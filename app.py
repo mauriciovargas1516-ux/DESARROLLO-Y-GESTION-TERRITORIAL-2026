@@ -7,13 +7,48 @@ import streamlit as st
 from scipy import stats
 
 # ==============================================================================
-# CONFIGURACIÓN DE PÁGINA
+# CONFIGURACIÓN DE PÁGINA - DESARROLLO Y GESTIÓN TERRITORIAL 2026
 # ==============================================================================
 st.set_page_config(
     page_title="Desarrollo y Gestión Territorial 2026 - ULagos",
-    page_icon="🌍",
     layout="wide",
     initial_sidebar_state="expanded",
+)
+
+# Estilo Corporativo Limpio (Conservando paleta de colores ejecutiva sin emojis)
+st.markdown(
+    """
+    <style>
+    .block-container {padding-top: 1.4rem !important;}
+    .corp-banner {
+        background: linear-gradient(90deg, #0F172A 0%, #1E3A8A 100%);
+        color: #FFFFFF;
+        padding: 18px 24px;
+        border-radius: 6px;
+        margin-bottom: 18px;
+        border-left: 5px solid #38BDF8;
+    }
+    .corp-title {font-size: 21px; font-weight: 700; margin: 0; letter-spacing: 0.3px;}
+    .corp-sub {font-size: 13px; color: #CBD5E1; margin-top: 4px;}
+    .sec-header {
+        background-color: #DBEAFE;
+        color: #1E3A8A;
+        padding: 8px 14px;
+        font-weight: 700;
+        font-size: 14px;
+        border-radius: 5px;
+        margin-top: 10px;
+        margin-bottom: 12px;
+        border-left: 4px solid #1D4ED8;
+    }
+    button[data-baseweb="tab"] {font-weight: 600 !important;}
+    </style>
+    <div class="corp-banner">
+        <div class="corp-title">PLATAFORMA INTERACTIVA: DESARROLLO Y GESTIÓN TERRITORIAL 2026</div>
+        <div class="corp-sub">Repositorio Académico e Inteligencia Territorial en Python + Streamlit | Ingeniería Comercial - ULagos</div>
+    </div>
+    """,
+    unsafe_allow_html=True,
 )
 
 # ==============================================================================
@@ -180,7 +215,6 @@ def calcular_indicadores_regionales(V0, Vt, nombres_reg, nombres_sec):
     V0 = np.array(V0, dtype=float)
     Vt = np.array(Vt, dtype=float)
 
-    # Totales
     tot_reg_0 = V0.sum(axis=0)
     tot_sec_0 = V0.sum(axis=1)
     tot_nac_0 = V0.sum()
@@ -189,36 +223,28 @@ def calcular_indicadores_regionales(V0, Vt, nombres_reg, nombres_sec):
     tot_sec_t = Vt.sum(axis=1)
     tot_nac_t = Vt.sum()
 
-    # Participación sectorial en cada región P_ij
     P0 = np.divide(V0, tot_reg_0, out=np.zeros_like(V0), where=tot_reg_0 != 0)
     Pt = np.divide(Vt, tot_reg_t, out=np.zeros_like(Vt), where=tot_reg_t != 0)
 
-    # Participación nacional de cada sector
     P_nac_0 = tot_sec_0 / tot_nac_0
     P_nac_t = tot_sec_t / tot_nac_t
 
-    # Cociente de Localización Qij
     Q0 = np.divide(P0, P_nac_0[:, None], out=np.zeros_like(P0), where=P_nac_0[:, None] != 0)
     Qt = np.divide(Pt, P_nac_t[:, None], out=np.zeros_like(Pt), where=P_nac_t[:, None] != 0)
 
-    # Coeficiente de Especialización Qr (0 a 1)
     Qr_0 = 0.5 * np.sum(np.abs(P0 - P_nac_0[:, None]), axis=0)
     Qr_t = 0.5 * np.sum(np.abs(Pt - P_nac_t[:, None]), axis=0)
 
-    # Producción Básica Exportable Xij (donde Qij > 1)
     X0_mat = np.where(Q0 > 1, V0 - (V0 / np.where(Q0 > 1, Q0, 1.0)), 0.0)
     Xt_mat = np.where(Qt > 1, Vt - (Vt / np.where(Qt > 1, Qt, 1.0)), 0.0)
     X0_tot = X0_mat.sum(axis=0)
     Xt_tot = Xt_mat.sum(axis=0)
 
-    # Multiplicador Básico Regional Mj = PTj / Xj
     M0 = np.divide(tot_reg_0, X0_tot, out=np.zeros_like(tot_reg_0), where=X0_tot != 0)
     Mt = np.divide(tot_reg_t, Xt_tot, out=np.zeros_like(tot_reg_t), where=Xt_tot != 0)
 
-    # Coeficiente de Reestructuración CRr
     CRr = 0.5 * np.sum(np.abs(Pt - P0), axis=0)
 
-    # Shift & Share (MADE Clásico)
     r_nac = tot_nac_t / tot_nac_0
     r_sec = np.divide(tot_sec_t, tot_sec_0, out=np.ones_like(tot_sec_0), where=tot_sec_0 != 0)
 
@@ -226,7 +252,6 @@ def calcular_indicadores_regionales(V0, Vt, nombres_reg, nombres_sec):
     EE = np.sum(V0 * (r_sec[:, None] - r_nac), axis=0)
     ED = ET - EE
 
-    # Shift & Share Modificado (Esteban-Marquillas / Arcelus / Lira & Quiroga)
     r_nac_inv = tot_nac_0 / tot_nac_t
     r_sec_inv = np.divide(tot_sec_0, tot_sec_t, out=np.ones_like(tot_sec_t), where=tot_sec_t != 0)
     EI = np.sum(Vt * (r_nac_inv - r_sec_inv[:, None]), axis=0)
@@ -272,7 +297,6 @@ def calcular_reat_convergencia(y0, yt, T=10):
     ln_yt = np.log(yt)
     g_anual = (ln_yt - ln_y0) / T
 
-    # Sigma y CV (con divisor N y N-1)
     sigma_ln_0 = np.std(ln_y0, ddof=1)
     sigma_ln_t = np.std(ln_yt, ddof=1)
     sigma_niv_0 = np.std(y0, ddof=0)
@@ -280,14 +304,12 @@ def calcular_reat_convergencia(y0, yt, T=10):
     cv_0 = sigma_niv_0 / np.mean(y0)
     cv_t = sigma_niv_t / np.mean(yt)
 
-    # Regresión OLS Convergencia Beta: g_anual = alpha + beta * ln(y0)
     slope, intercept, r_value, p_value, std_err = stats.linregress(ln_y0, g_anual)
     t_stat = slope / std_err
     B_acum = slope * T
     velocidad_b = -np.log(1 + B_acum) / T if (1 + B_acum) > 0 else np.nan
     semivida_b = np.log(2) / velocidad_b if velocidad_b and velocidad_b > 0 else np.nan
 
-    # Gini y Curva de Lorenz
     def lorenz_gini(x):
         x_sorted = np.sort(x)
         n = len(x_sorted)
@@ -301,13 +323,11 @@ def calcular_reat_convergencia(y0, yt, T=10):
     p0, q0, gini_0, gini_n0 = lorenz_gini(y0)
     pt, qt, gini_t, gini_nt = lorenz_gini(yt)
 
-    # Índice de Theil
     s0 = y0 / np.sum(y0)
     st_share = yt / np.sum(yt)
     theil_0 = np.sum(s0 * np.log(N * s0))
     theil_t = np.sum(st_share * np.log(N * st_share))
 
-    # HHI (sobre vectores per cápita o totales)
     hhi_0 = np.sum(s0 ** 2)
     hhi_t = np.sum(st_share ** 2)
 
@@ -346,26 +366,28 @@ def calcular_reat_convergencia(y0, yt, T=10):
 # ==============================================================================
 # BARRA LATERAL Y NAVEGACIÓN
 # ==============================================================================
-st.sidebar.title("🌍 Gestión Territorial 2026")
+st.sidebar.title("Gestión Territorial 2026")
 st.sidebar.markdown("**Universidad de Los Lagos**  \nIngeniería Comercial | Prof. Claudio Mancilla")
 st.sidebar.divider()
 
 archivo_subido = st.sidebar.file_uploader(
-    "📂 Cargar Excel ILPES (Opcional)",
+    "Cargar Excel ILPES (Opcional)",
     type=["xlsx"],
     help="El sistema ya incluye precargada toda la base de las 33 comunas de Biobío (2014-2024) y datos de cátedra.",
 )
 
-ruta_local = "ILPES GRUPO 10 TERRITORIAL AL 19-10-2026.xlsx"
+ruta_local_29 = "ILPES GRUPO 10 29-10-2026.xlsx"
+ruta_local_19 = "ILPES GRUPO 10 TERRITORIAL AL 19-10-2026.xlsx"
+
 if archivo_subido is not None:
-    st.sidebar.success("✅ Excel cargado dinámicamente.")
-elif os.path.exists(ruta_local):
-    st.sidebar.info("📘 Leyendo archivo Excel local del repositorio.")
+    st.sidebar.success("Archivo Excel cargado dinámicamente.")
+elif os.path.exists(ruta_local_29) or os.path.exists(ruta_local_19):
+    st.sidebar.info("Leyendo archivo Excel local del repositorio.")
 else:
-    st.sidebar.info("⚡ Operando con motor de datos nativo integrado (33 comunas Biobío + Cátedra).")
+    st.sidebar.info("Operando con motor de datos nativo integrado (33 comunas Biobío + Cátedra).")
 
 modulo = st.sidebar.radio(
-    "Selecciona el Módulo de Análisis:",
+    "Seleccione el Módulo de Análisis:",
     [
         "1. Técnicas de Análisis Regional (ILPES / MADE)",
         "2. Disparidades, Concentración y Convergencia (REAT)",
@@ -375,14 +397,11 @@ modulo = st.sidebar.radio(
     ],
 )
 
-st.title("🌍 Plataforma Interactiva: Desarrollo y Gestión Territorial 2026")
-st.caption("Repositorio Académico e Inteligencia Territorial en Python + Streamlit | Ingeniería Comercial - ULagos")
-
 # ==============================================================================
 # MÓDULO 1: TÉCNICAS DE ANÁLISIS REGIONAL (ILPES / CUADRANTES DE SILVA / MADE)
 # ==============================================================================
 if modulo.startswith("1."):
-    st.header("1. Técnicas de Análisis Regional: Localización, Base Exportadora y Shift & Share")
+    st.markdown("<div class='sec-header'>1. TÉCNICAS DE ANÁLISIS REGIONAL: LOCALIZACIÓN, BASE EXPORTADORA Y SHIFT & SHARE</div>", unsafe_allow_html=True)
 
     fuente_datos = st.radio(
         "Seleccionar Base de Datos:",
@@ -403,10 +422,10 @@ if modulo.startswith("1."):
     df_res = res["resumen"]
 
     tab1, tab2, tab3, tab4 = st.tabs([
-        "📊 Cuadrantes de Silva (2005)",
-        "📍 Localización (Qij) y Especialización (Qr)",
-        "🚢 Base Exportadora (Xj) y Multiplicador (Mj)",
-        "⚙️ Shift & Share (MADE y MADE Modificado)",
+        "I. Cuadrantes de Silva (2005)",
+        "II. Localización (Qij) y Especialización (Qr)",
+        "III. Base Exportadora (Xj) y Multiplicador (Mj)",
+        "IV. Shift & Share (MADE y MADE Modificado)",
     ])
 
     with tab1:
@@ -527,7 +546,7 @@ if modulo.startswith("1."):
 # MÓDULO 2: DISPARIDADES, CONCENTRACIÓN Y CONVERGENCIA (MOTOR REAT)
 # ==============================================================================
 elif modulo.startswith("2."):
-    st.header("2. Disparidades, Concentración y Convergencia Regional (Motor REAT)")
+    st.markdown("<div class='sec-header'>2. DISPARIDADES, CONCENTRACIÓN Y CONVERGENCIA REGIONAL (MOTOR REAT)</div>", unsafe_allow_html=True)
 
     base_conv = st.selectbox(
         "Seleccionar Serie de Convergencia:",
@@ -551,7 +570,7 @@ elif modulo.startswith("2."):
     reat = calcular_reat_convergencia(y0_c, yt_c, T=T_c)
 
     k1, k2, k3, k4 = st.columns(4)
-    k1.metric(f"Sigma Log ({lbl_0} → {lbl_t})", f"{reat['sigma_ln_t']:.4f}", f"{reat['sigma_ln_t'] - reat['sigma_ln_0']:.4f}", delta_color="inverse")
+    k1.metric(f"Sigma Log ({lbl_0} -> {lbl_t})", f"{reat['sigma_ln_t']:.4f}", f"{reat['sigma_ln_t'] - reat['sigma_ln_0']:.4f}", delta_color="inverse")
     k2.metric("Pendiente Beta Anual (β)", f"{reat['beta_anual']:.5f}", f"p = {reat['p_value']:.4e}")
     k3.metric("Bondad de Ajuste (R²)", f"{reat['r2'] * 100:.2f}%", f"t = {reat['t_stat']:.2f}")
     k4.metric("Índice de Gini", f"{reat['gini_t']:.4f}", f"{reat['gini_t'] - reat['gini_0']:.4f}", delta_color="inverse")
@@ -619,20 +638,20 @@ elif modulo.startswith("2."):
 # MÓDULO 3: SPL, REDES EMPRESARIALES (DINI / UCINET) Y CADENAS DE VALOR (CEPAL)
 # ==============================================================================
 elif modulo.startswith("3."):
-    st.header("3. Sistemas Productivos Locales, Redes (Dini 2010) y Cadenas de Valor (CEPAL)")
+    st.markdown("<div class='sec-header'>3. SISTEMAS PRODUCTIVOS LOCALES, REDES (DINI 2010) Y CADENAS DE VALOR (CEPAL)</div>", unsafe_allow_html=True)
 
     sub1, sub2, sub3 = st.tabs([
-        "🌲 Caso Aplicado: Cadena Maderera Los Ángeles (PYMEMAD / CORMA)",
-        "🕸️ Simulador de Redes Empresariales (UCINET / Dini)",
-        "⛓️ Metodología CEPAL y Ecosistema MIPE Los Lagos",
+        "I. Caso Aplicado: Cadena Maderera Los Ángeles (PYMEMAD / CORMA)",
+        "II. Simulador de Redes Empresariales (UCINET / Dini)",
+        "III. Metodología CEPAL y Ecosistema MIPE Los Lagos",
     ])
 
     with sub1:
         st.subheader("Cadena de Valor Forestal-Maderera en Los Ángeles (Región del Biobío)")
         st.markdown(
             "**Esquema Preliminar de 4 Eslabones para Validación Empírica (Control 4):**  \n"
-            "`1. Plantación Silvícola` ➡️ `2. Servicios de Cosecha y Faena` ➡️ "
-            "`3. Aserraderos e Industria Secundaria` ➡️ `4. Comercialización y Distribución`"
+            "`1. Plantación Silvícola` -> `2. Servicios de Cosecha y Faena` -> "
+            "`3. Aserraderos e Industria Secundaria` -> `4. Comercialización y Distribución`"
         )
 
         col_b1, col_b2, col_b3 = st.columns(3)
@@ -660,7 +679,7 @@ elif modulo.startswith("3."):
         if os.path.exists("cuestionario_entrevista.pdf"):
             with open("cuestionario_entrevista.pdf", "rb") as pdf_file:
                 st.download_button(
-                    label="📥 Descargar Pauta Oficial de Entrevista (cuestionario_entrevista.pdf)",
+                    label="Descargar Pauta Oficial de Entrevista (cuestionario_entrevista.pdf)",
                     data=pdf_file,
                     file_name="cuestionario_entrevista.pdf",
                     mime="application/pdf",
@@ -746,12 +765,12 @@ elif modulo.startswith("3."):
 # MÓDULO 4: ORDENAMIENTO TERRITORIAL Y GEORREFERENCIACIÓN (OSORNO)
 # ==============================================================================
 elif modulo.startswith("4."):
-    st.header("4. Ordenamiento Territorial: Primacía, Matriz de Rondinelli y Georreferenciación")
+    st.markdown("<div class='sec-header'>4. ORDENAMIENTO TERRITORIAL: PRIMACÍA, MATRIZ DE RONDINELLI Y GEORREFERENCIACIÓN</div>", unsafe_allow_html=True)
 
     ot1, ot2, ot3 = st.tabs([
-        "🏙️ Índice de Primacía Urbana",
-        "📋 Matriz Funcional de Rondinelli (Guttman)",
-        "🗺️ Mapa Georreferenciado: 15 Liceos de Osorno",
+        "I. Índice de Primacía Urbana",
+        "II. Matriz Funcional de Rondinelli (Guttman)",
+        "III. Mapa Georreferenciado: 15 Liceos de Osorno",
     ])
 
     with ot1:
@@ -795,7 +814,7 @@ elif modulo.startswith("4."):
 # MÓDULO 5: CONMUTACIÓN LABORAL EN LA PATAGONIA (MANCILLA, SOZA-AMIGO Y FERRADA)
 # ==============================================================================
 elif modulo.startswith("5."):
-    st.header("5. Conmutación Laboral Intertemporal en la Patagonia Chilena (2011 vs 2016)")
+    st.markdown("<div class='sec-header'>5. CONMUTACIÓN LABORAL INTERTEMPORAL EN LA PATAGONIA CHILENA (2011 VS 2016)</div>", unsafe_allow_html=True)
     st.markdown("Basado en **Mancilla, Soza-Amigo y Ferrada (2021)**, *Estudios Demográficos y Urbanos*.")
 
     cnp = ["Valdivia", "Osorno", "Puerto Montt", "Coyhaique", "Punta Arenas"]
@@ -814,7 +833,6 @@ elif modulo.startswith("5."):
         [112, 0, 1425],
     ])
 
-    # Índice de Similitud Temporal (Ecuación 4 del paper)
     prop_2011 = mat_2011_cnp / mat_2011_cnp.sum()
     prop_2016 = mat_2016_cnp / mat_2016_cnp.sum()
     ist_cnp = 100.0 * (1.0 - 0.5 * np.sum(np.abs(prop_2016 - prop_2011)))
