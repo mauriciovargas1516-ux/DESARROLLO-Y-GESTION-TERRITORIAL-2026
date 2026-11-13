@@ -1,861 +1,720 @@
+# -*- coding: utf-8 -*-
+"""
+PLATAFORMA INTEGRAL DE DESARROLLO Y GESTIÓN TERRITORIAL 2026
+Universidad de Los Lagos — Ingeniería Comercial
+Asignatura: Desarrollo y Gestión Territorial (Prof. Claudio Mancilla)
+Archivo principal: app.py
+"""
+
 import os
 import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
-from scipy import stats
+
+import motor_sii_exportador as msii
+
 
 # ==============================================================================
-# CONFIGURACIÓN DE PÁGINA - DESARROLLO Y GESTIÓN TERRITORIAL 2026
+# CONFIGURACIÓN DE PÁGINA Y ESTILO INSTITUCIONAL LIMPIO
 # ==============================================================================
 st.set_page_config(
-    page_title="Desarrollo y Gestión Territorial 2026 - ULagos",
+    page_title="Desarrollo y Gestión Territorial 2026 — ULagos",
     layout="wide",
     initial_sidebar_state="expanded",
 )
 
-# Estilo Corporativo Limpio (Conservando paleta de colores ejecutiva sin emojis)
 st.markdown(
     """
     <style>
-    .block-container {padding-top: 1.4rem !important;}
-    .corp-banner {
-        background: linear-gradient(90deg, #0F172A 0%, #1E3A8A 100%);
-        color: #FFFFFF;
-        padding: 18px 24px;
+    .block-container {
+        padding-top: 1.4rem;
+        padding-bottom: 2rem;
+    }
+    div[data-testid="stMetric"] {
+        background-color: #f8fafc;
+        border: 1px solid #e2e8f0;
+        padding: 12px 14px;
         border-radius: 6px;
-        margin-bottom: 18px;
-        border-left: 5px solid #38BDF8;
     }
-    .corp-title {font-size: 21px; font-weight: 700; margin: 0; letter-spacing: 0.3px;}
-    .corp-sub {font-size: 13px; color: #CBD5E1; margin-top: 4px;}
-    .sec-header {
-        background-color: #DBEAFE;
-        color: #1E3A8A;
-        padding: 8px 14px;
-        font-weight: 700;
-        font-size: 14px;
-        border-radius: 5px;
-        margin-top: 10px;
-        margin-bottom: 12px;
-        border-left: 4px solid #1D4ED8;
+    h1, h2, h3 {
+        color: #1e293b;
+        font-weight: 600;
     }
-    button[data-baseweb="tab"] {font-weight: 600 !important;}
     </style>
-    <div class="corp-banner">
-        <div class="corp-title">PLATAFORMA INTERACTIVA: DESARROLLO Y GESTIÓN TERRITORIAL 2026</div>
-        <div class="corp-sub">Repositorio Académico e Inteligencia Territorial en Python + Streamlit | Ingeniería Comercial - ULagos</div>
-    </div>
     """,
     unsafe_allow_html=True,
 )
 
-# ==============================================================================
-# DATOS NATIVOS PRECARGADOS (BIOBÍO 2014-2024 + CÁTEDRA ULAGOS)
-# ==============================================================================
-COMUNAS_BIOBIO = [
-    "Alto Biobío", "Antuco", "Arauco", "Cabrero", "Cañete", "Chiguayante",
-    "Concepción", "Contulmo", "Coronel", "Curanilahue", "Florida", "Hualpén",
-    "Hualqui", "Laja", "Lebu", "Los Álamos", "Los Ángeles", "Lota", "Mulchén",
-    "Nacimiento", "Negrete", "Penco", "Quilaco", "Quilleco",
-    "San Pedro de la Paz", "San Rosendo", "Santa Bárbara", "Santa Juana",
-    "Talcahuano", "Tirúa", "Tomé", "Tucapel", "Yumbel"
-]
 
-SECTORES_SII = [
-    "A - Agricultura, ganadería, silvicultura y pesca",
-    "B - Explotación de minas y canteras",
-    "C - Industria manufacturera",
-    "D - Suministro de electricidad, gas, vapor y aire acondicionado",
-    "E - Suministro de agua; evacuación de aguas residuales, gestión de desechos y descontaminación",
-    "F - Construcción",
-    "G - Comercio al por mayor y al por menor; reparación de vehículos automotores y motocicletas",
-    "H - Transporte y almacenamiento",
-    "I - Actividades de alojamiento y de servicio de comidas",
-    "J - Información y comunicaciones",
-    "K - Actividades financieras y de seguros",
-    "L - Actividades inmobiliarias",
-    "M - Actividades profesionales, científicas y técnicas",
-    "N - Actividades de servicios administrativos y de apoyo",
-    "P - Enseñanza",
-    "Q - Actividades de atención de la salud humana y de asistencia social",
-    "R - Actividades artísticas, de entretenimiento y recreativas",
-    "S - Otras actividades de servicios",
-]
-
-POB_BIOBIO_2024 = [
-    6016, 4373, 37163, 31256, 34640, 85822, 230375, 5905, 123648, 31119,
-    12958, 87731, 25795, 23706, 25246, 21950, 219441, 39980, 29036, 26140,
-    10723, 48971, 4440, 9700, 150992, 3575, 14075, 14947, 147322, 10208,
-    56907, 15729, 23170
-]
-
-V2014_PC = [
-    6.304916, 54.55178, 5197.97975, 186.113676, 120.676258, 109.830903,
-    772.334019, 63.116018, 436.488085, 119.223359, 151.27644, 139.613426,
-    222.629362, 90.189561, 65.940309, 86.879193, 387.833042, 159.708211,
-    104.999434, 110.442669, 80.502587, 157.243242, 37.344772, 53.069558,
-    836.764784, 10.029459, 85.352122, 43.759293, 525.167243, 51.2336,
-    124.18896, 106.467259, 58.11466
-]
-
-V2024_PC = [
-    26.381046, 79.070172, 3053.58138, 250.857866, 147.790774, 212.211666,
-    1053.1213, 165.403329, 545.962497, 149.011386, 174.318417, 229.23751,
-    261.886502, 141.759479, 147.570688, 80.595738, 776.469253, 215.25987,
-    167.121471, 230.192941, 303.748609, 288.491574, 78.400854, 100.75093,
-    322.338096, 91.493346, 142.421854, 150.724739, 874.776102, 101.66577,
-    231.470801, 282.174351, 109.821053
-]
-
-MAT_2014 = [
-    [16166.85, 99691.01, 1950305.85, 961285.46, 1422286.9, 651277.85, 17746770.88, 87150.64, 10145986.65, 1185174.69, 411713.92, 527339.58, 321435.67, 122604.14, 787121.64, 580411.59, 31414312.91, 1712930.65, 1556451.89, 804568.42, 364507.11, 503346.56, 110136.22, 336666.43, 82105835.51, 0.0, 445369.66, 111592.32, 3954028.39, 226336.6, 2862299.94, 1076161.3, 450238.76],
-    [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1018736.82, 0.0, 94015.0, 431777.78, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 902434.78, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 536140.51, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-    [0.0, 9359.83, 191610149.38, 2493994.26, 375962.32, 1389424.02, 15044583.28, 64384.21, 22588675.36, 521391.41, 67978.87, 3284860.72, 98960.9, 421065.26, 119099.7, 151972.27, 10911733.11, 2787812.41, 140304.22, 225369.14, 189087.94, 1676345.11, 0.0, 14494.66, 4090555.31, 0.0, 117220.6, 208945.13, 49223652.13, 60382.48, 903926.2, 88579.13, 164988.2],
-    [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1192105.69, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 43121.69, 0.0, 0.0, 0.0, 0.0],
-    [0.0, 0.0, 0.0, 0.0, 9009.99, 0.0, 11236407.92, 0.0, 24798.78, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 564584.44, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 335239.03, 0.0, 0.0, 0.0, 0.0],
-    [0.0, 0.0, 811238.78, 397932.69, 383264.97, 1074313.06, 14201236.28, 0.0, 4847362.88, 340849.59, 22774.34, 2209671.43, 31036.23, 704685.72, 130418.6, 215436.24, 4462830.37, 910498.92, 143210.37, 622337.81, 28034.17, 458314.15, 10899.16, 69052.65, 6290278.64, 11410.11, 148838.84, 49804.8, 4694726.7, 72439.95, 383831.34, 68587.56, 98968.26],
-    [18874.53, 114658.91, 1457333.45, 1200586.98, 1371893.69, 1917693.89, 55158929.63, 202523.36, 9727195.08, 905880.83, 172176.85, 5261286.37, 515677.68, 601993.35, 601925.74, 713226.62, 19714472.97, 1617722.15, 1081632.2, 966897.43, 91678.18, 1795111.4, 29449.08, 73162.65, 8687537.74, 22487.23, 403126.5, 198331.28, 5922123.53, 174782.53, 1161866.04, 225494.42, 470218.05],
-    [1242.8, 0.0, 298544.17, 377593.63, 430815.58, 280130.93, 5100065.82, 32113.49, 1147322.9, 430651.87, 79293.31, 442224.74, 144644.31, 143435.99, 17285.16, 148631.33, 4050278.28, 234322.62, 136485.0, 231084.0, 106151.34, 1760731.13, 0.0, 37886.49, 1418604.66, 0.0, 78098.07, 38856.72, 10781248.35, 6973.14, 1163601.32, 86796.64, 35525.52],
-    [5731.78, 6826.07, 111676.47, 72351.8, 70852.99, 173166.53, 2378893.86, 7230.44, 153261.48, 68956.53, 5595.43, 120082.4, 18782.48, 46680.23, 25484.04, 28040.58, 1088303.51, 63204.12, 55711.15, 55287.66, 30316.78, 133076.82, 4309.62, 2988.36, 308061.27, 3191.6, 17859.42, 16996.89, 867809.66, 10051.43, 110943.08, 15936.24, 33163.29],
-    [0.0, 0.0, 0.0, 0.0, 8779.42, 15149.31, 1870345.92, 0.0, 9655.05, 11019.71, 0.0, 28608.83, 0.0, 0.0, 0.0, 0.0, 214395.74, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 95261.04, 0.0, 0.0, 0.0, 32060.77, 0.0, 4147.26, 0.0, 0.0],
-    [0.0, 0.0, 0.0, 0.0, 0.0, 349042.58, 20120726.87, 0.0, 1521471.58, 0.0, 0.0, 283558.3, 4386413.36, 0.0, 0.0, 0.0, 740311.9, 0.0, 0.0, 0.0, 0.0, 296014.57, 0.0, 0.0, 1017739.3, 0.0, 0.0, 0.0, 1025719.79, 0.0, 220602.2, 0.0, 0.0],
-    [0.0, 0.0, 9690.87, 6237.12, 15205.79, 2739259.01, 8337188.07, 0.0, 192238.85, 0.0, 1007527.38, 145622.03, 0.0, 0.0, 0.0, 0.0, 1336465.89, 16317.56, 0.0, 0.0, 0.0, 251559.44, 0.0, 0.0, 1088137.34, 0.0, 0.0, 0.0, 1249810.71, 0.0, 166044.84, 0.0, 0.0],
-    [0.0, 0.0, 43805.97, 0.0, 25673.86, 150534.35, 3259499.7, 0.0, 371997.57, 6470.62, 0.0, 49640.79, 0.0, 0.0, 0.0, 0.0, 445621.43, 11856.55, 0.0, 19148.36, 0.0, 28902.01, 0.0, 0.0, 488466.12, 0.0, 0.0, 0.0, 451426.83, 0.0, 23869.9, 0.0, 0.0],
-    [0.0, 0.0, 280858.21, 8467.23, 30717.16, 285395.09, 8450501.64, 0.0, 442367.55, 9646.93, 0.0, 138194.07, 0.0, 87062.04, 0.0, 5237.71, 1523210.91, 19706.34, 5605.91, 51494.78, 0.0, 643249.79, 0.0, 0.0, 748592.98, 0.0, 0.0, 2834.39, 1303664.02, 0.0, 91036.04, 0.0, 12986.26],
-    [0.0, 0.0, 201563.75, 0.0, 119682.12, 539380.63, 9770045.95, 0.0, 429457.6, 0.0, 0.0, 389458.68, 0.0, 0.0, 0.0, 0.0, 1342288.05, 0.0, 54064.65, 0.0, 0.0, 135272.33, 0.0, 0.0, 1027726.49, 0.0, 0.0, 0.0, 402830.83, 0.0, 0.0, 0.0, 0.0],
-    [0.0, 0.0, 9836.17, 0.0, 14093.57, 150863.59, 4218344.34, 0.0, 69775.47, 0.0, 0.0, 340838.87, 0.0, 0.0, 0.0, 0.0, 1078690.62, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 221384.19, 0.0, 0.0, 0.0, 1119896.19, 0.0, 21125.66, 0.0, 0.0],
-    [0.0, 0.0, 0.0, 0.0, 0.0, 1844.56, 86306.79, 0.0, 1915.33, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 201084.52, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 34501.03, 0.0, 0.0, 0.0, 1186767.77, 0.0, 0.0, 0.0, 0.0],
-    [0.0, 0.0, 5312.2, 4288.06, 48608.88, 46821.35, 808704.6, 0.0, 99509.03, 86216.17, 0.0, 23599.32, 918.11, 946.91, 83029.97, 32939.19, 163211.07, 14529.08, 44452.26, 69379.44, 0.0, 6013.26, 0.0, 0.0, 66661.56, 0.0, 11302.54, 2991.08, 488381.82, 0.0, 13289.67, 0.0, 1392.39]
-]
-
-MAT_2024 = [
-    [0.0, 24563.46, 1197334.76, 496383.02, 921105.53, 364713.43, 9810669.86, 175695.0, 12040133.11, 277677.15, 1220890.4, 117329.49, 385276.35, 56866.22, 1018570.39, 242588.68, 34116621.56, 3325203.58, 1756511.97, 1229021.83, 793650.36, 708202.21, 164229.35, 563686.23, 485204.63, 0.0, 503740.55, 77570.98, 5654723.5, 252998.35, 812536.4, 490234.54, 123469.46],
-    [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 579134.5, 0.0, 0.0, 143766.62, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 564193.98, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 42122.04, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-    [0.0, 24100.85, 106067947.92, 2423659.37, 362651.01, 1768639.37, 12188265.12, 194019.9, 32914931.36, 275239.02, 91109.25, 4994235.02, 237028.51, 557006.91, 102178.41, 93694.82, 82352548.88, 3209720.52, 156267.77, 787428.72, 184399.84, 4383411.25, 3366.83, 23465.79, 6449785.82, 20540.62, 67378.28, 849350.46, 75842247.18, 29531.48, 7955494.94, 973363.97, 470414.87],
-    [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 2302747.36, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 952860.4, 0.0, 0.0, 0.0, 0.0],
-    [0.0, 0.0, 91003.08, 13304.73, 34323.26, 0.0, 9664589.76, 0.0, 223898.6, 0.0, 0.0, 269618.65, 0.0, 53095.93, 0.0, 0.0, 416303.09, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 606573.93, 0.0, 6785.76, 0.0, 1419970.13, 0.0, 0.0, 0.0, 10560.49],
-    [24055.98, 16819.25, 838913.17, 606572.09, 744208.74, 1327602.34, 18122552.91, 26099.87, 1665696.01, 426884.08, 138708.2, 1511586.63, 164878.06, 427839.68, 161942.57, 90471.09, 6480227.74, 152765.21, 198388.03, 400671.72, 624461.38, 534379.08, 32014.7, 28520.49, 6695997.31, 0.0, 66684.09, 161516.63, 4267227.18, 25826.2, 303089.37, 99085.87, 85414.79],
-    [105299.83, 191275.02, 2181883.73, 1923978.64, 2019109.84, 3352217.83, 88519637.26, 441535.79, 12102280.21, 2532569.88, 413961.51, 3784476.97, 916890.04, 1085788.38, 1839673.83, 883148.71, 21623765.16, 1223318.53, 1691948.95, 1694938.86, 613662.58, 3826497.74, 83775.42, 241530.62, 22069590.04, 299806.62, 833397.68, 755965.98, 10483805.95, 573202.29, 2067834.84, 1131741.68, 1409077.63],
-    [10260.82, 59043.34, 2206566.99, 1359454.98, 538486.84, 638552.24, 10217639.8, 109755.4, 4405465.02, 545107.17, 204264.96, 1552697.23, 138672.08, 251241.29, 95903.62, 197571.63, 9727039.79, 229461.83, 482959.24, 1160039.64, 353288.75, 3281048.5, 28413.27, 87175.95, 2164022.85, 1961.42, 269972.64, 185520.43, 16970994.41, 132463.86, 444095.56, 249545.88, 104596.89],
-    [19091.74, 24762.7, 310234.99, 214658.3, 127731.11, 252191.84, 5456262.28, 21666.06, 570839.16, 114902.18, 38087.52, 590794.44, 45870.91, 91649.27, 84625.8, 73420.76, 2057739.77, 118782.24, 104584.92, 187294.21, 69611.14, 219944.73, 16559.75, 25540.27, 1155122.62, 4780.05, 115961.29, 45577.78, 1503688.2, 18873.98, 460914.46, 35303.73, 136200.13],
-    [0.0, 0.0, 0.0, 5106.98, 20784.04, 54247.24, 2493211.2, 0.0, 48690.85, 14543.34, 0.0, 80936.11, 0.0, 0.0, 4843.55, 0.0, 583553.86, 9925.52, 0.0, 18283.98, 0.0, 2144.62, 0.0, 0.0, 311136.45, 0.0, 0.0, 0.0, 124998.71, 0.0, 38799.24, 0.0, 3731.64],
-    [0.0, 0.0, 0.0, 0.0, 0.0, 6994922.92, 9103703.69, 0.0, 31160.85, 0.0, 0.0, 1005189.93, 2786710.44, 0.0, 0.0, 0.0, 592377.3, 0.0, 0.0, 0.0, 0.0, 48206.4, 0.0, 0.0, 272814.38, 0.0, 0.0, 0.0, 1165838.93, 0.0, 174308.54, 1241332.2, 0.0],
-    [0.0, 0.0, 24291.3, 34371.42, 37196.47, 1467299.64, 11199921.06, 0.0, 312182.83, 12122.97, 87321.44, 374173.73, 1847498.32, 56905.97, 27132.91, 0.0, 2165602.29, 15930.49, 36484.59, 16753.64, 445640.49, 292793.06, 0.0, 0.0, 1797284.61, 0.0, 7850.59, 50770.33, 1540796.12, 0.0, 373594.08, 155173.37, 34355.14],
-    [0.0, 0.0, 46280.67, 139998.4, 48040.99, 283596.0, 9307279.73, 0.0, 889788.83, 31885.77, 26010.77, 2267128.3, 49108.38, 616257.78, 21572.92, 10983.62, 1285315.09, 160889.22, 70897.93, 57204.0, 80705.59, 85963.18, 0.0, 0.0, 2379488.67, 0.0, 50282.49, 15005.33, 1108158.87, 0.0, 182312.3, 14710.72, 20852.38],
-    [0.0, 3834.99, 228129.43, 461820.33, 126783.4, 497109.4, 11452580.77, 5917.17, 1462374.83, 161893.19, 36583.77, 854283.41, 112757.91, 84362.43, 24091.41, 25355.54, 3329106.84, 62112.1, 203156.35, 276839.52, 74554.87, 549179.75, 19740.47, 0.0, 1844780.52, 0.0, 70181.78, 44810.89, 2936130.26, 0.0, 150540.0, 42209.3, 114383.57],
-    [0.0, 0.0, 179849.08, 36703.75, 5721.13, 569621.74, 27090120.15, 0.0, 460772.2, 7789.25, 0.0, 425717.18, 0.0, 0.0, 0.0, 0.0, 1747204.22, 26421.05, 48037.31, 97447.04, 0.0, 83247.74, 0.0, 0.0, 1227728.55, 0.0, 0.0, 60805.47, 654996.44, 0.0, 28674.37, 0.0, 0.0],
-    [0.0, 0.0, 74189.33, 92873.08, 63079.76, 418410.03, 10815352.47, 0.0, 154802.18, 33331.67, 0.0, 2102638.28, 30675.75, 59401.99, 31112.65, 3005.77, 2349502.08, 42398.27, 15522.19, 29871.59, 0.0, 33177.08, 0.0, 0.0, 730868.31, 0.0, 0.0, 0.0, 2264918.33, 0.0, 65562.8, 0.0, 20243.83],
-    [0.0, 0.0, 12327.02, 7312.02, 11871.97, 46595.57, 1116297.59, 0.0, 50909.96, 0.0, 0.0, 82557.34, 30230.33, 5284.73, 2754.35, 4401.84, 452125.41, 4464.1, 8191.21, 18919.48, 0.0, 43586.34, 0.0, 0.0, 166172.18, 0.0, 0.0, 0.0, 1674676.02, 0.0, 55096.95, 0.0, 0.0],
-    [0.0, 1374.25, 21293.49, 24616.36, 58378.33, 176710.03, 3172853.79, 2017.47, 173244.77, 59373.02, 1880.23, 97873.25, 9765.25, 14849.63, 311167.18, 144433.99, 545962.37, 24696.94, 79588.57, 42529.24, 17121.33, 35939.19, 0.0, 7364.67, 271780.94, 0.0, 12352.44, 5988.39, 307734.23, 4908.02, 59455.03, 5619.1, 11252.98]
-]
-
-# Caso Clásico Cátedra: 00 Datos Base.xlsx
-TERRITORIOS_CATEDRA = ["Badalona", "Pueblo Seco", "Pueblo Nuevo"]
-SECTORES_CATEDRA = ["Agricultura", "Minería", "Pesca", "Industria"]
-MAT_CATEDRA_0 = [
-    [60.0, 100.0, 212.0],
-    [75.0, 210.0, 235.0],
-    [120.0, 253.0, 452.0],
-    [40.0, 77.0, 98.0],
-]
-MAT_CATEDRA_1 = [
-    [68.0, 300.0, 57.0],
-    [79.0, 200.0, 303.0],
-    [142.0, 400.0, 432.0],
-    [45.0, 300.0, 42.0],
-]
-
-# Liceos de Osorno (Liceos.xlsx)
-LICEOS_OSORNO = [
-    {"id": 1, "Liceo": "Liceo Carmela Carvajal de Prat", "Dirección": "Francisco Bilbao 1380, Osorno", "lat": -40.575314, "lon": -73.134019},
-    {"id": 2, "Liceo": "Liceo San Sebastián", "Dirección": "Los Carrera 602-700, Osorno", "lat": -40.573369, "lon": -73.122975},
-    {"id": 3, "Liceo": "Liceo Eleuterio Ramírez Osorno", "Dirección": "Ramón Freire 752, Osorno", "lat": -40.575337, "lon": -73.130475},
-    {"id": 4, "Liceo": "Liceo Manuel Baquedano", "Dirección": "Manuel Baquedano 413, Osorno", "lat": -40.571003, "lon": -73.143513},
-    {"id": 5, "Liceo": "Liceo Técnico Adolfo Matthei", "Dirección": "Av. René Soriano 2615, Osorno", "lat": -40.589083, "lon": -73.109866},
-    {"id": 6, "Liceo": "Liceo Tecnológico Luz de las Naciones", "Dirección": "Francisco Bilbao 1841, Osorno", "lat": -40.576632, "lon": -73.118119},
-    {"id": 7, "Liceo": "Liceo Rahue Osorno", "Dirección": "Del Pacífico 1360, Osorno", "lat": -40.577143, "lon": -73.163588},
-    {"id": 8, "Liceo": "Liceo Comercial Bartolomé de Las Casas", "Dirección": "Av. República 547, Osorno", "lat": -40.573865, "lon": -73.153096},
-    {"id": 9, "Liceo": "Liceo Técnico Monseñor Francisco Valdés", "Dirección": "Ramón Freire 1140, Osorno", "lat": -40.580237, "lon": -73.129584},
-    {"id": 10, "Liceo": "Sociedad Educacional Crecer Limitada", "Dirección": "Patricio Lynch 1639, Osorno", "lat": -40.574137, "lon": -73.121479},
-    {"id": 11, "Liceo": "Liceo Artístico Santa Cecilia", "Dirección": "Virgen del Socorro 10, Osorno", "lat": -40.568845, "lon": -73.118041},
-    {"id": 12, "Liceo": "Liceo Industrial Osorno", "Dirección": "Guillermo Hollstein 125, Osorno", "lat": -40.580024, "lon": -73.101489},
-    {"id": 13, "Liceo": "Instituto Comercial de Osorno", "Dirección": "Los Carrera 718, Osorno", "lat": -40.571339, "lon": -73.137692},
-    {"id": 14, "Liceo": "Colegio Técnico Diego Portales Limitada", "Dirección": "Gómez Carreño 2425, Osorno", "lat": -40.584195, "lon": -73.110051},
-    {"id": 15, "Liceo": "Colegio Luis Pasteur", "Dirección": "Ramón Freire 341, Osorno", "lat": -40.570432, "lon": -73.131061},
-]
-
-# Matriz Binaria de Redes (Datos.xlsx - 15 empresas A..O)
-NODOS_RED = list("ABCDEFGHIJKLMNO")
-MATRIZ_RED_DINI = [
-    [0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1],
-    [1, 0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 1, 0, 1, 1],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1],
-    [0, 1, 0, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0],
-    [0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0],
-    [0, 1, 1, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0],
-    [0, 1, 1, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0],
-    [0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 1, 1, 0, 0, 0],
-    [0, 1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 0],
-    [0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
-    [0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0],
-    [1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
-]
+ARCHIVO_EXCEL_REPO = "ILPES GRUPO 10 29-10-2026.xlsx"
+ARCHIVO_PDF_CUESTIONARIO = "cuestionario_entrevista.pdf"
 
 
 # ==============================================================================
-# FUNCIONES MATEMÁTICAS DE ECONOMÍA REGIONAL Y REAT
+# UTILIDADES PARA CARGA POR DEFECTO DEL CASO BIOBÍO (2014 - 2024)
 # ==============================================================================
-def calcular_indicadores_regionales(V0, Vt, nombres_reg, nombres_sec):
-    """Calcula Qij, Qr, Xj, Mj, CRr, MADE clásico y MADE modificado."""
-    V0 = np.array(V0, dtype=float)
-    Vt = np.array(Vt, dtype=float)
+@st.cache_data(show_spinner=False)
+def obtener_resultados_base_repo(
+    ruta_excel: str,
+    region_objetivo: str = "Región del Biobío",
+    variable_objetivo: str = "Ventas anuales en UF",
+    anio_0: int = 2014,
+    anio_t: int = 2024,
+    alpha_hk: float = 2.0,
+):
+    if not os.path.exists(ruta_excel):
+        return None, None, "No se encontró el archivo base en la raíz del repositorio."
 
-    tot_reg_0 = V0.sum(axis=0)
-    tot_sec_0 = V0.sum(axis=1)
-    tot_nac_0 = V0.sum()
+    df_sii, meta = msii.cargar_base_nacional_sii(ruta_excel)
+    col_region = meta["col_region"]
+    col_anio = meta["col_anio"]
+    metricas = meta["columnas_metricas"]
 
-    tot_reg_t = Vt.sum(axis=0)
-    tot_sec_t = Vt.sum(axis=1)
-    tot_nac_t = Vt.sum()
+    regiones_disp = (
+        sorted(df_sii[col_region].dropna().astype(str).str.strip().unique().tolist())
+        if col_region
+        else ["Todas (Consolidado)"]
+    )
+    reg_sel = regiones_disp[0]
+    for r in regiones_disp:
+        if "biob" in msii._normalizar_texto(r) or msii._normalizar_texto(region_objetivo) in msii._normalizar_texto(r):
+            reg_sel = r
+            break
 
-    P0 = np.divide(V0, tot_reg_0, out=np.zeros_like(V0), where=tot_reg_0 != 0)
-    Pt = np.divide(Vt, tot_reg_t, out=np.zeros_like(Vt), where=tot_reg_t != 0)
+    var_sel = metricas[0] if metricas else variable_objetivo
+    for m in metricas:
+        if msii._normalizar_texto(variable_objetivo) in msii._normalizar_texto(m):
+            var_sel = m
+            break
 
-    P_nac_0 = tot_sec_0 / tot_nac_0
-    P_nac_t = tot_sec_t / tot_nac_t
+    anios_disp = sorted(df_sii[col_anio].dropna().unique().tolist())
+    a0 = anio_0 if anio_0 in anios_disp else anios_disp[0]
+    at = anio_t if anio_t in anios_disp else anios_disp[-1]
 
-    Q0 = np.divide(P0, P_nac_0[:, None], out=np.zeros_like(P0), where=P_nac_0[:, None] != 0)
-    Qt = np.divide(Pt, P_nac_t[:, None], out=np.zeros_like(Pt), where=P_nac_t[:, None] != 0)
-
-    Qr_0 = 0.5 * np.sum(np.abs(P0 - P_nac_0[:, None]), axis=0)
-    Qr_t = 0.5 * np.sum(np.abs(Pt - P_nac_t[:, None]), axis=0)
-
-    X0_mat = np.where(Q0 > 1, V0 - (V0 / np.where(Q0 > 1, Q0, 1.0)), 0.0)
-    Xt_mat = np.where(Qt > 1, Vt - (Vt / np.where(Qt > 1, Qt, 1.0)), 0.0)
-    X0_tot = X0_mat.sum(axis=0)
-    Xt_tot = Xt_mat.sum(axis=0)
-
-    M0 = np.divide(tot_reg_0, X0_tot, out=np.zeros_like(tot_reg_0), where=X0_tot != 0)
-    Mt = np.divide(tot_reg_t, Xt_tot, out=np.zeros_like(tot_reg_t), where=Xt_tot != 0)
-
-    CRr = 0.5 * np.sum(np.abs(Pt - P0), axis=0)
-
-    r_nac = tot_nac_t / tot_nac_0
-    r_sec = np.divide(tot_sec_t, tot_sec_0, out=np.ones_like(tot_sec_0), where=tot_sec_0 != 0)
-
-    ET = tot_reg_t - tot_reg_0 * r_nac
-    EE = np.sum(V0 * (r_sec[:, None] - r_nac), axis=0)
-    ED = ET - EE
-
-    r_nac_inv = tot_nac_0 / tot_nac_t
-    r_sec_inv = np.divide(tot_sec_0, tot_sec_t, out=np.ones_like(tot_sec_t), where=tot_sec_t != 0)
-    EI = np.sum(Vt * (r_nac_inv - r_sec_inv[:, None]), axis=0)
-    EM = EI - EE
-    ERM = ET - EI
-
-    df_resumen = pd.DataFrame({
-        "Territorio": nombres_reg,
-        "Ventas_0": tot_reg_0,
-        "Ventas_t": tot_reg_t,
-        "Var_Ratio (rRj)": np.divide(tot_reg_t, tot_reg_0, out=np.zeros_like(tot_reg_0), where=tot_reg_0 != 0),
-        "Qr_0 (Especialización)": Qr_0,
-        "Qr_t (Especialización)": Qr_t,
-        "CRr (Reestructuración)": CRr,
-        "Exportación_Básica_0 (Xj)": X0_tot,
-        "Exportación_Básica_t (Xj)": Xt_tot,
-        "Multiplicador_0 (Mj)": M0,
-        "Multiplicador_t (Mj)": Mt,
-        "Efecto_Total (ET)": ET,
-        "Efecto_Estructural (EE)": EE,
-        "Efecto_Diferencial (ED)": ED,
-        "Efecto_Est_Inverso (EI)": EI,
-        "Efecto_Est_Modificado (EM)": EM,
-        "Efecto_Reg_Modificado (ERM)": ERM,
-    })
-
-    return {
-        "resumen": df_resumen,
-        "Q0": pd.DataFrame(Q0, index=nombres_sec, columns=nombres_reg),
-        "Qt": pd.DataFrame(Qt, index=nombres_sec, columns=nombres_reg),
-        "P0": pd.DataFrame(P0, index=nombres_sec, columns=nombres_reg),
-        "Pt": pd.DataFrame(Pt, index=nombres_sec, columns=nombres_reg),
+    V0, Vt = msii.construir_matrices_region(df_sii, meta, reg_sel, a0, at, var_sel)
+    res = msii.calcular_todo_el_ramo(V0, Vt, a0, at, alpha_hk=alpha_hk)
+    contexto = {
+        "region": reg_sel,
+        "variable": var_sel,
+        "anio_0": a0,
+        "anio_t": at,
+        "regiones_disp": regiones_disp,
+        "metricas_disp": metricas,
+        "anios_disp": anios_disp,
     }
-
-
-def calcular_reat_convergencia(y0, yt, T=10):
-    """Calcula Convergencia Sigma, Beta OLS, Lorenz, Gini, Theil y HHI."""
-    y0 = np.array(y0, dtype=float)
-    yt = np.array(yt, dtype=float)
-    N = len(y0)
-
-    ln_y0 = np.log(y0)
-    ln_yt = np.log(yt)
-    g_anual = (ln_yt - ln_y0) / T
-
-    sigma_ln_0 = np.std(ln_y0, ddof=1)
-    sigma_ln_t = np.std(ln_yt, ddof=1)
-    sigma_niv_0 = np.std(y0, ddof=0)
-    sigma_niv_t = np.std(yt, ddof=0)
-    cv_0 = sigma_niv_0 / np.mean(y0)
-    cv_t = sigma_niv_t / np.mean(yt)
-
-    slope, intercept, r_value, p_value, std_err = stats.linregress(ln_y0, g_anual)
-    t_stat = slope / std_err
-    B_acum = slope * T
-    velocidad_b = -np.log(1 + B_acum) / T if (1 + B_acum) > 0 else np.nan
-    semivida_b = np.log(2) / velocidad_b if velocidad_b and velocidad_b > 0 else np.nan
-
-    def lorenz_gini(x):
-        x_sorted = np.sort(x)
-        n = len(x_sorted)
-        cum_p = np.arange(0, n + 1) / n
-        cum_q = np.concatenate([[0.0], np.cumsum(x_sorted) / np.sum(x_sorted)])
-        trapecios = (cum_p[1:] - cum_p[:-1]) * (cum_q[1:] + cum_q[:-1])
-        gini = 1.0 - np.sum(trapecios)
-        gini_norm = gini * (n / (n - 1))
-        return cum_p, cum_q, gini, gini_norm
-
-    p0, q0, gini_0, gini_n0 = lorenz_gini(y0)
-    pt, qt, gini_t, gini_nt = lorenz_gini(yt)
-
-    s0 = y0 / np.sum(y0)
-    st_share = yt / np.sum(yt)
-    theil_0 = np.sum(s0 * np.log(N * s0))
-    theil_t = np.sum(st_share * np.log(N * st_share))
-
-    hhi_0 = np.sum(s0 ** 2)
-    hhi_t = np.sum(st_share ** 2)
-
-    return {
-        "sigma_ln_0": sigma_ln_0,
-        "sigma_ln_t": sigma_ln_t,
-        "sigma_niv_0": sigma_niv_0,
-        "sigma_niv_t": sigma_niv_t,
-        "cv_0": cv_0,
-        "cv_t": cv_t,
-        "beta_anual": slope,
-        "intercepto": intercept,
-        "r2": r_value ** 2,
-        "std_err": std_err,
-        "t_stat": t_stat,
-        "p_value": p_value,
-        "B_acum": B_acum,
-        "velocidad_b": velocidad_b,
-        "semivida_b": semivida_b,
-        "gini_0": gini_0,
-        "gini_t": gini_t,
-        "gini_n0": gini_n0,
-        "gini_nt": gini_nt,
-        "theil_0": theil_0,
-        "theil_t": theil_t,
-        "hhi_0": hhi_0,
-        "hhi_t": hhi_t,
-        "lorenz_0": (p0, q0),
-        "lorenz_t": (pt, qt),
-        "ln_y0": ln_y0,
-        "ln_yt": ln_yt,
-        "g_anual": g_anual,
-    }
+    return res, contexto, None
 
 
 # ==============================================================================
-# BARRA LATERAL Y NAVEGACIÓN
+# MÓDULO 1: TÉCNICAS DE ANÁLISIS REGIONAL (ILPES / SII BIOBÍO 2014-2024)
 # ==============================================================================
-st.sidebar.title("Gestión Territorial 2026")
-st.sidebar.markdown("**Universidad de Los Lagos**  \nIngeniería Comercial | Prof. Claudio Mancilla")
-st.sidebar.divider()
-
-archivo_subido = st.sidebar.file_uploader(
-    "Cargar Excel ILPES (Opcional)",
-    type=["xlsx"],
-    help="El sistema ya incluye precargada toda la base de las 33 comunas de Biobío (2014-2024) y datos de cátedra.",
-)
-
-ruta_local_29 = "ILPES GRUPO 10 29-10-2026.xlsx"
-ruta_local_19 = "ILPES GRUPO 10 TERRITORIAL AL 19-10-2026.xlsx"
-
-if archivo_subido is not None:
-    st.sidebar.success("Archivo Excel cargado dinámicamente.")
-elif os.path.exists(ruta_local_29) or os.path.exists(ruta_local_19):
-    st.sidebar.info("Leyendo archivo Excel local del repositorio.")
-else:
-    st.sidebar.info("Operando con motor de datos nativo integrado (33 comunas Biobío + Cátedra).")
-
-modulo = st.sidebar.radio(
-    "Seleccione el Módulo de Análisis:",
-    [
-        "1. Técnicas de Análisis Regional (ILPES / MADE)",
-        "2. Disparidades, Concentración y Convergencia (REAT)",
-        "3. SPL, Redes Empresariales (Dini) y Cadenas de Valor",
-        "4. Ordenamiento Territorial y Georreferenciación",
-        "5. Conmutación Laboral Patagonia (Mancilla et al.)",
-    ],
-)
-
-# ==============================================================================
-# MÓDULO 1: TÉCNICAS DE ANÁLISIS REGIONAL (ILPES / CUADRANTES DE SILVA / MADE)
-# ==============================================================================
-if modulo.startswith("1."):
-    st.markdown("<div class='sec-header'>1. TÉCNICAS DE ANÁLISIS REGIONAL: LOCALIZACIÓN, BASE EXPORTADORA Y SHIFT & SHARE</div>", unsafe_allow_html=True)
-
-    fuente_datos = st.radio(
-        "Seleccionar Base de Datos:",
-        [
-            "Región del Biobío - 33 Comunas y 18 Rubros SII (2014 vs 2024)",
-            "Caso Clásico de Cátedra - 00 Datos Base.xlsx (Badalona, Pueblo Seco, Pueblo Nuevo)",
-        ],
-        horizontal=True,
+def vista_modulo_1_ilpes():
+    st.header("1. Técnicas de Análisis Regional (ILPES / SII 2014–2024)")
+    st.markdown(
+        "Evaluación estructural e intertemporal mediante matrices sectoriales-comunales del SII: "
+        "**Cociente de Localización ($Q_{ij}$)**, **Coeficiente de Especialización ($Q_r$)**, "
+        "**Coeficiente de Reestructuración ($CR_r$)**, **Base Económica Exportadora ($X_j, M_j$)**, "
+        "**Cuadrantes de Silva Lira (CEPAL, 2005)** y **Shift & Share (MADE Clásico y Modificado)**."
     )
 
-    if fuente_datos.startswith("Región del Biobío"):
-        res = calcular_indicadores_regionales(MAT_2014, MAT_2024, COMUNAS_BIOBIO, SECTORES_SII)
-        etiqueta_0, etiqueta_t = "2014", "2024"
-    else:
-        res = calcular_indicadores_regionales(MAT_CATEDRA_0, MAT_CATEDRA_1, TERRITORIOS_CATEDRA, SECTORES_CATEDRA)
-        etiqueta_0, etiqueta_t = "Año 0", "Período 1"
-
-    df_res = res["resumen"]
-
-    tab1, tab2, tab3, tab4 = st.tabs([
-        "I. Cuadrantes de Silva (2005)",
-        "II. Localización (Qij) y Especialización (Qr)",
-        "III. Base Exportadora (Xj) y Multiplicador (Mj)",
-        "IV. Shift & Share (MADE y MADE Modificado)",
-    ])
-
-    with tab1:
-        st.subheader("Tipología de Territorios Subnacionales - Cuadrantes de Silva Lira (CEPAL, 2005)")
-        if fuente_datos.startswith("Región del Biobío"):
-            df_silva = pd.DataFrame({
-                "Comuna": COMUNAS_BIOBIO,
-                "Ventas_UF_2014": df_res["Ventas_0"],
-                "Ventas_UF_2024": df_res["Ventas_t"],
-                "Población_2024": POB_BIOBIO_2024,
-                "Tasa_Crec_Anual (%)": ((df_res["Ventas_t"] / df_res["Ventas_0"]) ** (1 / 10) - 1) * 100,
-                "Ventas_Per_Capita_2024_UF": V2024_PC,
-            })
-            prom_crec = ((df_res["Ventas_t"].sum() / df_res["Ventas_0"].sum()) ** (1 / 10) - 1) * 100
-            prom_pc = df_res["Ventas_t"].sum() / sum(POB_BIOBIO_2024)
-
-            def clasificar_silva(row):
-                alto_crec = row["Tasa_Crec_Anual (%)"] >= prom_crec
-                alto_pc = row["Ventas_Per_Capita_2024_UF"] >= prom_pc
-                if alto_crec and alto_pc:
-                    return "C1 (+ +): Ganadores"
-                elif alto_crec and not alto_pc:
-                    return "C2 (- +): En Marcha (Convergentes)"
-                elif not alto_crec and not alto_pc:
-                    return "C3 (- -): Estancados"
-                else:
-                    return "C4 (+ -): En Retroceso"
-
-            df_silva["Cuadrante"] = df_silva.apply(clasificar_silva, axis=1)
-
-            c1, c2, c3 = st.columns(3)
-            c1.metric("Crecimiento Promedio Regional Anual", f"{prom_crec:.2f}%")
-            c2.metric("Ventas per Cápita Promedio Regional (2024)", f"{prom_pc:.2f} UF/hab")
-            c3.metric("Comunas en Marcha / Ganadoras", f"{(df_silva['Tasa_Crec_Anual (%)'] >= prom_crec).sum()} de 33")
-
-            fig_silva = px.scatter(
-                df_silva,
-                x="Ventas_Per_Capita_2024_UF",
-                y="Tasa_Crec_Anual (%)",
-                color="Cuadrante",
-                hover_name="Comuna",
-                size="Población_2024",
-                log_x=True,
-                title="Cuadrantes de Silva - 33 Comunas Región del Biobío (2014-2024)",
-            )
-            fig_silva.add_hline(y=prom_crec, line_dash="dash", line_color="red", annotation_text="Crec. Regional")
-            fig_silva.add_vline(x=prom_pc, line_dash="dash", line_color="blue", annotation_text="PIB/Ventas PC Media")
-            st.plotly_chart(fig_silva, use_container_width=True)
-            st.dataframe(df_silva.round(3), use_container_width=True)
-        else:
-            st.info("Selecciona la base de la Región del Biobío arriba para visualizar los Cuadrantes de Silva con población comunal.")
-
-    with tab2:
-        st.subheader(f"Cociente de Localización (Qij) - {etiqueta_t}")
-        st.markdown("Valores $Q_{ij} > 1$ indican especialización relativa favorable (sector básico exportador).")
-        fig_q = px.imshow(
-            res["Qt"].round(2),
-            aspect="auto",
-            color_continuous_scale="RdBu_r",
-            color_continuous_midpoint=1.0,
-            title=f"Mapa de Calor: Cociente de Localización (Qij) en {etiqueta_t}",
+    if not os.path.exists(ARCHIVO_EXCEL_REPO):
+        st.warning(
+            f"No se encontró `{ARCHIVO_EXCEL_REPO}` en la raíz. "
+            "Dirígete al Módulo 5 (Exportador SII) para subir un archivo manualmente."
         )
-        st.plotly_chart(fig_q, use_container_width=True)
+        return
 
-        col_a, col_b = st.columns(2)
-        with col_a:
-            fig_qr = px.bar(
-                df_res.sort_values("Qr_t (Especialización)", ascending=False),
-                x="Territorio",
-                y=["Qr_0 (Especialización)", "Qr_t (Especialización)"],
-                barmode="group",
-                title="Coeficiente de Especialización (Qr): Comparación Temporal",
-            )
-            st.plotly_chart(fig_qr, use_container_width=True)
-        with col_b:
-            fig_crr = px.bar(
-                df_res.sort_values("CRr (Reestructuración)", ascending=False),
-                x="Territorio",
-                y="CRr (Reestructuración)",
-                color="CRr (Reestructuración)",
-                title="Coeficiente de Reestructuración (CRr) entre Períodos",
-            )
-            st.plotly_chart(fig_crr, use_container_width=True)
+    df_sii, meta = msii.cargar_base_nacional_sii(ARCHIVO_EXCEL_REPO)
+    regiones = sorted(df_sii[meta["col_region"]].dropna().astype(str).str.strip().unique().tolist())
+    metricas = meta["columnas_metricas"]
+    anios = sorted(df_sii[meta["col_anio"]].dropna().unique().tolist())
 
-    with tab3:
-        st.subheader("Base Económica Exportadora ($X_j$) y Multiplicador Básico Regional ($M_j$)")
-        st.dataframe(
-            df_res[[
-                "Territorio", "Ventas_0", "Exportación_Básica_0 (Xj)", "Multiplicador_0 (Mj)",
-                "Ventas_t", "Exportación_Básica_t (Xj)", "Multiplicador_t (Mj)"
-            ]].round(3),
-            use_container_width=True,
-        )
+    idx_biobio = 0
+    for i, r in enumerate(regiones):
+        if "biob" in msii._normalizar_texto(r):
+            idx_biobio = i
+            break
 
-    with tab4:
-        st.subheader("Método de Análisis Diferencial-Estructural (MADE Clásico y Modificado)")
-        st.markdown(
-            "**MADE Clásico:** $ET_j = EE_j + ED_j$ | **MADE Modificado:** $ET_j = EE_j + EM_j + ERM_j$"
-        )
-        fig_made = px.bar(
-            df_res,
-            x="Territorio",
-            y=["Efecto_Estructural (EE)", "Efecto_Diferencial (ED)"],
-            barmode="relative",
-            title="Descomposición Shift & Share (Efecto Estructural vs. Efecto Diferencial)",
-        )
-        st.plotly_chart(fig_made, use_container_width=True)
-        st.dataframe(
-            df_res[[
-                "Territorio", "Efecto_Total (ET)", "Efecto_Estructural (EE)",
-                "Efecto_Diferencial (ED)", "Efecto_Est_Inverso (EI)",
-                "Efecto_Est_Modificado (EM)", "Efecto_Reg_Modificado (ERM)"
-            ]].round(2),
-            use_container_width=True,
-        )
+    c1, c2, c3, c4 = st.columns([2.2, 2.2, 1, 1])
+    with c1:
+        reg_sel = st.selectbox("Región de análisis:", regiones, index=idx_biobio, key="m1_reg")
+    with c2:
+        var_sel = st.selectbox("Variable SII:", metricas, index=0, key="m1_var")
+    with c3:
+        a0 = st.selectbox("Año inicial ($t_0$):", anios, index=0, key="m1_a0")
+    with c4:
+        at = st.selectbox("Año final ($t_f$):", anios, index=len(anios) - 1, key="m1_at")
 
-# ==============================================================================
-# MÓDULO 2: DISPARIDADES, CONCENTRACIÓN Y CONVERGENCIA (MOTOR REAT)
-# ==============================================================================
-elif modulo.startswith("2."):
-    st.markdown("<div class='sec-header'>2. DISPARIDADES, CONCENTRACIÓN Y CONVERGENCIA REGIONAL (MOTOR REAT)</div>", unsafe_allow_html=True)
+    if int(a0) >= int(at):
+        st.error("El año final debe ser mayor al año inicial.")
+        return
 
-    base_conv = st.selectbox(
-        "Seleccionar Serie de Convergencia:",
-        [
-            "Región del Biobío - 33 Comunas (Ventas UF per cápita 2014 vs 2024)",
-            "Ejemplo de Cátedra REAT - Ejemplo 1 TE.xlsx (7 territorios: 2010 vs 2020)",
-        ],
-    )
-
-    if base_conv.startswith("Región del Biobío"):
-        nombres_c = COMUNAS_BIOBIO
-        y0_c, yt_c, T_c = V2014_PC, V2024_PC, 10
-        lbl_0, lbl_t = "2014", "2024"
-    else:
-        nombres_c = ["A", "B", "C", "D", "E", "F", "G"]
-        y0_c = [49, 11, 50, 19, 61, 146, 32]
-        yt_c = [94, 23, 121, 67, 107, 311, 116]
-        T_c = 10
-        lbl_0, lbl_t = "2010", "2020"
-
-    reat = calcular_reat_convergencia(y0_c, yt_c, T=T_c)
+    V0, Vt = msii.construir_matrices_region(df_sii, meta, reg_sel, a0, at, var_sel)
+    res = msii.calcular_todo_el_ramo(V0, Vt, a0, at, alpha_hk=2.0)
+    tot = res["totales"]
 
     k1, k2, k3, k4 = st.columns(4)
-    k1.metric(f"Sigma Log ({lbl_0} -> {lbl_t})", f"{reat['sigma_ln_t']:.4f}", f"{reat['sigma_ln_t'] - reat['sigma_ln_0']:.4f}", delta_color="inverse")
-    k2.metric("Pendiente Beta Anual (β)", f"{reat['beta_anual']:.5f}", f"p = {reat['p_value']:.4e}")
-    k3.metric("Bondad de Ajuste (R²)", f"{reat['r2'] * 100:.2f}%", f"t = {reat['t_stat']:.2f}")
-    k4.metric("Índice de Gini", f"{reat['gini_t']:.4f}", f"{reat['gini_t'] - reat['gini_0']:.4f}", delta_color="inverse")
+    k1.metric("Comunas Analizadas", f"{tot['n_comunas']}")
+    k2.metric("Rubros Económicos SII", f"{tot['n_rubros']}")
+    k3.metric(f"Total Regional {a0}", f"{tot['total_reg_0']:,.1f}")
+    k4.metric(f"Total Regional {at}", f"{tot['total_reg_t']:,.1f}", f"{tot['tasa_var_reg']:+.2f}%")
 
-    col_beta, col_lorenz = st.columns(2)
+    subtabs = st.tabs([
+        "Cuadrantes de Silva Lira",
+        "Localización (Qij) y Especialización (Qr, CRr)",
+        "Base Económica Exportadora (Xj y Mj)",
+        "Shift & Share (MADE Clásico y Modificado)",
+    ])
 
-    with col_beta:
-        df_beta = pd.DataFrame({
-            "Territorio": nombres_c,
-            f"ln({lbl_0})": reat["ln_y0"],
-            "Crecimiento_Log_Anual": reat["g_anual"],
-            "Ajuste_OLS": reat["intercepto"] + reat["beta_anual"] * reat["ln_y0"],
-        })
-        fig_beta = px.scatter(
-            df_beta,
-            x=f"ln({lbl_0})",
-            y="Crecimiento_Log_Anual",
-            hover_name="Territorio",
-            text="Territorio",
-            title=f"Convergencia Beta Absoluta ({lbl_0}-{lbl_t}): β = {reat['beta_anual']:.4f}",
+    with subtabs[0]:
+        df_ss = res["df_shift_share"].copy()
+        part_ini = (df_ss[f"Nivel_{a0}"] / max(tot["total_reg_0"], 1e-9)) * 100.0
+        part_prom = 100.0 / max(tot["n_comunas"], 1)
+        df_ss["Participacion_Inicial_%"] = part_ini
+
+        fig_silva = px.scatter(
+            df_ss,
+            x="Participacion_Inicial_%",
+            y="Var_Porcentual_%",
+            color="Cuadrante_Silva_Lira",
+            hover_name="Comuna",
+            size=np.maximum(df_ss[f"Nivel_{at}"], 1.0),
+            labels={
+                "Participacion_Inicial_%": f"Participación Comunal Inicial {a0} (%)",
+                "Var_Porcentual_%": f"Crecimiento Acumulado {a0}-{at} (%)",
+            },
+            title=f"Clasificación Comunal en Cuadrantes de Silva Lira ({reg_sel}, {a0}–{at})",
         )
-        fig_beta.add_traces(
+        fig_silva.add_hline(
+            y=tot["tasa_var_reg"],
+            line_dash="dash",
+            line_color="#dc2626",
+            annotation_text=f"Media Regional ({tot['tasa_var_reg']:.1f}%)",
+        )
+        fig_silva.add_vline(
+            x=part_prom,
+            line_dash="dash",
+            line_color="#1d4ed8",
+            annotation_text=f"Umbral Peso Medio ({part_prom:.2f}%)",
+        )
+        st.plotly_chart(fig_silva, use_container_width=True)
+
+        resumen_cuad = (
+            df_ss.groupby("Cuadrante_Silva_Lira")
+            .agg(
+                Numero_Comunas=("Comuna", "count"),
+                Comunas=("Comuna", lambda x: ", ".join(sorted(x))),
+            )
+            .reset_index()
+        )
+        st.dataframe(resumen_cuad, use_container_width=True, hide_index=True)
+
+    with subtabs[1]:
+        st.markdown(f"**Matriz de Cociente de Localización ($Q_{{ij}}$) — Año {at}**")
+        fig_q = px.imshow(
+            res["Q_ij_t"],
+            aspect="auto",
+            color_continuous_scale="RdBu_r",
+            labels={"x": "Comuna", "y": "Rubro Económico", "color": "Q_ij"},
+        )
+        fig_q.update_layout(height=500)
+        st.plotly_chart(fig_q, use_container_width=True)
+
+        st.markdown("**Coeficiente de Especialización ($Q_r$) y Coeficiente de Reestructuración ($CR_r$)**")
+        st.dataframe(res["df_especializacion"].round(4), use_container_width=True, hide_index=True)
+
+    with subtabs[2]:
+        st.markdown(
+            "**Modelo de Base Económica de Tiebout / Lira & Quiroga:** "
+            "Los sectores con $Q_{ij} > 1$ generan excedente básico exportable ($X_{ij} > 0$). "
+            "El multiplicador básico comunal se define como $M_j = V_j / X_j$."
+        )
+        cols_base = [
+            "Comuna",
+            f"Total_{at}",
+            f"Base_Exportadora_Xj_{at}",
+            f"Prop_Basica_{at}_%",
+            f"Multiplicador_Basico_Mj_{at}",
+        ]
+        df_base = res["df_especializacion"][cols_base].sort_values(
+            f"Base_Exportadora_Xj_{at}", ascending=False
+        )
+        st.dataframe(df_base.round(3), use_container_width=True, hide_index=True)
+
+        fig_base = px.bar(
+            df_base.head(20),
+            x="Comuna",
+            y=[f"Base_Exportadora_Xj_{at}", f"Total_{at}"],
+            barmode="group",
+            title=f"Top 20 Comunas por Actividad Básica Exportadora ({at})",
+        )
+        st.plotly_chart(fig_base, use_container_width=True)
+
+    with subtabs[3]:
+        st.markdown(
+            "**Descomposición Shift & Share Clásico ($ET_j = EE_j + ED_j$) y "
+            "MADE Modificado ($EI_j, EM_j, ERM_j$)**"
+        )
+        st.dataframe(res["df_shift_share"].round(2), use_container_width=True, hide_index=True)
+
+        fig_made = px.bar(
+            res["df_shift_share"].sort_values("Efecto_Total_ET", ascending=False),
+            x="Comuna",
+            y=["Efecto_Estructural_EE", "Efecto_Diferencial_ED", "Efecto_Inverso_EI"],
+            barmode="relative",
+            title=f"Efectos Estructural (EE), Diferencial (ED) e Inverso (EI) por Comuna ({a0}–{at})",
+        )
+        st.plotly_chart(fig_made, use_container_width=True)
+
+
+# ==============================================================================
+# MÓDULO 2: DISPARIDADES, CONCENTRACIÓN Y CONVERGENCIA REGIONAL (MOTOR REAT)
+# ==============================================================================
+def vista_modulo_2_reat():
+    st.header("2. Disparidades, Concentración y Convergencia Regional (Motor REAT)")
+    st.markdown(
+        "Réplica en Python de las funciones econométricas del paquete **`REAT` (Regional Economic Analysis Toolbox)** de R: "
+        "**Convergencia Sigma ($\sigma_t, CV_t$)**, **Convergencia Beta Absoluta ($\beta$, velocidad $\lambda$, semivida)**, "
+        "**Curva de Lorenz**, **Índice de Gini ($G, G^*$)**, **Entropía de Theil ($T$)**, "
+        "**Herfindahl-Hirschman ($HHI$)** e **Índice de Hannah-Kay ($HK_\\alpha$)**."
+    )
+
+    if not os.path.exists(ARCHIVO_EXCEL_REPO):
+        st.warning(f"No se encontró `{ARCHIVO_EXCEL_REPO}` en la raíz del repositorio.")
+        return
+
+    df_sii, meta = msii.cargar_base_nacional_sii(ARCHIVO_EXCEL_REPO)
+    regiones = sorted(df_sii[meta["col_region"]].dropna().astype(str).str.strip().unique().tolist())
+    metricas = meta["columnas_metricas"]
+    anios = sorted(df_sii[meta["col_anio"]].dropna().unique().tolist())
+
+    idx_biobio = 0
+    for i, r in enumerate(regiones):
+        if "biob" in msii._normalizar_texto(r):
+            idx_biobio = i
+            break
+
+    c1, c2, c3, c4, c5 = st.columns([2, 2, 1, 1, 1.2])
+    with c1:
+        reg_sel = st.selectbox("Región:", regiones, index=idx_biobio, key="m2_reg")
+    with c2:
+        var_sel = st.selectbox("Variable:", metricas, index=0, key="m2_var")
+    with c3:
+        a0 = st.selectbox("Año inicial:", anios, index=0, key="m2_a0")
+    with c4:
+        at = st.selectbox("Año final:", anios, index=len(anios) - 1, key="m2_at")
+    with c5:
+        alpha_hk = st.slider("Sensibilidad α (Hannah-Kay):", 0.5, 5.0, 2.0, 0.5, key="m2_alpha")
+
+    V0, Vt = msii.construir_matrices_region(df_sii, meta, reg_sel, a0, at, var_sel)
+    res = msii.calcular_todo_el_ramo(V0, Vt, a0, at, alpha_hk=alpha_hk)
+    mb = res["metricas_beta"]
+
+    m1, m2, m3, m4, m5 = st.columns(5)
+    m1.metric("Pendiente Beta (β)", f"{mb['beta']:.4f}", "Convergente" if mb["beta"] < 0 else "Divergente")
+    m2.metric("Velocidad anual (λ)", f"{mb['velocidad_lambda']*100:.2f}%")
+    m3.metric(
+        "Semivida (Half-life)",
+        f"{mb['half_life']:.1f} años" if np.isfinite(mb["half_life"]) else "N/A",
+    )
+    m4.metric("Bondad R² (OLS)", f"{mb['r2']:.4f}")
+    m5.metric("P-valor (β)", f"{mb['p_value']:.4f}")
+
+    st.subheader("Tabla Consolidada de Indicadores REAT")
+    st.dataframe(res["df_reat_resumen"].round(4), use_container_width=True, hide_index=True)
+
+    col_izq, col_der = st.columns(2)
+    with col_izq:
+        df_b = res["df_beta_comunas"]
+        fig_beta = px.scatter(
+            df_b,
+            x=f"ln_Y_{a0}",
+            y="Tasa_Crec_Anual_Log",
+            hover_name="Comuna",
+            text="Comuna",
+            title=f"Regresión OLS de Convergencia Beta Absoluta ({a0}–{at})",
+            labels={
+                f"ln_Y_{a0}": f"Logaritmo Nivel Inicial ln(Y_{a0})",
+                "Tasa_Crec_Anual_Log": f"Tasa de Crecimiento Anual Logarítmica (1/T)·ln(Y_{at}/Y_{a0})",
+            },
+        )
+        fig_beta.update_traces(textposition="top center")
+        df_b_ord = df_b.sort_values(f"ln_Y_{a0}")
+        fig_beta.add_trace(
             go.Scatter(
-                x=df_beta[f"ln({lbl_0})"],
-                y=df_beta["Ajuste_OLS"],
+                x=df_b_ord[f"ln_Y_{a0}"],
+                y=df_b_ord["Prediccion_OLS"],
                 mode="lines",
-                name="Tendencia OLS",
-                line=dict(color="red", dash="dash"),
+                name=f"Recta OLS (β={mb['beta']:.4f})",
+                line=dict(color="#dc2626", width=2),
             )
         )
         st.plotly_chart(fig_beta, use_container_width=True)
 
-    with col_lorenz:
-        p0, q0 = reat["lorenz_0"]
-        pt, qt = reat["lorenz_t"]
+    with col_der:
         fig_lor = go.Figure()
-        fig_lor.add_trace(go.Scatter(x=[0, 1], y=[0, 1], mode="lines", name="Equidistribución (45°)", line=dict(dash="dot", color="gray")))
-        fig_lor.add_trace(go.Scatter(x=p0, y=q0, mode="lines+markers", name=f"Lorenz {lbl_0} (Gini={reat['gini_0']:.3f})"))
-        fig_lor.add_trace(go.Scatter(x=pt, y=qt, mode="lines+markers", name=f"Lorenz {lbl_t} (Gini={reat['gini_t']:.3f})"))
-        fig_lor.update_layout(title="Curva de Lorenz e Índice de Gini", xaxis_title="Proporción acumulada de territorios", yaxis_title="Proporción acumulada de ingreso/ventas")
+        fig_lor.add_trace(
+            go.Scatter(
+                x=[0, 1],
+                y=[0, 1],
+                mode="lines",
+                line=dict(dash="dash", color="#64748b"),
+                name="Línea de Equidad Absoluta (45°)",
+            )
+        )
+        fig_lor.add_trace(
+            go.Scatter(
+                x=mb["lorenz_p_0"],
+                y=mb["lorenz_l_0"],
+                mode="lines+markers",
+                name=f"Curva de Lorenz {a0}",
+            )
+        )
+        fig_lor.add_trace(
+            go.Scatter(
+                x=mb["lorenz_p_t"],
+                y=mb["lorenz_l_t"],
+                mode="lines+markers",
+                name=f"Curva de Lorenz {at}",
+            )
+        )
+        fig_lor.update_layout(
+            title=f"Curva de Concentración de Lorenz ({a0} vs {at})",
+            xaxis_title="Proporción Acumulada de Comunas",
+            yaxis_title=f"Proporción Acumulada de {var_sel}",
+        )
         st.plotly_chart(fig_lor, use_container_width=True)
 
-    st.subheader("Tabla Oficial de Indicadores REAT y Concentración (Hannah-Kay / Herfindahl / Theil)")
-    alfa_hk = st.slider("Parámetro de sensibilidad α para Índice Hannah-Kay (HK):", min_value=1.5, max_value=5.0, value=2.0, step=0.5)
-    s0_tot = np.array(y0_c) / np.sum(y0_c)
-    st_tot = np.array(yt_c) / np.sum(yt_c)
-    hk_0 = (np.sum(s0_tot ** alfa_hk)) ** (1.0 / (alfa_hk - 1.0))
-    hk_t = (np.sum(st_tot ** alfa_hk)) ** (1.0 / (alfa_hk - 1.0))
-
-    df_tabla_reat = pd.DataFrame([
-        {"Indicador": "Sigma de logaritmos (σ_ln)", lbl_0: reat["sigma_ln_0"], lbl_t: reat["sigma_ln_t"]},
-        {"Indicador": "Desviación Estándar en niveles", lbl_0: reat["sigma_niv_0"], lbl_t: reat["sigma_niv_t"]},
-        {"Indicador": "Coeficiente de Variación (CV)", lbl_0: reat["cv_0"], lbl_t: reat["cv_t"]},
-        {"Indicador": "Índice de Gini Estándar", lbl_0: reat["gini_0"], lbl_t: reat["gini_t"]},
-        {"Indicador": "Índice de Gini Normalizado", lbl_0: reat["gini_n0"], lbl_t: reat["gini_nt"]},
-        {"Indicador": "Índice de Entropía de Theil", lbl_0: reat["theil_0"], lbl_t: reat["theil_t"]},
-        {"Indicador": "Índice Herfindahl-Hirschman (HHI per cápita)", lbl_0: reat["hhi_0"], lbl_t: reat["hhi_t"]},
-        {"Indicador": f"Índice Hannah-Kay (α = {alfa_hk})", lbl_0: hk_0, lbl_t: hk_t},
-        {"Indicador": "Velocidad de Convergencia λ (usando B acum.)", lbl_0: reat["velocidad_b"], lbl_t: np.nan},
-        {"Indicador": "Semivida / Half-life en años (usando B acum.)", lbl_0: reat["semivida_b"], lbl_t: np.nan},
-    ])
-    st.dataframe(df_tabla_reat.round(4), use_container_width=True)
 
 # ==============================================================================
-# MÓDULO 3: SPL, REDES EMPRESARIALES (DINI / UCINET) Y CADENAS DE VALOR (CEPAL)
+# MÓDULO 3: SPL, REDES EMPRESARIALES (UCINET / DINI) Y CADENAS DE VALOR (CEPAL)
 # ==============================================================================
-elif modulo.startswith("3."):
-    st.markdown("<div class='sec-header'>3. SISTEMAS PRODUCTIVOS LOCALES, REDES (DINI 2010) Y CADENAS DE VALOR (CEPAL)</div>", unsafe_allow_html=True)
+def vista_modulo_3_redes_cadenas():
+    st.header("3. Sistemas Productivos Locales (SPL), Redes Empresariales y Cadenas de Valor")
+    st.markdown(
+        "Análisis de articulación productiva local según **Dini (2010, CEPAL)** (reemplazo interactivo de **UCINET** "
+        "para matrices de adyacencia y centralidad de grafos) y diagnóstico de **Cadenas de Valor** bajo metodología "
+        "**Padilla y Oddone (2016, CEPAL)** aplicada al complejo forestal-maderero (caso **PymeMad Biobío / Los Ángeles**) "
+        "y ecosistema MIPE regional."
+    )
 
-    sub1, sub2, sub3 = st.tabs([
-        "I. Caso Aplicado: Cadena Maderera Los Ángeles (PYMEMAD / CORMA)",
-        "II. Simulador de Redes Empresariales (UCINET / Dini)",
-        "III. Metodología CEPAL y Ecosistema MIPE Los Lagos",
+    tabs_spl = st.tabs([
+        "1. Simulador de Grafos y Redes (UCINET / Dini 2010)",
+        "2. Cadena de Valor Forestal-Maderera (CEPAL / PymeMad)",
+        "3. Instrumento de Campo (cuestionario_entrevista.pdf)",
     ])
 
-    with sub1:
-        st.subheader("Cadena de Valor Forestal-Maderera en Los Ángeles (Región del Biobío)")
-        st.markdown(
-            "**Esquema Preliminar de 4 Eslabones para Validación Empírica (Control 4):**  \n"
-            "`1. Plantación Silvícola` -> `2. Servicios de Cosecha y Faena` -> "
-            "`3. Aserraderos e Industria Secundaria` -> `4. Comercialización y Distribución`"
-        )
+    with tabs_spl[0]:
+        st.subheader("Matriz Sociométrica y Topología de Red Empresarial (Modelo UCINET)")
+        nodos_default = [
+            "Aserradero PyME 1",
+            "Aserradero PyME 2",
+            "Remanufactura Maderera",
+            "Proveedores Forestales",
+            "Transporte y Logística",
+            "Gremio PymeMad",
+            "Planta Celulosa / Ancla",
+            "Centro I+D / Universidad",
+        ]
+        n_nodos = len(nodos_default)
+        mat_base = np.array([
+            [0, 1, 1, 1, 1, 1, 0, 0],
+            [1, 0, 1, 1, 0, 1, 0, 0],
+            [1, 1, 0, 0, 1, 1, 1, 1],
+            [1, 1, 0, 0, 1, 1, 1, 0],
+            [1, 0, 1, 1, 0, 0, 1, 0],
+            [1, 1, 1, 1, 0, 0, 1, 1],
+            [0, 0, 1, 1, 1, 1, 0, 1],
+            [0, 0, 1, 0, 0, 1, 1, 0],
+        ], dtype=int)
 
-        col_b1, col_b2, col_b3 = st.columns(3)
-        with col_b1:
-            st.info(
-                "**Bloque 1: Validar Cadena (5 min)**\n"
-                "1. **Eslabones:** ¿Las 4 etapas reflejan bien al sector o falta alguna intermedia?\n"
-                "2. **Localización:** ¿Qué etapas se realizan casi 100% en Los Ángeles y cuáles dependen de fuera?\n"
-                "3. **Identificación:** ¿Qué empresas u organizaciones son las más representativas por etapa?"
-            )
-        with col_b2:
-            st.warning(
-                "**Bloque 2: Red y Cooperación - Dini (6 min)**\n"
-                "4. **Articulación:** ¿Existe empresa tractora/líder o coordinan vía gremios (CORMA / PYMEMAD)?\n"
-                "5. **Cooperación H/V:** ¿Colaboran en transporte, capacitación, prevención de incendios o certificaciones?\n"
-                "6. **Falta de actores:** ¿Falta algún servicio técnico especializado, centro tecnológico o apoyo estatal?"
-            )
-        with col_b3:
-            st.success(
-                "**Bloque 3: Desafíos y Derivación (4 min)**\n"
-                "7. **Cuellos de botella:** ¿En qué etapa o vínculo entre empresas está el principal desafío a fortalecer?\n"
-                "8. **Red de contactos:** ¿Qué aserradero y qué proveedor de servicios recomienda contactar para contrastar visiones?"
-            )
+        df_adj_init = pd.DataFrame(mat_base, index=nodos_default, columns=nodos_default)
+        st.caption("Edita los vínculos binarios (1 = relación de cooperación/subcontratación activa, 0 = sin vínculo):")
+        df_adj = st.data_editor(df_adj_init, use_container_width=True, key="editor_ucinet")
 
-        if os.path.exists("cuestionario_entrevista.pdf"):
-            with open("cuestionario_entrevista.pdf", "rb") as pdf_file:
-                st.download_button(
-                    label="Descargar Pauta Oficial de Entrevista (cuestionario_entrevista.pdf)",
-                    data=pdf_file,
-                    file_name="cuestionario_entrevista.pdf",
-                    mime="application/pdf",
-                )
+        A = df_adj.to_numpy(dtype=float)
+        np.fill_diagonal(A, 0.0)
+        enlaces_totales = float(np.sum(A))
+        enlaces_posibles = float(n_nodos * (n_nodos - 1))
+        densidad_red = (enlaces_totales / enlaces_posibles) * 100.0 if enlaces_posibles > 0 else 0.0
 
-    with sub2:
-        st.subheader("Análisis de Estructura y Densidad de Red (Base Datos.xlsx - 15 Nodos)")
-        mat_red = np.array(MATRIZ_RED_DINI)
-        n_nodos = len(NODOS_RED)
-        total_lazos_dirigidos = np.sum(mat_red)
-        densidad_dirigida = total_lazos_dirigidos / (n_nodos * (n_nodos - 1))
+        grado_salida = np.sum(A, axis=1)
+        grado_entrada = np.sum(A, axis=0)
+        centralidad_norm = (grado_salida / max(n_nodos - 1, 1)) * 100.0
 
-        grado_salida = np.sum(mat_red, axis=1)
-        grado_entrada = np.sum(mat_red, axis=0)
+        c_u1, c_u2, c_u3 = st.columns(3)
+        c_u1.metric("Nodos del Sistema Productivo (N)", f"{n_nodos}")
+        c_u2.metric("Vínculos Activos / Posibles", f"{int(enlaces_totales)} / {int(enlaces_posibles)}")
+        c_u3.metric("Densidad de la Red (Dini / UCINET)", f"{densidad_red:.1f}%")
 
-        m1, m2, m3 = st.columns(3)
-        m1.metric("Número de Nodos (n)", n_nodos)
-        m2.metric("Total Vínculos Activos", int(total_lazos_dirigidos))
-        m3.metric("Densidad de la Red", f"{densidad_dirigida * 100:.2f}%")
-
+        # Coordenadas circulares para renderizar el grafo en Plotly
         angulos = np.linspace(0, 2 * np.pi, n_nodos, endpoint=False)
-        x_pos = np.cos(angulos)
-        y_pos = np.sin(angulos)
+        xs = np.cos(angulos)
+        ys = np.sin(angulos)
 
         edge_x, edge_y = [], []
         for i in range(n_nodos):
             for j in range(n_nodos):
-                if mat_red[i, j] == 1:
-                    edge_x.extend([x_pos[i], x_pos[j], None])
-                    edge_y.extend([y_pos[i], y_pos[j], None])
+                if A[i, j] > 0:
+                    edge_x.extend([xs[i], xs[j], None])
+                    edge_y.extend([ys[i], ys[j], None])
 
         fig_red = go.Figure()
-        fig_red.add_trace(go.Scatter(x=edge_x, y=edge_y, mode="lines", line=dict(width=1, color="#888"), hoverinfo="none", name="Vínculos"))
         fig_red.add_trace(
             go.Scatter(
-                x=x_pos,
-                y=y_pos,
-                mode="markers+text",
-                text=NODOS_RED,
-                textposition="top center",
-                marker=dict(
-                    size=12 + grado_salida * 3,
-                    color=grado_salida,
-                    colorscale="Viridis",
-                    showscale=True,
-                    colorbar=dict(title="Grado Salida"),
-                ),
-                name="Empresas (A-O)",
+                x=edge_x,
+                y=edge_y,
+                mode="lines",
+                line=dict(width=1.5, color="#94a3b8"),
+                hoverinfo="none",
+                name="Relación Productiva",
             )
         )
-        fig_red.update_layout(title="Grafo de Articulación Empresarial (Reemplazo Interactivo de UCINET)", xaxis=dict(visible=False), yaxis=dict(visible=False), height=500)
+        fig_red.add_trace(
+            go.Scatter(
+                x=xs,
+                y=ys,
+                mode="markers+text",
+                text=nodos_default,
+                textposition="top center",
+                marker=dict(
+                    size=18 + centralidad_norm * 0.25,
+                    color=centralidad_norm,
+                    colorscale="Blues",
+                    showscale=True,
+                    colorbar=dict(title="Centralidad (%)"),
+                    line=dict(width=1.5, color="#1e293b"),
+                ),
+                name="Actor Territorial",
+            )
+        )
+        fig_red.update_layout(
+            title="Topología de Articulación del Sistema Productivo Local (Grafo Sociométrico)",
+            xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
+            yaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
+            height=480,
+        )
         st.plotly_chart(fig_red, use_container_width=True)
 
-        df_grados = pd.DataFrame({
-            "Empresa (Nodo)": NODOS_RED,
-            "Grado de Salida (Vínculos emitidos)": grado_salida,
-            "Grado de Entrada (Vínculos recibidos)": grado_entrada,
-            "Grado Total": grado_salida + grado_entrada,
-        }).sort_values("Grado Total", ascending=False)
-        st.dataframe(df_grados, use_container_width=True)
-
-    with sub3:
-        st.subheader("Metodología CEPAL (Padilla y Oddone, 2016) y Ecosistema MIPE Los Lagos")
-        col_m1, col_m2 = st.columns(2)
-        with col_m1:
-            st.markdown("**Brechas en los Emprendimientos MIPE (Observatorio Laboral Los Lagos)**")
-            st.markdown(
-                "- **Modelo de negocio:** Identidad corporativa, diferenciación y estacionalidad.\n"
-                "- **Asociatividad y cadena de valor:** Encadenamiento horizontal y vertical con proveedores.\n"
-                "- **Procesos:** Formalización, resolución sanitaria rural y logística.\n"
-                "- **Competencias:** Habilidades blandas, alfabetización digital (TIC) y manejo técnico."
-            )
-        with col_m2:
-            st.markdown("**Brechas en los Instrumentos de Apoyo Público (GORE / CORFO / SERCOTEC / INDAP)**")
-            st.markdown(
-                "- **Evaluación:** Pasar de control de gasto a indicadores de impacto real.\n"
-                "- **Coordinación:** Reducir superposición programática multisectorial.\n"
-                "- **Accesibilidad:** Acercar la oferta a comunas aisladas y rurales.\n"
-                "- **Descentralización:** Diseñar instrumentos con pertinencia territorial local."
-            )
-
-# ==============================================================================
-# MÓDULO 4: ORDENAMIENTO TERRITORIAL Y GEORREFERENCIACIÓN (OSORNO)
-# ==============================================================================
-elif modulo.startswith("4."):
-    st.markdown("<div class='sec-header'>4. ORDENAMIENTO TERRITORIAL: PRIMACÍA, MATRIZ DE RONDINELLI Y GEORREFERENCIACIÓN</div>", unsafe_allow_html=True)
-
-    ot1, ot2, ot3 = st.tabs([
-        "I. Índice de Primacía Urbana",
-        "II. Matriz Funcional de Rondinelli (Guttman)",
-        "III. Mapa Georreferenciado: 15 Liceos de Osorno",
-    ])
-
-    with ot1:
-        st.subheader("Cálculo del Índice de Primacía ($IP = P_1 / (P_2 + P_3 + P_4)$)")
-        df_pob_biobio = pd.DataFrame({"Comuna": COMUNAS_BIOBIO, "Población_2024": POB_BIOBIO_2024}).sort_values("Población_2024", ascending=False).reset_index(drop=True)
-        df_pob_biobio["Ranking"] = df_pob_biobio.index + 1
-
-        top4 = df_pob_biobio.iloc[:4]
-        ip_biobio = top4.loc[0, "Población_2024"] / top4.loc[1:3, "Población_2024"].sum()
-
-        c_ip1, c_ip2 = st.columns(2)
-        c_ip1.metric("Índice de Primacía Región del Biobío (Censo 2024)", f"{ip_biobio:.4f}")
-        c_ip2.info(f"Centro principal: **{top4.loc[0, 'Comuna']}** ({top4.loc[0, 'Población_2024']:,} hab) frente a **{', '.join(top4.loc[1:3, 'Comuna'])}**.")
-        st.dataframe(df_pob_biobio.head(10), use_container_width=True)
-
-    with ot2:
-        st.subheader("Complejidad Funcional de Asentamientos - Matriz de Rondinelli (Escala de Guttman)")
-        df_rond = pd.DataFrame({
-            "Asentamiento Humano": ["Flores (GT)", "Melchor de Mencos (GT)", "San Ignacio/Santa Elena (BZE)", "Benque Viejo (BZE)"],
-            "Población": [51535, 19847, 16977, 5824],
-            "Educación Diversificada": [1, 1, 1, 0],
-            "Universidades": [1, 1, 1, 0],
-            "Centros Atención Médica": [1, 1, 1, 1],
-            "Seguro Social": [1, 1, 1, 1],
-            "Guarderías Infantiles": [1, 1, 0, 0],
-            "Programas de Vivienda": [1, 0, 1, 1],
-            "Atención a la Mujer": [1, 1, 1, 1],
+        df_metricas_nodos = pd.DataFrame({
+            "Actor_Nodo": nodos_default,
+            "Grado_Salida_OutDegree": grado_salida.astype(int),
+            "Grado_Entrada_InDegree": grado_entrada.astype(int),
+            "Centralidad_Grado_%": centralidad_norm.round(2),
+            "Rol_Tipologico_Dini": [
+                "Nodo Articulador / Gobernanza" if c >= 60 else ("Actor Integrado" if c >= 40 else "Actor Periférico")
+                for c in centralidad_norm
+            ],
         })
-        servicios_cols = df_rond.columns[2:]
-        df_rond["Suma_Servicios (Complejidad)"] = df_rond[servicios_cols].sum(axis=1)
-        df_rond["%_Población"] = (df_rond["Población"] / df_rond["Población"].sum() * 100).round(2)
-        st.dataframe(df_rond, use_container_width=True)
+        st.dataframe(df_metricas_nodos, use_container_width=True, hide_index=True)
 
-    with ot3:
-        st.subheader("Distribución Espacial de Establecimientos Educacionales en Osorno (Liceos.xlsx)")
-        df_liceos = pd.DataFrame(LICEOS_OSORNO)
-        st.map(df_liceos, latitude="lat", longitude="lon", size=25)
-        st.dataframe(df_liceos, use_container_width=True)
+    with tabs_spl[1]:
+        st.subheader("Diagnóstico de Restricciones y Escalamiento (Upgrading) — Cadena Forestal-Maderera")
+        df_cadena = pd.DataFrame([
+            {
+                "Eslabón de la Cadena": "1. Silvicultura y Manejo de Bosques PyME",
+                "Actores Clave": "Pequeños y medianos propietarios forestales, contratistas",
+                "Cuello de Botella Crítico": "Déficit de trozas aserrables tras incendios y baja tasa de reforestación",
+                "Estrategia de Upgrading (CEPAL)": "Upgrading de Proceso: Certificación de manejo sustentable asociativo (PEFC/FSC)",
+                "Impacto Esperado (1-5)": 4.8,
+            },
+            {
+                "Eslabón de la Cadena": "2. Aserrío Primario y Secado",
+                "Actores Clave": "Aserraderos asociados a PymeMad (Los Ángeles / Biobío)",
+                "Cuello de Botella Crítico": "Asimetría en abastecimiento de rollizos y costos de energía/secado en cámara",
+                "Estrategia de Upgrading (CEPAL)": "Upgrading Tecnológico: Incorporación de escáneres ópticos y cámaras de secado eficientes",
+                "Impacto Esperado (1-5)": 4.6,
+            },
+            {
+                "Eslabón de la Cadena": "3. Remanufactura y Valor Agregado (CLT / Estructural)",
+                "Actores Clave": "Plantas de molduras, madera laminada y componentes constructivos",
+                "Cuello de Botella Crítico": "Estandarización de clasificación estructural y acceso a financiamiento de capital de trabajo",
+                "Estrategia de Upgrading (CEPAL)": "Upgrading de Producto: Transición a madera estructural certificada para construcción industrializada",
+                "Impacto Esperado (1-5)": 4.9,
+            },
+            {
+                "Eslabón de la Cadena": "4. Comercialización, Logística y Mercados",
+                "Actores Clave": "Consorcios de exportación, distribuidores nacionales, sector público (MINVU)",
+                "Cuello de Botella Crítico": "Dependencia de intermediarios y barreras de escala para compras públicas",
+                "Estrategia de Upgrading (CEPAL)": "Upgrading Funcional: Consorcios comerciales PymeMad para licitaciones de vivienda pública en madera",
+                "Impacto Esperado (1-5)": 4.5,
+            },
+        ])
+        st.dataframe(df_cadena, use_container_width=True, hide_index=True)
+
+    with tabs_spl[2]:
+        st.subheader("Instrumento de Levantamiento Primario en Terreno (`cuestionario_entrevista.pdf`)")
+        st.markdown(
+            "Pauta semiestructurada de entrevista aplicada a actores gremiales y productivos de la cadena de valor "
+            "de madera aserrada y servicios forestales (**PymeMad Biobío — Los Ángeles**)."
+        )
+        if os.path.exists(ARCHIVO_PDF_CUESTIONARIO):
+            with open(ARCHIVO_PDF_CUESTIONARIO, "rb") as f_pdf:
+                pdf_bytes = f_pdf.read()
+            st.download_button(
+                label="Descargar Cuestionario de Entrevista Oficial (cuestionario_entrevista.pdf)",
+                data=pdf_bytes,
+                file_name="cuestionario_entrevista.pdf",
+                mime="application/pdf",
+            )
+        else:
+            st.info("El archivo `cuestionario_entrevista.pdf` se cargará automáticamente al estar en la raíz del repositorio.")
+
 
 # ==============================================================================
-# MÓDULO 5: CONMUTACIÓN LABORAL EN LA PATAGONIA (MANCILLA, SOZA-AMIGO Y FERRADA)
+# MÓDULO 4: ORDENAMIENTO TERRITORIAL, RONDINELLI Y GEORREFERENCIACIÓN
 # ==============================================================================
-elif modulo.startswith("5."):
-    st.markdown("<div class='sec-header'>5. CONMUTACIÓN LABORAL INTERTEMPORAL EN LA PATAGONIA CHILENA (2011 VS 2016)</div>", unsafe_allow_html=True)
-    st.markdown("Basado en **Mancilla, Soza-Amigo y Ferrada (2021)**, *Estudios Demográficos y Urbanos*.")
+def vista_modulo_4_ordenamiento():
+    st.header("4. Ordenamiento Territorial, Matriz de Rondinelli y Georreferenciación")
+    st.markdown(
+        "Análisis del sistema de asentamientos humanos mediante el **Escalograma Funcional de Rondinelli (1985)** "
+        "(cálculo de pesos de centralidad funcional e índice jerárquico urbano) y cartografía georreferenciada."
+    )
 
-    cnp = ["Valdivia", "Osorno", "Puerto Montt", "Coyhaique", "Punta Arenas"]
-    mat_2011_cnp = np.array([
-        [2586, 127, 2594],
-        [1761, 2250, 1438],
-        [3345, 525, 1024],
-        [776, 82, 326],
-        [195, 327, 799],
-    ])
-    mat_2016_cnp = np.array([
-        [3141, 0, 1231],
-        [1336, 955, 137],
-        [8951, 1048, 3529],
-        [1268, 375, 834],
-        [112, 0, 1425],
+    tabs_ot = st.tabs([
+        "1. Escalograma Funcional y Matriz de Rondinelli",
+        "2. Georreferenciación Comunal Interactiva",
     ])
 
-    prop_2011 = mat_2011_cnp / mat_2011_cnp.sum()
-    prop_2016 = mat_2016_cnp / mat_2016_cnp.sum()
-    ist_cnp = 100.0 * (1.0 - 0.5 * np.sum(np.abs(prop_2016 - prop_2011)))
+    with tabs_ot[0]:
+        st.subheader("Matriz de Funciones Urbanas y Jerarquía de Asentamientos (Método de Rondinelli)")
+        funciones_urbanas = [
+            "Hospital Alta Complejidad",
+            "Universidad Estatal / Tradicional",
+            "Tribunales Superiores / Corte",
+            "Servicios Financieros Especializados",
+            "Puerto / Hub Logístico Intermodal",
+            "Parque Industrial Consolidado",
+            "Instituto Técnico Profesional (CFT/IP)",
+            "Hospital Base / Mediana Complejidad",
+            "Comercio Mayorista Agroindustrial",
+            "Servicios Públicos Provinciales",
+        ]
+        asentamientos = [
+            "Concepción (Metrópoli Regional)",
+            "Los Ángeles (Centro Subregional)",
+            "Talcahuano (Nodo Portuario-Industrial)",
+            "Coronel (Centro Industrial Secundario)",
+            "Chillán (Capital Regional Vecina)",
+            "Osorno (Centro Agroindustrial Sur)",
+            "Lebu (Cabecera Provincial Costera)",
+            "Mulchén (Centro Local Silvoagropecuario)",
+            "Arauco (Nodo Forestal-Celulosa)",
+            "Santa Bárbara (Centro Rural de Soporte)",
+        ]
+        mat_rond = np.array([
+            [1, 1, 1, 1, 0, 1, 1, 1, 1, 1],
+            [1, 1, 0, 1, 0, 1, 1, 1, 1, 1],
+            [1, 1, 0, 1, 1, 1, 1, 1, 1, 1],
+            [0, 0, 0, 1, 1, 1, 1, 1, 1, 0],
+            [1, 1, 1, 1, 0, 1, 1, 1, 1, 1],
+            [1, 1, 0, 1, 0, 1, 1, 1, 1, 1],
+            [0, 0, 0, 0, 0, 0, 1, 1, 0, 1],
+            [0, 0, 0, 0, 0, 0, 0, 1, 1, 0],
+            [0, 0, 0, 1, 0, 1, 1, 1, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 1, 1, 0],
+        ], dtype=int)
 
-    chi2_2011, p_2011, _, _ = stats.chi2_contingency(mat_2011_cnp)
-    chi2_2016, p_2016, _, _ = stats.chi2_contingency(mat_2016_cnp)
+        df_rond_init = pd.DataFrame(mat_rond, index=asentamientos, columns=funciones_urbanas)
+        df_rond = st.data_editor(df_rond_init, use_container_width=True, key="editor_rondinelli")
 
-    c_p1, c_p2, c_p3 = st.columns(3)
-    c_p1.metric("Índice de Similitud Temporal (2011-2016)", f"{ist_cnp:.2f}%")
-    c_p2.metric("Chi-Cuadrado (χ²) 2011", f"{chi2_2011:,.1f}", f"p = {p_2011:.4f}")
-    c_p3.metric("Chi-Cuadrado (χ²) 2016", f"{chi2_2016:,.1f}", f"p = {p_2016:.4f}")
+        M = df_rond.to_numpy(dtype=float)
+        freq_funcion = np.sum(M, axis=0)
+        # Ponderación de Rondinelli: W_f = C_total / Frecuencia_f (normalizado a base 100 por función)
+        pesos_funcion = np.where(freq_funcion > 0, len(asentamientos) / freq_funcion, 0.0)
+        indice_centralidad = M @ pesos_funcion
+        num_funciones_ciudad = np.sum(M, axis=1)
 
-    tipos = ["Intrarregional", "Interregional", "Extrarregional"]
-    df_c2011 = pd.DataFrame(mat_2011_cnp, index=cnp, columns=tipos)
-    df_c2016 = pd.DataFrame(mat_2016_cnp, index=cnp, columns=tipos)
+        df_jerarquia = pd.DataFrame({
+            "Asentamiento_Comuna": asentamientos,
+            "Funciones_Presentes": num_funciones_ciudad.astype(int),
+            "Indice_Centralidad_Rondinelli": indice_centralidad.round(2),
+            "Jerarquia_Funcional": [
+                "Nivel 1: Centro Metropolitano / Primario" if ic >= 12
+                else ("Nivel 2: Centro Intermedio / Subregional" if ic >= 6 else "Nivel 3: Centro Local / Básico")
+                for ic in indice_centralidad
+            ],
+        }).sort_values("Indice_Centralidad_Rondinelli", ascending=False)
 
-    col_g1, col_g2 = st.columns(2)
-    with col_g1:
-        fig_11 = px.bar(df_c2011, barmode="stack", title="Flujos de Conmutación hacia Centros Nodales (2011)")
-        st.plotly_chart(fig_11, use_container_width=True)
-    with col_g2:
-        fig_16 = px.bar(df_c2016, barmode="stack", title="Flujos de Conmutación hacia Centros Nodales (2016)")
-        st.plotly_chart(fig_16, use_container_width=True)
+        st.dataframe(df_jerarquia, use_container_width=True, hide_index=True)
 
-elif modulo.startswith("6."):
-    motor_sii_exportador.renderizar_modulo_nacional_sii(archivo_subido)
+        fig_rond = px.bar(
+            df_jerarquia,
+            x="Asentamiento_Comuna",
+            y="Indice_Centralidad_Rondinelli",
+            color="Jerarquia_Funcional",
+            title="Índice de Centralidad Funcional de Rondinelli por Asentamiento",
+        )
+        st.plotly_chart(fig_rond, use_container_width=True)
+
+    with tabs_ot[1]:
+        st.subheader("Georreferenciación de Polos Territoriales (Biobío y Los Lagos)")
+        df_geo = pd.DataFrame([
+            {"Comuna": "Concepción", "Region": "Biobío", "Lat": -36.8270, "Lon": -73.0503, "Rol": "Metrópoli Servicios/Educación", "Peso_Relativo": 100},
+            {"Comuna": "Talcahuano", "Region": "Biobío", "Lat": -36.7249, "Lon": -73.1168, "Rol": "Complejo Portuario-Industrial", "Peso_Relativo": 85},
+            {"Comuna": "Coronel", "Region": "Biobío", "Lat": -37.0298, "Lon": -73.1429, "Rol": "Nodo Logístico-Portuario", "Peso_Relativo": 75},
+            {"Comuna": "Los Ángeles", "Region": "Biobío", "Lat": -37.4697, "Lon": -72.3537, "Rol": "Hub Forestal-Maderero (PymeMad) y Agroindustrial", "Peso_Relativo": 82},
+            {"Comuna": "Arauco", "Region": "Biobío", "Lat": -37.2464, "Lon": -73.3175, "Rol": "Enclave Celulosa-Forestal", "Peso_Relativo": 70},
+            {"Comuna": "Lebu", "Region": "Biobío", "Lat": -37.6083, "Lon": -73.6536, "Rol": "Cabecera Provincial Costera", "Peso_Relativo": 40},
+            {"Comuna": "Osorno", "Region": "Los Lagos", "Lat": -40.5740, "Lon": -73.1335, "Rol": "Polo Agroindustrial y Académico (ULagos)", "Peso_Relativo": 84},
+            {"Comuna": "Puerto Montt", "Region": "Los Lagos", "Lat": -41.4689, "Lon": -72.9411, "Rol": "Capital Regional y Hub Acuícola-Marítimo", "Peso_Relativo": 92},
+        ])
+
+        fig_mapa = px.scatter_mapbox(
+            df_geo,
+            lat="Lat",
+            lon="Lon",
+            size="Peso_Relativo",
+            color="Region",
+            hover_name="Comuna",
+            hover_data=["Rol", "Peso_Relativo"],
+            zoom=5.3,
+            height=520,
+            mapbox_style="carto-positron",
+            title="Distribución Espacial de Polos Productivos Analizados en Cátedra",
+        )
+        st.plotly_chart(fig_mapa, use_container_width=True)
+
+
+# ==============================================================================
+# NAVEGACIÓN PRINCIPAL EN BARRA LATERAL
+# ==============================================================================
+def main():
+    with st.sidebar:
+        st.title("Gestión Territorial 2026")
+        st.caption("Ingeniería Comercial — Universidad de Los Lagos")
+        st.markdown("---")
+        modulo_activo = st.radio(
+            "Seleccione Módulo de Trabajo:",
+            [
+                "1. Análisis Regional (ILPES / SII)",
+                "2. Convergencia y Desigualdad (REAT)",
+                "3. Redes (UCINET) y Cadenas de Valor",
+                "4. Ordenamiento Territorial y Rondinelli",
+                "5. Exportador Maestro SII (Excel 10 Hojas)",
+            ],
+        )
+        st.markdown("---")
+        st.markdown(
+            "**Repositorio Oficial:**\n"
+            "`DESARROLLO-Y-GESTION-TERRITORIAL-2026`\n\n"
+            "**Base SII Integrada:**\n"
+            f"`{ARCHIVO_EXCEL_REPO}`"
+        )
+
+    if modulo_activo.startswith("1."):
+        vista_modulo_1_ilpes()
+    elif modulo_activo.startswith("2."):
+        vista_modulo_2_reat()
+    elif modulo_activo.startswith("3."):
+        vista_modulo_3_redes_cadenas()
+    elif modulo_activo.startswith("4."):
+        vista_modulo_4_ordenamiento()
+    else:
+        msii.renderizar_exportador_sii(ARCHIVO_EXCEL_REPO)
+
+
+if __name__ == "__main__":
+    main()
