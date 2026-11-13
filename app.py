@@ -856,3 +856,6 @@ elif modulo.startswith("5."):
     with col_g2:
         fig_16 = px.bar(df_c2016, barmode="stack", title="Flujos de Conmutación hacia Centros Nodales (2016)")
         st.plotly_chart(fig_16, use_container_width=True)
+
+elif modulo.startswith("6."):
+    motor_sii_exportador.renderizar_modulo_nacional_sii(archivo_subido)
