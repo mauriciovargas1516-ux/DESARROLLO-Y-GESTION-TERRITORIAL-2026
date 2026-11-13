@@ -621,13 +621,55 @@ elif modulo.startswith("2."):
 elif modulo.startswith("3."):
     st.header("3. Sistemas Productivos Locales, Redes (Dini 2010) y Cadenas de Valor (CEPAL)")
 
-    sub1, sub2 = st.tabs(["🕸️ Simulador de Redes Empresariales (UCINET / Dini)", "⛓️ Cadenas de Valor y Ecosistema MIPE Los Lagos"])
+    sub1, sub2, sub3 = st.tabs([
+        "🌲 Caso Aplicado: Cadena Maderera Los Ángeles (PYMEMAD / CORMA)",
+        "🕸️ Simulador de Redes Empresariales (UCINET / Dini)",
+        "⛓️ Metodología CEPAL y Ecosistema MIPE Los Lagos",
+    ])
 
     with sub1:
+        st.subheader("Cadena de Valor Forestal-Maderera en Los Ángeles (Región del Biobío)")
+        st.markdown(
+            "**Esquema Preliminar de 4 Eslabones para Validación Empírica (Control 4):**  \n"
+            "`1. Plantación Silvícola` ➡️ `2. Servicios de Cosecha y Faena` ➡️ "
+            "`3. Aserraderos e Industria Secundaria` ➡️ `4. Comercialización y Distribución`"
+        )
+
+        col_b1, col_b2, col_b3 = st.columns(3)
+        with col_b1:
+            st.info(
+                "**Bloque 1: Validar Cadena (5 min)**\n"
+                "1. **Eslabones:** ¿Las 4 etapas reflejan bien al sector o falta alguna intermedia?\n"
+                "2. **Localización:** ¿Qué etapas se realizan casi 100% en Los Ángeles y cuáles dependen de fuera?\n"
+                "3. **Identificación:** ¿Qué empresas u organizaciones son las más representativas por etapa?"
+            )
+        with col_b2:
+            st.warning(
+                "**Bloque 2: Red y Cooperación - Dini (6 min)**\n"
+                "4. **Articulación:** ¿Existe empresa tractora/líder o coordinan vía gremios (CORMA / PYMEMAD)?\n"
+                "5. **Cooperación H/V:** ¿Colaboran en transporte, capacitación, prevención de incendios o certificaciones?\n"
+                "6. **Falta de actores:** ¿Falta algún servicio técnico especializado, centro tecnológico o apoyo estatal?"
+            )
+        with col_b3:
+            st.success(
+                "**Bloque 3: Desafíos y Derivación (4 min)**\n"
+                "7. **Cuellos de botella:** ¿En qué etapa o vínculo entre empresas está el principal desafío a fortalecer?\n"
+                "8. **Red de contactos:** ¿Qué aserradero y qué proveedor de servicios recomienda contactar para contrastar visiones?"
+            )
+
+        if os.path.exists("cuestionario_entrevista.pdf"):
+            with open("cuestionario_entrevista.pdf", "rb") as pdf_file:
+                st.download_button(
+                    label="📥 Descargar Pauta Oficial de Entrevista (cuestionario_entrevista.pdf)",
+                    data=pdf_file,
+                    file_name="cuestionario_entrevista.pdf",
+                    mime="application/pdf",
+                )
+
+    with sub2:
         st.subheader("Análisis de Estructura y Densidad de Red (Base Datos.xlsx - 15 Nodos)")
         mat_red = np.array(MATRIZ_RED_DINI)
         n_nodos = len(NODOS_RED)
-        # Vínculos dirigidos y no dirigidos
         total_lazos_dirigidos = np.sum(mat_red)
         densidad_dirigida = total_lazos_dirigidos / (n_nodos * (n_nodos - 1))
 
@@ -639,7 +681,6 @@ elif modulo.startswith("3."):
         m2.metric("Total Vínculos Activos", int(total_lazos_dirigidos))
         m3.metric("Densidad de la Red", f"{densidad_dirigida * 100:.2f}%")
 
-        # Visualización circular de la red en Plotly
         angulos = np.linspace(0, 2 * np.pi, n_nodos, endpoint=False)
         x_pos = np.cos(angulos)
         y_pos = np.sin(angulos)
@@ -681,7 +722,7 @@ elif modulo.startswith("3."):
         }).sort_values("Grado Total", ascending=False)
         st.dataframe(df_grados, use_container_width=True)
 
-    with sub2:
+    with sub3:
         st.subheader("Metodología CEPAL (Padilla y Oddone, 2016) y Ecosistema MIPE Los Lagos")
         col_m1, col_m2 = st.columns(2)
         with col_m1:
