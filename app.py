@@ -14,6 +14,8 @@ import plotly.graph_objects as go
 import streamlit as st
 
 import motor_sii_exportador as msii
+from motor_laboratorio_catedra import renderizar_laboratorio_catedra
+from motor_redes_territorio_ot import renderizar_redes_territorio_ot
 
 
 # ==============================================================================
@@ -276,7 +278,7 @@ def vista_modulo_2_reat():
     st.header("2. Disparidades, Concentración y Convergencia Regional (Motor REAT)")
     st.markdown(
         "Réplica en Python de las funciones econométricas del paquete **`REAT` (Regional Economic Analysis Toolbox)** de R: "
-        "**Convergencia Sigma ($\sigma_t, CV_t$)**, **Convergencia Beta Absoluta ($\beta$, velocidad $\lambda$, semivida)**, "
+        "**Convergencia Sigma ($\\sigma_t, CV_t$)**, **Convergencia Beta Absoluta ($\\beta$, velocidad $\\lambda$, semivida)**, "
         "**Curva de Lorenz**, **Índice de Gini ($G, G^*$)**, **Entropía de Theil ($T$)**, "
         "**Herfindahl-Hirschman ($HHI$)** e **Índice de Hannah-Kay ($HK_\\alpha$)**."
     )
@@ -449,7 +451,6 @@ def vista_modulo_3_redes_cadenas():
         c_u2.metric("Vínculos Activos / Posibles", f"{int(enlaces_totales)} / {int(enlaces_posibles)}")
         c_u3.metric("Densidad de la Red (Dini / UCINET)", f"{densidad_red:.1f}%")
 
-        # Coordenadas circulares para renderizar el grafo en Plotly
         angulos = np.linspace(0, 2 * np.pi, n_nodos, endpoint=False)
         xs = np.cos(angulos)
         ys = np.sin(angulos)
@@ -622,7 +623,6 @@ def vista_modulo_4_ordenamiento():
 
         M = df_rond.to_numpy(dtype=float)
         freq_funcion = np.sum(M, axis=0)
-        # Ponderación de Rondinelli: W_f = C_total / Frecuencia_f (normalizado a base 100 por función)
         pesos_funcion = np.where(freq_funcion > 0, len(asentamientos) / freq_funcion, 0.0)
         indice_centralidad = M @ pesos_funcion
         num_funciones_ciudad = np.sum(M, axis=1)
@@ -679,7 +679,7 @@ def vista_modulo_4_ordenamiento():
 
 
 # ==============================================================================
-# NAVEGACIÓN PRINCIPAL EN BARRA LATERAL
+# NAVEGACIÓN PRINCIPAL EN BARRA LATERAL (7 MÓDULOS CONECTADOS)
 # ==============================================================================
 def main():
     with st.sidebar:
@@ -694,6 +694,8 @@ def main():
                 "3. Redes (UCINET) y Cadenas de Valor",
                 "4. Ordenamiento Territorial y Rondinelli",
                 "5. Exportador Maestro SII (Excel 10 Hojas)",
+                "6. Laboratorio de Cátedra + Excel Fórmulas Vivas",
+                "7. Controles 2, 4 y 5: My Maps, Cadenas, ELITE y PROT",
             ],
         )
         st.markdown("---")
@@ -712,8 +714,12 @@ def main():
         vista_modulo_3_redes_cadenas()
     elif modulo_activo.startswith("4."):
         vista_modulo_4_ordenamiento()
-    else:
+    elif modulo_activo.startswith("5."):
         msii.renderizar_exportador_sii(ARCHIVO_EXCEL_REPO)
+    elif modulo_activo.startswith("6."):
+        renderizar_laboratorio_catedra()
+    elif modulo_activo.startswith("7."):
+        renderizar_redes_territorio_ot()
 
 
 if __name__ == "__main__":
