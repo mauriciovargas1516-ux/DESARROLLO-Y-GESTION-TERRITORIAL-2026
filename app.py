@@ -15,7 +15,7 @@ import streamlit as st
 
 import motor_sii_exportador as msii
 from motor_laboratorio_catedra import renderizar_laboratorio_catedra
-from motor_redes_territorio_ot import renderizar_redes_territorio_ot
+from motor_redes_territorio_ot import renderizar_redes_territorio_ot, _renderizar_mapa_puntos_seguro
 
 
 # ==============================================================================
@@ -662,20 +662,20 @@ def vista_modulo_4_ordenamiento():
             {"Comuna": "Puerto Montt", "Region": "Los Lagos", "Lat": -41.4689, "Lon": -72.9411, "Rol": "Capital Regional y Hub Acuícola-Marítimo", "Peso_Relativo": 92},
         ])
 
-        fig_mapa = px.scatter_mapbox(
-            df_geo,
-            lat="Lat",
-            lon="Lon",
-            size="Peso_Relativo",
-            color="Region",
-            hover_name="Comuna",
-            hover_data=["Rol", "Peso_Relativo"],
+        _renderizar_mapa_puntos_seguro(
+            df_puntos=df_geo,
+            col_lat="Lat",
+            col_lon="Lon",
+            col_grupo="Region",
+            col_titulo_hover="Comuna",
+            cols_detalle_hover=["Rol", "Peso_Relativo"],
+            lat_centro=-38.8,
+            lon_centro=-73.0,
             zoom=5.3,
-            height=520,
-            mapbox_style="carto-positron",
-            title="Distribución Espacial de Polos Productivos Analizados en Cátedra",
+            altura=520,
+            titulo_mapa="Distribución Espacial de Polos Productivos Analizados en Cátedra",
+            estilo_mapa="carto-positron",
         )
-        st.plotly_chart(fig_mapa, use_container_width=True)
 
 
 # ==============================================================================
