@@ -16,6 +16,7 @@ import streamlit as st
 from scipy import stats
 from openpyxl import Workbook
 from openpyxl.chart import Reference, ScatterChart, Series
+from openpyxl.chart.label import DataLabelList
 from openpyxl.formatting.rule import CellIsRule
 from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 from openpyxl.utils import get_column_letter
@@ -669,7 +670,8 @@ def compilar_excel_10_hojas(
     - Formato condicional rosado/rojo (#FFC7CE / #9C0006) en Localización Q_ij (bloques t0 y tf).
     - Matriz Rubro x Comuna de Especialización |P_ij - P_i| con franja gris y fórmula =SUM(...)/2.
     - Base Exportable X_ij con celdas limpias en blanco cuando Q_ij <= 1, resaltado rosado y filas X_j y M_j con fórmulas vivas.
-    - Hoja 07_Cuadrantes_Silva con fórmulas vivas, colores por cuadrante, Matriz Visual 2x2 y ScatterChart nativo de Excel.
+    - Hoja 07_Cuadrantes_Silva con fórmulas vivas, colores por cuadrante, Gráfico de Dispersión nativo con
+      nombres de comunas en cada punto + las 2 líneas rojas de corte de cuadrante, y Matriz Visual 2x2.
     """
     wb = Workbook()
     wb.remove(wb.active)
@@ -1147,7 +1149,7 @@ def compilar_excel_10_hojas(
     _autoajustar_columnas_hoja(ws6)
 
     # ==========================================================================
-    # HOJA 7: CUADRANTES DE SILVA LIRA (FÓRMULAS + COLORES + MATRIZ 2x2 + GRÁFICO)
+    # HOJA 7: CUADRANTES DE SILVA LIRA (GRÁFICO CON NOMBRES DE COMUNAS + EJES ROJOS)
     # ==========================================================================
     ws7 = wb.create_sheet("07_Cuadrantes_Silva")
     ws7.merge_cells("A1:M1")
@@ -1164,7 +1166,7 @@ def compilar_excel_10_hojas(
     c7_s = ws7.cell(
         row=2,
         column=1,
-        value="Incluye fórmulas vivas de tasa anualizada =((Ct/C0)^(1/T))-1, fila de referencia regional, Matriz Visual 2x2 de Silva Lira y Gráfico de Dispersión nativo",
+        value="Incluye fórmulas vivas de tasa anualizada =((Ct/C0)^(1/T))-1, Gráfico de Cuadrantes con nombres de comunas y ejes rojos de corte regional, y Matriz 2x2",
     )
     c7_s.font = font_sub
 
@@ -1193,6 +1195,9 @@ def compilar_excel_10_hojas(
     fila_ini_7 = 5
     fila_tot_7 = fila_ini_7 + len(df_ss)
 
+    xs_vals = []
+    ys_vals = []
+
     for idx_r, row_s in enumerate(df_ss.itertuples(index=False), start=fila_ini_7):
         cuad_str = str(row_s.Cuadrante_Silva_Lira)
         if cuad_str.startswith("I."):
@@ -1206,6 +1211,11 @@ def compilar_excel_10_hojas(
 
         v0_val = float(getattr(row_s, f"Nivel_{anio_0}"))
         vt_val = float(getattr(row_s, f"Nivel_{anio_t}"))
+
+        part_dec = (v0_val / max(tot["total_reg_0"], 1e-12)) if tot["total_reg_0"] > 0 else 0.0
+        tpa_dec = ((vt_val / v0_val) ** (1.0 / T_per) - 1.0) if v0_val > 0 and vt_val > 0 else 0.0
+        xs_vals.append(part_dec)
+        ys_vals.append(tpa_dec)
 
         c_com = ws7.cell(row=idx_r, column=1, value=row_s.Comuna)
         c_v0 = ws7.cell(row=idx_r, column=2, value=v0_val)
@@ -1245,38 +1255,129 @@ def compilar_excel_10_hojas(
         cell_tot.border = borde_total
 
     # --------------------------------------------------------------------------
-    # MATRIZ VISUAL 2x2 DE CUADRANTES DE SILVA LIRA EN COLUMNAS J:M
+    # COORDENADAS AUXILIARES PARA LAS 2 LÍNEAS ROJAS DE CORTE DEL CUADRANTE
+    # --------------------------------------------------------------------------
+    umbral_x = 1.0 / max(n_comunas, 1)
+    umbral_y = (
+        ((tot["total_reg_t"] / tot["total_reg_0"]) ** (1.0 / T_per) - 1.0)
+        if tot["total_reg_0"] > 0 and tot["total_reg_t"] > 0
+        else 0.0
+    )
+    x_max_plot = max(max(xs_vals) * 1.12, umbral_x * 1.5, 0.05) if xs_vals else 0.20
+    y_min_val = min(ys_vals + [umbral_y]) if ys_vals else -0.05
+    y_max_val = max(ys_vals + [umbral_y]) if ys_vals else 0.10
+    margen_y = max((y_max_val - y_min_val) * 0.15, 0.015)
+    y_min_plot = y_min_val - margen_y
+    y_max_plot = y_max_val + margen_y
+
+    fila_aux = fila_tot_7 + 3
+    ws7.cell(row=fila_aux, column=1, value="Parámetros Ejes Rojos Cuadrante").font = font_sub
+    # Línea Vertical Roja (X constante = umbral_x, Y de y_min_plot a y_max_plot)
+    ws7.cell(row=fila_aux + 1, column=2, value=float(umbral_x)).number_format = "0.00%"
+    ws7.cell(row=fila_aux + 1, column=3, value=float(y_min_plot)).number_format = "0.00%"
+    ws7.cell(row=fila_aux + 2, column=2, value=float(umbral_x)).number_format = "0.00%"
+    ws7.cell(row=fila_aux + 2, column=3, value=float(y_max_plot)).number_format = "0.00%"
+
+    # Línea Horizontal Roja (X de 0 a x_max_plot, Y constante = umbral_y)
+    ws7.cell(row=fila_aux + 3, column=2, value=0.0).number_format = "0.00%"
+    ws7.cell(row=fila_aux + 3, column=3, value=float(umbral_y)).number_format = "0.00%"
+    ws7.cell(row=fila_aux + 4, column=2, value=float(x_max_plot)).number_format = "0.00%"
+    ws7.cell(row=fila_aux + 4, column=3, value=float(umbral_y)).number_format = "0.00%"
+
+    # --------------------------------------------------------------------------
+    # GRÁFICO DE DISPERSIÓN NATIVO EN J4 CON NOMBRES DE COMUNAS + LÍNEAS ROJAS
+    # --------------------------------------------------------------------------
+    chart_silva = ScatterChart()
+    chart_silva.title = f"Cuadrante de Silva Lira ({region_sel}, {anio_0}–{anio_t})"
+    chart_silva.style = 2
+    chart_silva.legend = None  # Sin leyenda lateral: cada punto muestra el nombre de su comuna
+    chart_silva.x_axis.title = f"Participación Comunal Inicial {anio_0} (%)"
+    chart_silva.y_axis.title = f"Crecimiento Anualizado de {variable_sel} ({anio_0}-{anio_t})"
+    chart_silva.x_axis.number_format = "0.0%"
+    chart_silva.y_axis.number_format = "0.0%"
+    chart_silva.x_axis.tickLblPos = "low"
+    chart_silva.y_axis.tickLblPos = "low"
+    chart_silva.x_axis.scaling.min = 0.0
+    chart_silva.x_axis.scaling.max = float(x_max_plot)
+    chart_silva.y_axis.scaling.min = float(y_min_plot)
+    chart_silva.y_axis.scaling.max = float(y_max_plot)
+    chart_silva.width = 25
+    chart_silva.height = 15.5
+
+    # 1 serie por comuna para que Excel muestre exactamente el nombre de la comuna sobre cada punto
+    for idx_r in range(fila_ini_7, fila_tot_7):
+        nom_comuna = str(ws7.cell(row=idx_r, column=1).value)
+        x_ref = Reference(ws7, min_col=7, min_row=idx_r, max_row=idx_r)
+        y_ref = Reference(ws7, min_col=6, min_row=idx_r, max_row=idx_r)
+        s_com = Series(y_ref, x_ref, title=nom_comuna)
+        s_com.marker.symbol = "circle"
+        s_com.marker.size = 7
+        s_com.marker.graphicalProperties.solidFill = "4472C4"
+        s_com.marker.graphicalProperties.line.solidFill = "2F5597"
+        s_com.graphicalProperties.line.noFill = True
+
+        s_com.dLbls = DataLabelList()
+        s_com.dLbls.showSerName = True
+        s_com.dLbls.showVal = False
+        s_com.dLbls.showCatName = False
+        s_com.dLbls.showLegendKey = False
+        chart_silva.series.append(s_com)
+
+    # Serie Línea Roja Vertical (Corte Eje X)
+    xv_ref = Reference(ws7, min_col=2, min_row=fila_aux + 1, max_row=fila_aux + 2)
+    yv_ref = Reference(ws7, min_col=3, min_row=fila_aux + 1, max_row=fila_aux + 2)
+    s_linea_v = Series(yv_ref, xv_ref, title="Umbral Peso Medio")
+    s_linea_v.marker.symbol = "none"
+    s_linea_v.graphicalProperties.line.solidFill = "C00000"
+    s_linea_v.graphicalProperties.line.width = 28575  # ~2.25 pt
+
+    # Serie Línea Roja Horizontal (Corte Eje Y)
+    xh_ref = Reference(ws7, min_col=2, min_row=fila_aux + 3, max_row=fila_aux + 4)
+    yh_ref = Reference(ws7, min_col=3, min_row=fila_aux + 3, max_row=fila_aux + 4)
+    s_linea_h = Series(yh_ref, xh_ref, title="Umbral Crecimiento Regional")
+    s_linea_h.marker.symbol = "none"
+    s_linea_h.graphicalProperties.line.solidFill = "C00000"
+    s_linea_h.graphicalProperties.line.width = 28575  # ~2.25 pt
+
+    chart_silva.series.append(s_linea_v)
+    chart_silva.series.append(s_linea_h)
+
+    ws7.add_chart(chart_silva, "J4")
+
+    # --------------------------------------------------------------------------
+    # MATRIZ VISUAL 2x2 DE CUADRANTES DE SILVA LIRA DEBAJO DEL GRÁFICO (J35:M46)
     # --------------------------------------------------------------------------
     com_q1 = sorted(df_ss[df_ss["Cuadrante_Silva_Lira"].str.startswith("I.")]["Comuna"].tolist())
     com_q2 = sorted(df_ss[df_ss["Cuadrante_Silva_Lira"].str.startswith("II.")]["Comuna"].tolist())
     com_q3 = sorted(df_ss[df_ss["Cuadrante_Silva_Lira"].str.startswith("III.")]["Comuna"].tolist())
     com_q4 = sorted(df_ss[df_ss["Cuadrante_Silva_Lira"].str.startswith("IV.")]["Comuna"].tolist())
 
-    ws7.merge_cells("J4:M4")
-    c_m2_tit = ws7.cell(row=4, column=10, value="MATRIZ VISUAL 2×2 DE CUADRANTES DE SILVA LIRA (CEPAL, 2005)")
+    f_m2 = 35
+    ws7.merge_cells(start_row=f_m2, start_column=10, end_row=f_m2, end_column=13)
+    c_m2_tit = ws7.cell(row=f_m2, column=10, value="MATRIZ VISUAL 2×2 DE CUADRANTES DE SILVA LIRA (CEPAL, 2005)")
     c_m2_tit.fill = fill_titulo
     c_m2_tit.font = font_header
     c_m2_tit.alignment = Alignment(horizontal="center", vertical="center")
 
-    ws7.cell(row=5, column=10, value="Eje Crecimiento (Y) \\ Eje Peso Inicial (X)").fill = fill_header
-    ws7.cell(row=5, column=10).font = font_header
-    ws7.cell(row=5, column=10).alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+    ws7.cell(row=f_m2 + 1, column=10, value="Eje Crecimiento (Y) \\ Eje Peso Inicial (X)").fill = fill_header
+    ws7.cell(row=f_m2 + 1, column=10).font = font_header
+    ws7.cell(row=f_m2 + 1, column=10).alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
 
-    ws7.merge_cells("K5:L5")
-    c_x_bajo = ws7.cell(row=5, column=11, value="BAJO PESO INICIAL (< Media Comunal)")
+    ws7.merge_cells(start_row=f_m2 + 1, start_column=11, end_row=f_m2 + 1, end_column=12)
+    c_x_bajo = ws7.cell(row=f_m2 + 1, column=11, value="BAJO PESO INICIAL (< Media Comunal)")
     c_x_bajo.fill = fill_header
     c_x_bajo.font = font_header
     c_x_bajo.alignment = Alignment(horizontal="center", vertical="center")
 
-    c_x_alto = ws7.cell(row=5, column=13, value="ALTO PESO INICIAL (>= Media Comunal)")
+    c_x_alto = ws7.cell(row=f_m2 + 1, column=13, value="ALTO PESO INICIAL (>= Media Comunal)")
     c_x_alto.fill = fill_header
     c_x_alto.font = font_header
     c_x_alto.alignment = Alignment(horizontal="center", vertical="center")
 
     # Fila Superior del 2x2: Alto Crecimiento (Cuadrante II a la izquierda, Cuadrante I a la derecha)
-    ws7.merge_cells("J6:J10")
+    ws7.merge_cells(start_row=f_m2 + 2, start_column=10, end_row=f_m2 + 6, end_column=10)
     c_y_alto = ws7.cell(
-        row=6,
+        row=f_m2 + 2,
         column=10,
         value=f"ALTO DINAMISMO\nCrecimiento >= Media Regional ({tot['tasa_var_reg']:.1f}%)",
     )
@@ -1284,32 +1385,32 @@ def compilar_excel_10_hojas(
     c_y_alto.font = font_bold
     c_y_alto.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
 
-    ws7.merge_cells("K6:L10")
+    ws7.merge_cells(start_row=f_m2 + 2, start_column=11, end_row=f_m2 + 6, end_column=12)
     txt_q2 = (
         f"CUADRANTE II: EMERGENTES / CONVERGENTES ({len(com_q2)} comunas)\n"
         f"(Bajo Peso Inicial + Alto Crecimiento)\n\n"
         + (", ".join(com_q2) if com_q2 else "Sin comunas en este cuadrante")
     )
-    c_box_q2 = ws7.cell(row=6, column=11, value=txt_q2)
+    c_box_q2 = ws7.cell(row=f_m2 + 2, column=11, value=txt_q2)
     c_box_q2.fill = fill_cuad_2
     c_box_q2.font = font_celda
     c_box_q2.alignment = Alignment(horizontal="left", vertical="top", wrap_text=True)
 
-    ws7.merge_cells("M6:M10")
+    ws7.merge_cells(start_row=f_m2 + 2, start_column=13, end_row=f_m2 + 6, end_column=13)
     txt_q1 = (
         f"CUADRANTE I: DINÁMICAS / GANADORAS ({len(com_q1)} comunas)\n"
         f"(Alto Peso Inicial + Alto Crecimiento)\n\n"
         + (", ".join(com_q1) if com_q1 else "Sin comunas en este cuadrante")
     )
-    c_box_q1 = ws7.cell(row=6, column=13, value=txt_q1)
+    c_box_q1 = ws7.cell(row=f_m2 + 2, column=13, value=txt_q1)
     c_box_q1.fill = fill_cuad_1
     c_box_q1.font = font_celda
     c_box_q1.alignment = Alignment(horizontal="left", vertical="top", wrap_text=True)
 
     # Fila Inferior del 2x2: Bajo Crecimiento (Cuadrante IV a la izquierda, Cuadrante III a la derecha)
-    ws7.merge_cells("J11:J15")
+    ws7.merge_cells(start_row=f_m2 + 7, start_column=10, end_row=f_m2 + 11, end_column=10)
     c_y_bajo = ws7.cell(
-        row=11,
+        row=f_m2 + 7,
         column=10,
         value=f"BAJO DINAMISMO\nCrecimiento < Media Regional ({tot['tasa_var_reg']:.1f}%)",
     )
@@ -1317,53 +1418,33 @@ def compilar_excel_10_hojas(
     c_y_bajo.font = font_bold
     c_y_bajo.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
 
-    ws7.merge_cells("K11:L15")
+    ws7.merge_cells(start_row=f_m2 + 7, start_column=11, end_row=f_m2 + 11, end_column=12)
     txt_q4 = (
         f"CUADRANTE IV: EN RETROCESO / REZAGADAS ({len(com_q4)} comunas)\n"
         f"(Bajo Peso Inicial + Bajo Crecimiento)\n\n"
         + (", ".join(com_q4) if com_q4 else "Sin comunas en este cuadrante")
     )
-    c_box_q4 = ws7.cell(row=11, column=11, value=txt_q4)
+    c_box_q4 = ws7.cell(row=f_m2 + 7, column=11, value=txt_q4)
     c_box_q4.fill = fill_cuad_4
     c_box_q4.font = font_celda
     c_box_q4.alignment = Alignment(horizontal="left", vertical="top", wrap_text=True)
 
-    ws7.merge_cells("M11:M15")
+    ws7.merge_cells(start_row=f_m2 + 7, start_column=13, end_row=f_m2 + 11, end_column=13)
     txt_q3 = (
         f"CUADRANTE III: ESTANCADAS / MADURAS ({len(com_q3)} comunas)\n"
         f"(Alto Peso Inicial + Bajo Crecimiento)\n\n"
         + (", ".join(com_q3) if com_q3 else "Sin comunas en este cuadrante")
     )
-    c_box_q3 = ws7.cell(row=11, column=13, value=txt_q3)
+    c_box_q3 = ws7.cell(row=f_m2 + 7, column=13, value=txt_q3)
     c_box_q3.font = font_celda
     c_box_q3.fill = fill_cuad_3
     c_box_q3.alignment = Alignment(horizontal="left", vertical="top", wrap_text=True)
 
-    for r_box in range(4, 16):
+    for r_box in range(f_m2, f_m2 + 12):
         ws7.row_dimensions[r_box].height = 24
         for c_box in range(10, 14):
             ws7.cell(row=r_box, column=c_box).border = borde_fino
 
-    # --------------------------------------------------------------------------
-    # GRÁFICO DE DISPERSIÓN (ScatterChart) NATIVO DE EXCEL INCRUSTADO EN J17
-    # --------------------------------------------------------------------------
-    chart_silva = ScatterChart()
-    chart_silva.title = f"Cuadrantes de Silva Lira ({region_sel}, {anio_0}-{anio_t})"
-    chart_silva.style = 13
-    chart_silva.x_axis.title = f"Participación Comunal Inicial {anio_0} (%)"
-    chart_silva.y_axis.title = f"Tasa Promedio Anualizada {anio_0}-{anio_t} (%)"
-    chart_silva.width = 22
-    chart_silva.height = 14
-
-    xvalues = Reference(ws7, min_col=7, min_row=fila_ini_7, max_row=fila_tot_7 - 1)
-    yvalues = Reference(ws7, min_col=6, min_row=fila_ini_7, max_row=fila_tot_7 - 1)
-    serie_comunas = Series(yvalues, xvalues, title="Comunas")
-    serie_comunas.marker.symbol = "circle"
-    serie_comunas.marker.size = 8
-    serie_comunas.graphicalProperties.line.noFill = True
-    chart_silva.series.append(serie_comunas)
-
-    ws7.add_chart(chart_silva, "J17")
     ws7.freeze_panes = "B5"
     _autoajustar_columnas_hoja(ws7)
     ws7.column_dimensions["J"].width = 24
