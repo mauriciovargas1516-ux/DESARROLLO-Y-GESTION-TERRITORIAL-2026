@@ -7,7 +7,7 @@
 Plataforma de modelamiento econométrico, análisis espacial, redes productivas y ordenamiento territorial desarrollada en **Python + Streamlit** para la asignatura de **Desarrollo y Gestión Territorial** (Ingeniería Comercial, Universidad de Los Lagos — Prof. Claudio Mancilla).
 
 **Acceso directo a la aplicación web en vivo:**  
-[https://desarrollo-y-gestion-territorial-2026-9yq3jazfc52x93tfumxwpz.streamlit.app/](https://desarrollo-y-gestion-territorial-2026-9yq3jazfc52x93tfumxwpz.streamlit.app/)
+[https://desarrollo-y-gestion-territorial-2026-ec6keylhsgra88s77bkl6f.streamlit.app/](https://desarrollo-y-gestion-territorial-2026-ec6keylhsgra88s77bkl6f.streamlit.app//)
 
 ---
 
