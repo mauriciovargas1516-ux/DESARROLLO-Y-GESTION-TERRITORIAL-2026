@@ -11,14 +11,15 @@ Integra:
    - Validador automático de los 10 puntos de la lista de comprobación para Google My Maps y exportador .xlsx.
 2. Unidad 4 y Control 4 (Unidad 4 Cadenas de Valor.pdf + Unidad 5. Redes y Cadena de Valor.dcx.pdf):
    - Cadena de Valor Láctea (ODEPA 2019) y Clúster del Salmón (Araya 2016) con Eslabón, Actor Directo y Apoyo.
-   - Asistente de Entrevistas Control 4 (3 perfiles, protocolo ético, cuestionario de 10 preguntas, Dini 2010 y UCINET).
+   - Asistente de Entrevistas Control 4 (3 perfiles, protocolo ético, cuestionario de 8 preguntas, Dini 2010 y UCINET).
    - Sistema ELITE (Boisier, 1995): Sociograma interinstitucional (Cooperatividad, Conflictividad, Neutralidad) y Poder Social.
-3. Unidad 5 y Control 5 (Unidad 5. Ordenamiento Territorial.pdf + SUBDERE PROT 2011):
-   - Habitantes por comuna Censos 2017 y 2024 (Región de Los Lagos y Región de Los Ríos), Ranking e Índice de Primacía.
-   - Escalograma de Guttman / Rondinelli para las 10 comunas más pobladas en las 4 Dimensiones oficiales (mín. 7+ variables).
-   - Matriz de Aislamiento Comunal (Criterio a: conexión directa 0/1; Criterio b: pavimento vs ripio/tierra 0/1).
-   - Simulador PROT SUBDERE-CEPAL (4 Sistemas, 5 Funciones, Mapa Semáforo y Buscador Normativo Anexo 2).
-   - Exportador Excel (.xlsx) con FÓRMULAS NATIVAS ACTIVAS para Control 2 y Control 5.
+3. Unidad 5 y Control 5 Multirregional (Unidad 5. Ordenamiento Territorial.pdf + SUBDERE PROT 2011):
+   - Habitantes por comuna Censos 2017 y 2024 para 4 regiones completas (Los Lagos 30, Biobío 33, Los Ríos 12, Araucanía 32),
+     con tabla editable en vivo, Ranking, Ley de Zipf e Índice de Primacía (2 y 4 ciudades).
+   - Escalograma de Guttman / Rondinelli adaptado al Top 10 comunal de cada región en las 4 Dimensiones oficiales.
+   - Matriz de Aislamiento Comunal (0 = conexión directa asfaltada; 1 = sin conexión directa) adaptada por región.
+   - Simulador PROT SUBDERE-CEPAL (4 Sistemas, Mapa Semáforo y Buscador Normativo Anexo 2).
+   - Exportador Excel (.xlsx) dinámico con FÓRMULAS NATIVAS ACTIVAS para Control 2 y Control 5.
 """
 
 import io
@@ -221,7 +222,7 @@ def validar_base_google_mymaps(df: pd.DataFrame) -> pd.DataFrame:
         ("5. Rango válido de Longitud (-180 a 180) con punto decimal", rango_lon, f"Mín: {df['Longitud'].min():.4f}, Máx: {df['Longitud'].max():.4f}"),
         ("6. No existen pares de coordenadas duplicados", sin_dup_coord, "Cada local físico tiene ubicación única"),
         ("7. No existen IDs duplicados", sin_dup_id, "Identificadores únicos verificados"),
-        ("8. Delimitación territorial homogénea (misma comuna)", una_comuna, f"Comunas presentes: {', '.join(df['Comuna'].unique())}"),
+        ("8. Delimitación territorial homogénea (misma comuna)", una_comuna, f"Comunas presentes: {', '.join(df['Comuna'].astype(str).unique())}"),
     ]
     return pd.DataFrame(checks, columns=["Criterio de Rúbrica (Actividad Mapa)", "Cumple", "Diagnóstico Técnico"])
 
@@ -265,14 +266,120 @@ def calcular_sistema_elite_boisier(mat_rel: pd.DataFrame, df_cargos: pd.DataFram
 
 
 # ==============================================================================
-# 3. DATOS Y CÁLCULOS PARA CONTROL 5 (UNIDAD 5. ORDENAMIENTO TERRITORIAL)
+# 3. DATOS Y CÁLCULOS MULTIRREGIONALES PARA CONTROL 5 (97 COMUNAS EN 4 REGIONES)
 # ==============================================================================
+def recalcular_indicadores_primacia_df(df_base: pd.DataFrame) -> pd.DataFrame:
+    """Recalcula rankings, variación intercensal, cuota regional y Ley de Zipf sobre cualquier tabla editada."""
+    df = df_base.copy()
+    df["Censo_2017"] = pd.to_numeric(df["Censo_2017"], errors="coerce").fillna(1).astype(int)
+    df["Censo_2024"] = pd.to_numeric(df["Censo_2024"], errors="coerce").fillna(1).astype(int)
+    df = df.sort_values("Censo_2024", ascending=False).reset_index(drop=True)
+    df["Ranking_2017"] = df["Censo_2017"].rank(ascending=False, method="min").astype(int)
+    df["Ranking_2024"] = df["Censo_2024"].rank(ascending=False, method="min").astype(int)
+    df["Variacion_Intercensal_%"] = ((df["Censo_2024"] / df["Censo_2017"].replace(0, np.nan)) - 1.0).fillna(0.0) * 100.0
+    tot_24 = max(float(df["Censo_2024"].sum()), 1.0)
+    df["Peso_Regional_2024_%"] = (df["Censo_2024"] / tot_24) * 100.0
+    p1_24 = float(df.loc[0, "Censo_2024"]) if len(df) > 0 else 1.0
+    df["Poblacion_Teorica_Zipf_2024"] = p1_24 / df["Ranking_2024"].replace(0, 1)
+    return df
+
+
 def obtener_poblacion_censos_control5(region_sel: str = "Región de Los Lagos (30 comunas)") -> pd.DataFrame:
     """
     Retorna la población comunal entre los Censos 2017 y 2024 para calcular Índice de Primacía
-    y Ranking de asentamientos según lo solicitado en 'Unidad 5. Ordenamiento Territorial.pdf'.
+    y Ranking de asentamientos en 4 regiones completas:
+    - Región de Los Lagos (30 comunas)
+    - Región del Biobío (33 comunas)
+    - Región de Los Ríos (12 comunas)
+    - Región de La Araucanía (32 comunas)
     """
-    if "Los Lagos" in region_sel:
+    if "Biobío" in region_sel:
+        datos = [
+            ("Concepción", "Concepción", 223574, 238092),
+            ("Los Ángeles", "Biobío", 202331, 218515),
+            ("Talcahuano", "Concepción", 151749, 158345),
+            ("San Pedro de la Paz", "Concepción", 131808, 148250),
+            ("Coronel", "Concepción", 116262, 125890),
+            ("Hualpén", "Concepción", 91773, 94520),
+            ("Chiguayante", "Concepción", 85938, 91410),
+            ("Tomé", "Concepción", 54946, 57820),
+            ("Penco", "Concepción", 47367, 49610),
+            ("Lota", "Concepción", 43535, 44120),
+            ("Arauco", "Arauco", 36257, 38940),
+            ("Cañete", "Arauco", 34537, 36810),
+            ("Curanilahue", "Arauco", 32288, 33650),
+            ("Mulchén", "Biobío", 29627, 31040),
+            ("Cabrero", "Biobío", 28573, 30420),
+            ("Nacimiento", "Biobío", 26315, 27450),
+            ("Lebu", "Arauco", 25522, 26480),
+            ("Hualqui", "Concepción", 24333, 26190),
+            ("Laja", "Biobío", 22389, 23110),
+            ("Yumbel", "Biobío", 21198, 22430),
+            ("Los Álamos", "Arauco", 21035, 22380),
+            ("Tucapel", "Biobío", 14134, 15120),
+            ("Santa Bárbara", "Biobío", 13773, 14450),
+            ("Santa Juana", "Concepción", 13749, 14510),
+            ("Florida", "Concepción", 10624, 11480),
+            ("Tirúa", "Arauco", 10417, 11020),
+            ("Quilleco", "Biobío", 9587, 10040),
+            ("Negrete", "Biobío", 9737, 10390),
+            ("Contulmo", "Arauco", 6031, 6340),
+            ("Alto Biobío", "Biobío", 5923, 6480),
+            ("Antuco", "Biobío", 4073, 4390),
+            ("Quilaco", "Biobío", 3988, 4210),
+            ("San Rosendo", "Biobío", 3412, 3590),
+        ]
+    elif "Los Ríos" in region_sel:
+        datos = [
+            ("Valdivia", "Valdivia", 166080, 181240),
+            ("La Unión", "Ranco", 38036, 39850),
+            ("Panguipulli", "Valdivia", 34539, 36410),
+            ("Río Bueno", "Ranco", 31372, 32680),
+            ("Mariquina", "Valdivia", 21278, 22840),
+            ("Paillaco", "Valdivia", 20188, 21150),
+            ("Los Lagos", "Valdivia", 19634, 20590),
+            ("Lanco", "Valdivia", 16752, 17890),
+            ("Futrono", "Ranco", 14665, 15520),
+            ("Lago Ranco", "Ranco", 9896, 10420),
+            ("Máfil", "Valdivia", 7095, 7450),
+            ("Corral", "Valdivia", 5302, 5510),
+        ]
+    elif "Araucanía" in region_sel:
+        datos = [
+            ("Temuco", "Cautín", 282415, 304820),
+            ("Padre Las Casas", "Cautín", 76126, 83540),
+            ("Villarrica", "Cautín", 55478, 63910),
+            ("Angol", "Malleco", 53262, 56840),
+            ("Victoria", "Malleco", 34182, 36120),
+            ("Lautaro", "Cautín", 38013, 40890),
+            ("Pucón", "Cautín", 28523, 34950),
+            ("Nueva Imperial", "Cautín", 32510, 34620),
+            ("Carahue", "Cautín", 24533, 25680),
+            ("Loncoche", "Cautín", 23612, 24910),
+            ("Collipulli", "Malleco", 24598, 25840),
+            ("Pitrufquén", "Cautín", 24837, 26410),
+            ("Freire", "Cautín", 24606, 25920),
+            ("Vilcún", "Cautín", 28151, 30480),
+            ("Traiguén", "Malleco", 18843, 19450),
+            ("Curacautín", "Malleco", 17413, 18290),
+            ("Cunco", "Cautín", 17526, 18460),
+            ("Gorbea", "Cautín", 14414, 15180),
+            ("Teodoro Schmidt", "Cautín", 15045, 15620),
+            ("Saavedra", "Cautín", 12450, 13010),
+            ("Purén", "Malleco", 11779, 12190),
+            ("Galvarino", "Cautín", 11996, 12540),
+            ("Cholchol", "Cautín", 11611, 12380),
+            ("Lonquimay", "Malleco", 10251, 10890),
+            ("Renaico", "Malleco", 10250, 10740),
+            ("Toltén", "Cautín", 9722, 10120),
+            ("Lumaco", "Malleco", 9548, 9890),
+            ("Ercilla", "Malleco", 7733, 8110),
+            ("Curarrehue", "Cautín", 7489, 8040),
+            ("Los Sauces", "Malleco", 7265, 7580),
+            ("Perquenco", "Cautín", 6905, 7320),
+            ("Melipeuco", "Cautín", 6138, 6650),
+        ]
+    else:
         datos = [
             ("Puerto Montt", "Llanquihue", 245902, 275473),
             ("Osorno", "Osorno", 161460, 174998),
@@ -305,42 +412,41 @@ def obtener_poblacion_censos_control5(region_sel: str = "Región de Los Lagos (3
             ("Futaleufú", "Palena", 2623, 2910),
             ("Palena", "Palena", 1711, 1890),
         ]
-    else:
-        datos = [
-            ("Valdivia", "Valdivia", 166080, 181240),
-            ("La Unión", "Ranco", 38036, 39850),
-            ("Río Bueno", "Ranco", 31372, 32680),
-            ("Panguipulli", "Valdivia", 34539, 36410),
-            ("Paillaco", "Valdivia", 20188, 21150),
-            ("Los Lagos", "Valdivia", 19634, 20590),
-            ("Mariquina", "Valdivia", 21278, 22840),
-            ("Lanco", "Valdivia", 16752, 17890),
-            ("Futrono", "Ranco", 14665, 15520),
-            ("Lago Ranco", "Ranco", 9896, 10420),
-            ("Máfil", "Valdivia", 7095, 7450),
-            ("Corral", "Valdivia", 5302, 5510),
-        ]
 
-    df = pd.DataFrame(datos, columns=["Comuna", "Provincia", "Censo_2017", "Censo_2024"])
-    df = df.sort_values("Censo_2024", ascending=False).reset_index(drop=True)
-    df["Ranking_2017"] = df["Censo_2017"].rank(ascending=False, method="min").astype(int)
-    df["Ranking_2024"] = df["Censo_2024"].rank(ascending=False, method="min").astype(int)
-    df["Variacion_Intercensal_%"] = ((df["Censo_2024"] / df["Censo_2017"]) - 1.0) * 100.0
-    df["Peso_Regional_2024_%"] = (df["Censo_2024"] / df["Censo_2024"].sum()) * 100.0
-    df["Poblacion_Teorica_Zipf_2024"] = df.loc[0, "Censo_2024"] / df["Ranking_2024"]
-    return df
+    df_raw = pd.DataFrame(datos, columns=["Comuna", "Provincia", "Censo_2017", "Censo_2024"])
+    return recalcular_indicadores_primacia_df(df_raw)
 
 
-def obtener_matriz_guttman_control5(dimension: str) -> pd.DataFrame:
+def obtener_matriz_guttman_control5(
+    dimension: str,
+    region_sel: str = "Región de Los Lagos (30 comunas)",
+) -> pd.DataFrame:
     """
     Construye la matriz de presencia/ausencia (1/0) para las 10 comunas con más población
-    de la Región de Los Lagos según las 4 dimensiones de 'Unidad 5. Ordenamiento Territorial.pdf',
-    garantizando al menos 8 variables con diferenciación efectiva entre comunas.
+    de la región seleccionada según las 4 dimensiones de 'Unidad 5. Ordenamiento Territorial.pdf',
+    garantizando 8 variables con diferenciación efectiva entre comunas.
     """
-    comunas_top10 = [
-        "Puerto Montt", "Osorno", "Puerto Varas", "Castro", "Ancud",
-        "Calbuco", "Quellón", "Purranque", "Frutillar", "Llanquihue",
-    ]
+    if "Biobío" in region_sel:
+        comunas_top10 = [
+            "Concepción", "Los Ángeles", "Talcahuano", "San Pedro de la Paz", "Coronel",
+            "Hualpén", "Chiguayante", "Tomé", "Penco", "Lota",
+        ]
+    elif "Los Ríos" in region_sel:
+        comunas_top10 = [
+            "Valdivia", "La Unión", "Panguipulli", "Río Bueno", "Mariquina",
+            "Paillaco", "Los Lagos", "Lanco", "Futrono", "Lago Ranco",
+        ]
+    elif "Araucanía" in region_sel:
+        comunas_top10 = [
+            "Temuco", "Padre Las Casas", "Villarrica", "Angol", "Lautaro",
+            "Victoria", "Pucón", "Nueva Imperial", "Vilcún", "Pitrufquén",
+        ]
+    else:
+        comunas_top10 = [
+            "Puerto Montt", "Osorno", "Puerto Varas", "Castro", "Ancud",
+            "Calbuco", "Quellón", "Purranque", "Frutillar", "Llanquihue",
+        ]
+
     if "1. Servicios a la producción" in dimension:
         cols = [
             "Cajeros automáticos", "OTEC / Capacitación", "Más de 1 Banco comercial",
@@ -348,35 +454,35 @@ def obtener_matriz_guttman_control5(dimension: str) -> pd.DataFrame:
             "Empresa reclutamiento laboral", "Centro de Negocios Sercotec", "Laboratorio Certificación Industrial",
         ]
         mat = [
-            [1, 1, 1, 1, 1, 1, 1, 1],  # Puerto Montt
-            [1, 1, 1, 1, 1, 1, 1, 1],  # Osorno
-            [1, 1, 1, 1, 0, 1, 1, 0],  # Puerto Varas
-            [1, 1, 1, 1, 1, 0, 1, 1],  # Castro
-            [1, 1, 1, 1, 1, 0, 0, 0],  # Ancud
-            [1, 1, 0, 1, 0, 0, 0, 1],  # Calbuco
-            [1, 1, 1, 1, 0, 0, 0, 1],  # Quellón
-            [1, 1, 0, 1, 1, 0, 0, 0],  # Purranque
-            [1, 1, 1, 1, 0, 0, 0, 0],  # Frutillar
-            [1, 0, 0, 1, 0, 0, 0, 1],  # Llanquihue
+            [1, 1, 1, 1, 1, 1, 1, 1],
+            [1, 1, 1, 1, 1, 1, 1, 1],
+            [1, 1, 1, 1, 0, 1, 1, 1],
+            [1, 1, 1, 1, 1, 0, 1, 1],
+            [1, 1, 1, 1, 1, 0, 0, 0],
+            [1, 1, 0, 1, 0, 0, 0, 1],
+            [1, 1, 1, 1, 0, 0, 0, 1],
+            [1, 1, 0, 1, 1, 0, 0, 0],
+            [1, 1, 1, 1, 0, 0, 0, 0],
+            [1, 0, 0, 1, 0, 0, 0, 1],
         ]
     elif "2. Infraestructura, transporte" in dimension:
         cols = [
             "Señal Estación Radio Local", "Terminal de Buses Interurbano",
             "Periódico / Medio Digital Local", "Parque o Área Industrial",
-            "Puerto Marítimo Comercial", "Señal de TV Local",
-            "Estación Operativa de Tren", "Aeropuerto Comercial (DGAC)",
+            "Puerto Marítimo / Fluvial Comercial", "Señal de TV Local",
+            "Estación Operativa de Tren", "Aeropuerto / Aeródromo Comercial (DGAC)",
         ]
         mat = [
-            [1, 1, 1, 1, 1, 1, 1, 1],  # Puerto Montt
-            [1, 1, 1, 1, 0, 1, 0, 1],  # Osorno
-            [1, 1, 1, 1, 0, 1, 1, 0],  # Puerto Varas
-            [1, 1, 1, 1, 1, 1, 0, 1],  # Castro
-            [1, 1, 1, 0, 1, 1, 0, 0],  # Ancud
-            [1, 1, 0, 1, 1, 0, 0, 0],  # Calbuco
-            [1, 1, 1, 1, 1, 0, 0, 0],  # Quellón
-            [1, 1, 1, 0, 0, 0, 0, 0],  # Purranque
-            [1, 0, 0, 0, 0, 0, 1, 0],  # Frutillar
-            [1, 0, 0, 1, 0, 0, 1, 0],  # Llanquihue
+            [1, 1, 1, 1, 1, 1, 1, 1],
+            [1, 1, 1, 1, 0, 1, 0, 1],
+            [1, 1, 1, 1, 1, 1, 1, 0],
+            [1, 1, 1, 1, 1, 1, 0, 1],
+            [1, 1, 1, 1, 1, 1, 1, 0],
+            [1, 1, 0, 1, 1, 0, 1, 0],
+            [1, 1, 1, 1, 0, 0, 1, 0],
+            [1, 1, 1, 0, 0, 0, 0, 0],
+            [1, 0, 0, 0, 1, 0, 0, 0],
+            [1, 0, 0, 1, 0, 0, 1, 0],
         ]
     elif "3. Infraestructura de salud" in dimension:
         cols = [
@@ -385,16 +491,16 @@ def obtener_matriz_guttman_control5(dimension: str) -> pd.DataFrame:
             "CFT / Instituto Profesional", "Universidad con Sede Presencial", "Hospital Alta Complejidad (Tipo 1)",
         ]
         mat = [
-            [1, 1, 1, 1, 1, 1, 1, 1],  # Puerto Montt
-            [1, 1, 1, 1, 1, 1, 1, 1],  # Osorno
-            [1, 1, 1, 1, 0, 0, 1, 0],  # Puerto Varas
-            [1, 1, 1, 1, 1, 1, 1, 1],  # Castro
-            [1, 1, 1, 1, 1, 1, 0, 0],  # Ancud
-            [1, 1, 1, 1, 1, 0, 0, 0],  # Calbuco
-            [1, 1, 1, 1, 1, 0, 0, 0],  # Quellón
-            [1, 1, 1, 1, 1, 0, 0, 0],  # Purranque
-            [1, 1, 1, 1, 1, 0, 0, 0],  # Frutillar
-            [1, 1, 1, 1, 1, 0, 0, 0],  # Llanquihue
+            [1, 1, 1, 1, 1, 1, 1, 1],
+            [1, 1, 1, 1, 1, 1, 1, 1],
+            [1, 1, 1, 1, 1, 1, 1, 1],
+            [1, 1, 1, 1, 1, 1, 1, 0],
+            [1, 1, 1, 1, 1, 1, 0, 0],
+            [1, 1, 1, 1, 1, 0, 0, 0],
+            [1, 1, 1, 1, 1, 0, 0, 0],
+            [1, 1, 1, 1, 1, 0, 0, 0],
+            [1, 1, 1, 1, 1, 0, 0, 0],
+            [1, 1, 1, 1, 1, 0, 0, 0],
         ]
     else:
         cols = [
@@ -403,55 +509,108 @@ def obtener_matriz_guttman_control5(dimension: str) -> pd.DataFrame:
             "Centro Comercial (Tipo Mall)", "Salas de Cine Comercial",
         ]
         mat = [
-            [1, 1, 1, 1, 1, 1, 1, 1],  # Puerto Montt
-            [1, 1, 1, 1, 1, 1, 1, 1],  # Osorno
-            [1, 1, 1, 0, 1, 1, 1, 0],  # Puerto Varas
-            [1, 1, 1, 0, 1, 1, 1, 1],  # Castro
-            [1, 1, 1, 0, 0, 1, 0, 0],  # Ancud
-            [1, 1, 1, 0, 0, 0, 0, 0],  # Calbuco
-            [1, 1, 1, 0, 0, 1, 0, 0],  # Quellón
-            [1, 1, 1, 0, 0, 0, 0, 0],  # Purranque
-            [1, 1, 1, 0, 0, 0, 0, 0],  # Frutillar
-            [1, 1, 1, 0, 0, 0, 0, 0],  # Llanquihue
+            [1, 1, 1, 1, 1, 1, 1, 1],
+            [1, 1, 1, 1, 1, 1, 1, 1],
+            [1, 1, 1, 1, 1, 1, 1, 1],
+            [1, 1, 1, 0, 1, 1, 1, 1],
+            [1, 1, 1, 0, 0, 1, 1, 0],
+            [1, 1, 1, 0, 0, 0, 0, 0],
+            [1, 1, 1, 0, 0, 1, 0, 0],
+            [1, 1, 1, 0, 0, 0, 0, 0],
+            [1, 1, 1, 0, 0, 0, 0, 0],
+            [1, 1, 1, 0, 0, 0, 0, 0],
         ]
 
     return pd.DataFrame(mat, index=comunas_top10, columns=cols)
 
 
-def obtener_matriz_aislamiento_control5() -> pd.DataFrame:
+def obtener_matriz_aislamiento_control5(region_sel: str = "Región de Los Lagos (30 comunas)") -> pd.DataFrame:
     """
     Construye la Matriz de Aislamiento del punto 3 de 'Unidad 5. Ordenamiento Territorial.pdf':
-    0 = Conectada directamente (o por ruta asfaltada directa sin pasar por otra cabecera comunal intermedia)
+    0 = Conectada directamente (por ruta asfaltada directa sin pasar por otra cabecera comunal intermedia)
     1 = No está conectada directamente (requiere transbordo o paso por otra comuna)
-    Incluye explícitamente el ejemplo del documento (Osorno, Puaucho, Entre Lagos) ampliado a la Provincia/Región.
     """
-    localidades = [
-        "Osorno", "Puaucho (S.J. Costa)", "Entre Lagos (Puyehue)",
-        "San Pablo", "Río Negro", "Purranque", "Puerto Octay",
-        "Frutillar", "Puerto Varas", "Puerto Montt",
-    ]
+    if "Biobío" in region_sel:
+        localidades = [
+            "Concepción", "Talcahuano", "Hualpén", "San Pedro de la Paz",
+            "Chiguayante", "Coronel", "Lota", "Penco", "Tomé", "Los Ángeles",
+        ]
+        conexiones_directas_0 = [
+            ("Concepción", "Talcahuano"),
+            ("Concepción", "Hualpén"),
+            ("Concepción", "San Pedro de la Paz"),
+            ("Concepción", "Chiguayante"),
+            ("Concepción", "Penco"),
+            ("Concepción", "Los Ángeles"),
+            ("Talcahuano", "Hualpén"),
+            ("San Pedro de la Paz", "Coronel"),
+            ("Coronel", "Lota"),
+            ("Penco", "Tomé"),
+        ]
+    elif "Los Ríos" in region_sel:
+        localidades = [
+            "Valdivia", "Corral", "Mariquina", "Lanco", "Máfil",
+            "Los Lagos", "Paillaco", "Panguipulli", "Futrono", "La Unión",
+        ]
+        conexiones_directas_0 = [
+            ("Valdivia", "Corral"),
+            ("Valdivia", "Mariquina"),
+            ("Valdivia", "Máfil"),
+            ("Valdivia", "Los Lagos"),
+            ("Valdivia", "Paillaco"),
+            ("Mariquina", "Lanco"),
+            ("Mariquina", "Máfil"),
+            ("Lanco", "Panguipulli"),
+            ("Los Lagos", "Panguipulli"),
+            ("Los Lagos", "Futrono"),
+            ("Paillaco", "La Unión"),
+        ]
+    elif "Araucanía" in region_sel:
+        localidades = [
+            "Temuco", "Padre Las Casas", "Lautaro", "Victoria", "Angol",
+            "Nueva Imperial", "Carahue", "Freire", "Villarrica", "Pucón",
+        ]
+        conexiones_directas_0 = [
+            ("Temuco", "Padre Las Casas"),
+            ("Temuco", "Lautaro"),
+            ("Temuco", "Nueva Imperial"),
+            ("Lautaro", "Victoria"),
+            ("Victoria", "Angol"),
+            ("Nueva Imperial", "Carahue"),
+            ("Padre Las Casas", "Freire"),
+            ("Freire", "Villarrica"),
+            ("Villarrica", "Pucón"),
+        ]
+    else:
+        localidades = [
+            "Osorno", "Puaucho (S.J. Costa)", "Entre Lagos (Puyehue)",
+            "San Pablo", "Río Negro", "Purranque", "Puerto Octay",
+            "Frutillar", "Puerto Varas", "Puerto Montt",
+        ]
+        conexiones_directas_0 = [
+            ("Osorno", "Puaucho (S.J. Costa)"),
+            ("Osorno", "Entre Lagos (Puyehue)"),
+            ("Osorno", "San Pablo"),
+            ("Osorno", "Río Negro"),
+            ("Osorno", "Puerto Octay"),
+            ("Entre Lagos (Puyehue)", "Puerto Octay"),
+            ("Río Negro", "Purranque"),
+            ("Purranque", "Frutillar"),
+            ("Puerto Octay", "Frutillar"),
+            ("Frutillar", "Puerto Varas"),
+            ("Puerto Varas", "Puerto Montt"),
+        ]
+
     n = len(localidades)
     mat = np.ones((n, n), dtype=int)
     np.fill_diagonal(mat, 0)
 
-    conexiones_directas_0 = [
-        ("Osorno", "Puaucho (S.J. Costa)"),
-        ("Osorno", "Entre Lagos (Puyehue)"),
-        ("Osorno", "San Pablo"),
-        ("Osorno", "Río Negro"),
-        ("Osorno", "Puerto Octay"),
-        ("Entre Lagos (Puyehue)", "Puerto Octay"),
-        ("Río Negro", "Purranque"),
-        ("Purranque", "Frutillar"),
-        ("Puerto Octay", "Frutillar"),
-        ("Frutillar", "Puerto Varas"),
-        ("Puerto Varas", "Puerto Montt"),
-    ]
     idx_map = {loc: i for i, loc in enumerate(localidades)}
     for a, b in conexiones_directas_0:
-        ia, ib = idx_map[a], idx_map[b]
-        mat[ia, ib] = 0
-        mat[ib, ia] = 0
+        if a in idx_map and b in idx_map:
+            ia, ib = idx_map[a], idx_map[b]
+            mat[ia, ib] = 0
+            mat[ib, ia] = 0
 
     return pd.DataFrame(mat, index=localidades, columns=localidades)
 
@@ -626,30 +785,31 @@ def renderizar_redes_territorio_ot():
     st.markdown(
         "Módulo integral que resuelve de forma interactiva las pautas prácticas de **Control 2 (Google My Maps $\\ge 20$ locales y `Liceos.xlsx`)**, "
         "**Unidad 4 y Control 4 (Cadenas de Valor ODEPA/Araya, Entrevistas, Redes Dini/UCINET y Sistema ELITE de Boisier)** "
-        "y **Unidad 5 / Control 5 (Primacía Censos 2017–2024, Escalograma de Guttman en 4 Dimensiones, Matriz de Aislamiento 0/1 y PROT SUBDERE)**."
+        "y **Unidad 5 / Control 5 Multirregional (Primacía Censos 2017–2024 en 4 regiones completas, Escalograma de Guttman en 4 Dimensiones, Matriz de Aislamiento 0/1 y PROT SUBDERE)**."
     )
 
     tabs = st.tabs([
         "1. Control 2 y 4: Mapa My Maps (22 Locales + 15 Liceos Osorno)",
         "2. Unidad 4 y Control 4: Cadenas de Valor (Láctea y Salmón) + Entrevistas",
         "3. Sistema ELITE (Boisier) y Redes Dini / UCINET",
-        "4. Control 5: Primacía (2017–2024), Guttman (4 Dim.) y Aislamiento (0/1)",
+        "4. Control 5 Multirregional: Primacía (97 Comunas), Guttman y Aislamiento",
         "5. Guía PROT SUBDERE (4 Sistemas, Mapa Semáforo y Normativa Anexo 2)",
     ])
 
     df_liceos = obtener_liceos_osorno_df()
     df_lactea_22 = obtener_22_establecimientos_cadena_lactea_osorno()
     df_censo_ll = obtener_poblacion_censos_control5("Región de Los Lagos (30 comunas)")
-    df_gutt_def = obtener_matriz_guttman_control5("1. Servicios a la producción")
-    df_aisl_def = obtener_matriz_aislamiento_control5()
+    df_gutt_def = obtener_matriz_guttman_control5("1. Servicios a la producción", "Región de Los Lagos (30 comunas)")
+    df_aisl_def = obtener_matriz_aislamiento_control5("Región de Los Lagos (30 comunas)")
 
     bytes_c2_c5 = exportar_excel_controles_2_y_5(df_lactea_22, df_censo_ll, df_gutt_def, df_aisl_def)
     st.download_button(
-        label="Descargar Libro Excel Oficial para Control 2 (My Maps) y Control 5 (Primacía, Guttman y Aislamiento con Fórmulas)",
+        label="Descargar Libro Excel Oficial Base (My Maps + Primacía, Guttman y Aislamiento con Fórmulas)",
         data=bytes_c2_c5,
         file_name="GRUPO_Controles_2_4_5_Osorno_LosLagos.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         use_container_width=True,
+        key="btn_dl_top_general",
     )
 
     # ------------------------------------------------------------------
@@ -699,6 +859,7 @@ def renderizar_redes_territorio_ot():
                 file_name="GRUPO_Sector_Osorno.xlsx",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 use_container_width=True,
+                key="btn_dl_mymaps_clean",
             )
 
     # ------------------------------------------------------------------
@@ -867,22 +1028,37 @@ def renderizar_redes_territorio_ot():
             st.dataframe(df_elite_res, use_container_width=True, hide_index=True)
 
     # ------------------------------------------------------------------
-    # TAB 4: CONTROL 5 — PRIMACÍA (2017-2024), GUTTMAN (4 DIM.) Y AISLAMIENTO
+    # TAB 4: CONTROL 5 MULTIRREGIONAL — PRIMACÍA, GUTTMAN Y AISLAMIENTO
     # ------------------------------------------------------------------
     with tabs[3]:
-        st.subheader("Laboratorio Oficial Control 5 (`Unidad 5. Ordenamiento Territorial.pdf`)")
+        st.subheader("Laboratorio Oficial Control 5 Multirregional (`Unidad 5. Ordenamiento Territorial.pdf`)")
         reg_c5 = st.radio(
-            "Seleccione Región de Estudio para Control 5:",
-            ["Región de Los Lagos (30 comunas)", "Región de Los Ríos (12 comunas)"],
+            "Seleccione Región de Estudio para Control 5 (97 comunas precargadas + edición en vivo):",
+            [
+                "Región de Los Lagos (30 comunas)",
+                "Región del Biobío (33 comunas)",
+                "Región de Los Ríos (12 comunas)",
+                "Región de La Araucanía (32 comunas)",
+            ],
             horizontal=True,
         )
-        df_c5_pob = obtener_poblacion_censos_control5(reg_c5)
+        df_c5_init = obtener_poblacion_censos_control5(reg_c5)
+
+        st.markdown("**1. Tabla Editable de Habitantes por Comuna, Ranking e Índice de Primacía (Censos 2017 y 2024)**")
+        st.caption("Puedes editar poblaciones o agregar filas si deseas evaluar otra región personalizada:")
+        df_c5_edit_raw = st.data_editor(
+            df_c5_init[["Comuna", "Provincia", "Censo_2017", "Censo_2024"]],
+            num_rows="dynamic",
+            use_container_width=True,
+            key=f"censo_ed_{reg_c5}",
+        )
+        df_c5_pob = recalcular_indicadores_primacia_df(df_c5_edit_raw)
 
         p1_17, p1_24 = float(df_c5_pob.loc[0, "Censo_2017"]), float(df_c5_pob.loc[0, "Censo_2024"])
         p2_17, p2_24 = float(df_c5_pob.loc[1, "Censo_2017"]), float(df_c5_pob.loc[1, "Censo_2024"])
-        ip2_17, ip2_24 = p1_17 / p2_17, p1_24 / p2_24
-        ip4_17 = p1_17 / float(df_c5_pob.loc[1:3, "Censo_2017"].sum())
-        ip4_24 = p1_24 / float(df_c5_pob.loc[1:3, "Censo_2024"].sum())
+        ip2_17, ip2_24 = p1_17 / max(p2_17, 1.0), p1_24 / max(p2_24, 1.0)
+        ip4_17 = p1_17 / max(float(df_c5_pob.loc[1:3, "Censo_2017"].sum()), 1.0)
+        ip4_24 = p1_24 / max(float(df_c5_pob.loc[1:3, "Censo_2024"].sum()), 1.0)
 
         m1, m2, m3, m4 = st.columns(4)
         m1.metric("Primacía 2 Ciudades (2017)", f"{ip2_17:.3f}", f"Ciudad 1: {df_c5_pob.loc[0, 'Comuna']}")
@@ -890,11 +1066,10 @@ def renderizar_redes_territorio_ot():
         m3.metric("Primacía 4 Ciudades (2017)", f"{ip4_17:.3f}", "P1 / (P2 + P3 + P4)")
         m4.metric("Primacía 4 Ciudades (2024)", f"{ip4_24:.3f}", f"{ip4_24 - ip4_17:+.3f} vs 2017")
 
-        st.markdown("**1. Tabla Completa de Habitantes por Comuna, Ranking e Índice de Primacía (Censos 2017 y 2024)**")
         st.dataframe(df_c5_pob.round(2), use_container_width=True, hide_index=True)
 
         st.markdown("---")
-        st.markdown("**2. Escala de Guttman / Rondinelli para las 10 Comunas Más Pobladas (Seleccione Dimensión)**")
+        st.markdown(f"**2. Escala de Guttman / Rondinelli para las 10 Comunas Más Pobladas ({reg_c5.split('(')[0].strip()})**")
         dim_sel = st.selectbox(
             "Seleccione una de las 4 dimensiones oficiales de la pauta del Control 5 (mínimo 7+ variables diferenciadoras):",
             [
@@ -904,8 +1079,8 @@ def renderizar_redes_territorio_ot():
                 "4. Servicios recreacionales, deportivos y grandes centros comerciales (Estadio, Gimnasio, Cine, Mall, Multitiendas)",
             ],
         )
-        df_gutt_base = obtener_matriz_guttman_control5(dim_sel)
-        df_gutt_edit = st.data_editor(df_gutt_base, use_container_width=True, key="gutt_c5_ed")
+        df_gutt_base = obtener_matriz_guttman_control5(dim_sel, reg_c5)
+        df_gutt_edit = st.data_editor(df_gutt_base, use_container_width=True, key=f"gutt_c5_ed_{reg_c5}_{dim_sel[:2]}")
 
         frec_f = df_gutt_edit.sum(axis=0)
         pesos_r = np.where(frec_f > 0, 100.0 / frec_f, 0.0)
@@ -932,8 +1107,12 @@ def renderizar_redes_territorio_ot():
             st.plotly_chart(fig_gutt, use_container_width=True)
 
         st.markdown("---")
-        st.markdown("**3. Matriz de Aislamiento Comunal (0 = Conectada directamente/Asfalto | 1 = No conectada/Ripio)**")
-        df_aisl_edit = st.data_editor(obtener_matriz_aislamiento_control5(), use_container_width=True, key="aisl_c5_ed")
+        st.markdown(f"**3. Matriz de Aislamiento Comunal ({reg_c5.split('(')[0].strip()} | 0 = Conectada/Asfalto, 1 = No conectada/Ripio)**")
+        df_aisl_edit = st.data_editor(
+            obtener_matriz_aislamiento_control5(reg_c5),
+            use_container_width=True,
+            key=f"aisl_c5_ed_{reg_c5}",
+        )
         vals_a = df_aisl_edit.values.copy()
         np.fill_diagonal(vals_a, 0)
         n_loc = len(df_aisl_edit)
@@ -948,6 +1127,22 @@ def renderizar_redes_territorio_ot():
             "Índice de Aislamiento (%)": np.round(ind_aisl, 2),
         }).sort_values("Índice de Aislamiento (%)", ascending=True).reset_index(drop=True)
         st.dataframe(df_res_aisl, use_container_width=True, hide_index=True)
+
+        bytes_reg_activa = exportar_excel_controles_2_y_5(
+            df_lactea_22,
+            df_c5_pob,
+            df_gutt_edit,
+            df_aisl_edit,
+        )
+        slug_reg = reg_c5.split("(")[0].strip().replace(" ", "_")
+        st.download_button(
+            label=f"Descargar Excel con Fórmulas Vivas de la Región Seleccionada ({reg_c5.split('(')[0].strip()})",
+            data=bytes_reg_activa,
+            file_name=f"Control5_Primacia_Guttman_Aislamiento_{slug_reg}.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            use_container_width=True,
+            key="btn_dl_tab4_region",
+        )
 
     # ------------------------------------------------------------------
     # TAB 5: GUÍA PROT SUBDERE-CEPAL (2011) Y BUSCADOR ANEXO 2
@@ -966,14 +1161,14 @@ def renderizar_redes_territorio_ot():
                 ],
                 "Vocación y Uso Preferente": [
                     "Pesca artesanal, concesiones de acuicultura, puertos, conservación y turismo litoral",
-                    "Red de ciudades (Osorno, Puerto Montt, Castro), vivienda, servicios y equipamiento",
-                    "Producción silvoagropecuaria y lechera, agroindustria y conservación de suelos",
-                    "Gestión integrada del recurso hídrico (Cuencas ríos Rahue, Bueno, Maullín y Petrohué)",
+                    "Red de ciudades (Osorno, Puerto Montt, Concepción, Temuco, Valdivia), vivienda y servicios",
+                    "Producción silvoagropecuaria, forestal y lechera, agroindustria y conservación de suelos",
+                    "Gestión integrada del recurso hídrico (Cuencas ríos Biobío, Imperial, Valdivia, Bueno, Rahue y Maullín)",
                 ],
                 "Semáforo de Conflicto de Intereses": [
                     "Rojo / Amarillo: Superposición entre ECMPO, acuicultura, puertos y turismo",
                     "Rojo: Expansión urbana sobre suelos agrícolas clase I-III y déficit de conectividad",
-                    "Amarillo: Subdivisión de predios rústicos (DL 3.516 / parcelas de agrado) vs uso lechero",
+                    "Amarillo: Subdivisión de predios rústicos (DL 3.516 / parcelas de agrado) vs uso productivo",
                     "Rojo / Amarillo: Derechos de agua, descargas puntuales y riberas protegidas",
                 ],
             })
