@@ -454,4 +454,4 @@ def vista_modulo_2_reat():
         fig_lor = go.Figure()
         fig_lor.add_trace(
             go.Scatter(
-   
+  
