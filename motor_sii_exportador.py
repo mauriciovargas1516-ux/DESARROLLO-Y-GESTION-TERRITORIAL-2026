@@ -679,7 +679,6 @@ def compilar_excel_10_hojas(
         f"Periodo: {anio_0}-{anio_t} | Universidad de Los Lagos"
     )
 
-    # Paleta de estilos reutilizables
     fill_titulo = PatternFill("solid", fgColor="1B365D")
     fill_header = PatternFill("solid", fgColor="2C5282")
     fill_subbloque = PatternFill("solid", fgColor="D9E1F2")
@@ -760,9 +759,7 @@ def compilar_excel_10_hojas(
     # ==========================================================================
     # HOJAS 2 Y 3: MATRICES BASE V0 Y Vt CON FÓRMULAS =SUM(...)
     # ==========================================================================
-    for idx_h, (anio_mat, df_mat, pref_h) in enumerate(
-        [(anio_0, V0, "02_Matriz_Base"), (anio_t, Vt, "03_Matriz_Base")], start=2
-    ):
+    for anio_mat, df_mat, pref_h in [(anio_0, V0, "02_Matriz_Base"), (anio_t, Vt, "03_Matriz_Base")]:
         ws_m = wb.create_sheet(f"{pref_h}_{anio_mat}")
         n_cols_m = n_comunas + 2
         ws_m.merge_cells(start_row=1, start_column=1, end_row=1, end_column=n_cols_m)
@@ -956,7 +953,7 @@ def compilar_excel_10_hojas(
             fila_cur_5 += 1
         f_fin_d = fila_cur_5 - 1
 
-        # Franja gris con fórmula activa =SUM(...)/2 igual al Excel original
+        # Franja gris con fórmula activa =SUM(...)/2
         c_qr_lbl = ws5.cell(row=fila_cur_5, column=1, value=f"Coeficiente Especialización (Qr {etq_anio})")
         c_qr_lbl.font = font_bold
         c_qr_lbl.fill = fill_gris_total
@@ -1070,7 +1067,6 @@ def compilar_excel_10_hojas(
             cr.border = borde_fino
             for c_i, com in enumerate(comunas, start=2):
                 val_x = float(mat_x.loc[rubro, com])
-                # Dejar celda en blanco si no exporta (Xij <= 0)
                 if val_x > 1e-6:
                     cc = ws6.cell(row=fila_cur_6, column=c_i, value=val_x)
                     cc.fill = fill_rosado_q
@@ -1096,7 +1092,7 @@ def compilar_excel_10_hojas(
         f_fin_x = fila_cur_6 - 1
         ws6.conditional_formatting.add(f"B{f_ini_x}:{ult_col_com_x}{f_fin_x}", regla_x_pos)
 
-        # Fila 1 al pie: Total Actividad Comunal Vj (necesario para calcular Mj = Vj / Xj en vivo)
+        # Fila 1 al pie: Vj (Actividad Total Comunal)
         f_vj = fila_cur_6
         c_vj_lbl = ws6.cell(row=f_vj, column=1, value=f"Vj (Actividad Total Comunal {etq_anio})")
         c_vj_lbl.font = font_bold
@@ -1216,7 +1212,7 @@ def compilar_excel_10_hojas(
         c_vt = ws7.cell(row=idx_r, column=3, value=vt_val)
         c_dif = ws7.cell(row=idx_r, column=4, value=f"=C{idx_r}-B{idx_r}")
         c_var = ws7.cell(row=idx_r, column=5, value=f"=IF(B{idx_r}>0,(C{idx_r}-B{idx_r})/B{idx_r},0)")
-        c_ tpa = ws7.cell(row=idx_r, column=6, value=f"=IF(B{idx_r}>0,((C{idx_r}/B{idx_r})^(1/{T_per}))-1,0)")
+        c_tpa = ws7.cell(row=idx_r, column=6, value=f"=IF(B{idx_r}>0,((C{idx_r}/B{idx_r})^(1/{T_per}))-1,0)")
         c_par = ws7.cell(row=idx_r, column=7, value=f"=IF($B${fila_tot_7}>0,B{idx_r}/$B${fila_tot_7},0)")
         c_cua = ws7.cell(row=idx_r, column=8, value=cuad_str)
 
@@ -1433,6 +1429,19 @@ def compilar_excel_10_hojas(
     return buffer.getvalue()
 
 
+def _estilizar_qij_streamlit(df_q: pd.DataFrame):
+    """Aplica estilo rosado/rojo a celdas Q_ij > 1 compatible con cualquier versión de Pandas."""
+    fn_color = (
+        lambda v: "background-color: #FFC7CE; color: #9C0006; font-weight: bold;"
+        if isinstance(v, (int, float, np.number)) and v > 1.0
+        else ""
+    )
+    styler = df_q.style.format("{:.4f}")
+    if hasattr(styler, "map"):
+        return styler.map(fn_color)
+    return styler.applymap(fn_color)
+
+
 def renderizar_exportador_sii(ruta_excel_default: str = ARCHIVO_DEFAULT_REPO):
     """
     Interfaz interactiva en Streamlit para explorar la base del SII, ejecutar
@@ -1585,15 +1594,7 @@ def renderizar_exportador_sii(ruta_excel_default: str = ARCHIVO_DEFAULT_REPO):
         )
         fig_q.update_layout(height=520, margin=dict(l=10, r=10, t=30, b=10))
         st.plotly_chart(fig_q, use_container_width=True)
-
-        st.dataframe(
-            resultados["Q_ij_t"].style.format("{:.4f}").map(
-                lambda v: "background-color: #FFC7CE; color: #9C0006; font-weight: bold;"
-                if isinstance(v, (int, float, np.number)) and v > 1.0
-                else ""
-            ),
-            use_container_width=True,
-        )
+        st.dataframe(_estilizar_qij_streamlit(resultados["Q_ij_t"]), use_container_width=True)
 
     with tabs[1]:
         st.markdown(
