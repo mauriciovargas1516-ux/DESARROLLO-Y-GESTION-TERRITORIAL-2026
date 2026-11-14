@@ -3,7 +3,7 @@
 PLATAFORMA INTEGRAL DE DESARROLLO Y GESTIÓN TERRITORIAL 2026
 Universidad de Los Lagos — Ingeniería Comercial
 Asignatura: Desarrollo y Gestión Territorial (Prof. Claudio Mancilla)
-Archivo principal: app.py
+Archivo 2 de 2 (Principal): app.py
 """
 
 import os
@@ -16,6 +16,11 @@ import streamlit as st
 import motor_sii_exportador as msii
 from motor_laboratorio_catedra import renderizar_laboratorio_catedra
 from motor_redes_territorio_ot import renderizar_redes_territorio_ot, _renderizar_mapa_puntos_seguro
+from motor_redes_dinamicas_dini import (
+    renderizar_extension_redes_y_gradientes,
+    renderizar_burbuja_tip,
+    inyectar_estilos_burbujas,
+)
 
 
 # ==============================================================================
@@ -36,7 +41,8 @@ st.markdown(
     }
     div[data-testid="stMetric"] {
         background-color: #f8fafc;
-        border: 1px solid #e2e8f0;
+        border: 1px solid #e2eeb0;
+        border-color: #e2e8f0;
         padding: 12px 14px;
         border-radius: 6px;
     }
@@ -48,6 +54,7 @@ st.markdown(
     """,
     unsafe_allow_html=True,
 )
+inyectar_estilos_burbujas()
 
 
 ARCHIVO_EXCEL_REPO = "ILPES GRUPO 10 29-10-2026.xlsx"
@@ -164,6 +171,54 @@ def vista_modulo_1_ilpes():
     k2.metric("Rubros Económicos SII", f"{tot['n_rubros']}")
     k3.metric(f"Total Regional {a0}", f"{tot['total_reg_0']:,.1f}")
     k4.metric(f"Total Regional {at}", f"{tot['total_reg_t']:,.1f}", f"{tot['tasa_var_reg']:+.2f}%")
+
+    # Fila de Burbujas Informativas del Módulo 1
+    b1, b2, b3, b4 = st.columns(4)
+    with b1:
+        renderizar_burbuja_tip(
+            titulo_boton="Tip: ¿Cómo leer Silva Lira?",
+            titulo_interno="Cuadrantes de Silva Lira (CEPAL, 2005)",
+            explicacion_md=(
+                "- **Eje X (Peso Inicial):** Compara la cuota comunal inicial con el promedio regional ($100\\% / N$).\n"
+                "- **Eje Y (Dinamismo):** Compara el crecimiento comunal con la tasa regional.\n"
+                "- **I. Dinámica (+,+):** Alto peso y crece más que la región.\n"
+                "- **II. Emergente (-,+):** Bajo peso pero crece rápido (convergente).\n"
+                "- **III. Estancada (+,-):** Alto peso pero crece lento.\n"
+                "- **IV. En Retroceso (-,-):** Bajo peso y rezagada."
+            ),
+        )
+    with b2:
+        renderizar_burbuja_tip(
+            titulo_boton="Tip: Fórmulas Qij, Qr y CRr",
+            titulo_interno="Localización (Qij), Especialización (Qr) y Reestructuración (CRr)",
+            formula_latex=r"Q_{ij} = \frac{V_{ij}/\sum_i V_{ij}}{\sum_j V_{ij}/\sum_i \sum_j V_{ij}} \quad ; \quad Q_r = \frac{1}{2}\sum_i |P_{ij} - P_i|",
+            explicacion_md=(
+                "- **$Q_{ij} > 1$:** La comuna está especializada en el rubro $i$ (actividad básica exportadora).\n"
+                "- **$Q_r \\in [0, 1]$:** Si tiende a $0$, la estructura comunal es diversificada (igual a la región); si tiende a $1$, es altamente especializada.\n"
+                "- **$CR_r \\in [0, 1]$:** Mide cuánto cambió la estructura productiva de la comuna entre $t_0$ y $t_f$."
+            ),
+        )
+    with b3:
+        renderizar_burbuja_tip(
+            titulo_boton="Tip: Base Exportadora (Xj y Mj)",
+            titulo_interno="Modelo de Base Económica (Tiebout / Lira & Quiroga)",
+            formula_latex=r"X_{ij} = V_{ij} - \frac{V_{ij}}{Q_{ij}} \quad (\forall Q_{ij}>1) \quad ; \quad M_j = \frac{V_j}{X_j}",
+            explicacion_md=(
+                "- **$X_j$:** Excedente producido por sobre la media regional que se 'exporta' hacia otras comunas o mercados.\n"
+                "- **Multiplicador $M_j$:** Indica cuántas unidades de actividad total se generan en la comuna por cada $1$ unidad de base exportadora."
+            ),
+        )
+    with b4:
+        renderizar_burbuja_tip(
+            titulo_boton="Tip: Shift & Share (MADE)",
+            titulo_interno="Efectos Total (ET), Estructural (EE) y Diferencial (ED)",
+            formula_latex=r"ET_j = EE_j + ED_j",
+            explicacion_md=(
+                "- **$ET_j > 0$:** La comuna creció por encima de lo esperado si hubiese seguido el promedio regional.\n"
+                "- **$EE_j > 0$ (Efecto Estructural):** La comuna estaba especializada en rubros dinámicos a nivel regional.\n"
+                "- **$ED_j > 0$ (Efecto Diferencial / Competitivo):** Los rubros dentro de la comuna crecieron más rápido que esos mismos rubros en la región."
+            ),
+        )
 
     subtabs = st.tabs([
         "Cuadrantes de Silva Lira",
@@ -328,6 +383,42 @@ def vista_modulo_2_reat():
     m4.metric("Bondad R² (OLS)", f"{mb['r2']:.4f}")
     m5.metric("P-valor (β)", f"{mb['p_value']:.4f}")
 
+    # Burbujas informativas del Módulo 2 (REAT)
+    rb1, rb2, rb3 = st.columns(3)
+    with rb1:
+        renderizar_burbuja_tip(
+            titulo_boton="Tip: Convergencia Beta y Sigma",
+            titulo_interno="¿Qué significan β, λ, Semivida y Sigma?",
+            formula_latex=r"\frac{1}{T}\ln\left(\frac{Y_{i,t}}{Y_{i,0}}\right) = \alpha + \beta \ln(Y_{i,0}) + \varepsilon_i \quad ; \quad \lambda = -\frac{\ln(1+\beta T)}{T}",
+            explicacion_md=(
+                "- **Pendiente $\\beta < 0$:** Existe **Convergencia Beta** (las comunas que partieron más rezagadas crecen a tasas proporcionalmente mayores).\n"
+                "- **P-valor $< 0,05$:** Confirma que la convergencia es estadísticamente significativa.\n"
+                "- **Semivida ($\\ln(2)/\\lambda$):** Años necesarios para cerrar la mitad de la brecha respecto al estado estacionario.\n"
+                "- **Convergencia Sigma ($\\sigma$):** Ocurre si la dispersión $\\sigma(\\ln Y_t)$ cae entre $t_0$ y $t_f$."
+            ),
+        )
+    with rb2:
+        renderizar_burbuja_tip(
+            titulo_boton="Tip: Curva de Lorenz, Gini y Theil",
+            titulo_interno="Desigualdad Territorial (Gini y Entropía de Theil)",
+            formula_latex=r"G = 1 - \sum_{i=1}^n (p_i - p_{i-1})(q_i + q_{i-1}) \quad ; \quad T = \sum_{i=1}^n s_i \ln(n \cdot s_i)",
+            explicacion_md=(
+                "- **Curva de Lorenz:** Mientras más se aleja la curva de la diagonal de $45^\\circ$, mayor es la concentración en pocas comunas.\n"
+                "- **Índice de Gini ($0$ a $1$):** $0$ = equidad perfecta; valores sobre $0,50$ indican fuerte concentración.\n"
+                "- **Entropía de Theil ($T$):** Rango $[0, \\ln(n)]$. Permite descomponer la desigualdad entre provincias y dentro de ellas."
+            ),
+        )
+    with rb3:
+        renderizar_burbuja_tip(
+            titulo_boton="Tip: HHI y Hannah-Kay (HKα)",
+            titulo_interno="Concentración Absoluta (Herfindahl-Hirschman y Hannah-Kay)",
+            formula_latex=r"HHI = \sum_{i=1}^n s_i^2 \quad ; \quad HK_\alpha = \left(\sum_{i=1}^n s_i^\alpha\right)^{\frac{1}{1-\alpha}}",
+            explicacion_md=(
+                "- **$HHI \\in [1/n, 1]$:** Suma de las cuotas comunales al cuadrado. A mayor valor, mayor monopolio territorial de la capital regional.\n"
+                "- **Hannah-Kay ($HK_\\alpha$):** Al subir el parámetro $\\alpha$, penaliza con más fuerza el peso de las comunas gigantes y entrega el **número equivalente de comunas**."
+            ),
+        )
+
     st.subheader("Tabla Consolidada de Indicadores REAT")
     st.dataframe(res["df_reat_resumen"].round(4), use_container_width=True, hide_index=True)
 
@@ -363,369 +454,4 @@ def vista_modulo_2_reat():
         fig_lor = go.Figure()
         fig_lor.add_trace(
             go.Scatter(
-                x=[0, 1],
-                y=[0, 1],
-                mode="lines",
-                line=dict(dash="dash", color="#64748b"),
-                name="Línea de Equidad Absoluta (45°)",
-            )
-        )
-        fig_lor.add_trace(
-            go.Scatter(
-                x=mb["lorenz_p_0"],
-                y=mb["lorenz_l_0"],
-                mode="lines+markers",
-                name=f"Curva de Lorenz {a0}",
-            )
-        )
-        fig_lor.add_trace(
-            go.Scatter(
-                x=mb["lorenz_p_t"],
-                y=mb["lorenz_l_t"],
-                mode="lines+markers",
-                name=f"Curva de Lorenz {at}",
-            )
-        )
-        fig_lor.update_layout(
-            title=f"Curva de Concentración de Lorenz ({a0} vs {at})",
-            xaxis_title="Proporción Acumulada de Comunas",
-            yaxis_title=f"Proporción Acumulada de {var_sel}",
-        )
-        st.plotly_chart(fig_lor, use_container_width=True)
-
-
-# ==============================================================================
-# MÓDULO 3: SPL, REDES EMPRESARIALES (UCINET / DINI) Y CADENAS DE VALOR (CEPAL)
-# ==============================================================================
-def vista_modulo_3_redes_cadenas():
-    st.header("3. Sistemas Productivos Locales (SPL), Redes Empresariales y Cadenas de Valor")
-    st.markdown(
-        "Análisis de articulación productiva local según **Dini (2010, CEPAL)** (reemplazo interactivo de **UCINET** "
-        "para matrices de adyacencia y centralidad de grafos) y diagnóstico de **Cadenas de Valor** bajo metodología "
-        "**Padilla y Oddone (2016, CEPAL)** aplicada al complejo forestal-maderero (caso **PymeMad Biobío / Los Ángeles**) "
-        "y ecosistema MIPE regional."
-    )
-
-    tabs_spl = st.tabs([
-        "1. Simulador de Grafos y Redes (UCINET / Dini 2010)",
-        "2. Cadena de Valor Forestal-Maderera (CEPAL / PymeMad)",
-        "3. Instrumento de Campo (cuestionario_entrevista.pdf)",
-    ])
-
-    with tabs_spl[0]:
-        st.subheader("Matriz Sociométrica y Topología de Red Empresarial (Modelo UCINET)")
-        nodos_default = [
-            "Aserradero PyME 1",
-            "Aserradero PyME 2",
-            "Remanufactura Maderera",
-            "Proveedores Forestales",
-            "Transporte y Logística",
-            "Gremio PymeMad",
-            "Planta Celulosa / Ancla",
-            "Centro I+D / Universidad",
-        ]
-        n_nodos = len(nodos_default)
-        mat_base = np.array([
-            [0, 1, 1, 1, 1, 1, 0, 0],
-            [1, 0, 1, 1, 0, 1, 0, 0],
-            [1, 1, 0, 0, 1, 1, 1, 1],
-            [1, 1, 0, 0, 1, 1, 1, 0],
-            [1, 0, 1, 1, 0, 0, 1, 0],
-            [1, 1, 1, 1, 0, 0, 1, 1],
-            [0, 0, 1, 1, 1, 1, 0, 1],
-            [0, 0, 1, 0, 0, 1, 1, 0],
-        ], dtype=int)
-
-        df_adj_init = pd.DataFrame(mat_base, index=nodos_default, columns=nodos_default)
-        st.caption("Edita los vínculos binarios (1 = relación de cooperación/subcontratación activa, 0 = sin vínculo):")
-        df_adj = st.data_editor(df_adj_init, use_container_width=True, key="editor_ucinet")
-
-        # copy=True garantiza que el arreglo sea editable en Python 3.14 / Pandas Copy-on-Write
-        A = df_adj.to_numpy(dtype=float, copy=True)
-        np.fill_diagonal(A, 0.0)
-        enlaces_totales = float(np.sum(A))
-        enlaces_posibles = float(n_nodos * (n_nodos - 1))
-        densidad_red = (enlaces_totales / enlaces_posibles) * 100.0 if enlaces_posibles > 0 else 0.0
-
-        grado_salida = np.sum(A, axis=1)
-        grado_entrada = np.sum(A, axis=0)
-        centralidad_norm = (grado_salida / max(n_nodos - 1, 1)) * 100.0
-
-        c_u1, c_u2, c_u3 = st.columns(3)
-        c_u1.metric("Nodos del Sistema Productivo (N)", f"{n_nodos}")
-        c_u2.metric("Vínculos Activos / Posibles", f"{int(enlaces_totales)} / {int(enlaces_posibles)}")
-        c_u3.metric("Densidad de la Red (Dini / UCINET)", f"{densidad_red:.1f}%")
-
-        angulos = np.linspace(0, 2 * np.pi, n_nodos, endpoint=False)
-        xs = np.cos(angulos)
-        ys = np.sin(angulos)
-
-        edge_x, edge_y = [], []
-        for i in range(n_nodos):
-            for j in range(n_nodos):
-                if A[i, j] > 0:
-                    edge_x.extend([xs[i], xs[j], None])
-                    edge_y.extend([ys[i], ys[j], None])
-
-        fig_red = go.Figure()
-        fig_red.add_trace(
-            go.Scatter(
-                x=edge_x,
-                y=edge_y,
-                mode="lines",
-                line=dict(width=1.5, color="#94a3b8"),
-                hoverinfo="none",
-                name="Relación Productiva",
-            )
-        )
-        fig_red.add_trace(
-            go.Scatter(
-                x=xs,
-                y=ys,
-                mode="markers+text",
-                text=nodos_default,
-                textposition="top center",
-                marker=dict(
-                    size=18 + centralidad_norm * 0.25,
-                    color=centralidad_norm,
-                    colorscale="Blues",
-                    showscale=True,
-                    colorbar=dict(title="Centralidad (%)"),
-                    line=dict(width=1.5, color="#1e293b"),
-                ),
-                name="Actor Territorial",
-            )
-        )
-        fig_red.update_layout(
-            title="Topología de Articulación del Sistema Productivo Local (Grafo Sociométrico)",
-            xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
-            yaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
-            height=480,
-        )
-        st.plotly_chart(fig_red, use_container_width=True)
-
-        df_metricas_nodos = pd.DataFrame({
-            "Actor_Nodo": nodos_default,
-            "Grado_Salida_OutDegree": grado_salida.astype(int),
-            "Grado_Entrada_InDegree": grado_entrada.astype(int),
-            "Centralidad_Grado_%": centralidad_norm.round(2),
-            "Rol_Tipologico_Dini": [
-                "Nodo Articulador / Gobernanza" if c >= 60 else ("Actor Integrado" if c >= 40 else "Actor Periférico")
-                for c in centralidad_norm
-            ],
-        })
-        st.dataframe(df_metricas_nodos, use_container_width=True, hide_index=True)
-
-    with tabs_spl[1]:
-        st.subheader("Diagnóstico de Restricciones y Escalamiento (Upgrading) — Cadena Forestal-Maderera")
-        df_cadena = pd.DataFrame([
-            {
-                "Eslabón de la Cadena": "1. Silvicultura y Manejo de Bosques PyME",
-                "Actores Clave": "Pequeños y medianos propietarios forestales, contratistas",
-                "Cuello de Botella Crítico": "Déficit de trozas aserrables tras incendios y baja tasa de reforestación",
-                "Estrategia de Upgrading (CEPAL)": "Upgrading de Proceso: Certificación de manejo sustentable asociativo (PEFC/FSC)",
-                "Impacto Esperado (1-5)": 4.8,
-            },
-            {
-                "Eslabón de la Cadena": "2. Aserrío Primario y Secado",
-                "Actores Clave": "Aserraderos asociados a PymeMad (Los Ángeles / Biobío)",
-                "Cuello de Botella Crítico": "Asimetría en abastecimiento de rollizos y costos de energía/secado en cámara",
-                "Estrategia de Upgrading (CEPAL)": "Upgrading Tecnológico: Incorporación de escáneres ópticos y cámaras de secado eficientes",
-                "Impacto Esperado (1-5)": 4.6,
-            },
-            {
-                "Eslabón de la Cadena": "3. Remanufactura y Valor Agregado (CLT / Estructural)",
-                "Actores Clave": "Plantas de molduras, madera laminada y componentes constructivos",
-                "Cuello de Botella Crítico": "Estandarización de clasificación estructural y acceso a financiamiento de capital de trabajo",
-                "Estrategia de Upgrading (CEPAL)": "Upgrading de Producto: Transición a madera estructural certificada para construcción industrializada",
-                "Impacto Esperado (1-5)": 4.9,
-            },
-            {
-                "Eslabón de la Cadena": "4. Comercialización, Logística y Mercados",
-                "Actores Clave": "Consorcios de exportación, distribuidores nacionales, sector público (MINVU)",
-                "Cuello de Botella Crítico": "Dependencia de intermediarios y barreras de escala para compras públicas",
-                "Estrategia de Upgrading (CEPAL)": "Upgrading Funcional: Consorcios comerciales PymeMad para licitaciones de vivienda pública en madera",
-                "Impacto Esperado (1-5)": 4.5,
-            },
-        ])
-        st.dataframe(df_cadena, use_container_width=True, hide_index=True)
-
-    with tabs_spl[2]:
-        st.subheader("Instrumento de Levantamiento Primario en Terreno (`cuestionario_entrevista.pdf`)")
-        st.markdown(
-            "Pauta semiestructurada de entrevista aplicada a actores gremiales y productivos de la cadena de valor "
-            "de madera aserrada y servicios forestales (**PymeMad Biobío — Los Ángeles**)."
-        )
-        if os.path.exists(ARCHIVO_PDF_CUESTIONARIO):
-            with open(ARCHIVO_PDF_CUESTIONARIO, "rb") as f_pdf:
-                pdf_bytes = f_pdf.read()
-            st.download_button(
-                label="Descargar Cuestionario de Entrevista Oficial (cuestionario_entrevista.pdf)",
-                data=pdf_bytes,
-                file_name="cuestionario_entrevista.pdf",
-                mime="application/pdf",
-            )
-        else:
-            st.info("El archivo `cuestionario_entrevista.pdf` se cargará automáticamente al estar en la raíz del repositorio.")
-
-
-# ==============================================================================
-# MÓDULO 4: ORDENAMIENTO TERRITORIAL, RONDINELLI Y GEORREFERENCIACIÓN
-# ==============================================================================
-def vista_modulo_4_ordenamiento():
-    st.header("4. Ordenamiento Territorial, Matriz de Rondinelli y Georreferenciación")
-    st.markdown(
-        "Análisis del sistema de asentamientos humanos mediante el **Escalograma Funcional de Rondinelli (1985)** "
-        "(cálculo de pesos de centralidad funcional e índice jerárquico urbano) y cartografía georreferenciada."
-    )
-
-    tabs_ot = st.tabs([
-        "1. Escalograma Funcional y Matriz de Rondinelli",
-        "2. Georreferenciación Comunal Interactiva",
-    ])
-
-    with tabs_ot[0]:
-        st.subheader("Matriz de Funciones Urbanas y Jerarquía de Asentamientos (Método de Rondinelli)")
-        funciones_urbanas = [
-            "Hospital Alta Complejidad",
-            "Universidad Estatal / Tradicional",
-            "Tribunales Superiores / Corte",
-            "Servicios Financieros Especializados",
-            "Puerto / Hub Logístico Intermodal",
-            "Parque Industrial Consolidado",
-            "Instituto Técnico Profesional (CFT/IP)",
-            "Hospital Base / Mediana Complejidad",
-            "Comercio Mayorista Agroindustrial",
-            "Servicios Públicos Provinciales",
-        ]
-        asentamientos = [
-            "Concepción (Metrópoli Regional)",
-            "Los Ángeles (Centro Subregional)",
-            "Talcahuano (Nodo Portuario-Industrial)",
-            "Coronel (Centro Industrial Secundario)",
-            "Chillán (Capital Regional Vecina)",
-            "Osorno (Centro Agroindustrial Sur)",
-            "Lebu (Cabecera Provincial Costera)",
-            "Mulchén (Centro Local Silvoagropecuario)",
-            "Arauco (Nodo Forestal-Celulosa)",
-            "Santa Bárbara (Centro Rural de Soporte)",
-        ]
-        mat_rond = np.array([
-            [1, 1, 1, 1, 0, 1, 1, 1, 1, 1],
-            [1, 1, 0, 1, 0, 1, 1, 1, 1, 1],
-            [1, 1, 0, 1, 1, 1, 1, 1, 1, 1],
-            [0, 0, 0, 1, 1, 1, 1, 1, 1, 0],
-            [1, 1, 1, 1, 0, 1, 1, 1, 1, 1],
-            [1, 1, 0, 1, 0, 1, 1, 1, 1, 1],
-            [0, 0, 0, 0, 0, 0, 1, 1, 0, 1],
-            [0, 0, 0, 0, 0, 0, 0, 1, 1, 0],
-            [0, 0, 0, 1, 0, 1, 1, 1, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 1, 1, 0],
-        ], dtype=int)
-
-        df_rond_init = pd.DataFrame(mat_rond, index=asentamientos, columns=funciones_urbanas)
-        df_rond = st.data_editor(df_rond_init, use_container_width=True, key="editor_rondinelli")
-
-        M = df_rond.to_numpy(dtype=float, copy=True)
-        freq_funcion = np.sum(M, axis=0)
-        pesos_funcion = np.where(freq_funcion > 0, len(asentamientos) / freq_funcion, 0.0)
-        indice_centralidad = M @ pesos_funcion
-        num_funciones_ciudad = np.sum(M, axis=1)
-
-        df_jerarquia = pd.DataFrame({
-            "Asentamiento_Comuna": asentamientos,
-            "Funciones_Presentes": num_funciones_ciudad.astype(int),
-            "Indice_Centralidad_Rondinelli": indice_centralidad.round(2),
-            "Jerarquia_Funcional": [
-                "Nivel 1: Centro Metropolitano / Primario" if ic >= 12
-                else ("Nivel 2: Centro Intermedio / Subregional" if ic >= 6 else "Nivel 3: Centro Local / Básico")
-                for ic in indice_centralidad
-            ],
-        }).sort_values("Indice_Centralidad_Rondinelli", ascending=False)
-
-        st.dataframe(df_jerarquia, use_container_width=True, hide_index=True)
-
-        fig_rond = px.bar(
-            df_jerarquia,
-            x="Asentamiento_Comuna",
-            y="Indice_Centralidad_Rondinelli",
-            color="Jerarquia_Funcional",
-            title="Índice de Centralidad Funcional de Rondinelli por Asentamiento",
-        )
-        st.plotly_chart(fig_rond, use_container_width=True)
-
-    with tabs_ot[1]:
-        st.subheader("Georreferenciación de Polos Territoriales (Biobío y Los Lagos)")
-        df_geo = pd.DataFrame([
-            {"Comuna": "Concepción", "Region": "Biobío", "Lat": -36.8270, "Lon": -73.0503, "Rol": "Metrópoli Servicios/Educación", "Peso_Relativo": 100},
-            {"Comuna": "Talcahuano", "Region": "Biobío", "Lat": -36.7249, "Lon": -73.1168, "Rol": "Complejo Portuario-Industrial", "Peso_Relativo": 85},
-            {"Comuna": "Coronel", "Region": "Biobío", "Lat": -37.0298, "Lon": -73.1429, "Rol": "Nodo Logístico-Portuario", "Peso_Relativo": 75},
-            {"Comuna": "Los Ángeles", "Region": "Biobío", "Lat": -37.4697, "Lon": -72.3537, "Rol": "Hub Forestal-Maderero (PymeMad) y Agroindustrial", "Peso_Relativo": 82},
-            {"Comuna": "Arauco", "Region": "Biobío", "Lat": -37.2464, "Lon": -73.3175, "Rol": "Enclave Celulosa-Forestal", "Peso_Relativo": 70},
-            {"Comuna": "Lebu", "Region": "Biobío", "Lat": -37.6083, "Lon": -73.6536, "Rol": "Cabecera Provincial Costera", "Peso_Relativo": 40},
-            {"Comuna": "Osorno", "Region": "Los Lagos", "Lat": -40.5740, "Lon": -73.1335, "Rol": "Polo Agroindustrial y Académico (ULagos)", "Peso_Relativo": 84},
-            {"Comuna": "Puerto Montt", "Region": "Los Lagos", "Lat": -41.4689, "Lon": -72.9411, "Rol": "Capital Regional y Hub Acuícola-Marítimo", "Peso_Relativo": 92},
-        ])
-
-        _renderizar_mapa_puntos_seguro(
-            df_puntos=df_geo,
-            col_lat="Lat",
-            col_lon="Lon",
-            col_grupo="Region",
-            col_titulo_hover="Comuna",
-            cols_detalle_hover=["Rol", "Peso_Relativo"],
-            lat_centro=-38.8,
-            lon_centro=-73.0,
-            zoom=5.3,
-            altura=520,
-            titulo_mapa="Distribución Espacial de Polos Productivos Analizados en Cátedra",
-            estilo_mapa="carto-positron",
-        )
-
-
-# ==============================================================================
-# NAVEGACIÓN PRINCIPAL EN BARRA LATERAL (7 MÓDULOS CONECTADOS)
-# ==============================================================================
-def main():
-    with st.sidebar:
-        st.title("Gestión Territorial 2026")
-        st.caption("Ingeniería Comercial — Universidad de Los Lagos")
-        st.markdown("---")
-        modulo_activo = st.radio(
-            "Seleccione Módulo de Trabajo:",
-            [
-                "1. Análisis Regional (ILPES / SII)",
-                "2. Convergencia y Desigualdad (REAT)",
-                "3. Redes (UCINET) y Cadenas de Valor",
-                "4. Ordenamiento Territorial y Rondinelli",
-                "5. Exportador Maestro SII (Excel 10 Hojas)",
-                "6. Laboratorio de Cátedra + Excel Fórmulas Vivas",
-                "7. Controles 2, 4 y 5: My Maps, Cadenas, ELITE y PROT",
-            ],
-        )
-        st.markdown("---")
-        st.markdown(
-            "**Repositorio Oficial:**\n"
-            "`DESARROLLO-Y-GESTION-TERRITORIAL-2026`\n\n"
-            "**Base SII Integrada:**\n"
-            f"`{ARCHIVO_EXCEL_REPO}`"
-        )
-
-    if modulo_activo.startswith("1."):
-        vista_modulo_1_ilpes()
-    elif modulo_activo.startswith("2."):
-        vista_modulo_2_reat()
-    elif modulo_activo.startswith("3."):
-        vista_modulo_3_redes_cadenas()
-    elif modulo_activo.startswith("4."):
-        vista_modulo_4_ordenamiento()
-    elif modulo_activo.startswith("5."):
-        msii.renderizar_exportador_sii(ARCHIVO_EXCEL_REPO)
-    elif modulo_activo.startswith("6."):
-        renderizar_laboratorio_catedra()
-    elif modulo_activo.startswith("7."):
-        renderizar_redes_territorio_ot()
-
-
-if __name__ == "__main__":
-    main()
+   
