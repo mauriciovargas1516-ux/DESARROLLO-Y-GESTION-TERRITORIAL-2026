@@ -3,25 +3,38 @@
 EXTENSIÓN INTERACTIVA: REDES DINÁMICAS (DINI 2010 / 04 SPL), BURBUJAS DE TIPS
 Y GRADIENTE DE CONCENTRACIÓN (REDES + ORDENAMIENTO TERRITORIAL)
 Asignatura: Desarrollo y Gestión Territorial — Universidad de Los Lagos (Prof. Claudio Mancilla)
-Archivo: motor_redes_dinamicas_dini.py
+Archivo 1 de 2: motor_redes_dinamicas_dini.py
 """
 
+import io
 import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
+from openpyxl import Workbook
+from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
+from openpyxl.utils import get_column_letter
 
 
 # ==============================================================================
 # 1. COMPONENTE DE BURBUJAS INFORMATIVAS (POPUP / TOOLTIP PEDAGÓGICO)
 # ==============================================================================
-def renderizar_burbuja_tip(titulo_boton: str, titulo_interno: str, explicacion_md: str, formula_latex: str = None):
+def renderizar_burbuja_tip(
+    titulo_boton: str,
+    titulo_interno: str,
+    explicacion_md: str,
+    formula_latex: str = None,
+):
     """
     Crea una burbuja interactiva (popover) que al hacer clic despliega la explicación
     conceptual, la fórmula matemática y la regla de interpretación de las cifras.
     """
-    contenedor = st.popover(f"💡 {titulo_boton}", use_container_width=True) if hasattr(st, "popover") else st.expander(f"💡 {titulo_boton}")
+    if hasattr(st, "popover"):
+        contenedor = st.popover(f"💡 {titulo_boton}", use_container_width=True)
+    else:
+        contenedor = st.expander(f"💡 {titulo_boton}")
+
     with contenedor:
         st.markdown(f"#### {titulo_interno}")
         if formula_latex:
@@ -62,21 +75,21 @@ def inyectar_estilos_burbujas():
 
 
 # ==============================================================================
-# 2. GENERADOR DE LAS TOPOLOGÍAS OFICIALES DE CÁTEDRA (DINI, 2010 — 04 SPL.PDF)
+# 2. GENERADOR DE TOPOLOGÍAS DE CÁTEDRA (DINI 2010 + CASOS REALES CONTROL 4)
 # ==============================================================================
 def obtener_topologia_dini(tipo_red: str, n_nodos: int = 8):
     """
-    Genera las coordenadas (x, y), nombres de nodos y lista ordenada de enlaces (L)
-    para las estructuras de Dini (2010) en '04 SPL.pdf' (Diagramas 2, 3 y 4, pág. 14).
+    Genera las coordenadas (x, y), nombres de nodos, roles y lista ordenada de enlaces (L)
+    para las estructuras de Dini (2010) en '04 SPL.pdf' (Diagramas 2, 3 y 4, pág. 14)
+    y los 2 casos aplicados del Control 4 (Cadena Láctea/Quesera Osorno y PymeMad Biobío).
     """
     if "1. Red Simétrica" in tipo_red:
         n = n_nodos
         nombres = [f"PyME {i+1}" for i in range(n)]
-        roles = ["Socio Horizontal" for _ in range(n)]
+        roles = ["Socio Horizontal (Par)" for _ in range(n)]
         angulos = np.linspace(0, 2 * np.pi, n, endpoint=False)
         xs = np.cos(angulos)
         ys = np.sin(angulos)
-        # Anillo completo + diagonales simétricas para que todos tengan el mismo grado
         enlaces = []
         for i in range(n):
             enlaces.append((i, (i + 1) % n))
@@ -85,9 +98,9 @@ def obtener_topologia_dini(tipo_red: str, n_nodos: int = 8):
             if (j, i) not in enlaces and (i, j) not in enlaces:
                 enlaces.append((i, j))
         descripcion = (
-            "**Red Simétrica (Dini, 2010 — Diagrama 2):** Cooperación horizontal donde todas las empresas "
+            "**Red Simétrica (Dini, 2010 — Diagrama 2, pág. 14):** Cooperación horizontal donde todas las empresas "
             "poseen el mismo grado nodal ($k_i$ constante). No existe un líder hegemónico; las decisiones se "
-            "toman por consenso y el **Gradiente de Concentración es 0%**."
+            "toman por consenso grupal y el **Gradiente de Concentración es 0%**."
         )
 
     elif "2. Red con Liderazgo" in tipo_red:
@@ -104,13 +117,12 @@ def obtener_topologia_dini(tipo_red: str, n_nodos: int = 8):
         ys = np.array(ys)
         enlaces = [(0, i) for i in range(1, n)]
         descripcion = (
-            "**Red con Liderazgo (Dini, 2010 — Diagrama 2):** Estructura radial tipo estrella. "
-            "Un actor central (ej. planta procesadora o gremio coordinador) conecta a todas las PyMEs periféricas. "
-            "Alcanza el **Gradiente de Concentración máximo (100%)**, pero alta vulnerabilidad si falla el líder."
+            "**Red con Liderazgo (Dini, 2010 — Diagrama 2, pág. 14):** Estructura radial tipo estrella. "
+            "Un actor central (planta compradora o entidad articuladora) centraliza los vínculos con las PyMEs. "
+            "Presenta el **Gradiente de Concentración máximo (100%)**, pero alta vulnerabilidad si el líder se retira."
         )
 
     elif "3. Red Jerárquica" in tipo_red:
-        # Estructura piramidal de 3 niveles (1 Matriz -> 2 Sub-líderes -> Nodos operativos)
         nombres = [
             "1. Empresa Matriz / Ancla",
             "2. Contratista Nivel 1A",
@@ -137,13 +149,12 @@ def obtener_topologia_dini(tipo_red: str, n_nodos: int = 8):
             (2, 5), (2, 6),
         ]
         descripcion = (
-            "**Red Jerárquica (Dini, 2010 — Diagrama 2):** Organización vertical piramidal típica de "
-            "esquemas de subcontratación escalonada (*Outsourcing*). El flujo productivo y de autoridad "
-            "desciende por niveles sin puentes horizontales entre la base."
+            "**Red Jerárquica (Dini, 2010 — Diagrama 2, pág. 14):** Organización vertical piramidal típica de "
+            "esquemas de subcontratación escalonada (*Outsourcing*). El flujo de órdenes y control de calidad "
+            "desciende por niveles sin vínculos horizontales entre la base."
         )
 
     elif "4. Red de Redes (Diagrama 3)" in tipo_red:
-        # 3 sub-redes (clústeres locales) cuyos nodos negros líderes se conectan entre sí
         nombres = [
             "Líder Clúster A (Osorno)", "PyME A1", "PyME A2", "PyME A3",
             "Líder Clúster B (Puerto Montt)", "PyME B1", "PyME B2", "PyME B3",
@@ -157,25 +168,20 @@ def obtener_topologia_dini(tipo_red: str, n_nodos: int = 8):
         xs = np.array([-1.0, -1.5, -1.4, -0.9,  0.9, 1.4, 1.5, 0.7,  0.1, -0.3, 0.5, 0.1])
         ys = np.array([ 0.5,  0.9,  0.2, -0.1,  0.7, 0.9, 0.3, 0.1, -0.8, -1.2,-1.2,-0.3])
         enlaces = [
-            # Puentes entre los 3 líderes negros (Triángulo central del Diagrama 3)
             (0, 4), (4, 8), (0, 8),
-            # Subred A (Estrella local)
             (0, 1), (0, 2), (0, 3),
-            # Subred B (Con malla parcial)
             (4, 5), (4, 6), (4, 7), (6, 7),
-            # Subred C (Con triángulo interno)
             (8, 9), (8, 10), (8, 11), (10, 11),
         ]
         descripcion = (
-            "**Red de Redes (Dini, 2010 — Diagrama 3, pág. 14):** Articulación de segundo grado donde tres "
-            "redes locales mantienen su cohesión interna, pero sus nodos líderes (nodos puente) se conectan "
-            "entre sí para alcanzar escala interregional."
+            "**Red de Redes (Dini, 2010 — Diagrama 3, pág. 14):** Articulación de segundo piso donde tres "
+            "redes locales mantienen su cohesión interna, pero sus nodos líderes (nodos negros en el diagrama de Dini) "
+            "se conectan entre sí para proyectos interregionales."
         )
 
-    else:
-        # 5. Red de Redes en la Producción de Aviones (Diagrama 4 de Dini, pág. 14)
+    elif "5. Red de Redes en la Producción de Aviones" in tipo_red:
         nombres = [
-            "GRAN ENSAMBLADORA CENTRAL (Hub Global)",
+            "GRAN ENSAMBLADORA CENTRAL",
             "Sub-Líder Motores (N1)", "Taller Turbinas A", "Taller Turbinas B", "Taller Turbinas C",
             "Sub-Líder Aviónica (N2)", "Software Vuelo A", "Sensores B", "Radar C",
             "Sub-Líder Fuselaje (N3)", "Aleaciones A", "Tren Aterrizaje B", "Cabina C",
@@ -189,19 +195,96 @@ def obtener_topologia_dini(tipo_red: str, n_nodos: int = 8):
         xs = np.array([0.0,  -1.1, -1.6, -1.6, -1.0,   1.1, 1.6, 1.5, 0.8,   0.1, -0.4, 0.6, 0.1])
         ys = np.array([0.0,   0.4,  0.8,  0.1, -0.2,   0.6, 0.9, 0.2, 0.0,  -0.9, -1.3,-1.3,-0.4])
         enlaces = [
-            # Gran nodo central conecta a los 3 líderes de subsistema
             (0, 1), (0, 5), (0, 9),
-            # Subsistema 1
             (1, 2), (1, 3), (1, 4),
-            # Subsistema 2
             (5, 6), (5, 7), (5, 8), (7, 8),
-            # Subsistema 3
             (9, 10), (9, 11), (9, 12), (10, 12),
         ]
         descripcion = (
             "**Red de Redes en la Producción de Aviones (Dini, 2010 — Diagrama 4, pág. 14):** "
             "Una gran empresa integradora al centro coordina a los líderes de cada subsistema tecnológico, "
             "quienes a su vez articulan sus propios clústeres de proveedores especializados."
+        )
+
+    elif "6. Caso Control 4: Cadena y Red Láctea-Quesera (Osorno)" in tipo_red:
+        nombres = [
+            "Aproleche Osorno (Gremio)",
+            "Cooprinsem (Insumos/Genética)",
+            "INIA Remehue (I+D Agro)",
+            "Lechería A. Matthei (Prod.)",
+            "Quesos Las Ánimas (PyME)",
+            "Lácteos Osorno (Quesería)",
+            "Planta Nestlé Cancura",
+            "Watt's Planta Osorno",
+            "DeLaval Osorno (Equipos)",
+            "FEGOSA / Recinto SAGO",
+        ]
+        roles = [
+            "Articulador Gremial Horizontal",
+            "Cooperativa de Servicios e Insumos",
+            "Entidad de Apoyo e Innovación",
+            "Eslabón Primario Lechero",
+            "Transformación Quesera Local",
+            "Transformación Quesera Regional",
+            "Industria Procesadora Ancla",
+            "Industria Procesadora Ancla",
+            "Proveedor Equipamiento Ordeña",
+            "Comercialización Ganadera",
+        ]
+        angulos = np.linspace(0, 2 * np.pi, len(nombres), endpoint=False)
+        xs = np.cos(angulos) * 1.25
+        ys = np.sin(angulos) * 1.05
+        xs[0], ys[0] = 0.0, 0.25      # Aproleche al centro-norte
+        xs[1], ys[1] = -0.35, -0.25   # Cooprinsem al centro-sur
+        enlaces = [
+            (0, 1), (0, 2), (0, 3), (0, 4), (0, 5), (0, 6), (0, 7), (0, 9),
+            (1, 2), (1, 3), (1, 4), (1, 5), (1, 6), (1, 7), (1, 8),
+            (2, 3), (2, 4), (3, 5), (3, 6), (3, 7), (3, 8), (3, 9),
+            (4, 5), (6, 8), (7, 8),
+        ]
+        descripcion = (
+            "**Caso Aplicado Control 4 — Red Láctea y Quesera de Osorno:** Combina una **Red Asociativa Multilateral** "
+            "(articulada por *Aproleche Osorno* y *Cooprinsem*) con encadenamientos verticales hacia plantas ancla "
+            "(*Nestlé Cancura*, *Watt's*) y queserías locales (*Lácteos Osorno*, *Quesos Las Ánimas*)."
+        )
+
+    else:
+        nombres = [
+            "Gremio PymeMad Biobío",
+            "Aserradero PyME 1",
+            "Aserradero PyME 2",
+            "Remanufactura y CLT",
+            "Proveedores Forestales",
+            "Transporte y Logística",
+            "Planta Celulosa / Ancla",
+            "Centro I+D / Universidad",
+        ]
+        roles = [
+            "Gobernanza Gremial",
+            "Aserrío Primario",
+            "Aserrío Primario",
+            "Valor Agregado Estructural",
+            "Silvicultura y Rollizos",
+            "Logística Forestal",
+            "Empresa Tractora Ancla",
+            "Transferencia Tecnológica",
+        ]
+        angulos = np.linspace(0, 2 * np.pi, len(nombres), endpoint=False)
+        xs = np.cos(angulos) * 1.2
+        ys = np.sin(angulos) * 1.0
+        xs[0], ys[0] = 0.0, 0.0
+        enlaces = [
+            (0, 1), (0, 2), (0, 3), (0, 4), (0, 6), (0, 7),
+            (1, 2), (1, 3), (1, 4), (1, 5),
+            (2, 3), (2, 4),
+            (3, 5), (3, 6), (3, 7),
+            (4, 5), (4, 6),
+            (5, 6), (6, 7),
+        ]
+        descripcion = (
+            "**Caso Aplicado Control 4 — Clúster Forestal-Maderero PymeMad (Biobío / Los Ángeles):** "
+            "Muestra cómo el gremio *PymeMad* articula horizontalmente a los aserraderos y plantas de remanufactura "
+            "para superar cuellos de botella de abastecimiento de trozas y certificación estructural."
         )
 
     return nombres, roles, xs, ys, enlaces, descripcion
@@ -212,13 +295,13 @@ def obtener_topologia_dini(tipo_red: str, n_nodos: int = 8):
 # ==============================================================================
 def calcular_metricas_red_en_paso(nombres, roles, enlaces_activos):
     """
-    Calcula en vivo:
+    Calcula en vivo para cualquier subconjunto de enlaces activos:
     - n (número de empresas/nodos)
     - L (número de vínculos activos en el paso actual)
     - Grado nodal k_i de cada empresa
     - Densidad D = 2L / (n*(n-1)) (Fórmula exacta de Dini 2010, pág. 14)
-    - Gradiente de Concentración / Centralización de Freeman C_D
-    - Cuota de articulación de cada nodo (%)
+    - Gradiente de Concentración / Centralización de Freeman GC_red
+    - Cuota de concentración de vínculos de cada nodo (%)
     """
     n = len(nombres)
     L = len(enlaces_activos)
@@ -230,14 +313,12 @@ def calcular_metricas_red_en_paso(nombres, roles, enlaces_activos):
 
     grados = A.sum(axis=1)
     max_enlaces_posibles = (n * (n - 1)) / 2.0 if n > 1 else 1.0
-    # Fórmula explícita lámina 14 de 04 SPL.pdf: DENSIDAD = 2L / (n*(n-1))
     densidad = (2.0 * L) / (n * (n - 1.0)) if n > 1 else 0.0
 
     k_max = int(np.max(grados)) if n > 0 else 0
     k_min = int(np.min(grados)) if n > 0 else 0
     k_prom = float(np.mean(grados)) if n > 0 else 0.0
 
-    # Centralización / Gradiente de Concentración de la Red (Freeman)
     denom_freeman = float((n - 1) * (n - 2)) if n > 2 else 1.0
     gradiente_concentracion = float(np.sum(k_max - grados) / denom_freeman) if n > 2 else 0.0
     gradiente_concentracion = min(max(gradiente_concentracion, 0.0), 1.0)
@@ -275,7 +356,15 @@ def calcular_metricas_red_en_paso(nombres, roles, enlaces_activos):
 # ==============================================================================
 # 4. CONSTRUCTOR DE GRAFO ANIMADO EN PLOTLY ("VER LA RED ARMARSE EN VIVO")
 # ==============================================================================
-def construir_figura_red_animada(nombres, roles, xs, ys, todos_enlaces, paso_actual, mostrar_cifras_nodos=True):
+def construir_figura_red_animada(
+    nombres,
+    roles,
+    xs,
+    ys,
+    todos_enlaces,
+    paso_actual,
+    mostrar_cifras_nodos=True,
+):
     """
     Genera una figura interactiva de Plotly que:
     1. Muestra el estado exacto en `paso_actual` con cifras vivas sobre cada nodo.
@@ -295,7 +384,6 @@ def construir_figura_red_animada(nombres, roles, xs, ys, todos_enlaces, paso_act
             edge_x.extend([xs[u], xs[v], None])
             edge_y.extend([ys[u], ys[v], None])
 
-        # Si hay un último enlace recién agregado, lo destacamos en dorado/rojo vivo
         ult_x, ult_y = [], []
         if k_step > 0:
             u_last, v_last = sub_enlaces[-1]
@@ -343,7 +431,7 @@ def construir_figura_red_animada(nombres, roles, xs, ys, todos_enlaces, paso_act
             hovertext=textos_hover,
             hoverinfo="text",
             marker=dict(
-                size=24 + grados_k * 5.5,
+                size=24 + grados_k * 4.8,
                 color=cent_k,
                 colorscale="YlOrRd",
                 cmin=0,
@@ -358,7 +446,6 @@ def construir_figura_red_animada(nombres, roles, xs, ys, todos_enlaces, paso_act
 
     trazas_actuales, res_actual = _trazas_para_k_enlaces(paso_actual)
 
-    # Construimos los frames de animación desde 0 hasta L enlaces
     frames = []
     for k_f in range(0, len(todos_enlaces) + 1):
         trazas_f, res_f = _trazas_para_k_enlaces(k_f)
@@ -383,8 +470,8 @@ def construir_figura_red_animada(nombres, roles, xs, ys, todos_enlaces, paso_act
             f"L = {res_actual['L']} vínculos | Densidad D = {res_actual['densidad_pct']:.1f}% "
             f"({res_actual['densidad_prop']:.3f}) | Gradiente Concentración = {res_actual['gradiente_conc_pct']:.1f}%"
         ),
-        xaxis=dict(showgrid=False, zeroline=False, showticklabels=False, range=[-2.0, 2.0]),
-        yaxis=dict(showgrid=False, zeroline=False, showticklabels=False, range=[-1.7, 1.5]),
+        xaxis=dict(showgrid=False, zeroline=False, showticklabels=False, range=[-2.1, 2.1]),
+        yaxis=dict(showgrid=False, zeroline=False, showticklabels=False, range=[-1.8, 1.6]),
         height=560,
         margin=dict(l=20, r=20, t=65, b=85),
         plot_bgcolor="#f8fafc",
@@ -405,8 +492,8 @@ def construir_figura_red_animada(nombres, roles, xs, ys, todos_enlaces, paso_act
                         args=[
                             None,
                             dict(
-                                frame=dict(duration=650, redraw=True),
-                                transition=dict(duration=250),
+                                frame=dict(duration=600, redraw=True),
+                                transition=dict(duration=220),
                                 fromcurrent=False,
                                 mode="immediate",
                             ),
@@ -432,26 +519,125 @@ def construir_figura_red_animada(nombres, roles, xs, ys, todos_enlaces, paso_act
 
 
 # ==============================================================================
-# 5. INTERFAZ PRINCIPAL DEL MÓDULO DE EXTENSIÓN EN STREAMLIT
+# 5. EXPORTADOR EXCEL CON FÓRMULAS VIVAS DE LA RED ACTIVA (DINI / UCINET)
+# ==============================================================================
+def exportar_excel_red_dini_formulas(nombres, roles, matriz_A, tipo_red_titulo: str) -> bytes:
+    """
+    Exporta la matriz sociométrica actual a un archivo Excel (.xlsx) con fórmulas nativas vivas:
+    - Grado Nodal k_i = SUM(fila)
+    - Total de vínculos dirigidos 2L = SUM(grados)
+    - Vínculos bilaterales L = 2L / 2
+    - Densidad D = 2L / (n * (n - 1))
+    - Centralidad local (%) y Gradiente de Concentración
+    """
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Red_Dini_Formulas"
+
+    fill_h = PatternFill("solid", fgColor="1E3A8A")
+    font_h = Font(name="Calibri", size=10, bold=True, color="FFFFFF")
+    fill_in = PatternFill("solid", fgColor="FEF9C3")
+    fill_fn = PatternFill("solid", fgColor="EFF6FF")
+    borde = Border(
+        left=Side(style="thin", color="CBD5E1"),
+        right=Side(style="thin", color="CBD5E1"),
+        top=Side(style="thin", color="CBD5E1"),
+        bottom=Side(style="thin", color="CBD5E1"),
+    )
+
+    ws["A1"] = f"MATRIZ SOCIOMÉTRICA Y FÓRMULAS DE RED (DINI 2010 / UCINET) — {tipo_red_titulo.upper()}"
+    ws["A1"].font = Font(size=12, bold=True, color="1E3A8A")
+    ws["A2"] = "Amarillo = Vínculos 1/0 editables | Azul = Fórmulas de Grado, Densidad D = 2L/[n(n-1)] y Gradiente"
+
+    n = len(nombres)
+    headers = ["Empresa / Actor"] + nombres + ["Grado Nodal (k_i)", "Centralidad (%)", "Brecha (k_max - k_i)"]
+    for c_i, h_txt in enumerate(headers, start=1):
+        c = ws.cell(row=4, column=c_i, value=h_txt)
+        c.fill = fill_h
+        c.font = font_h
+        c.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+
+    col_fin_mat = get_column_letter(1 + n)
+    col_ki = get_column_letter(2 + n)
+    col_cent = get_column_letter(3 + n)
+    col_brecha = get_column_letter(4 + n)
+
+    fila_ini = 5
+    fila_fin = fila_ini + n - 1
+
+    for idx_r, nom in enumerate(nombres):
+        r_excel = fila_ini + idx_r
+        c_nom = ws.cell(row=r_excel, column=1, value=nom)
+        c_nom.font = Font(bold=True)
+        c_nom.border = borde
+
+        for idx_c in range(n):
+            c_excel = 2 + idx_c
+            c_val = ws.cell(row=r_excel, column=c_excel, value=int(matriz_A[idx_r, idx_c]))
+            c_val.fill = fill_in
+            c_val.alignment = Alignment(horizontal="center")
+            c_val.border = borde
+
+        c_k = ws.cell(row=r_excel, column=2 + n, value=f"=SUM(B{r_excel}:{col_fin_mat}{r_excel})")
+        c_c = ws.cell(row=r_excel, column=3 + n, value=f"={col_ki}{r_excel}/({n}-1)")
+        c_b = ws.cell(row=r_excel, column=4 + n, value=f"=MAX(${col_ki}${fila_ini}:${col_ki}${fila_fin})-{col_ki}{r_excel}")
+
+        for cf in (c_k, c_c, c_b):
+            cf.fill = fill_fn
+            cf.border = borde
+        c_c.number_format = "0.0%"
+
+    f_res = fila_fin + 2
+    indicadores_red = [
+        ("Número de Empresas en la Red (n)", f"={n}", "0"),
+        ("Suma de Grados (2L)", f"=SUM({col_ki}{fila_ini}:{col_ki}{fila_fin})", "0"),
+        ("Número de Vínculos Activos (L = 2L / 2)", f"=B{f_res+1}/2", "0"),
+        ("Fórmula Densidad D = 2L / [n*(n-1)]", f"=B{f_res+1}/(B{f_res}*(B{f_res}-1))", "0.00%"),
+        ("Grado Nodal Máximo (k_máx)", f"=MAX({col_ki}{fila_ini}:{col_ki}{fila_fin})", "0"),
+        ("Gradiente de Concentración de la Red (GC_red)", f"=SUM({col_brecha}{fila_ini}:{col_brecha}{fila_fin})/((B{f_res}-1)*(B{f_res}-2))", "0.00%"),
+    ]
+    for offset, (etq, form_str, num_fmt) in enumerate(indicadores_red):
+        r_curr = f_res + offset
+        c1 = ws.cell(row=r_curr, column=1, value=etq)
+        c1.font = Font(bold=True)
+        c1.border = borde
+        c2 = ws.cell(row=r_curr, column=2, value=form_str)
+        c2.fill = fill_fn
+        c2.font = Font(bold=True)
+        c2.number_format = num_fmt
+        c2.border = borde
+
+    for col in range(1, ws.max_column + 1):
+        ws.column_dimensions[get_column_letter(col)].width = 18
+    ws.column_dimensions["A"].width = 36
+
+    buf = io.BytesIO()
+    wb.save(buf)
+    buf.seek(0)
+    return buf.getvalue()
+
+
+# ==============================================================================
+# 6. INTERFAZ PRINCIPAL DEL MÓDULO DE EXTENSIÓN EN STREAMLIT
 # ==============================================================================
 def renderizar_extension_redes_y_gradientes():
     inyectar_estilos_burbujas()
 
     st.header("8. Extensión Interactiva: Redes Empresariales (Dini) y Gradientes de Concentración")
     st.markdown(
-        '<span class="tip-badge">✨ Modo Pedagógico Activo: Haz clic en las burbujas 💡 para descubrir qué significa cada concepto y cada cifra</span>',
+        '<span class="tip-badge">✨ Modo Pedagógico Activo: Haz clic en las burbujas 💡 para ver las fórmulas y qué significa cada cifra</span>',
         unsafe_allow_html=True,
     )
     st.markdown(
-        "Módulo interactivo que integra las **3 Estructuras de Redes Empresariales de Dini (2010, CEPAL)** y las "
-        "**3 Visiones de Articulación Productiva (`04 SPL.pdf`)** con el **Simulador de Gradiente de Concentración "
+        "Módulo interactivo que integra las **Estructuras de Redes Empresariales de Dini (2010, CEPAL)** y los "
+        "**Casos Reales del Control 4** con las **Burbujas de Tips Informativos** y el **Simulador de Gradiente de Concentración "
         "(Red + Primacía Urbana + Complejidad de Guttman + Renta de von Thünen)**."
     )
 
     tabs = st.tabs([
-        "1. Constructor Animado de Redes en Vivo (Dini 2010 — 04 SPL)",
+        "1. Constructor Animado de Redes en Vivo (Dini 2010 + Casos Control 4)",
         "2. Gradiente de Concentración: Primacía, Guttman y von Thünen",
-        "3. Comparador Interactivo:Las 3 Visiones (Red, Clúster y SPL)",
+        "3. Las 3 Visiones (Red, Clúster y SPL) + Matriz de Schmitz",
     ])
 
     # ==========================================================================
@@ -460,25 +646,28 @@ def renderizar_extension_redes_y_gradientes():
     with tabs[0]:
         st.subheader("Simulador Visual: Mira la Red Armarse Frente a tus Ojos con sus Cifras")
 
-        col_sel1, col_sel2, col_sel3 = st.columns([2.2, 1.1, 1.2])
+        col_sel1, col_sel2, col_sel3 = st.columns([2.3, 1.0, 1.1])
         with col_sel1:
             tipo_red_sel = st.selectbox(
-                "Seleccione Estructura de Red de Cátedra (`04 SPL.pdf`, pág. 14):",
+                "Seleccione Estructura Teórica (Dini 2010) o Caso Aplicado de Control 4:",
                 [
                     "1. Red Simétrica (Cooperación Horizontal Pares — Diagrama 2)",
                     "2. Red con Liderazgo (Empresa Líder / Estrella — Diagrama 2)",
                     "3. Red Jerárquica (Piramidal por Niveles — Diagrama 2)",
                     "4. Red de Redes (Articulación entre Clústeres — Diagrama 3)",
                     "5. Red de Redes en la Producción de Aviones (Hub Central — Diagrama 4)",
+                    "6. Caso Control 4: Cadena y Red Láctea-Quesera (Osorno)",
+                    "7. Caso Control 4: Clúster Forestal-Maderero PymeMad (Biobío)",
                 ],
             )
         with col_sel2:
+            es_tamano_fijo = any(pref in tipo_red_sel for pref in ["3.", "4.", "5.", "6.", "7."])
             n_nodos_sim = st.slider(
                 "Número de empresas (n):",
                 min_value=5,
                 max_value=12,
                 value=8,
-                disabled=("3." in tipo_red_sel or "4." in tipo_red_sel or "5." in tipo_red_sel),
+                disabled=es_tamano_fijo,
                 help="Para Red Simétrica y Red con Liderazgo puedes variar n libremente entre 5 y 12 empresas.",
             )
         with col_sel3:
@@ -489,7 +678,6 @@ def renderizar_extension_redes_y_gradientes():
 
         st.info(desc_topologia)
 
-        # Slider para armar/desarmar la red paso a paso manualmente (además del botón Play)
         paso_actual = st.slider(
             "🔧 Desliza para armar la red vínculo por vínculo (o presiona ▶ Play debajo del gráfico):",
             min_value=0,
@@ -501,7 +689,6 @@ def renderizar_extension_redes_y_gradientes():
         enlaces_activos = enlaces_totales[:paso_actual]
         res_red, df_nodos_vivo = calcular_metricas_red_en_paso(nombres, roles, enlaces_activos)
 
-        # Fila de KPIs con sus respectivas Burbujas de Tips Informativos
         k1, k2, k3, k4 = st.columns(4)
         with k1:
             st.metric(
@@ -516,7 +703,7 @@ def renderizar_extension_redes_y_gradientes():
                 explicacion_md=(
                     "- **$n$ (Nodos):** Cantidad de empresas, productores o instituciones que integran la red.\n"
                     "- **$L$ (Vínculos / Líneas):** Acuerdos reales de cooperación, compraventa o transferencia de información activos en este paso.\n"
-                    f"- **Lectura de tu cifra actual:** De los **{res_red['L_max']}** vínculos bilaterales posibles entre estas {res_red['n']} empresas, actualmente existen **{res_red['L']}** activos."
+                    f"- **Lectura de tu cifra actual:** De los **{res_red['L_max']}** vínculos bilaterales posibles entre estas {res_red['n']} organizaciones, actualmente existen **{res_red['L']}** activos."
                 ),
             )
 
@@ -535,7 +722,7 @@ def renderizar_extension_redes_y_gradientes():
                     f"- **Cálculo en vivo:** $D = \\frac{{2 \\times {res_red['L']}}}{{{res_red['n']} \\times ({res_red['n']}-1)}} = {res_red['densidad_prop']:.4f}$ (**{res_red['densidad_pct']:.1f}%**).\n"
                     "- **¿Qué significa la cifra?:**\n"
                     "  - **$D > 50\\%$:** Alta cohesión horizontal y confianza mutua (rápida difusión de aprendizaje).\n"
-                    "  - **$D < 30\\%$:** Red dispersa o altamente dependiente de un único nodo articulador."
+                    "  - **$D < 30\\%$:** Red dispersa o dependiente de pocos nodos puente."
                 ),
             )
 
@@ -543,16 +730,16 @@ def renderizar_extension_redes_y_gradientes():
             st.metric(
                 "3. Grado Nodal Máximo y Medio",
                 f"k_máx = {res_red['k_max']}",
-                f"Promedio k̄ = {res_red['k_prom']:.2f} vínculos/empresa",
+                f"Promedio k̄ = {res_red['k_prom']:.2f} vínculos/actor",
             )
             renderizar_burbuja_tip(
                 titulo_boton="¿Qué es el Grado Nodal?",
                 titulo_interno="Grado de una Empresa en la Red (k_i)",
                 formula_latex=r"k_i = \sum_{j=1}^{n} a_{ij}",
                 explicacion_md=(
-                    "- **Definición (`04 SPL.pdf`, pág. 14):** *'Grado = Número de vínculos de una empresa con las otras'*.\n"
+                    "- **Definición (`04 SPL.pdf`, pág. 14):** *'Grado = Número de vínculo de una empresa con las otras'*.\n"
                     f"- **Lectura de tu cifra actual:** El actor más conectado tiene **{res_red['k_max']} vínculos directos**, mientras que el actor menos conectado tiene **{res_red['k_min']}**.\n"
-                    "- Una empresa con alto grado actúa como **articulador o gobernanza de la red**."
+                    "- Una organización con alto grado actúa como **articulador o gobernanza de la red**."
                 ),
             )
 
@@ -570,12 +757,11 @@ def renderizar_extension_redes_y_gradientes():
                     "- **Concepto:** Mide qué tan empinada es la jerarquía de poder entre el nodo líder ($k_{\\max}$) y el resto de las empresas.\n"
                     "- **Cómo leer esta cifra en tu informe:**\n"
                     "  - **$0\\%$ a $15\\%$:** **Red Simétrica** (ningún actor monopoliza la intermediación).\n"
-                    "  - **$25\\%$ a $65\\%$:** **Red Jerárquica o Policéntrica** (existen mandos medios o sub-líderes).\n"
+                    "  - **$25\\%$ a $65\\%$:** **Red Jerárquica o Policéntrica** (existen mandos medios o co-liderazgos como Gremio + Cooperativa).\n"
                     "  - **$70\\%$ a $100\\%$:** **Red con Liderazgo Fuerte** (toda la coordinación pasa por un único centro)."
                 ),
             )
 
-        # Renderizado del Grafo Animado y Curva de Gradiente lado a lado
         col_grafo, col_grad = st.columns([1.45, 1.0])
         with col_grafo:
             fig_anim = construir_figura_red_animada(
@@ -612,17 +798,31 @@ def renderizar_extension_redes_y_gradientes():
                 )
             )
             fig_grad_red.update_layout(
-                height=310,
+                height=300,
                 margin=dict(l=10, r=10, t=25, b=40),
                 yaxis_title="N° de Vínculos (Grado k_i)",
-                xaxis_title="Empresas ordenadas de Mayor a Menor Jerarquía",
+                xaxis_title="Actores ordenados de Mayor a Menor Jerarquía",
                 showlegend=True,
                 legend=dict(orientation="h", y=1.12),
             )
             st.plotly_chart(fig_grad_red, use_container_width=True)
 
-            st.markdown("##### Tabla de Cifras por Empresa en Tiempo Real")
-            st.dataframe(df_nodos_vivo, use_container_width=True, hide_index=True, height=215)
+            st.markdown("##### Tabla de Cifras por Actor en Tiempo Real")
+            st.dataframe(df_nodos_vivo, use_container_width=True, hide_index=True, height=210)
+
+        bytes_red_xlsx = exportar_excel_red_dini_formulas(
+            nombres=nombres,
+            roles=roles,
+            matriz_A=res_red["matriz_A"],
+            tipo_red_titulo=tipo_red_sel.split("(")[0].strip(),
+        )
+        st.download_button(
+            label="📥 Descargar Matriz Sociométrica Actual en Excel con Fórmulas Vivas (D = 2L/[n(n-1)], Grado y Gradiente)",
+            data=bytes_red_xlsx,
+            file_name="Matriz_Red_Dini_Formulas_Vivas.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            use_container_width=True,
+        )
 
     # ==========================================================================
     # PESTAÑA 2: GRADIENTE DE CONCENTRACIÓN TERRITORIAL (PRIMACÍA, GUTTMAN Y VON THÜNEN)
@@ -630,8 +830,8 @@ def renderizar_extension_redes_y_gradientes():
     with tabs[1]:
         st.subheader("Fórmulas de Concentración Territorial y Gradientes Espaciales (`06 OT 2024.pdf`)")
         st.markdown(
-            "Conecta la concentración de redes con los **3 indicadores de jerarquía y gradiente espacial** vistos en clases: "
-            "**1) Índice de Primacía Urbana**, **2) Gradiente Funcional de Guttman / Rondinelli** y "
+            "Conecta la concentración de redes con los **3 modelos de concentración y gradiente espacial** vistos en clases: "
+            "**1) Índice de Primacía Urbana (Escala 0 a 3)**, **2) Gradiente Funcional de Guttman / Rondinelli** y "
             "**3) Gradiente de Renta y Distancia de von Thünen**."
         )
 
@@ -713,15 +913,38 @@ def renderizar_extension_redes_y_gradientes():
             dist_max = st.slider("Distancia máxima desde el centro urbano (km):", 10, 100, 50)
             d_vec = np.linspace(0, dist_max, 100)
 
-            # 3 Actividades con distinto gradiente de concentración espacial
-            lr_intensiva = np.maximum(0, 120 - 4.5 * d_vec)   # Lechería intensiva / Hortalizas / Comercio
-            lr_intermedia = np.maximum(0, 85 - 2.0 * d_vec)   # Cultivos / Industria agroalimentaria
-            lr_extensiva = np.maximum(0, 50 - 0.8 * d_vec)    # Ganadería extensiva / Forestal
+            lr_intensiva = np.maximum(0, 120 - 4.5 * d_vec)
+            lr_intermedia = np.maximum(0, 85 - 2.0 * d_vec)
+            lr_extensiva = np.maximum(0, 50 - 0.8 * d_vec)
 
             fig_thunen = go.Figure()
-            fig_thunen.add_trace(go.Scatter(x=d_vec, y=lr_intensiva, mode="lines", name="1. Actividad Intensiva / Hortalizas-Lechería (Alto Gradiente)", line=dict(width=3, color="#dc2626")))
-            fig_thunen.add_trace(go.Scatter(x=d_vec, y=lr_intermedia, mode="lines", name="2. Agroindustria / Cultivos (Gradiente Medio)", line=dict(width=3, color="#2563eb")))
-            fig_thunen.add_trace(go.Scatter(x=d_vec, y=lr_extensiva, mode="lines", name="3. Forestal / Extensiva (Bajo Gradiente)", line=dict(width=3, color="#059669")))
+            fig_thunen.add_trace(
+                go.Scatter(
+                    x=d_vec,
+                    y=lr_intensiva,
+                    mode="lines",
+                    name="1. Actividad Intensiva / Lechería-Hortalizas (Alto Gradiente)",
+                    line=dict(width=3, color="#dc2626"),
+                )
+            )
+            fig_thunen.add_trace(
+                go.Scatter(
+                    x=d_vec,
+                    y=lr_intermedia,
+                    mode="lines",
+                    name="2. Agroindustria / Cultivos (Gradiente Medio)",
+                    line=dict(width=3, color="#2563eb"),
+                )
+            )
+            fig_thunen.add_trace(
+                go.Scatter(
+                    x=d_vec,
+                    y=lr_extensiva,
+                    mode="lines",
+                    name="3. Forestal / Extensiva (Bajo Gradiente)",
+                    line=dict(width=3, color="#059669"),
+                )
+            )
             fig_thunen.update_layout(
                 title="Curvas de Gradiente de Renta y Anillos Concéntricos de von Thünen",
                 xaxis_title="Distancia al Centro Urbano / Mercado Principal (d en km)",
@@ -732,11 +955,49 @@ def renderizar_extension_redes_y_gradientes():
             )
             st.plotly_chart(fig_thunen, use_container_width=True)
 
+        st.markdown("---")
+        st.markdown("#### C. Gráfico de Gradiente Funcional de Guttman / Rondinelli (Complejidad vs. Población — Lámina 15 `06 OT 2024.pdf`)")
+        df_gutt_ej = pd.DataFrame({
+            "Localidad_Asentamiento": [
+                "Metrópoli Regional (380.534 hab.)",
+                "Villa Esperanza (125.000 hab.)",
+                "El Rincón (110.000 hab.)",
+                "Pueblo Nuevo (96.585 hab.)",
+                "El Quebradero (36.363 hab.)",
+                "Valle Hermoso (12.586 hab.)",
+            ],
+            "Poblacion": [380534, 125000, 110000, 96585, 36363, 12586],
+            "Indice_Funcional_Rondinelli": [700.0, 283.3, 150.0, 133.3, 83.3, 50.0],
+        })
+        fig_gutt_grad = px.scatter(
+            df_gutt_ej,
+            x="Poblacion",
+            y="Indice_Funcional_Rondinelli",
+            text="Localidad_Asentamiento",
+            size="Indice_Funcional_Rondinelli",
+            title="Gradiente Jerárquico Decreciente: Población vs. Complejidad Funcional (Ejemplo Oficial Láminas 14–15)",
+            labels={
+                "Poblacion": "Población del Asentamiento Humano (Habitantes)",
+                "Indice_Funcional_Rondinelli": "Índice de Complejidad Funcional Ponderado (Rondinelli)",
+            },
+        )
+        fig_gutt_grad.update_traces(textposition="top center")
+        fig_gutt_grad.add_trace(
+            go.Scatter(
+                x=df_gutt_ej["Poblacion"],
+                y=df_gutt_ej["Indice_Funcional_Rondinelli"],
+                mode="lines",
+                line=dict(color="#1e3a8a", dash="dash"),
+                name="Gradiente Jerárquico Funcional",
+            )
+        )
+        st.plotly_chart(fig_gutt_grad, use_container_width=True)
+
     # ==========================================================================
-    # PESTAÑA 3: LAS 3 VISIONES DE ARTICULACIÓN PRODUCTIVA (04 SPL.PDF PÁGS. 5-7)
+    # PESTAÑA 3: LAS 3 VISIONES DE ARTICULACIÓN + MATRIZ DE SCHMITZ (04 SPL.PDF)
     # ==========================================================================
     with tabs[2]:
-        st.subheader("Las 3 Estrategias de Articulación Productiva (`04 SPL.pdf`, págs. 5 a 7)")
+        st.subheader("Las 3 Estrategias de Articulación Productiva y Modalidades de Cooperación (`04 SPL.pdf`, págs. 5 a 13)")
         st.markdown(
             "En la cátedra se distinguen **3 niveles concéntricos de articulación territorial** "
             "(Diagrama de círculos concéntricos de la página 6 de `04 SPL.pdf`):"
@@ -796,3 +1057,20 @@ def renderizar_extension_redes_y_gradientes():
                 """,
                 unsafe_allow_html=True,
             )
+
+        st.markdown("#### Cuadro 2 (Dini 2010 / Schmitz 1999, pág. 13 de `04 SPL.pdf`): Modalidades de Cooperación Interempresarial")
+        df_schmitz = pd.DataFrame({
+            "Posición en la Cadena Productiva \\ N° Participantes": [
+                "Horizontal (Empresas del mismo eslabón)",
+                "Vertical (Proveedor — Comprador en distintos eslabones)",
+            ],
+            "Bilateral (2 empresas)": [
+                "Joint Ventures / Alianza entre 2 pares",
+                "Outsourcing / Subcontratación directa",
+            ],
+            "Multilateral (Múltiples empresas)": [
+                "Asociación sectorial / Red empresarial horizontal (ej. Aproleche, PymeMad)",
+                "Red empresarial vertical / Alianza en torno a una cadena de valor local",
+            ],
+        })
+        st.dataframe(df_schmitz, use_container_width=True, hide_index=True)
