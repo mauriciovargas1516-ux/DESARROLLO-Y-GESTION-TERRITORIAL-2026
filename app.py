@@ -139,13 +139,15 @@ def vista_modulo_1_ilpes():
             idx_biobio = i
             break
 
+    idx_a0_def = anios.index(2014) if 2014 in anios else 0
+
     c1, c2, c3, c4 = st.columns([2.2, 2.2, 1, 1])
     with c1:
         reg_sel = st.selectbox("Región de análisis:", regiones, index=idx_biobio, key="m1_reg")
     with c2:
         var_sel = st.selectbox("Variable SII:", metricas, index=0, key="m1_var")
     with c3:
-        a0 = st.selectbox("Año inicial ($t_0$):", anios, index=0, key="m1_a0")
+        a0 = st.selectbox("Año inicial ($t_0$):", anios, index=idx_a0_def, key="m1_a0")
     with c4:
         at = st.selectbox("Año final ($t_f$):", anios, index=len(anios) - 1, key="m1_at")
 
@@ -298,13 +300,15 @@ def vista_modulo_2_reat():
             idx_biobio = i
             break
 
+    idx_a0_def = anios.index(2014) if 2014 in anios else 0
+
     c1, c2, c3, c4, c5 = st.columns([2, 2, 1, 1, 1.2])
     with c1:
         reg_sel = st.selectbox("Región:", regiones, index=idx_biobio, key="m2_reg")
     with c2:
         var_sel = st.selectbox("Variable:", metricas, index=0, key="m2_var")
     with c3:
-        a0 = st.selectbox("Año inicial:", anios, index=0, key="m2_a0")
+        a0 = st.selectbox("Año inicial:", anios, index=idx_a0_def, key="m2_a0")
     with c4:
         at = st.selectbox("Año final:", anios, index=len(anios) - 1, key="m2_at")
     with c5:
@@ -436,7 +440,8 @@ def vista_modulo_3_redes_cadenas():
         st.caption("Edita los vínculos binarios (1 = relación de cooperación/subcontratación activa, 0 = sin vínculo):")
         df_adj = st.data_editor(df_adj_init, use_container_width=True, key="editor_ucinet")
 
-        A = df_adj.to_numpy(dtype=float)
+        # copy=True garantiza que el arreglo sea editable en Python 3.14 / Pandas Copy-on-Write
+        A = df_adj.to_numpy(dtype=float, copy=True)
         np.fill_diagonal(A, 0.0)
         enlaces_totales = float(np.sum(A))
         enlaces_posibles = float(n_nodos * (n_nodos - 1))
@@ -621,7 +626,7 @@ def vista_modulo_4_ordenamiento():
         df_rond_init = pd.DataFrame(mat_rond, index=asentamientos, columns=funciones_urbanas)
         df_rond = st.data_editor(df_rond_init, use_container_width=True, key="editor_rondinelli")
 
-        M = df_rond.to_numpy(dtype=float)
+        M = df_rond.to_numpy(dtype=float, copy=True)
         freq_funcion = np.sum(M, axis=0)
         pesos_funcion = np.where(freq_funcion > 0, len(asentamientos) / freq_funcion, 0.0)
         indice_centralidad = M @ pesos_funcion
