@@ -33,6 +33,111 @@ from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 from openpyxl.utils import get_column_letter
 
 
+def _renderizar_mapa_puntos_seguro(
+    df_puntos: pd.DataFrame,
+    col_lat: str,
+    col_lon: str,
+    col_grupo: str,
+    col_titulo_hover: str,
+    cols_detalle_hover: list,
+    lat_centro: float,
+    lon_centro: float,
+    zoom: float,
+    altura: int,
+    titulo_mapa: str,
+    estilo_mapa: str = "open-street-map",
+):
+    """
+    Construye un mapa interactivo de Plotly usando listas nativas de Python
+    y respaldo automático entre Scattermapbox y Scattermap para evitar AttributeError
+    en cualquier versión de Pandas o Plotly en Streamlit Cloud.
+    """
+    paleta = [
+        "#1d4ed8", "#dc2626", "#059669", "#d97706",
+        "#7c3aed", "#0891b2", "#be123c", "#4f46e5",
+    ]
+    df_clean = df_puntos.copy()
+    df_clean[col_lat] = pd.to_numeric(df_clean[col_lat], errors="coerce")
+    df_clean[col_lon] = pd.to_numeric(df_clean[col_lon], errors="coerce")
+    df_clean = df_clean.dropna(subset=[col_lat, col_lon])
+
+    grupos = df_clean[col_grupo].dropna().astype(str).unique().tolist()
+
+    try:
+        fig = go.Figure()
+        usar_scattermap_nuevo = hasattr(go, "Scattermap") and not hasattr(go, "Scattermapbox")
+
+        for idx_g, g_val in enumerate(grupos):
+            sub = df_clean[df_clean[col_grupo].astype(str) == g_val]
+            lats = [float(x) for x in sub[col_lat].tolist()]
+            lons = [float(x) for x in sub[col_lon].tolist()]
+
+            textos = []
+            for _, fila in sub.iterrows():
+                partes = [f"<b>{fila[col_titulo_hover]}</b>"]
+                for c_det in cols_detalle_hover:
+                    if c_det in sub.columns:
+                        partes.append(f"{c_det}: {fila[c_det]}")
+                textos.append("<br>".join(partes))
+
+            color_actual = paleta[idx_g % len(paleta)]
+            if usar_scattermap_nuevo:
+                fig.add_trace(
+                    go.Scattermap(
+                        lat=lats,
+                        lon=lons,
+                        mode="markers",
+                        marker=dict(size=11, color=color_actual),
+                        name=str(g_val),
+                        text=textos,
+                        hoverinfo="text",
+                    )
+                )
+            else:
+                fig.add_trace(
+                    go.Scattermapbox(
+                        lat=lats,
+                        lon=lons,
+                        mode="markers",
+                        marker=dict(size=11, color=color_actual),
+                        name=str(g_val),
+                        text=textos,
+                        hoverinfo="text",
+                    )
+                )
+
+        if usar_scattermap_nuevo:
+            fig.update_layout(
+                map=dict(
+                    style=estilo_mapa,
+                    center=dict(lat=lat_centro, lon=lon_centro),
+                    zoom=zoom,
+                ),
+                height=altura,
+                margin={"r": 0, "t": 40, "l": 0, "b": 0},
+                title=titulo_mapa,
+                legend=dict(orientation="h", yanchor="bottom", y=-0.18, xanchor="left", x=0),
+            )
+        else:
+            fig.update_layout(
+                mapbox_style=estilo_mapa,
+                mapbox=dict(
+                    center=dict(lat=lat_centro, lon=lon_centro),
+                    zoom=zoom,
+                ),
+                height=altura,
+                margin={"r": 0, "t": 40, "l": 0, "b": 0},
+                title=titulo_mapa,
+                legend=dict(orientation="h", yanchor="bottom", y=-0.18, xanchor="left", x=0),
+            )
+
+        st.plotly_chart(fig, use_container_width=True)
+    except Exception:
+        st.caption(titulo_mapa)
+        df_fallback = df_clean.rename(columns={col_lat: "lat", col_lon: "lon"})
+        st.map(df_fallback[["lat", "lon"]])
+
+
 # ==============================================================================
 # 1. BASES DE DATOS GEORREFERENCIADAS (LICEOS.XLSX Y 22 ESTABLECIMIENTOS CONTROL 2/4)
 # ==============================================================================
@@ -240,7 +345,7 @@ def obtener_matriz_guttman_control5(dimension: str) -> pd.DataFrame:
         cols = [
             "Cajeros automáticos", "OTEC / Capacitación", "Más de 1 Banco comercial",
             "Agencia Desarrollo Local / Fomento", "Asistencia Técnica (Oficina Sercotec/INDAP)",
-            "Empresa reclutamiento laboral", "Centro de Negocios Sercotec", " Laboratorio Certificación Industrial",
+            "Empresa reclutamiento laboral", "Centro de Negocios Sercotec", "Laboratorio Certificación Industrial",
         ]
         mat = [
             [1, 1, 1, 1, 1, 1, 1, 1],  # Puerto Montt
@@ -326,22 +431,21 @@ def obtener_matriz_aislamiento_control5() -> pd.DataFrame:
         "Frutillar", "Puerto Varas", "Puerto Montt",
     ]
     n = len(localidades)
-    # Por defecto 1 (no conectada directamente), diagonal en blanco/0
     mat = np.ones((n, n), dtype=int)
     np.fill_diagonal(mat, 0)
 
     conexiones_directas_0 = [
-        ("Osorno", "Puaucho (S.J. Costa)"),       # Ruta U-40 asfaltada directa (0 en pauta del profesor)
-        ("Osorno", "Entre Lagos (Puyehue)"),      # Ruta CH-215 asfaltada directa (0 en pauta del profesor)
-        ("Osorno", "San Pablo"),                  # Ruta 5 Norte directa
-        ("Osorno", "Río Negro"),                  # Ruta 5 Sur / U-51 directa
-        ("Osorno", "Puerto Octay"),               # Ruta U-55 directa
-        ("Entre Lagos (Puyehue)", "Puerto Octay"),# Ruta Interlagos directa
-        ("Río Negro", "Purranque"),               # Ruta 5 Sur / U-72 directa
-        ("Purranque", "Frutillar"),               # Ruta 5 Sur directa
-        ("Puerto Octay", "Frutillar"),            # Ruta V-155 lacustre directa
-        ("Frutillar", "Puerto Varas"),            # Ruta 5 Sur directa
-        ("Puerto Varas", "Puerto Montt"),         # Ruta 5 Sur directa
+        ("Osorno", "Puaucho (S.J. Costa)"),
+        ("Osorno", "Entre Lagos (Puyehue)"),
+        ("Osorno", "San Pablo"),
+        ("Osorno", "Río Negro"),
+        ("Osorno", "Puerto Octay"),
+        ("Entre Lagos (Puyehue)", "Puerto Octay"),
+        ("Río Negro", "Purranque"),
+        ("Purranque", "Frutillar"),
+        ("Puerto Octay", "Frutillar"),
+        ("Frutillar", "Puerto Varas"),
+        ("Puerto Varas", "Puerto Montt"),
     ]
     idx_map = {loc: i for i, loc in enumerate(localidades)}
     for a, b in conexiones_directas_0:
@@ -428,7 +532,6 @@ def exportar_excel_controles_2_y_5(
     ws2.cell(row=fila_tot, column=3, value=f"=SUM(C4:C{fila_tot-1})").fill = fill_fn
     ws2.cell(row=fila_tot, column=4, value=f"=SUM(D4:D{fila_tot-1})").fill = fill_fn
 
-    # Índices de Primacía con Fórmulas
     ws2.cell(row=fila_tot + 2, column=1, value="Índice de Primacía 2 Ciudades (P1 / P2)").font = Font(bold=True)
     ws2.cell(row=fila_tot + 2, column=3, value="=C4/C5").fill = fill_fn
     ws2.cell(row=fila_tot + 2, column=4, value="=D4/D5").fill = fill_fn
@@ -534,7 +637,6 @@ def renderizar_redes_territorio_ot():
         "5. Guía PROT SUBDERE (4 Sistemas, Mapa Semáforo y Normativa Anexo 2)",
     ])
 
-    # Pre-cargamos bases para el botón de exportación general
     df_liceos = obtener_liceos_osorno_df()
     df_lactea_22 = obtener_22_establecimientos_cadena_lactea_osorno()
     df_censo_ll = obtener_poblacion_censos_control5("Región de Los Lagos (30 comunas)")
@@ -568,26 +670,26 @@ def renderizar_redes_territorio_ot():
 
         c_m1, c_m2 = st.columns([1.3, 1.0])
         with c_m1:
-            fig_map = px.scatter_mapbox(
-                df_editada,
-                lat="Latitud",
-                lon="Longitud",
-                color="Categoría",
-                hover_name="Nombre",
-                hover_data=["ID", "Dirección", "Comuna", "Fuente"],
-                zoom=12,
-                height=440,
-                title="Previsualización Interactiva de Marcadores en Osorno (Validación Coordenadas)",
+            _renderizar_mapa_puntos_seguro(
+                df_puntos=df_editada,
+                col_lat="Latitud",
+                col_lon="Longitud",
+                col_grupo="Categoría",
+                col_titulo_hover="Nombre",
+                cols_detalle_hover=["ID", "Dirección", "Comuna", "Fuente"],
+                lat_centro=-40.575,
+                lon_centro=-73.133,
+                zoom=11.8,
+                altura=440,
+                titulo_mapa="Previsualización Interactiva de Marcadores en Osorno (Validación Coordenadas)",
+                estilo_mapa="open-street-map",
             )
-            fig_map.update_layout(mapbox_style="open-street-map", margin={"r": 0, "t": 40, "l": 0, "b": 0})
-            st.plotly_chart(fig_map, use_container_width=True)
 
         with c_m2:
             st.markdown("**Lista de Comprobación Automática (Rúbrica Control 2)**")
             df_val = validar_base_google_mymaps(df_editada)
             st.dataframe(df_val, use_container_width=True, hide_index=True)
 
-            # Botón de descarga exclusiva de la hoja limpia en fila 1 para importar directo a Google My Maps
             buf_mm = io.BytesIO()
             with pd.ExcelWriter(buf_mm, engine="openpyxl") as writer:
                 df_editada.to_excel(writer, index=False, sheet_name="Establecimientos")
@@ -729,7 +831,6 @@ def renderizar_redes_territorio_ot():
             "GORE Los Lagos", "Muni. Osorno", "ULagos",
             "Aproleche / SAGO", "Cámara Comercio", "Cooprinsem",
         ]
-        # 1 = Cooperación, 2 = Conflicto, 3 = Neutralidad, 0 = Sin relación
         mat_default = pd.DataFrame([
             [0, 1, 1, 1, 1, 3],
             [1, 0, 1, 3, 1, 3],
@@ -832,7 +933,7 @@ def renderizar_redes_territorio_ot():
 
         st.markdown("---")
         st.markdown("**3. Matriz de Aislamiento Comunal (0 = Conectada directamente/Asfalto | 1 = No conectada/Ripio)**")
-        df_aisl_edit = st.data_editor(df_aislamiento := obtener_matriz_aislamiento_control5(), use_container_width=True, key="aisl_c5_ed")
+        df_aisl_edit = st.data_editor(obtener_matriz_aislamiento_control5(), use_container_width=True, key="aisl_c5_ed")
         vals_a = df_aisl_edit.values.copy()
         np.fill_diagonal(vals_a, 0)
         n_loc = len(df_aisl_edit)
