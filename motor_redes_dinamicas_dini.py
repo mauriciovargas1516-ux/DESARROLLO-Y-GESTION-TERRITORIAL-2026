@@ -1074,3 +1074,4 @@ def renderizar_extension_redes_y_gradientes():
             ],
         })
         st.dataframe(df_schmitz, use_container_width=True, hide_index=True)
+ 
