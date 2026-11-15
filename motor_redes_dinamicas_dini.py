@@ -527,43 +527,65 @@ def construir_figura_red_animada(
 
 
 # ==============================================================================
-# 5. EXPORTADOR EXCEL CON FÓRMULAS VIVAS DE LA RED ACTIVA (DINI / UCINET)
+# 5. EXPORTADOR EXCEL DE MATRIZ SOCIOMÉTRICA (DINI / UCINET)
 # ==============================================================================
 def exportar_excel_red_dini_formulas(nombres, roles, matriz_A, tipo_red_titulo: str) -> bytes:
     """
-    Exporta la matriz sociométrica actual a un archivo Excel (.xlsx) con fórmulas nativas vivas:
-    - Grado Nodal k_i = SUM(fila)
-    - Total de vínculos dirigidos 2L = SUM(grados)
-    - Vínculos bilaterales L = 2L / 2
-    - Densidad D = 2L / (n * (n - 1))
-    - Centralidad local (%) y Gradiente de Concentración
+    Exporta la matriz sociométrica actual a un archivo Excel (.xlsx) en estilo
+    monocromático sobrio con fórmulas dinámicas de grado nodal, densidad y gradiente.
     """
     wb = Workbook()
     ws = wb.active
-    ws.title = "Red_Dini_Formulas"
+    ws.title = "Matriz Sociométrica"
 
-    fill_h = PatternFill("solid", fgColor="1E3A8A")
-    font_h = Font(name="Calibri", size=10, bold=True, color="FFFFFF")
-    fill_in = PatternFill("solid", fgColor="FEF9C3")
-    fill_fn = PatternFill("solid", fgColor="EFF6FF")
+    fill_titulo = PatternFill("solid", fgColor="262626")
+    fill_header = PatternFill("solid", fgColor="404040")
+    fill_subbloque = PatternFill("solid", fgColor="E5E7EB")
+    fill_in = PatternFill("solid", fgColor="FFFFFF")
+    fill_cebra = PatternFill("solid", fgColor="F9FAFB")
+    fill_fn = PatternFill("solid", fgColor="F3F4F6")
+
+    font_titulo = Font(name="Calibri", size=12, bold=True, color="FFFFFF")
+    font_sub = Font(name="Calibri", size=10, italic=True, color="374151")
+    font_header = Font(name="Calibri", size=10, bold=True, color="FFFFFF")
+    font_bold = Font(name="Calibri", size=10, bold=True, color="111827")
+    font_celda = Font(name="Calibri", size=10, color="1F2937")
+
     borde = Border(
-        left=Side(style="thin", color="CBD5E1"),
-        right=Side(style="thin", color="CBD5E1"),
-        top=Side(style="thin", color="CBD5E1"),
-        bottom=Side(style="thin", color="CBD5E1"),
+        left=Side(style="thin", color="D1D5DB"),
+        right=Side(style="thin", color="D1D5DB"),
+        top=Side(style="thin", color="D1D5DB"),
+        bottom=Side(style="thin", color="D1D5DB"),
     )
 
-    ws["A1"] = f"MATRIZ SOCIOMÉTRICA Y FÓRMULAS DE RED (DINI 2010 / UCINET) — {tipo_red_titulo.upper()}"
-    ws["A1"].font = Font(size=12, bold=True, color="1E3A8A")
-    ws["A2"] = "Amarillo = Vínculos 1/0 editables | Azul = Fórmulas de Grado, Densidad D = 2L/[n(n-1)] y Gradiente"
-
     n = len(nombres)
-    headers = ["Empresa / Actor"] + nombres + ["Grado Nodal (k_i)", "Centralidad (%)", "Brecha (k_max - k_i)"]
+    headers = ["Empresa / Actor"] + nombres + ["Grado nodal (k_i)", "Centralidad (%)", "Brecha (k_máx - k_i)"]
+    n_cols = len(headers)
+
+    ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=n_cols)
+    ct = ws.cell(row=1, column=1, value=f"MATRIZ SOCIOMÉTRICA DE RED (DINI, 2010) — {tipo_red_titulo.upper()}")
+    ct.fill = fill_titulo
+    ct.font = font_titulo
+    ct.alignment = Alignment(horizontal="left", vertical="center")
+    ws.row_dimensions[1].height = 26
+
+    ws.merge_cells(start_row=2, start_column=1, end_row=2, end_column=n_cols)
+    cs = ws.cell(
+        row=2,
+        column=1,
+        value="Vínculos bilaterales (1 = activo, 0 = sin vínculo), grado nodal, densidad D = 2L/[n(n-1)] y gradiente de concentración.",
+    )
+    cs.font = font_sub
+    cs.alignment = Alignment(horizontal="left", vertical="center")
+    ws.row_dimensions[2].height = 19
+
     for c_i, h_txt in enumerate(headers, start=1):
         c = ws.cell(row=4, column=c_i, value=h_txt)
-        c.fill = fill_h
-        c.font = font_h
+        c.fill = fill_header
+        c.font = font_header
         c.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+        c.border = borde
+    ws.row_dimensions[4].height = 25
 
     col_fin_mat = get_column_letter(1 + n)
     col_ki = get_column_letter(2 + n)
@@ -575,49 +597,69 @@ def exportar_excel_red_dini_formulas(nombres, roles, matriz_A, tipo_red_titulo: 
 
     for idx_r, nom in enumerate(nombres):
         r_excel = fila_ini + idx_r
+        fill_r = fill_in if (r_excel % 2 == 1) else fill_cebra
         c_nom = ws.cell(row=r_excel, column=1, value=nom)
-        c_nom.font = Font(bold=True)
+        c_nom.font = font_bold
+        c_nom.fill = fill_r
         c_nom.border = borde
 
         for idx_c in range(n):
             c_excel = 2 + idx_c
             c_val = ws.cell(row=r_excel, column=c_excel, value=int(matriz_A[idx_r, idx_c]))
-            c_val.fill = fill_in
-            c_val.alignment = Alignment(horizontal="center")
+            c_val.fill = fill_subbloque if idx_r == idx_c else fill_r
+            c_val.font = font_celda
+            c_val.alignment = Alignment(horizontal="center", vertical="center")
             c_val.border = borde
 
         c_k = ws.cell(row=r_excel, column=2 + n, value=f"=SUM(B{r_excel}:{col_fin_mat}{r_excel})")
-        c_c = ws.cell(row=r_excel, column=3 + n, value=f"={col_ki}{r_excel}/({n}-1)")
+        c_c = ws.cell(row=r_excel, column=3 + n, value=f"=IF({n}>1,{col_ki}{r_excel}/({n}-1),0)")
         c_b = ws.cell(row=r_excel, column=4 + n, value=f"=MAX(${col_ki}${fila_ini}:${col_ki}${fila_fin})-{col_ki}{r_excel}")
 
-        for cf in (c_k, c_c, c_b):
+        for cf, fmt in [(c_k, "0"), (c_c, "0.0%"), (c_b, "0")]:
             cf.fill = fill_fn
+            cf.font = font_bold if cf is c_k else font_celda
+            cf.number_format = fmt
+            cf.alignment = Alignment(horizontal="right", vertical="center")
             cf.border = borde
-        c_c.number_format = "0.0%"
 
-    f_res = fila_fin + 2
+    f_res = fila_fin + 3
+    ws.merge_cells(start_row=f_res - 1, start_column=1, end_row=f_res - 1, end_column=2)
+    c_rt = ws.cell(row=f_res - 1, column=1, value="Resumen estructural de la red")
+    c_rt.fill = fill_subbloque
+    c_rt.font = font_bold
+    ws.cell(row=f_res - 1, column=1).border = borde
+    ws.cell(row=f_res - 1, column=2).border = borde
+
     indicadores_red = [
-        ("Número de Empresas en la Red (n)", f"={n}", "0"),
-        ("Suma de Grados (2L)", f"=SUM({col_ki}{fila_ini}:{col_ki}{fila_fin})", "0"),
-        ("Número de Vínculos Activos (L = 2L / 2)", f"=B{f_res+1}/2", "0"),
-        ("Fórmula Densidad D = 2L / [n*(n-1)]", f"=B{f_res+1}/(B{f_res}*(B{f_res}-1))", "0.00%"),
-        ("Grado Nodal Máximo (k_máx)", f"=MAX({col_ki}{fila_ini}:{col_ki}{fila_fin})", "0"),
-        ("Gradiente de Concentración de la Red (GC_red)", f"=SUM({col_brecha}{fila_ini}:{col_brecha}{fila_fin})/((B{f_res}-1)*(B{f_res}-2))", "0.00%"),
+        ("Empresas / nodos en la red (n)", f"={n}", "0"),
+        ("Suma de grados (2L)", f"=SUM({col_ki}{fila_ini}:{col_ki}{fila_fin})", "0"),
+        ("Vínculos bilaterales activos (L)", f"=B{f_res+1}/2", "0"),
+        ("Densidad de la red (D)", f"=IF(B{f_res}>1,B{f_res+1}/(B{f_res}*(B{f_res}-1)),0)", "0.00%"),
+        ("Grado nodal máximo (k_máx)", f"=MAX({col_ki}{fila_ini}:{col_ki}{fila_fin})", "0"),
+        ("Gradiente de concentración (GC)", f"=IF(B{f_res}>2,SUM({col_brecha}{fila_ini}:{col_brecha}{fila_fin})/((B{f_res}-1)*(B{f_res}-2)),0)", "0.00%"),
     ]
     for offset, (etq, form_str, num_fmt) in enumerate(indicadores_red):
         r_curr = f_res + offset
         c1 = ws.cell(row=r_curr, column=1, value=etq)
-        c1.font = Font(bold=True)
+        c1.font = font_bold
+        c1.fill = fill_in
         c1.border = borde
         c2 = ws.cell(row=r_curr, column=2, value=form_str)
         c2.fill = fill_fn
-        c2.font = Font(bold=True)
+        c2.font = font_bold
         c2.number_format = num_fmt
+        c2.alignment = Alignment(horizontal="right", vertical="center")
         c2.border = borde
 
-    for col in range(1, ws.max_column + 1):
-        ws.column_dimensions[get_column_letter(col)].width = 18
-    ws.column_dimensions["A"].width = 36
+    ws.freeze_panes = "B5"
+    for col_idx in range(1, ws.max_column + 1):
+        col_letter = get_column_letter(col_idx)
+        max_len = 0
+        for r_idx in range(4, min(ws.max_row + 1, 50)):
+            val = ws.cell(row=r_idx, column=col_idx).value
+            if val is not None and not str(val).startswith("="):
+                max_len = max(max_len, len(str(val)))
+        ws.column_dimensions[col_letter].width = max(min(max_len + 4, 34 if col_idx == 1 else 20), 13)
 
     buf = io.BytesIO()
     wb.save(buf)
@@ -826,9 +868,9 @@ def renderizar_extension_redes_y_gradientes():
             tipo_red_titulo=tipo_red_sel.split("(")[0].strip(),
         )
         st.download_button(
-            label="Exportar Matriz Sociométrica Actual en Excel con Fórmulas Vivas (D = 2L/[n(n-1)], Grado y Gradiente)",
+            label="Descargar Matriz Sociométrica en Excel (.xlsx)",
             data=bytes_red_xlsx,
-            file_name="Matriz_Red_Dini_Formulas_Vivas.xlsx",
+            file_name="Matriz_Sociometrica_Red.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             use_container_width=True,
         )
@@ -867,7 +909,7 @@ def renderizar_extension_redes_y_gradientes():
                 "Cargar caso de estudio para Primacía:",
                 [
                     "Región de Los Lagos — Censo 2024 (Puerto Montt, Osorno, Puerto Varas, Castro)",
-                    "Región del Biobío — Censo 2024 (Concepción, Los Ángeles, Talcahuano, San Pedro)",
+                    "Región del Biobío — Censo 2024 (Concepción, Los Ángeles, San Pedro de la Paz, Talcahuano)",
                     "Ejemplo Lámina 12 Prof. Mancilla (Villa Esperanza, El Rincón, Pueblo Nuevo, El Quebradero)",
                 ],
             )
@@ -875,8 +917,8 @@ def renderizar_extension_redes_y_gradientes():
                 noms_p = ["Puerto Montt (P1)", "Osorno (P2)", "Puerto Varas (P3)", "Castro (P4)"]
                 vals_p = [275473, 174998, 50010, 48632]
             elif "Biobío" in caso_prim:
-                noms_p = ["Concepción (P1)", "Los Ángeles (P2)", "Talcahuano (P3)", "San Pedro de la Paz (P4)"]
-                vals_p = [238092, 218515, 158345, 148250]
+                noms_p = ["Concepción (P1)", "Los Ángeles (P2)", "San Pedro de la Paz (P3)", "Talcahuano (P4)"]
+                vals_p = [230375, 219441, 150992, 147322]
             else:
                 noms_p = ["Villa Esperanza (P1)", "El Rincón (P2)", "Pueblo Nuevo (P3)", "El Quebradero (P4)"]
                 vals_p = [5520, 4541, 122, 50]
