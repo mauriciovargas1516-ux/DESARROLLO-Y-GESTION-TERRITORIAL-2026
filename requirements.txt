@@ -5,3 +5,7 @@ scipy
 plotly
 networkx
 openpyxl
+requests
+beautifulsoup4
+pypdf
+google-auth
