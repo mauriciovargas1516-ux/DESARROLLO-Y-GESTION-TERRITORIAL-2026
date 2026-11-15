@@ -6,6 +6,7 @@ Archivo: motor_sii_exportador.py
 """
 
 import io
+import re
 import os
 import unicodedata
 import numpy as np
@@ -48,17 +49,56 @@ def _buscar_columna(columnas, candidatos):
     return None
 
 
+def _parsear_celda_sii(val) -> float:
+    """
+    Convierte una celda individual de la base SII a float sin destruir decimales.
+    Preserva intactos los int/float nativos de Excel (que aparecen en columnas
+    dtype=object cuando conviven con asteriscos '*' de secreto tributario).
+    """
+    if val is None or (isinstance(val, float) and np.isnan(val)):
+        return 0.0
+    if isinstance(val, (int, float, np.number)) and not isinstance(val, bool):
+        return float(val) if np.isfinite(val) else 0.0
+
+    s = str(val).strip()
+    if not s or s in {"*", "-", "--", "nan", "None", "N/A", "S/I"}:
+        return 0.0
+
+    s = s.replace(" ", "").replace("$", "")
+
+    if re.fullmatch(r"[+-]?\d+(\.\d+)?[eE][+-]?\d+", s):
+        return float(s)
+
+    if "." in s and "," in s:
+        if s.rfind(",") > s.rfind("."):
+            s = s.replace(".", "").replace(",", ".")
+        else:
+            s = s.replace(",", "")
+    elif "," in s:
+        if s.count(",") == 1:
+            s = s.replace(",", ".")
+        else:
+            s = s.replace(",", "")
+    elif "." in s:
+        partes = s.split(".")
+        if len(partes) > 2:
+            s = s.replace(".", "")
+        else:
+            izq, der = partes[0].lstrip("+-"), partes[1]
+            if len(der) == 3 and 1 <= len(izq) <= 3 and izq != "0":
+                s = s.replace(".", "")
+
+    try:
+        v = float(s)
+        return v if np.isfinite(v) else 0.0
+    except ValueError:
+        return 0.0
+
+
 def _a_numero_sii(serie: pd.Series) -> pd.Series:
     if pd.api.types.is_numeric_dtype(serie):
         return pd.to_numeric(serie, errors="coerce").fillna(0.0)
-    limpia = (
-        serie.astype(str)
-        .str.replace(".", "", regex=False)
-        .str.replace(",", ".", regex=False)
-        .str.replace("*", "0", regex=False)
-        .str.strip()
-    )
-    return pd.to_numeric(limpia, errors="coerce").fillna(0.0)
+    return serie.map(_parsear_celda_sii).astype(float)
 
 
 @st.cache_data(show_spinner=False)
@@ -107,11 +147,13 @@ def cargar_base_nacional_sii(fuente_archivo):
                 if pd.api.types.is_numeric_dtype(df[c]):
                     columnas_metricas.append(c)
 
+    if col_anio:
+        df[col_anio] = pd.to_numeric(df[col_anio], errors="coerce")
+        df = df.dropna(subset=[col_anio]).copy()
+        df[col_anio] = df[col_anio].astype(int)
+
     for m in columnas_metricas:
         df[m] = _a_numero_sii(df[m])
-
-    if col_anio:
-        df[col_anio] = pd.to_numeric(df[col_anio], errors="coerce").dropna().astype(int)
 
     metadatos = {
         "hoja_leida": hoja_datos,
