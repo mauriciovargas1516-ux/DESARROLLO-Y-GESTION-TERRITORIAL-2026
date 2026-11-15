@@ -295,39 +295,39 @@ def obtener_poblacion_censos_control5(region_sel: str = "Región de Los Lagos (3
     """
     if "Biobío" in region_sel:
         datos = [
-            ("Concepción", "Concepción", 223574, 238092),
-            ("Los Ángeles", "Biobío", 202331, 218515),
-            ("Talcahuano", "Concepción", 151749, 158345),
-            ("San Pedro de la Paz", "Concepción", 131808, 148250),
-            ("Coronel", "Concepción", 116262, 125890),
-            ("Hualpén", "Concepción", 91773, 94520),
-            ("Chiguayante", "Concepción", 85938, 91410),
-            ("Tomé", "Concepción", 54946, 57820),
-            ("Penco", "Concepción", 47367, 49610),
-            ("Lota", "Concepción", 43535, 44120),
-            ("Arauco", "Arauco", 36257, 38940),
-            ("Cañete", "Arauco", 34537, 36810),
-            ("Curanilahue", "Arauco", 32288, 33650),
-            ("Mulchén", "Biobío", 29627, 31040),
-            ("Cabrero", "Biobío", 28573, 30420),
-            ("Nacimiento", "Biobío", 26315, 27450),
-            ("Lebu", "Arauco", 25522, 26480),
-            ("Hualqui", "Concepción", 24333, 26190),
-            ("Laja", "Biobío", 22389, 23110),
-            ("Yumbel", "Biobío", 21198, 22430),
-            ("Los Álamos", "Arauco", 21035, 22380),
-            ("Tucapel", "Biobío", 14134, 15120),
-            ("Santa Bárbara", "Biobío", 13773, 14450),
-            ("Santa Juana", "Concepción", 13749, 14510),
-            ("Florida", "Concepción", 10624, 11480),
-            ("Tirúa", "Arauco", 10417, 11020),
-            ("Quilleco", "Biobío", 9587, 10040),
-            ("Negrete", "Biobío", 9737, 10390),
-            ("Contulmo", "Arauco", 6031, 6340),
-            ("Alto Biobío", "Biobío", 5923, 6480),
-            ("Antuco", "Biobío", 4073, 4390),
-            ("Quilaco", "Biobío", 3988, 4210),
-            ("San Rosendo", "Biobío", 3412, 3590),
+            ("Concepción", "Concepción", 223574, 230375),
+            ("Los Ángeles", "Biobío", 202331, 219441),
+            ("San Pedro de la Paz", "Concepción", 131808, 150992),
+            ("Talcahuano", "Concepción", 151749, 147322),
+            ("Coronel", "Concepción", 116262, 123648),
+            ("Hualpén", "Concepción", 91773, 87731),
+            ("Chiguayante", "Concepción", 85938, 85822),
+            ("Tomé", "Concepción", 54946, 56907),
+            ("Penco", "Concepción", 47367, 48971),
+            ("Lota", "Concepción", 43535, 39980),
+            ("Arauco", "Arauco", 36257, 37163),
+            ("Cañete", "Arauco", 34537, 34640),
+            ("Cabrero", "Biobío", 28573, 31256),
+            ("Curanilahue", "Arauco", 32288, 31119),
+            ("Mulchén", "Biobío", 29627, 29036),
+            ("Nacimiento", "Biobío", 26315, 26140),
+            ("Hualqui", "Concepción", 24333, 25795),
+            ("Lebu", "Arauco", 25522, 25246),
+            ("Laja", "Biobío", 22389, 23706),
+            ("Yumbel", "Biobío", 21198, 23170),
+            ("Los Álamos", "Arauco", 21035, 21950),
+            ("Tucapel", "Biobío", 14134, 15729),
+            ("Santa Juana", "Concepción", 13749, 14947),
+            ("Santa Bárbara", "Biobío", 13773, 14075),
+            ("Florida", "Concepción", 10624, 12958),
+            ("Negrete", "Biobío", 9737, 10723),
+            ("Tirúa", "Arauco", 10417, 10208),
+            ("Quilleco", "Biobío", 9587, 9700),
+            ("Alto Biobío", "Biobío", 5923, 6016),
+            ("Contulmo", "Arauco", 6031, 5905),
+            ("Quilaco", "Biobío", 3988, 4440),
+            ("Antuco", "Biobío", 4073, 4373),
+            ("San Rosendo", "Biobío", 3412, 3575),
         ]
     elif "Los Ríos" in region_sel:
         datos = [
@@ -428,7 +428,7 @@ def obtener_matriz_guttman_control5(
     """
     if "Biobío" in region_sel:
         comunas_top10 = [
-            "Concepción", "Los Ángeles", "Talcahuano", "San Pedro de la Paz", "Coronel",
+            "Concepción", "Los Ángeles", "San Pedro de la Paz", "Talcahuano", "Coronel",
             "Hualpén", "Chiguayante", "Tomé", "Penco", "Lota",
         ]
     elif "Los Ríos" in region_sel:
@@ -616,8 +616,22 @@ def obtener_matriz_aislamiento_control5(region_sel: str = "Región de Los Lagos 
 
 
 # ==============================================================================
-# 4. EXPORTADOR EXCEL CON FÓRMULAS NATIVAS PARA CONTROL 2 Y CONTROL 5
+# 4. EXPORTADOR EXCEL PARA CONTROL 2 Y CONTROL 5
 # ==============================================================================
+def _autoajustar_columnas_ot(ws, fila_ini: int = 3, max_width: int = 34, min_width: int = 13, col_a_max: int = 36):
+    for col_idx in range(1, ws.max_column + 1):
+        col_letter = get_column_letter(col_idx)
+        max_len = 0
+        for r_idx in range(fila_ini, min(ws.max_row + 1, 80)):
+            val = ws.cell(row=r_idx, column=col_idx).value
+            if val is not None:
+                s_val = str(val)
+                if not s_val.startswith("="):
+                    max_len = max(max_len, len(s_val))
+        limite_sup = col_a_max if col_idx == 1 else max_width
+        ws.column_dimensions[col_letter].width = max(min(max_len + 4, limite_sup), min_width)
+
+
 def exportar_excel_controles_2_y_5(
     df_mymaps: pd.DataFrame,
     df_censo: pd.DataFrame,
@@ -625,151 +639,307 @@ def exportar_excel_controles_2_y_5(
     df_aislamiento: pd.DataFrame,
 ) -> bytes:
     """
-    Genera un archivo Excel (.xlsx) listo para entregar en Control 2 y Control 5:
-    - Hoja 1: Base limpia para importar directamente en Google My Maps (Control 2 / Control 4).
-    - Hoja 2: Habitantes Censos 2017 y 2024, Ranking e Índice de Primacía con FÓRMULAS EXCEL (Control 5).
-    - Hoja 3: Escalograma de Guttman y Centralidad de Rondinelli para las 10 mayores comunas con FÓRMULAS EXCEL.
-    - Hoja 4: Matriz de Aislamiento 0/1 con FÓRMULAS EXCEL de Índice de Aislamiento y Conectividad.
+    Genera un libro Excel (.xlsx) sobrio y homogéneo con fórmulas dinámicas:
+    - Base My Maps: fila 1 estrictamente encabezados para importación directa en Google My Maps.
+    - Primacía Censos: población comunal 2017–2024, rankings, cuota regional, Zipf y Primacía.
+    - Guttman Top 10: escalograma funcional y centralidad ponderada de Rondinelli.
+    - Aislamiento: matriz 0/1 con suma de aislamiento, índice promedio y conexiones directas.
     """
     wb = Workbook()
     wb.remove(wb.active)
 
-    fill_h = PatternFill("solid", fgColor="1E3A8A")
-    font_h = Font(name="Calibri", size=10, bold=True, color="FFFFFF")
-    fill_in = PatternFill("solid", fgColor="FEF9C3")
-    fill_fn = PatternFill("solid", fgColor="EFF6FF")
+    fill_titulo = PatternFill("solid", fgColor="262626")
+    fill_header = PatternFill("solid", fgColor="404040")
+    fill_subbloque = PatternFill("solid", fgColor="E5E7EB")
+    fill_total = PatternFill("solid", fgColor="D4D4D8")
+    fill_in = PatternFill("solid", fgColor="FFFFFF")
+    fill_cebra = PatternFill("solid", fgColor="F9FAFB")
+    fill_fn = PatternFill("solid", fgColor="F3F4F6")
 
-    # HOJA 1: GOOGLE MY MAPS (CONTROL 2 / CONTROL 4) — Fila 1 estrictamente encabezados
-    ws1 = wb.create_sheet("01_Base_Google_MyMaps")
+    font_titulo = Font(name="Calibri", size=12, bold=True, color="FFFFFF")
+    font_sub = Font(name="Calibri", size=10, italic=True, color="374151")
+    font_header = Font(name="Calibri", size=10, bold=True, color="FFFFFF")
+    font_bold = Font(name="Calibri", size=10, bold=True, color="111827")
+    font_celda = Font(name="Calibri", size=10, color="1F2937")
+
+    borde = Border(
+        left=Side(style="thin", color="D1D5DB"),
+        right=Side(style="thin", color="D1D5DB"),
+        top=Side(style="thin", color="D1D5DB"),
+        bottom=Side(style="thin", color="D1D5DB"),
+    )
+    borde_total = Border(
+        left=Side(style="thin", color="9CA3AF"),
+        right=Side(style="thin", color="9CA3AF"),
+        top=Side(style="thin", color="262626"),
+        bottom=Side(style="double", color="262626"),
+    )
+
+    def _banner_ot(ws, n_cols: int, titulo: str, subtitulo: str):
+        ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=n_cols)
+        ct = ws.cell(row=1, column=1, value=titulo)
+        ct.fill = fill_titulo
+        ct.font = font_titulo
+        ct.alignment = Alignment(horizontal="left", vertical="center")
+        ws.row_dimensions[1].height = 26
+
+        ws.merge_cells(start_row=2, start_column=1, end_row=2, end_column=n_cols)
+        cs = ws.cell(row=2, column=1, value=subtitulo)
+        cs.font = font_sub
+        cs.alignment = Alignment(horizontal="left", vertical="center")
+        ws.row_dimensions[2].height = 19
+
+    # HOJA 1: BASE MY MAPS (Fila 1 estrictamente encabezados para importar en Google My Maps)
+    ws1 = wb.create_sheet("Base My Maps")
     cols_mm = list(df_mymaps.columns)
     for c_i, col_name in enumerate(cols_mm, start=1):
         cell = ws1.cell(row=1, column=c_i, value=col_name)
-        cell.fill = fill_h
-        cell.font = font_h
+        cell.fill = fill_header
+        cell.font = font_header
+        cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+        cell.border = borde
+    ws1.row_dimensions[1].height = 24
+
     for r_i, row in enumerate(df_mymaps.itertuples(index=False), start=2):
+        fill_r = fill_in if (r_i % 2 == 0) else fill_cebra
         for c_i, val in enumerate(row, start=1):
-            ws1.cell(row=r_i, column=c_i, value=val)
+            c = ws1.cell(row=r_i, column=c_i, value=val)
+            c.font = font_celda
+            c.fill = fill_r
+            c.border = borde
+            if isinstance(val, (float, np.floating)):
+                c.number_format = "0.000000"
+                c.alignment = Alignment(horizontal="right", vertical="center")
+            else:
+                c.alignment = Alignment(horizontal="left", vertical="center")
+    ws1.freeze_panes = "B2"
+    _autoajustar_columnas_ot(ws1, fila_ini=1, max_width=36, min_width=12, col_a_max=12)
 
-    # HOJA 2: PRIMACÍA Y RANKING CENSOS 2017 VS 2024 (CONTROL 5)
-    ws2 = wb.create_sheet("02_Control5_Primacia_Censos")
-    ws2["A1"] = "CONTROL 5 — HABITANTES POR COMUNA (CENSOS 2017 Y 2024), RANKING E ÍNDICE DE PRIMACÍA"
-    ws2["A1"].font = Font(size=12, bold=True, color="1E3A8A")
-
+    # HOJA 2: PRIMACÍA CENSOS (2017–2024)
+    ws2 = wb.create_sheet("Primacía Censos")
     headers_p = [
         "Comuna", "Provincia", "Censo 2017", "Censo 2024",
-        "Ranking 2017", "Ranking 2024", "Variación %", "Cuota Regional 2024 %", "Zipf Teórico (P1/Rango)",
+        "Ranking 2017", "Ranking 2024", "Variación (%)", "Cuota Regional 2024 (%)", "Zipf Teórico (P1/Rango)",
     ]
+    _banner_ot(
+        ws2,
+        len(headers_p),
+        "HABITANTES POR COMUNA (CENSOS 2017–2024), RANKING E ÍNDICE DE PRIMACÍA",
+        "Fuente: INE (Censos 2017 y 2024) | Ordenamiento Territorial",
+    )
+
     for c_i, h in enumerate(headers_p, start=1):
-        cell = ws2.cell(row=3, column=c_i, value=h)
-        cell.fill = fill_h
-        cell.font = font_h
+        cell = ws2.cell(row=4, column=c_i, value=h)
+        cell.fill = fill_header
+        cell.font = font_header
+        cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+        cell.border = borde
+    ws2.row_dimensions[4].height = 25
 
     n_com = len(df_censo)
-    fila_tot = 4 + n_com
-    for idx_r, row in enumerate(df_censo.itertuples(index=False), start=4):
-        ws2.cell(row=idx_r, column=1, value=row.Comuna)
-        ws2.cell(row=idx_r, column=2, value=row.Provincia)
+    fila_ini_2 = 5
+    fila_tot = fila_ini_2 + n_com
+    for idx_r, row in enumerate(df_censo.itertuples(index=False), start=fila_ini_2):
+        fill_r = fill_in if (idx_r % 2 == 1) else fill_cebra
+        c_com = ws2.cell(row=idx_r, column=1, value=row.Comuna)
+        c_pro = ws2.cell(row=idx_r, column=2, value=row.Provincia)
+        for ct in (c_com, c_pro):
+            ct.font = font_celda
+            ct.fill = fill_r
+            ct.alignment = Alignment(horizontal="left", vertical="center")
+            ct.border = borde
+
         c17 = ws2.cell(row=idx_r, column=3, value=int(row.Censo_2017))
         c24 = ws2.cell(row=idx_r, column=4, value=int(row.Censo_2024))
-        c17.fill = fill_in
-        c24.fill = fill_in
-        c17.number_format = "#,##0"
-        c24.number_format = "#,##0"
+        for cp in (c17, c24):
+            cp.fill = fill_r
+            cp.font = font_celda
+            cp.number_format = "#,##0"
+            cp.alignment = Alignment(horizontal="right", vertical="center")
+            cp.border = borde
 
-        cr17 = ws2.cell(row=idx_r, column=5, value=f"=RANK(C{idx_r},$C$4:$C${fila_tot-1})")
-        cr24 = ws2.cell(row=idx_r, column=6, value=f"=RANK(D{idx_r},$D$4:$D${fila_tot-1})")
-        cvar = ws2.cell(row=idx_r, column=7, value=f"=(D{idx_r}/C{idx_r})-1")
-        ccuo = ws2.cell(row=idx_r, column=8, value=f"=D{idx_r}/$D${fila_tot}")
-        czip = ws2.cell(row=idx_r, column=9, value=f"=$D$4/F{idx_r}")
-        for cf in (cr17, cr24, cvar, ccuo, czip):
+        cr17 = ws2.cell(row=idx_r, column=5, value=f"=RANK(C{idx_r},$C${fila_ini_2}:$C${fila_tot-1})")
+        cr24 = ws2.cell(row=idx_r, column=6, value=f"=RANK(D{idx_r},$D${fila_ini_2}:$D${fila_tot-1})")
+        cvar = ws2.cell(row=idx_r, column=7, value=f"=IF(C{idx_r}>0,(D{idx_r}/C{idx_r})-1,0)")
+        ccuo = ws2.cell(row=idx_r, column=8, value=f"=IF($D${fila_tot}>0,D{idx_r}/$D${fila_tot},0)")
+        czip = ws2.cell(row=idx_r, column=9, value=f"=IF(F{idx_r}>0,$D${fila_ini_2}/F{idx_r},0)")
+
+        for cf, fmt in [(cr17, "0"), (cr24, "0"), (cvar, "0.00%"), (ccuo, "0.00%"), (czip, "#,##0")]:
             cf.fill = fill_fn
-        cvar.number_format = "0.00%"
-        ccuo.number_format = "0.00%"
-        czip.number_format = "#,##0"
+            cf.font = font_celda
+            cf.number_format = fmt
+            cf.alignment = Alignment(horizontal="right", vertical="center")
+            cf.border = borde
 
-    ws2.cell(row=fila_tot, column=1, value="TOTAL REGIONAL").font = Font(bold=True)
-    ws2.cell(row=fila_tot, column=3, value=f"=SUM(C4:C{fila_tot-1})").fill = fill_fn
-    ws2.cell(row=fila_tot, column=4, value=f"=SUM(D4:D{fila_tot-1})").fill = fill_fn
+    ws2.cell(row=fila_tot, column=1, value="Total regional")
+    ws2.cell(row=fila_tot, column=3, value=f"=SUM(C{fila_ini_2}:C{fila_tot-1})").number_format = "#,##0"
+    ws2.cell(row=fila_tot, column=4, value=f"=SUM(D{fila_ini_2}:D{fila_tot-1})").number_format = "#,##0"
+    ws2.cell(row=fila_tot, column=7, value=f"=IF(C{fila_tot}>0,(D{fila_tot}/C{fila_tot})-1,0)").number_format = "0.00%"
+    ws2.cell(row=fila_tot, column=8, value=f"=SUM(H{fila_ini_2}:H{fila_tot-1})").number_format = "0.00%"
+    for c_i in range(1, 10):
+        ct = ws2.cell(row=fila_tot, column=c_i)
+        ct.font = font_bold
+        ct.fill = fill_total
+        ct.border = borde_total
+        if c_i >= 3:
+            ct.alignment = Alignment(horizontal="right", vertical="center")
 
-    ws2.cell(row=fila_tot + 2, column=1, value="Índice de Primacía 2 Ciudades (P1 / P2)").font = Font(bold=True)
-    ws2.cell(row=fila_tot + 2, column=3, value="=C4/C5").fill = fill_fn
-    ws2.cell(row=fila_tot + 2, column=4, value="=D4/D5").fill = fill_fn
+    for offset, etq_p, f17, f24 in [
+        (2, "Índice de Primacía 2 ciudades (P1 / P2)", f"=IF(C{fila_ini_2+1}>0,C{fila_ini_2}/C{fila_ini_2+1},0)", f"=IF(D{fila_ini_2+1}>0,D{fila_ini_2}/D{fila_ini_2+1},0)"),
+        (3, "Índice de Primacía 4 ciudades (P1 / Suma P2:P4)", f"=IF(SUM(C{fila_ini_2+1}:C{fila_ini_2+3})>0,C{fila_ini_2}/SUM(C{fila_ini_2+1}:C{fila_ini_2+3}),0)", f"=IF(SUM(D{fila_ini_2+1}:D{fila_ini_2+3})>0,D{fila_ini_2}/SUM(D{fila_ini_2+1}:D{fila_ini_2+3}),0)"),
+    ]:
+        r_p = fila_tot + offset
+        ws2.merge_cells(start_row=r_p, start_column=1, end_row=r_p, end_column=2)
+        cl = ws2.cell(row=r_p, column=1, value=etq_p)
+        cl.font = font_bold
+        cl.fill = fill_subbloque
+        ws2.cell(row=r_p, column=1).border = borde
+        ws2.cell(row=r_p, column=2).border = borde
 
-    ws2.cell(row=fila_tot + 3, column=1, value="Índice de Primacía 4 Ciudades P1 / SUM(P2:P4)").font = Font(bold=True)
-    ws2.cell(row=fila_tot + 3, column=3, value="=C4/SUM(C5:C7)").fill = fill_fn
-    ws2.cell(row=fila_tot + 3, column=4, value="=D4/SUM(D5:D7)").fill = fill_fn
+        for col_p, form_p in [(3, f17), (4, f24)]:
+            cp = ws2.cell(row=r_p, column=col_p, value=form_p)
+            cp.font = font_bold
+            cp.fill = fill_fn
+            cp.number_format = "0.000"
+            cp.alignment = Alignment(horizontal="right", vertical="center")
+            cp.border = borde
 
-    # HOJA 3: ESCALOGRAMA DE GUTTMAN Y RONDINELLI (10 COMUNAS MÁS POBLADAS)
-    ws3 = wb.create_sheet("03_Control5_Guttman_10Com")
-    ws3["A1"] = "CONTROL 5 — ESCALA DE GUTTMAN Y CENTRALIDAD DE RONDINELLI (10 COMUNAS CON MÁS POBLACIÓN)"
-    ws3["A1"].font = Font(size=12, bold=True, color="1E3A8A")
+    ws2.freeze_panes = "B5"
+    _autoajustar_columnas_ot(ws2, fila_ini=4)
 
+    # HOJA 3: GUTTMAN TOP 10 (ESCALOGRAMA FUNCIONAL Y RONDINELLI)
+    ws3 = wb.create_sheet("Guttman Top 10")
     funcs_cols = list(df_guttman.columns)
-    headers_g = ["Comuna (Top 10)"] + funcs_cols + ["Total Funciones Comuna", "Índice Centralidad Rondinelli"]
+    headers_g = ["Comuna"] + funcs_cols + ["Total funciones", "Índice Centralidad Rondinelli"]
+    _banner_ot(
+        ws3,
+        len(headers_g),
+        "ESCALOGRAMA DE GUTTMAN Y CENTRALIDAD DE RONDINELLI (TOP 10 COMUNAL)",
+        "Presencia (1) o ausencia (0) de servicios y equipamiento urbano | Ponderación 100 / Frecuencia",
+    )
+
     for c_i, h in enumerate(headers_g, start=1):
-        cell = ws3.cell(row=3, column=c_i, value=h)
-        cell.fill = fill_h
-        cell.font = font_h
+        cell = ws3.cell(row=4, column=c_i, value=h)
+        cell.fill = fill_header
+        cell.font = font_header
+        cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+        cell.border = borde
+    ws3.row_dimensions[4].height = 26
 
     n_f = len(funcs_cols)
+    n_g = len(df_guttman)
+    fila_ini_3 = 5
+    fila_frec = fila_ini_3 + n_g
+    fila_peso = fila_frec + 1
     col_fin_f = get_column_letter(1 + n_f)
-    for r_i, com_nom in enumerate(df_guttman.index, start=4):
-        ws3.cell(row=r_i, column=1, value=com_nom)
+
+    for r_i, com_nom in enumerate(df_guttman.index, start=fila_ini_3):
+        fill_r = fill_in if (r_i % 2 == 1) else fill_cebra
+        c_com = ws3.cell(row=r_i, column=1, value=com_nom)
+        c_com.font = font_celda
+        c_com.fill = fill_r
+        c_com.border = borde
+
         for f_i, f_nom in enumerate(funcs_cols, start=2):
             c = ws3.cell(row=r_i, column=f_i, value=int(df_guttman.loc[com_nom, f_nom]))
-            c.fill = fill_in
-            c.alignment = Alignment(horizontal="center")
+            c.fill = fill_r
+            c.font = font_celda
+            c.alignment = Alignment(horizontal="center", vertical="center")
+            c.border = borde
+
         csum = ws3.cell(row=r_i, column=2 + n_f, value=f"=SUM(B{r_i}:{col_fin_f}{r_i})")
         csum.fill = fill_fn
-        f_pond = "+".join([f"{get_column_letter(c)}{r_i}*${get_column_letter(c)}$15" for c in range(2, 2 + n_f)])
+        csum.font = font_bold
+        csum.alignment = Alignment(horizontal="right", vertical="center")
+        csum.border = borde
+
+        f_pond = "+".join([f"{get_column_letter(c)}{r_i}*${get_column_letter(c)}${fila_peso}" for c in range(2, 2 + n_f)])
         cic = ws3.cell(row=r_i, column=3 + n_f, value=f"={f_pond}")
         cic.fill = fill_fn
+        cic.font = font_bold
         cic.number_format = "0.00"
+        cic.alignment = Alignment(horizontal="right", vertical="center")
+        cic.border = borde
 
-    ws3.cell(row=14, column=1, value="Frecuencia Comunal (Suma)").font = Font(bold=True)
-    ws3.cell(row=15, column=1, value="Peso Rondinelli (100 / Frecuencia)").font = Font(bold=True)
+    ws3.cell(row=fila_frec, column=1, value="Frecuencia comunal (Suma)")
+    ws3.cell(row=fila_peso, column=1, value="Peso Rondinelli (100 / Frecuencia)")
     for c_i in range(2, 2 + n_f):
         cl = get_column_letter(c_i)
-        c14 = ws3.cell(row=14, column=c_i, value=f"=SUM({cl}4:{cl}13)")
-        c15 = ws3.cell(row=15, column=c_i, value=f"=IF({cl}14>0,100/{cl}14,0)")
-        c14.fill = fill_fn
-        c15.fill = fill_fn
-        c15.number_format = "0.00"
+        c_fr = ws3.cell(row=fila_frec, column=c_i, value=f"=SUM({cl}{fila_ini_3}:{cl}{fila_frec-1})")
+        c_fr.alignment = Alignment(horizontal="center", vertical="center")
+        c_pe = ws3.cell(row=fila_peso, column=c_i, value=f"=IF({cl}{fila_frec}>0,100/{cl}{fila_frec},0)")
+        c_pe.number_format = "0.00"
+        c_pe.alignment = Alignment(horizontal="right", vertical="center")
 
-    # HOJA 4: MATRIZ DE AISLAMIENTO (0 = CONECTADA DIRECTAMENTE, 1 = NO CONECTADA)
-    ws4 = wb.create_sheet("04_Control5_Aislamiento")
-    ws4["A1"] = "CONTROL 5 — MATRIZ DE AISLAMIENTO (0 = Conectada directamente/Asfalto | 1 = No conectada/Ripio)"
-    ws4["A1"].font = Font(size=12, bold=True, color="1E3A8A")
+    for c_i in range(1, 4 + n_f):
+        c_fr = ws3.cell(row=fila_frec, column=c_i)
+        c_fr.font = font_bold
+        c_fr.fill = fill_total
+        c_fr.border = borde_total
 
+        c_pe = ws3.cell(row=fila_peso, column=c_i)
+        c_pe.font = font_bold
+        c_pe.fill = fill_subbloque
+        c_pe.border = borde
+
+    ws3.freeze_panes = "B5"
+    _autoajustar_columnas_ot(ws3, fila_ini=4, max_width=24, min_width=13, col_a_max=28)
+
+    # HOJA 4: AISLAMIENTO (MATRIZ 0/1)
+    ws4 = wb.create_sheet("Aislamiento")
     locs = list(df_aislamiento.index)
     n_l = len(locs)
-    headers_a = ["Localidad / Comuna"] + locs + ["Suma Aislamiento (1s)", "Índice Aislamiento Promedio", "Conexiones Directas (0s)"]
+    headers_a = ["Localidad / Comuna"] + locs + ["Suma aislamiento (1)", "Índice aislamiento (%)", "Conexiones directas (0)"]
+    _banner_ot(
+        ws4,
+        len(headers_a),
+        "MATRIZ DE AISLAMIENTO COMUNAL",
+        "0 = conexión vial directa asfaltada | 1 = sin conexión directa",
+    )
+
     for c_i, h in enumerate(headers_a, start=1):
-        cell = ws4.cell(row=3, column=c_i, value=h)
-        cell.fill = fill_h
-        cell.font = font_h
+        cell = ws4.cell(row=4, column=c_i, value=h)
+        cell.fill = fill_header
+        cell.font = font_header
+        cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+        cell.border = borde
+    ws4.row_dimensions[4].height = 25
 
     col_fin_l = get_column_letter(1 + n_l)
-    for r_i, loc_nom in enumerate(locs, start=4):
-        ws4.cell(row=r_i, column=1, value=loc_nom)
-        for c_i, col_nom in enumerate(locs, start=2):
-            if r_i - 4 == c_i - 2:
-                ws4.cell(row=r_i, column=c_i, value="")
+    fila_ini_4 = 5
+    for idx_off, loc_nom in enumerate(locs):
+        r_i = fila_ini_4 + idx_off
+        fill_r = fill_in if (r_i % 2 == 1) else fill_cebra
+        c_loc = ws4.cell(row=r_i, column=1, value=loc_nom)
+        c_loc.font = font_celda
+        c_loc.fill = fill_r
+        c_loc.border = borde
+
+        for c_off, col_nom in enumerate(locs):
+            c_i = 2 + c_off
+            if idx_off == c_off:
+                cd = ws4.cell(row=r_i, column=c_i, value=None)
+                cd.fill = fill_subbloque
+                cd.border = borde
             else:
                 c = ws4.cell(row=r_i, column=c_i, value=int(df_aislamiento.loc[loc_nom, col_nom]))
-                c.fill = fill_in
-                c.alignment = Alignment(horizontal="center")
+                c.fill = fill_r
+                c.font = font_celda
+                c.alignment = Alignment(horizontal="center", vertical="center")
+                c.border = borde
 
         csum1 = ws4.cell(row=r_i, column=2 + n_l, value=f"=SUM(B{r_i}:{col_fin_l}{r_i})")
         cavg1 = ws4.cell(row=r_i, column=3 + n_l, value=f"=AVERAGE(B{r_i}:{col_fin_l}{r_i})")
         ccon0 = ws4.cell(row=r_i, column=4 + n_l, value=f"=COUNTIF(B{r_i}:{col_fin_l}{r_i},0)")
-        for cf in (csum1, cavg1, ccon0):
+        for cf, fmt in [(csum1, "0"), (cavg1, "0.00%"), (ccon0, "0")]:
             cf.fill = fill_fn
-        cavg1.number_format = "0.00%"
+            cf.font = font_bold
+            cf.number_format = fmt
+            cf.alignment = Alignment(horizontal="right", vertical="center")
+            cf.border = borde
 
-    for ws in [ws1, ws2, ws3, ws4]:
-        for col in range(1, ws.max_column + 1):
-            ws.column_dimensions[get_column_letter(col)].width = 20
+    ws4.freeze_panes = "B5"
+    _autoajustar_columnas_ot(ws4, fila_ini=4, max_width=22, min_width=13, col_a_max=28)
 
     buf = io.BytesIO()
     wb.save(buf)
@@ -804,7 +974,7 @@ def renderizar_redes_territorio_ot():
 
     bytes_c2_c5 = exportar_excel_controles_2_y_5(df_lactea_22, df_censo_ll, df_gutt_def, df_aisl_def)
     st.download_button(
-        label="Descargar Libro Excel Oficial Base (My Maps + Primacía, Guttman y Aislamiento con Fórmulas)",
+        label="Descargar Reporte Excel (My Maps, Primacía, Guttman y Aislamiento)",
         data=bytes_c2_c5,
         file_name="GRUPO_Controles_2_4_5_Osorno_LosLagos.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -1136,7 +1306,7 @@ def renderizar_redes_territorio_ot():
         )
         slug_reg = reg_c5.split("(")[0].strip().replace(" ", "_")
         st.download_button(
-            label=f"Descargar Excel con Fórmulas Vivas de la Región Seleccionada ({reg_c5.split('(')[0].strip()})",
+            label=f"Descargar Reporte Excel — {reg_c5.split('(')[0].strip()}",
             data=bytes_reg_activa,
             file_name=f"Control5_Primacia_Guttman_Aislamiento_{slug_reg}.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
