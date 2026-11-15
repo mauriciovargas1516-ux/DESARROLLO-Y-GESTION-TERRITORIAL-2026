@@ -1,153 +1,72 @@
-# Desarrollo y Gestión Territorial 2026 — Universidad de Los Lagos
+[readme_desarrollo_y_gestion_territorial_2026.md](https://github.com/user-attachments/files/34865658/readme_desarrollo_y_gestion_territorial_2026.md)
+# Plataforma Integral de Desarrollo y Gestión Territorial 2026 — ULagos
 
 [![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://desarrollo-y-gestion-territorial-2026-ec6keylhsgra88s77bkl6f.streamlit.app/)
-[![Lanzar Plataforma en Streamlit](https://img.shields.io/badge/ABRIR_PLATAFORMA_INTERACTIVA_EN_STREAMLIT-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)](https://desarrollo-y-gestion-territorial-2026-ec6keylhsgra88s77bkl6f.streamlit.app/)
+[![Lanzar Plataforma en Streamlit](https://img.shields.io/badge/ABRIR_PLATAFORMA_TERRITORIAL_EN_STREAMLIT-1E3A8A?style=for-the-badge&logo=streamlit&logoColor=white)](https://desarrollo-y-gestion-territorial-2026-ec6keylhsgra88s77bkl6f.streamlit.app/)
 [![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://github.com/mauriciovargas1516-ux/DESARROLLO-Y-GESTION-TERRITORIAL-2026)
 
-Plataforma integral de modelamiento econométrico, análisis espacial, redes productivas y ordenamiento territorial desarrollada en **Python + Streamlit** para la asignatura de **Desarrollo y Gestión Territorial** (Ingeniería Comercial, Universidad de Los Lagos — Prof. Claudio Mancilla).
+Motor econométrico, sociométrico y espacial desarrollado en **Python (`Streamlit`, `Pandas`, `NumPy`, `SciPy`, `Plotly`, `OpenPyXL`)** para la asignatura **Desarrollo y Gestión Territorial** (Carrera de Ingeniería Comercial, Universidad de Los Lagos — Prof. Claudio Mancilla). Integra en **8 módulos interactivos** el procesamiento de estadísticas tributarias comunales del **SII (2014–2024)**, metodologías de análisis regional de **ILPES / CEPAL (Lira y Quiroga; Silva Lira)**, réplica econométrica del paquete **REAT** de R, **Sistemas Productivos Locales y Redes Empresariales (Dini, 2010; UCINET)**, **Cadenas de Valor (Padilla y Oddone, 2016)** y **Ordenamiento Territorial (Rondinelli, Guttman, Primacía Urbana, von Thünen, Boisier ELITE y PROT)**.
 
 **Acceso directo a la aplicación web en vivo:**  
 https://desarrollo-y-gestion-territorial-2026-ec6keylhsgra88s77bkl6f.streamlit.app/
 
 ---
 
-## Guía Rápida de Uso (Sin conocimientos de programación)
+## Arquitectura de los 8 Módulos Interactivos (`app.py`)
 
-Cualquier estudiante, grupo de trabajo o analista regional puede utilizar la plataforma directamente desde el navegador en **3 pasos**:
-
-1. **Seleccionar el Módulo en la Barra Lateral Izquierda:** El menú organiza secuencialmente las unidades del curso y las entregas prácticas (Módulos 1 al 7).
-2. **Elegir Región, Variable o Matriz de Trabajo:**
-   * En los **Módulos 1, 2 y 5**, puedes seleccionar cualquier región de Chile disponible en la base nacional del SII (`ILPES GRUPO 10 29-10-2026.xlsx`), cambiar la métrica económica (*Ventas en UF, Trabajadores dependientes, Número de empresas, Renta neta*) o subir tu propio archivo Excel del SII.
-   * En los **Módulos 3, 4 y 7**, todas las tablas en pantalla son **interactivas y editables en vivo**: haz doble clic sobre cualquier celda para modificar coordenadas, poblaciones censales o vínculos `1/0` y los gráficos, mapas e indicadores se recalcularán al instante.
-3. **Descargar Entregables en Excel con Fórmulas Nativas Activas:** Cada módulo cuenta con botones de exportación directa a `.xlsx` que entregan tanto las matrices procesadas como libros con **fórmulas nativas de Excel vivas** (`=LN`, `=SLOPE`, `=STDEV.P`, `=RANK`, `=SUM`, `=COUNTIF`), listos para auditar o adjuntar en controles e informes.
-
----
-
-## Impacto Cuantitativo y Multiplicadores de Velocidad (Motor Python vs. Flujo Manual)
-
-El desarrollo de esta arquitectura unificada reemplaza el uso fragmentado de múltiples programas (**Excel manual, scripts aislados en R Studio para `REAT`, software de escritorio `UCINET` y validación manual en Google My Maps**), eliminando errores de arrastre de fórmulas y comprimiendo semanas de trabajo operativo a segundos:
-
-### 1. Ahorro de Tiempo por Ciclo de Análisis Regional y Controles de Cátedra
-
-| Proceso Analítico / Entregable Académico | Volumen de Datos Activo | Tiempo Manual vs. Motor Cloud | Horas Ahorradas por Ciclo | % Mejora (Multiplicador) |
-| :--- | :--- | :---: | :---: | :---: |
-| **1. Cruce SII, Sistema TAREA (ILPES) y Shift & Share (MADE)** | Base SII 26,1 MB (33 comunas × 22 rubros × 20 años) | **14,5 hrs** vs. **0,05 hrs** (3 min) | **14,45 hrs/región** | **99,7% (290,0x más rápido)** |
-| **2. Econometría de Convergencia ($\sigma, \beta$), Lorenz, Theil y Markov** | 33 comunas + 16 regiones (OLS, Gini trapecios, $P^{61}$) | **8,0 hrs** vs. **0,03 hrs** (2 min) | **7,97 hrs/entrega** | **99,6% (240,0x más rápido)** |
-| **3. Redes Sociométricas (UCINET / Dini) y Sistema ELITE (Boisier)** | Matrices cuadradas $8\times8$ y $6\times6$ + grafos nodales | **4,5 hrs** vs. **0,05 hrs** (3 min) | **4,45 hrs/control** | **98,9% (90,0x más rápido)** |
-| **4. Georreferenciación Google My Maps y Auditoría (Control 2 y 4)** | 37 catastros (22 locales Lácteos + 15 Liceos Osorno) | **5,5 hrs** vs. **0,08 hrs** (5 min) | **5,42 hrs/control** | **98,5% (66,0x más rápido)** |
-| **5. Ordenamiento Territorial: Primacía, Guttman y Aislamiento (Control 5)** | 97 comunas (4 regiones Censos 2017–2024) + 4 Dim. Guttman | **9,5 hrs** vs. **0,07 hrs** (4 min) | **9,43 hrs/control** | **99,3% (142,5x más rápido)** |
-| **6. Compilación de Libros Excel Maestros con Fórmulas Vivas** | 18 hojas `.xlsx` totales (10 SII + 4 Cátedra + 4 Controles) | **12,0 hrs** vs. **0,02 hrs** (1 min) | **11,98 hrs/informe** | **99,8% (720,0x más rápido)** |
-| **TOTAL CICLO SEMESTRAL COMPLETO (1 REGIÓN)** | **Base Nacional SII + 16 Regiones + 97 Comunas OT** | **54,0 hrs** vs. **0,30 hrs (18 min)** | **53,70 hrs/semestre (6,7 jornadas)** | **99,4% (180,0x más rápido)** |
-
----
-
-### 2. Porcentaje de Mejora en Micro-Tareas Críticas de Cálculo y Auditoría
-
-| Micro-Tarea de Ingeniería Territorial o Econometría | Tiempo Manual (Excel / R / UCINET) | Tiempo Motor Cloud | Tiempo Ahorrado | % Mejora (Multiplicador) |
-| :--- | :---: | :---: | :---: | :---: |
-| **Filtrar y alinear matrices $V_0$ y $V_t$ en 26,1 MB del SII sin descalce de rubros** | 3,5 horas (tablas dinámicas) | **1,8 segundos** | 3,5 horas | **99,9% (7.000x más rápido)** |
-| **Clasificar comunas en las 6 tipologías de Boisier y 14 de Stilwell (MADE Modificado)** | 2,5 horas (condicionales manuales) | **0,05 segundos** | 2,5 horas | **99,9% (180.000x más rápido)** |
-| **Correr regresión OLS Beta ($\beta, \lambda$, semivida, $R^2, p$-valor) + Curva de Lorenz** | 1,8 horas (en R Studio / Excel) | **0,12 segundos** | 1,8 horas | **99,9% (54.000x más rápido)** |
-| **Elevar matriz de transición de Markov a $n=61$ décadas ($P^{61}$ ergódico)** | 1,2 horas (multiplicación matricial) | **0,01 segundos** | 1,2 horas | **99,9% (432.000x más rápido)** |
-| **Validar los 8 criterios técnicos de rúbrica para importar en Google My Maps** | 45,0 minutos (revisión fila a fila) | **0,02 segundos** | 45,0 minutos | **99,9% (135.000x más rápido)** |
-| **Recalcular Índice de Primacía, Ley de Zipf y Guttman al cambiar de región** | 4,0 horas (rearmar planillas INE) | **0,10 segundos** | 4,0 horas | **99,9% (144.000x más rápido)** |
-| **Inyectar fórmulas nativas vivas (`=SLOPE`, `=STDEV.P`, `=RANK`) en 8 hojas Excel** | 6,5 horas (sin errores `#¡REF!`) | **1,5 segundos** | 6,5 horas | **99,9% (15.600x más rápido)** |
-
----
-
-### 3. Arquitectura de Traspasabilidad Multirregional (El "Trampolín Territorial")
-
-Una vez que la lógica matricial vive estructurada en los 4 motores de Python del repositorio, la plataforma opera como un **traductor territorial universal**: cualquier grupo de trabajo puede cambiar la región objetivo o el periodo de análisis y obtener instantáneamente todos los diagnósticos sin reconstruir una sola fórmula:
-
-| Escenario de Expansión / Cambio de Caso | Volumen Procesado | Regla de Transformación Automática | Tiempo Manual | Tiempo Cloud |
-| :--- | :---: | :--- | :---: | :---: |
-| **Cambio de Región o Métrica en Base SII (Módulos 1, 2 y 5)** | 16 Regiones × 5 Variables SII | Pivoteo dinámico $V_0, V_t \rightarrow Q_{ij}, Q_r, CR_r, X_j, M_j$, MADE y REAT | 14,5 horas | **2,0 segundos** |
-| **Cambio de Región en Ordenamiento Territorial (Módulo 7 — Control 5)** | 97 Comunas (Los Lagos, Biobío, Los Ríos, Araucanía) | Recálculo automático de Primacía 2017–2024, Zipf, Guttman (4 Dim.) y Aislamiento 0/1 | 9,5 horas | **0,5 segundos** |
-| **Carga de un Nuevo Catastro Comunal para Google My Maps (Control 2 y 4)** | $N \ge 20$ establecimientos | Auditoría de coordenadas, renderizado de mapa interactivo y exportación `.xlsx` en fila 1 | 3,0 horas | **1,0 segundo** |
-
----
-
-## Arquitectura Detallada de los 7 Módulos
-
-### 1. Técnicas de Análisis Regional (ILPES / SII 2005–2024)
-* Procesamiento automatizado de microdatos comunales y sectoriales del **Servicio de Impuestos Internos (SII)** con foco en las 33 comunas de la Región del Biobío y selector multirregional.
-* Clasificación dinámica en los **Cuadrantes de Silva Lira (CEPAL, 2005)**.
-* Matrices de **Cociente de Localización ($Q_{ij}$)**, **Coeficiente de Especialización ($Q_r$)** y **Coeficiente de Reestructuración ($CR_r$)** en los rubros económicos del SII.
-* Estimación del modelo de **Base Económica Exportadora ($X_{ij}, X_j$)** y **Multiplicador Básico Regional ($M_j$)** de Tiebout / Lira & Quiroga.
-* Descomposición **Shift & Share (MADE Clásico y Modificado)**: Efecto Total ($ET_j$), Estructural ($EE_j$), Diferencial ($ED_j$), Estructural Inverso ($EI_j$), Estructural Modificado ($EM_j$) y Regional Modificado ($ERM_j$).
+### 1. Técnicas de Análisis Regional (ILPES / SII 2014–2024)
+* Construcción automatizada de matrices sectoriales-comunales $V_{ij}$ desde la base oficial del SII (`ILPES GRUPO 10 29-10-2026.xlsx`).
+* Cálculo de **Cociente de Localización ($Q_{ij}$)**, **Coeficiente de Especialización ($Q_r$)**, **Coeficiente de Reestructuración ($CR_r$)**, **Base Económica Exportadora de Tiebout ($X_j$ y multiplicador $M_j$)**, **Cuadrantes de Silva Lira (CEPAL, 2005)** y descomposición **Shift & Share Clásico y Modificado (MADE: $ET_j = EE_j + ED_j$, $EI_j, EM_j, ERM_j$)** con Notas Metodológicas desplegables.
 
 ### 2. Disparidades, Concentración y Convergencia Regional (Motor REAT)
-* Réplica en Python de las funciones econométricas del paquete **`REAT` (Regional Economic Analysis Toolbox)** de R.
-* **Convergencia Sigma ($\sigma_{\ln}$)**, **Coeficiente de Variación ($CV$)** y regresión OLS de **Convergencia Beta Absoluta ($\beta$)** con cálculo de velocidad anual ($\lambda$), semivida (*Half-life*), $R^2$ y $p$-valor.
-* **Curva de Lorenz**, **Índice de Gini** (estándar $G$ y normalizado $G^*$), **Índice de Entropía de Theil ($T$)**, **Herfindahl-Hirschman ($HHI, HHI_N$)** e **Índice de Hannah-Kay ($HK_\alpha$)** con parámetro de sensibilidad $\alpha$ configurable.
+* Réplica exacta en Python del paquete **REAT (*Regional Economic Analysis Toolbox*)**: **Convergencia Sigma ($\sigma_t, CV_t$)**, **Convergencia Beta Absoluta OLS ($\beta$, velocidad anual $\lambda$, semivida $t_{1/2}$ y valor $p$)**, **Curva de Lorenz**, **Índice de Gini ($G, G^*$)**, **Entropía de Theil ($T$)**, **Índice de Herfindahl-Hirschman ($HHI$)** e **Índice de Hannah-Kay ($HK_\alpha$)**.
 
-### 3. Sistemas Productivos Locales (SPL), Redes Empresariales y Cadenas de Valor
-* Simulador interactivo de matrices sociométricas y grafos de articulación empresarial (reemplazo práctico de **UCINET**) con cálculo de densidad de red, grado de entrada/salida y centralidad según **Dini (2010, CEPAL)**.
-* Diagnóstico de restricciones y estrategias de escalamiento (*Upgrading* de proceso, producto, funcional y tecnológico) bajo metodología **CEPAL (Padilla y Oddone, 2016)** aplicada al complejo forestal-maderero (**PymeMad Biobío — Los Ángeles**).
-* Descarga integrada del instrumento oficial de levantamiento primario en terreno (`cuestionario_entrevista.pdf`).
+### 3. Sistemas Productivos Locales (SPL), Redes (UCINET) y Cadenas de Valor
+* Simulador interactivo de matrices de adyacencia binaria (reemplazo de **UCINET**) con cálculo de grados de entrada/salida, centralidad nodal y densidad de red, junto al diagnóstico de restricciones y *Upgrading* de la cadena forestal-maderera (**PymeMad Biobío / Los Ángeles**).
 
-### 4. Ordenamiento Territorial, Matriz de Rondinelli y Georreferenciación
-* **Escalograma Funcional de Rondinelli (1985):** Edición interactiva de matrices de presencia/ausencia de funciones urbanas, ponderación inversa de frecuencia y jerarquización en 3 niveles de centralidad.
-* Cartografía georreferenciada de polos productivos y urbanos en las regiones del Biobío y Los Lagos.
+### 4. Ordenamiento Territorial, Escalograma de Rondinelli y Georreferenciación
+* Matriz editable de funciones urbanas con ponderación inversa de frecuencia ($W_k = N / f_k$) para el cálculo del **Índice de Centralidad Funcional de Rondinelli (1985)** y cartografía interactiva.
 
-### 5. Exportador Maestro SII (Libro Excel de 10 Hojas)
-* Motor de compilación en memoria (`openpyxl`) que permite cargar cualquier base estadística del SII o utilizar la base oficial del repositorio (`ILPES GRUPO 10 29-10-2026.xlsx`) y exportar un **libro Excel profesional de 10 hojas** con portada ejecutiva, matrices $V_0$ y $V_t$, $Q_{ij}$, $Q_r$, $CR_r$, $X_{ij}$, Cuadrantes de Silva Lira, Shift & Share Clásico/Modificado e indicadores REAT.
+### 5. Exportador Maestro SII (Generador Excel de 10 Hojas)
+* Compila y descarga un libro `.xlsx` de 10 hojas con todas las matrices sectoriales, indicadores ILPES, Shift & Share y regresiones REAT para cualquier región de Chile.
 
-### 6. Laboratorio Oficial de Cátedra + Exportador Excel con Fórmulas Vivas
-* **Cruce PIB Regional y Censo 2024:** Serie de PIB Regional encadenado del Banco Central (2015–2025) cruzada con la población del Censo Oficial 2024 (INE) y proyecciones demográficas para las **16 regiones de Chile**.
-* **Sistema TAREA (Manual 59 ILPES — Lira y Quiroga):** Resolución completa del caso de cátedra (*Badalona, Pueblo Seco y Pueblo Nuevo*) y del caso de las *Regiones de Colombia (1980–1996)*, incluyendo las **6 tipologías de Boisier (1980)**, las **14 tipologías de Stilwell (1969)**, Concentración Espacial ($Q_s$), Redistribución ($CR_s$) y Matriz de Asociación Geográfica ($CA_{i,k}$).
-* **Laboratorio Unidad 3:** Convergencia Base 1 (2010–2020), Gini por método de trapecios, Theil por cuotas, indicadores de desigualdad **CASEN (2009–2024)** ($10/10, 20/20, 10/40$), Concentración Relativa $CR_3$ en la Región de Los Lagos y **Cadenas de Markov** con vector ergódico de largo plazo (*Figueroa y Herrero, 2003*).
-* **Descarga de Excel con Fórmulas Nativas Activas:** Genera el archivo `Laboratorio_Catedra_Formulas_Vivas_ULagos.xlsx` con funciones vivas de Excel (`=LN`, `=SLOPE`, `=INTERCEPT`, `=RSQ`, `=STDEV.P`, `=SUM`, trapecios de Lorenz, MADE y Rondinelli).
+### 6. Laboratorio de Cátedra + Exportador Excel con Fórmulas Nativas Vivas
+* Simulador de **Movilidad de Quah (Cadenas de Markov y Vector Ergódico)**, **Descomposición de Theil ($T = T_B + T_W$)**, **Concentración Espacial de Ellison-Glaeser ($\gamma_i$)**, **Curvas de Renta de von Thünen** y descarga de libro Excel con fórmulas nativas vinculadas (`=SLOPE`, `=STDEV.P`, `=SUMPRODUCT`, `=RANK`, `=COUNTIF`).
 
-### 7. Laboratorio Práctico Multirregional Controles 2, 4 y 5 (My Maps, Cadenas, ELITE y PROT)
-* **Control 2 y Control 4 (Google My Maps):** Base georreferenciada editable de **22 establecimientos de la Cadena Láctea y Agroindustrial de Osorno** y base oficial de los **15 Liceos de Osorno (`Liceos.xlsx`)**, con validador automático de la rúbrica de 8 criterios técnicos y exportador directo para importar en Google My Maps.
-* **Unidad 4 y Control 4 (Cadenas de Valor y Entrevistas):** Caracterización de eslabones, actores directos y entidades de apoyo para la **Cadena Láctea y Quesera (ODEPA, 2019)** y el **Clúster de la Salmonicultura (Araya, 2016)**, junto con la pauta de 3 perfiles de entrevista y cuestionario validado de 8 preguntas.
-* **Sistema ELITE (Boisier, 1995):** Sociograma interinstitucional con índices de Cooperatividad, Conflictividad, Neutralidad y Ranking de Importancia Social Relativa.
-* **Control 5 Multirregional (97 Comunas) y PROT (SUBDERE-CEPAL, 2011):** Cálculo interactivo de **Índice de Primacía Urbana** (2 y 4 ciudades) y Ley de Zipf entre los Censos 2017 y 2024 para **4 regiones completas** (*Los Lagos 30 comunas, Biobío 33 comunas, Los Ríos 12 comunas y La Araucanía 32 comunas*), **Escala de Guttman** adaptada al Top 10 comunal en las 4 dimensiones oficiales, **Matriz de Aislamiento Comunal (0/1)** y buscador normativo del **Anexo 2 del PROT**, con exportación a Excel con fórmulas vivas para la región seleccionada.
+### 7. Controles 2, 4 y 5: Google My Maps, Cadenas, Sistema ELITE y PROT Multirregional
+* Catastro georreferenciado validado para **Google My Maps** (15 Liceos de Osorno y 22 establecimientos del complejo lácteo-quesero e industrial de Osorno), **Sistema ELITE de Sergio Boisier (1995)** y **Matriz de Compatibilidad Territorial PROT** para las 97 comunas de Biobío, La Araucanía, Los Ríos y Los Lagos.
+
+### 8. Extensión Interactiva: Redes en Vivo (Dini, 2010) y Gradientes de Concentración (`motor_redes_dinamicas_dini.py`)
+* **Constructor Animado de Redes Paso a Paso:** Permite visualizar mediante deslizador de secuencia o animación `Play` cómo se tejen los vínculos en las **5 estructuras de Dini (2010, `04 SPL.pdf` pág. 14)** (*Red Simétrica, Red con Liderazgo, Red Jerárquica, Red de Redes y Red de Producción de Aviones*) y en los **2 casos reales del Control 4** (*Red Láctea-Quesera de Osorno* y *Clúster Maderero PymeMad Biobío*), calculando en tiempo real el grado nodal $k_i$, la fórmula oficial de densidad:
+  $$D = \frac{2L}{n(n-1)}$$
+  y la curva de **Gradiente de Concentración de la Red ($GC_{red}$)**, con exportación directa a `.xlsx` con fórmulas vivas.
+* **Simulador de Gradiente de Concentración Territorial (`06 OT 2024.pdf`):** Integra el **Índice de Primacía Urbana ($IP_4 = \frac{P_1}{P_2+P_3+P_4}$)** con su tabla de estandarización de cátedra ($0$ a $3$), la curva de **Gradiente Jerárquico Funcional de Guttman / Rondinelli** y los anillos de **Renta Locacional de von Thünen ($LR(d) = Y(m-c) - Ytd$)**.
+* **Comparador de las 3 Estrategias de Articulación (`04 SPL.pdf` págs. 5–13):** Red Empresarial, Clúster Productivo y Sistema Productivo Local (SPL) junto al Cuadro 2 de cooperación interempresarial de **Schmitz (1999)**.
 
 ---
 
-## Estructura del Repositorio
+## Estructura de Archivos del Repositorio
 
 ```text
 DESARROLLO-Y-GESTION-TERRITORIAL-2026/
-├── app.py                              # Aplicación principal Streamlit y enrutador de los 7 módulos
-├── motor_sii_exportador.py             # Motor econométrico SII (ILPES / MADE / REAT) y exportador de 10 hojas
-├── motor_laboratorio_catedra.py        # Motor Sistema TAREA, PIB Censo 2024, Markov y Excel con fórmulas vivas
-├── motor_redes_territorio_ot.py        # Motor Multirregional Controles 2, 4 y 5 (My Maps, Cadenas, ELITE, Guttman y PROT)
-├── ILPES GRUPO 10 29-10-2026.xlsx      # Base de datos estadísticos SII e ILPES integrada en el repositorio
-├── cuestionario_entrevista.pdf         # Instrumento oficial de entrevista para trabajo de campo
-├── requirements.txt                    # Dependencias del entorno de ejecución en Python
-└── README.md                           # Documentación técnica, métricas de eficiencia y guía de uso
+├── app.py                               # Aplicación principal en Streamlit (Menú de 8 Módulos + Notas Metodológicas)
+├── motor_sii_exportador.py              # Motor matricial SII, ILPES, Shift & Share MADE, REAT y exportador Excel 10 hojas
+├── motor_laboratorio_catedra.py         # Motor de Markov (Quah), Theil (TB + TW), Ellison-Glaeser y Excel Fórmulas Vivas
+├── motor_redes_territorio_ot.py         # Motor Controles 2, 4 y 5 (Google My Maps, ODEPA, Boisier ELITE y PROT 97 comunas)
+├── motor_redes_dinamicas_dini.py        # Módulo 8: Redes animadas en vivo (Dini 2010), Notas Metodológicas y Gradientes
+├── ILPES GRUPO 10 29-10-2026.xlsx       # Base oficial nacional del SII e ILPES (26,1 MB)
+├── cuestionario_entrevista.pdf          # Instrumento oficial de levantamiento primario en terreno
+├── requirements.txt                     # Dependencias para despliegue en Streamlit Cloud
+└── README.md                            # Documentación técnica y académica del repositorio
 ```
 
 ---
 
-## Ejecución Local
-
-1. Clonar el repositorio e instalar las dependencias:
+## Instalación y Ejecución Local
 
 ```bash
-git clone [https://github.com/mauriciovargas1516-ux/DESARROLLO-Y-GESTION-TERRITORIAL-2026.git](https://github.com/mauriciovargas1516-ux/DESARROLLO-Y-GESTION-TERRITORIAL-2026.git)
+git clone https://github.com/mauriciovargas1516-ux/DESARROLLO-Y-GESTION-TERRITORIAL-2026.git
 cd DESARROLLO-Y-GESTION-TERRITORIAL-2026
 pip install -r requirements.txt
-```
-
-2. Iniciar la plataforma interactiva en el navegador:
-
-```bash
 streamlit run app.py
 ```
-
----
-
-## Referencias Metodológicas Principales
-
-* **Boisier, S. (1980, 1995).** *Técnicas de análisis regional con información limitada* y *El desafío territorial: Sistema ELITE*. ILPES / CEPAL.
-* **Dini, M. (2010).** *Competitividad, redes de empresas y cooperación empresarial*. Serie Gestión Pública N° 72, CEPAL.
-* **Figueroa, E. & Herrero, C. (2003).** *Análisis dinámico del desarrollo comunal en Chile mediante Cadenas de Markov*.
-* **Lira, L. & Quiroga, B. (2009).** *Técnicas de análisis regional (Sistema TAREA)*. Serie Manuales N° 59, ILPES / CEPAL.
-* **Padilla Pérez, R. & Oddone, N. (2016).** *Manual para el fortalecimiento de cadenas de valor*. CEPAL.
-* **Rondinelli, D. A. (1985).** *Applied Methods of Regional Analysis: The Spatial Dimensions of Development Policy*.
-* **Silva Lira, I. (2005).** *Disparidades, competitividad territorial y desarrollo local y regional en América Latina*. Serie Gestión Pública N° 33, ILPES / CEPAL.
-* **SUBDERE & CEPAL (2011).** *Guía Metodológica para la Elaboración del Plan Regional de Ordenamiento Territorial (PROT)*.
