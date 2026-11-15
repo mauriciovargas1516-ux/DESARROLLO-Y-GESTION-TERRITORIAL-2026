@@ -1,12 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-MOTOR ECONOMÉTRICO Y EXPORTADOR SII - ILPES / MADE / REAT (EDICIÓN EJECUTIVA SOBRIA)
-Asignatura: Desarrollo y Gestión Territorial - Universidad de Los Lagos
+Motor Econométrico y Exportador SII — ILPES / MADE / REAT
+Asignatura: Desarrollo y Gestión Territorial — Universidad de Los Lagos
 Archivo: motor_sii_exportador.py
-- Paleta monocromática ejecutiva (Gris Carbón #262626, Gris Pizarra #404040, Gris Piedra #E5E7EB) sin azules.
-- Hoja 07_Cuadrantes_Silva sobria (filas en blanco/cebra tenue, Matriz 2x2 en tonos piedra neutros).
-- Gráfico de dispersión de Silva Lira con coordenadas precalculadas en columnas ocultas O y P para
-  renderizado inmediato incluso en 'Vista Protegida' de Excel, manteniendo fórmulas vivas en la tabla.
 """
 
 import io
@@ -569,8 +565,73 @@ def calcular_todo_el_ramo(
     }
 
 
+
+# Población comunal referencial (Censo 2024 INE — Biobío, Los Lagos, Los Ríos y La Araucanía)
+_POBLACION_CENSO_2024_RAW = {
+    # Región del Biobío (33 comunas — Total: 1.613.059)
+    "Alto Biobío": 6016, "Antuco": 4373, "Arauco": 37163, "Cabrero": 31256,
+    "Cañete": 34640, "Chiguayante": 85822, "Concepción": 230375, "Contulmo": 5905,
+    "Coronel": 123648, "Curanilahue": 31119, "Florida": 12958, "Hualpén": 87731,
+    "Hualqui": 25795, "Laja": 23706, "Lebu": 25246, "Los Álamos": 21950,
+    "Los Ángeles": 219441, "Lota": 39980, "Mulchén": 29036, "Nacimiento": 26140,
+    "Negrete": 10723, "Penco": 48971, "Quilaco": 4440, "Quilleco": 9700,
+    "San Pedro de la Paz": 150992, "San Rosendo": 3575, "Santa Bárbara": 14075,
+    "Santa Juana": 14947, "Talcahuano": 147322, "Tirúa": 10208, "Tomé": 56907,
+    "Tucapel": 15729, "Yumbel": 23170,
+    # Región de Los Lagos (30 comunas)
+    "Puerto Montt": 275473, "Osorno": 174998, "Puerto Varas": 50010, "Castro": 48632,
+    "Ancud": 42158, "Calbuco": 37620, "Quellón": 30910, "Purranque": 21475,
+    "Frutillar": 21220, "Llanquihue": 19380, "Los Muermos": 17950, "Maullín": 15110,
+    "Río Negro": 14560, "Dalcahue": 15240, "Chonchi": 16120, "Fresia": 12810,
+    "Puyehue": 12390, "San Pablo": 10540, "Puerto Octay": 9450, "Quinchao": 8420,
+    "Quemchi": 8790, "San Juan de la Costa": 7890, "Hualaihué": 9680, "Queilén": 5610,
+    "Chaitén": 5420, "Cochamó": 4180, "Puqueldón": 4350, "Curaco de Vélez": 4080,
+    "Futaleufú": 2910, "Palena": 1890,
+    # Región de Los Ríos (12 comunas)
+    "Valdivia": 181240, "La Unión": 39850, "Panguipulli": 36410, "Río Bueno": 32680,
+    "Mariquina": 22840, "Paillaco": 21150, "Los Lagos": 20590, "Lanco": 17890,
+    "Futrono": 15520, "Lago Ranco": 10420, "Máfil": 7450, "Corral": 5510,
+    # Región de La Araucanía (32 comunas)
+    "Temuco": 304820, "Padre Las Casas": 83540, "Villarrica": 63910, "Angol": 56840,
+    "Victoria": 36120, "Lautaro": 40890, "Pucón": 34950, "Nueva Imperial": 34620,
+    "Carahue": 25680, "Loncoche": 24910, "Collipulli": 25840, "Pitrufquén": 26410,
+    "Freire": 25920, "Vilcún": 30480, "Traiguén": 19450, "Curacautín": 18290,
+    "Cunco": 18460, "Gorbea": 15180, "Teodoro Schmidt": 15620, "Saavedra": 13010,
+    "Purén": 12190, "Galvarino": 12540, "Cholchol": 12380, "Lonquimay": 10890,
+    "Renaico": 10740, "Toltén": 10120, "Lumaco": 9890, "Ercilla": 8110,
+    "Curarrehue": 8040, "Los Sauces": 7580, "Perquenco": 7320, "Melipeuco": 6650,
+}
+POBLACION_CENSO_2024 = {_normalizar_texto(k): int(v) for k, v in _POBLACION_CENSO_2024_RAW.items()}
+
+
+def _obtener_poblacion_comunas(comunas: list):
+    """Retorna lista de poblaciones Censo 2024 si todas las comunas están disponibles; si no, None."""
+    pobs = []
+    for com in comunas:
+        val = POBLACION_CENSO_2024.get(_normalizar_texto(com))
+        if val is None or val <= 0:
+            return None
+        pobs.append(int(val))
+    return pobs
+
+
+def _etiquetas_variable_sii(variable_sel: str, anio_0: int, anio_t: int):
+    """Genera etiquetas limpias para encabezados de la hoja Cuadrantes Silva."""
+    v_norm = _normalizar_texto(variable_sel)
+    if "venta" in v_norm:
+        return f"Ventas UF {anio_0}", f"Ventas UF {anio_t}", f"Ventas per cápita {anio_t} UF", "#,##0", "#,##0"
+    if "renta" in v_norm:
+        return f"Renta UF {anio_0}", f"Renta UF {anio_t}", f"Renta per cápita {anio_t} UF", "#,##0", "#,##0"
+    if "trabajador" in v_norm:
+        return f"Trabajadores {anio_0}", f"Trabajadores {anio_t}", f"Trabajadores per cápita {anio_t}", "#,##0", "0.000"
+    if "empresa" in v_norm:
+        return f"Empresas {anio_0}", f"Empresas {anio_t}", f"Empresas per cápita {anio_t}", "#,##0", "0.000"
+    base_txt = str(variable_sel).strip()[:20]
+    return f"{base_txt} {anio_0}", f"{base_txt} {anio_t}", f"{base_txt} per cápita {anio_t}", "#,##0.00", "0.00"
+
+
 def _estilizar_hoja_excel(ws, titulo_hoja: str, subtitulo: str, df_tabla: pd.DataFrame):
-    """Aplica diseño ejecutivo monocromático (Gris Carbón y Gris Pizarra, sin tonos azules)."""
+    """Aplica estilo monocromático limpio para tablas resumen."""
     fill_titulo = PatternFill("solid", fgColor="262626")
     fill_header = PatternFill("solid", fgColor="404040")
     fill_zebra = PatternFill("solid", fgColor="F9FAFB")
@@ -645,10 +706,10 @@ def _estilizar_hoja_excel(ws, titulo_hoja: str, subtitulo: str, df_tabla: pd.Dat
             len(str(ws.cell(row=r, column=col_idx).value or ""))
             for r in range(fila_header, min(fila_header + len(df_tabla) + 1, fila_header + 60))
         )
-        ws.column_dimensions[col_letter].width = max(min(max_len + 4, 38), 13)
+        ws.column_dimensions[col_letter].width = max(min(max_len + 4, 44), 14)
 
 
-def _autoajustar_columnas_hoja(ws, max_width: int = 34, min_width: int = 12):
+def _autoajustar_columnas_hoja(ws, max_width: int = 34, min_width: int = 13, col_a_max: int = 44):
     for col_idx in range(1, ws.max_column + 1):
         col_letter = get_column_letter(col_idx)
         if ws.column_dimensions[col_letter].hidden:
@@ -660,7 +721,8 @@ def _autoajustar_columnas_hoja(ws, max_width: int = 34, min_width: int = 12):
                 s_val = str(val)
                 if not s_val.startswith("="):
                     max_len = max(max_len, len(s_val))
-        ws.column_dimensions[col_letter].width = max(min(max_len + 4, max_width), min_width)
+        limite_sup = col_a_max if col_idx == 1 else max_width
+        ws.column_dimensions[col_letter].width = max(min(max_len + 4, limite_sup), min_width)
 
 
 def compilar_excel_10_hojas(
@@ -672,35 +734,30 @@ def compilar_excel_10_hojas(
     alpha_hk: float = 2.0,
 ) -> bytes:
     """
-    Genera en memoria un libro Excel (.xlsx) con 10 hojas completas en diseño ejecutivo sobrio:
-    - Paleta Gris Carbón (#262626) / Gris Pizarra (#404040) / Gris Piedra (#E5E7EB) sin tonos azules.
-    - Hoja 07 (Cuadrantes de Silva Lira) limpia sin arcoíris por fila y con coordenadas precalculadas
-      en columnas ocultas (O y P) para que el gráfico se visualice perfecto incluso en Vista Protegida.
+    Genera en memoria un libro Excel (.xlsx) de 10 hojas con nombres naturales,
+    paleta monocromática sobria, fórmulas dinámicas y Cuadrantes de Silva Lira
+    en formato estándar con Población (Censo 2024) e indicador per cápita.
     """
     wb = Workbook()
     wb.remove(wb.active)
 
-    sub_general = (
-        f"Región: {region_sel} | Variable: {variable_sel} | "
-        f"Periodo: {anio_0}-{anio_t} | Universidad de Los Lagos"
-    )
+    sub_general = f"{region_sel} | {variable_sel} | Periodo {anio_0}–{anio_t} | Fuente: SII"
 
-    # Paleta Ejecutiva Monocromática (Sin Azules ni Colores Chillones)
-    fill_titulo = PatternFill("solid", fgColor="262626")         # Gris Carbón Oscuro
-    fill_header = PatternFill("solid", fgColor="404040")         # Gris Pizarra Ejecutivo
-    fill_subbloque = PatternFill("solid", fgColor="E5E7EB")      # Gris Piedra Suave
-    fill_gris_total = PatternFill("solid", fgColor="D4D4D8")     # Gris Ceniza Totales
-    fill_amarillo_ref = PatternFill("solid", fgColor="E4E4E7")   # Gris Perla Referencia (reemplaza amarillo chillón)
-    fill_amarillo_made = PatternFill("solid", fgColor="F3F4F6")  # Gris Claro Institucional para franjas MADE Modificado
-    fill_rosado_q = PatternFill("solid", fgColor="FFC7CE")       # Formato condicional exigido para Q_ij > 1
+    # Paleta monocromática sobria
+    fill_titulo = PatternFill("solid", fgColor="262626")
+    fill_header = PatternFill("solid", fgColor="404040")
+    fill_subbloque = PatternFill("solid", fgColor="E5E7EB")
+    fill_gris_total = PatternFill("solid", fgColor="D4D4D8")
+    fill_ref = PatternFill("solid", fgColor="E4E4E7")
+    fill_made_mod = PatternFill("solid", fgColor="F3F4F6")
+    fill_rosado_q = PatternFill("solid", fgColor="FFC7CE")
 
-    # Rellenos sobrios para la hoja 07_Cuadrantes_Silva (sin arcoíris)
     fill_fila_blanca = PatternFill("solid", fgColor="FFFFFF")
     fill_fila_cebra = PatternFill("solid", fgColor="F9FAFB")
-    fill_cuad_1 = PatternFill("solid", fgColor="F3F4F6")         # Gris Perla Claro (Cuadrante I)
-    fill_cuad_2 = PatternFill("solid", fgColor="FAFAFA")         # Blanco Humo (Cuadrante II)
-    fill_cuad_3 = PatternFill("solid", fgColor="F4F4F5")         # Gris Zinc Tenue (Cuadrante III)
-    fill_cuad_4 = PatternFill("solid", fgColor="EBECEF")         # Gris Piedra Tenue (Cuadrante IV)
+    fill_cuad_1 = PatternFill("solid", fgColor="F3F4F6")
+    fill_cuad_2 = PatternFill("solid", fgColor="FAFAFA")
+    fill_cuad_3 = PatternFill("solid", fgColor="F4F4F5")
+    fill_cuad_4 = PatternFill("solid", fgColor="EBECEF")
 
     font_titulo = Font(name="Calibri", size=12, bold=True, color="FFFFFF")
     font_sub = Font(name="Calibri", size=10, italic=True, color="374151")
@@ -740,43 +797,43 @@ def compilar_excel_10_hojas(
     n_comunas = len(comunas)
 
     # ==========================================================================
-    # HOJA 1: PORTADA Y RESUMEN EJECUTIVO
+    # HOJA 1: RESUMEN
     # ==========================================================================
     df_portada = pd.DataFrame([
-        {"Parametro_Indicador": "Región Analizada", "Valor": str(region_sel)},
-        {"Parametro_Indicador": "Variable Económica SII", "Valor": str(variable_sel)},
-        {"Parametro_Indicador": "Periodo de Análisis", "Valor": f"{anio_0} - {anio_t} ({mb['T_anios']} años)"},
-        {"Parametro_Indicador": "Número de Comunas Activas", "Valor": tot["n_comunas"]},
-        {"Parametro_Indicador": "Número de Rubros Económicos SII", "Valor": tot["n_rubros"]},
-        {"Parametro_Indicador": f"Total Regional {anio_0}", "Valor": tot["total_reg_0"]},
-        {"Parametro_Indicador": f"Total Regional {anio_t}", "Valor": tot["total_reg_t"]},
-        {"Parametro_Indicador": "Variación Regional Acumulada (%)", "Valor": tot["tasa_var_reg"]},
-        {"Parametro_Indicador": "Pendiente Beta Absoluta (OLS)", "Valor": mb["beta"]},
-        {"Parametro_Indicador": "Intercepto Alpha (OLS)", "Valor": mb["alpha"]},
-        {"Parametro_Indicador": "Bondad de Ajuste R² (Convergencia Beta)", "Valor": mb["r2"]},
-        {"Parametro_Indicador": "P-Valor Regresión Beta", "Valor": mb["p_value"]},
-        {"Parametro_Indicador": "Velocidad de Convergencia (Lambda anual)", "Valor": mb["velocidad_lambda"]},
+        {"Indicador": "Región analizada", "Valor": str(region_sel)},
+        {"Indicador": "Variable económica (SII)", "Valor": str(variable_sel)},
+        {"Indicador": "Periodo de análisis", "Valor": f"{anio_0} – {anio_t} ({mb['T_anios']} años)"},
+        {"Indicador": "Comunas activas", "Valor": tot["n_comunas"]},
+        {"Indicador": "Rubros económicos SII", "Valor": tot["n_rubros"]},
+        {"Indicador": f"Total regional {anio_0}", "Valor": tot["total_reg_0"]},
+        {"Indicador": f"Total regional {anio_t}", "Valor": tot["total_reg_t"]},
+        {"Indicador": "Variación regional acumulada (%)", "Valor": tot["tasa_var_reg"]},
+        {"Indicador": "Pendiente Beta absoluta (OLS)", "Valor": mb["beta"]},
+        {"Indicador": "Intercepto Alpha (OLS)", "Valor": mb["alpha"]},
+        {"Indicador": "Coeficiente R² (Convergencia Beta)", "Valor": mb["r2"]},
+        {"Indicador": "P-valor regresión Beta", "Valor": mb["p_value"]},
+        {"Indicador": "Velocidad de convergencia (λ anual)", "Valor": mb["velocidad_lambda"]},
         {
-            "Parametro_Indicador": "Semivida (Half-Life en años)",
-            "Valor": float(mb["half_life"]) if np.isfinite(mb["half_life"]) else "No aplica (Divergencia)",
+            "Indicador": "Semivida (años)",
+            "Valor": float(mb["half_life"]) if np.isfinite(mb["half_life"]) else "No aplica (divergencia)",
         },
     ])
-    ws1 = wb.create_sheet("01_Portada_Resumen")
+    ws1 = wb.create_sheet("Resumen")
     _estilizar_hoja_excel(
         ws1,
-        "FICHA RESUMEN EJECUTIVA - MOTOR ECONOMÉTRICO SII / ILPES / REAT",
+        f"RESUMEN EJECUTIVO — ANÁLISIS REGIONAL ({region_sel.upper()})",
         sub_general,
         df_portada,
     )
 
     # ==========================================================================
-    # HOJAS 2 Y 3: MATRICES BASE V0 Y Vt CON FÓRMULAS =SUM(...)
+    # HOJAS 2 Y 3: BASE t0 Y BASE tf
     # ==========================================================================
-    for anio_mat, df_mat, pref_h in [(anio_0, V0, "02_Matriz_Base"), (anio_t, Vt, "03_Matriz_Base")]:
-        ws_m = wb.create_sheet(f"{pref_h}_{anio_mat}")
+    for anio_mat, df_mat in [(anio_0, V0), (anio_t, Vt)]:
+        ws_m = wb.create_sheet(f"Base {anio_mat}")
         n_cols_m = n_comunas + 2
         ws_m.merge_cells(start_row=1, start_column=1, end_row=1, end_column=n_cols_m)
-        ct = ws_m.cell(row=1, column=1, value=f"MATRIZ SECTORIAL-COMUNAL (AÑO {anio_mat}) - {variable_sel.upper()}")
+        ct = ws_m.cell(row=1, column=1, value=f"MATRIZ SECTORIAL-COMUNAL ({anio_mat}) — {variable_sel.upper()}")
         ct.fill = fill_titulo
         ct.font = font_titulo
         ws_m.row_dimensions[1].height = 25
@@ -785,7 +842,7 @@ def compilar_excel_10_hojas(
         cs = ws_m.cell(row=2, column=1, value=sub_general)
         cs.font = font_sub
 
-        headers_m = ["Rubro Económico SII"] + comunas + [f"TOTAL RUBRO {anio_mat}"]
+        headers_m = ["Rubro Económico SII"] + comunas + [f"Total Rubro {anio_mat}"]
         for c_i, h_txt in enumerate(headers_m, start=1):
             ch = ws_m.cell(row=4, column=c_i, value=h_txt)
             ch.fill = fill_header
@@ -814,7 +871,7 @@ def compilar_excel_10_hojas(
             c_tot_r.border = borde_fino
 
         fila_tot_m = fila_ini_m + n_rubros
-        ct_lbl = ws_m.cell(row=fila_tot_m, column=1, value=f"TOTAL COMUNAL {anio_mat}")
+        ct_lbl = ws_m.cell(row=fila_tot_m, column=1, value=f"Total comunal {anio_mat}")
         ct_lbl.font = font_bold
         ct_lbl.fill = fill_gris_total
         ct_lbl.border = borde_total
@@ -831,12 +888,12 @@ def compilar_excel_10_hojas(
         _autoajustar_columnas_hoja(ws_m)
 
     # ==========================================================================
-    # HOJA 4: COCIENTE DE LOCALIZACIÓN Q_ij (BLOQUES t0 Y tf + ROSADO #FFC7CE)
+    # HOJA 4: LOCALIZACIÓN Qij
     # ==========================================================================
-    ws4 = wb.create_sheet("04_Localizacion_Qij")
+    ws4 = wb.create_sheet("Localización Qij")
     n_cols_q = n_comunas + 1
     ws4.merge_cells(start_row=1, start_column=1, end_row=1, end_column=n_cols_q)
-    c4_t = ws4.cell(row=1, column=1, value=f"COCIENTE DE LOCALIZACIÓN (Qij) — COMPARATIVO AÑOS {anio_0} Y {anio_t}")
+    c4_t = ws4.cell(row=1, column=1, value=f"COCIENTE DE LOCALIZACIÓN (Qij) — AÑOS {anio_0} Y {anio_t}")
     c4_t.fill = fill_titulo
     c4_t.font = font_titulo
     ws4.row_dimensions[1].height = 26
@@ -845,7 +902,7 @@ def compilar_excel_10_hojas(
     c4_s = ws4.cell(
         row=2,
         column=1,
-        value="Celdas resaltadas en rosado (#FFC7CE) y texto rojo (#9C0006) indican especialización relativa exportadora (Qij > 1)",
+        value="Valores destacados (Qij > 1) indican especialización relativa respecto al promedio regional.",
     )
     c4_s.font = font_sub
 
@@ -860,7 +917,7 @@ def compilar_excel_10_hojas(
     fila_cursor = 4
     for etq_anio, mat_q in [(anio_0, Q0), (anio_t, Qt)]:
         ws4.merge_cells(start_row=fila_cursor, start_column=1, end_row=fila_cursor, end_column=n_cols_q)
-        cb = ws4.cell(row=fila_cursor, column=1, value=f"BLOQUE COCIENTE DE LOCALIZACIÓN (Qij) — AÑO {etq_anio}")
+        cb = ws4.cell(row=fila_cursor, column=1, value=f"Cociente de Localización (Qij) — Año {etq_anio}")
         cb.fill = fill_subbloque
         cb.font = font_subbloque
         ws4.row_dimensions[fila_cursor].height = 21
@@ -903,15 +960,15 @@ def compilar_excel_10_hojas(
     _autoajustar_columnas_hoja(ws4)
 
     # ==========================================================================
-    # HOJA 5: ESPECIALIZACIÓN (Qr) CON MATRIZ RUBRO x COMUNA Y FILA GRIS =SUM()/2
+    # HOJA 5: ESPECIALIZACIÓN (Qr y CRr)
     # ==========================================================================
-    ws5 = wb.create_sheet("05_Especializ_Qr_CRr")
+    ws5 = wb.create_sheet("Especialización")
     n_cols_e = n_comunas + 1
     ws5.merge_cells(start_row=1, start_column=1, end_row=1, end_column=n_cols_e)
     c5_t = ws5.cell(
         row=1,
         column=1,
-        value=f"COEFICIENTE DE ESPECIALIZACIÓN (Qr) — MATRIZ |Pij - Pi| Y FÓRMULA ACTIVA =SUM(...)/2 ({anio_0} Y {anio_t})",
+        value=f"COEFICIENTE DE ESPECIALIZACIÓN (Qr) Y REESTRUCTURACIÓN (CRr) — {anio_0} Y {anio_t}",
     )
     c5_t.fill = fill_titulo
     c5_t.font = font_titulo
@@ -921,7 +978,7 @@ def compilar_excel_10_hojas(
     c5_s = ws5.cell(
         row=2,
         column=1,
-        value="Cada bloque muestra la diferencia absoluta |Pij - Pi| por rubro y comuna, cerrando con la fila gris Coeficiente Especialización =SUM(...)/2",
+        value="Diferencias absolutas |Pij - Pi| por rubro y comuna. Fuente: SII.",
     )
     c5_s.font = font_sub
 
@@ -934,7 +991,7 @@ def compilar_excel_10_hojas(
         cb = ws5.cell(
             row=fila_cur_5,
             column=1,
-            value=f"MATRIZ DE DIFERENCIAS ABSOLUTAS |Pij - Pi| POR RUBRO Y COMUNA — AÑO {etq_anio}",
+            value=f"Diferencias absolutas |Pij - Pi| por rubro y comuna — Año {etq_anio}",
         )
         cb.fill = fill_subbloque
         cb.font = font_subbloque
@@ -966,7 +1023,7 @@ def compilar_excel_10_hojas(
             fila_cur_5 += 1
         f_fin_d = fila_cur_5 - 1
 
-        c_qr_lbl = ws5.cell(row=fila_cur_5, column=1, value=f"Coeficiente Especialización (Qr {etq_anio})")
+        c_qr_lbl = ws5.cell(row=fila_cur_5, column=1, value=f"Coeficiente de Especialización (Qr {etq_anio})")
         c_qr_lbl.font = font_bold
         c_qr_lbl.fill = fill_gris_total
         c_qr_lbl.border = borde_total
@@ -983,19 +1040,32 @@ def compilar_excel_10_hojas(
         ws5.row_dimensions[fila_cur_5].height = 22
         fila_cur_5 += 3
 
-    df_esp_res = resultados["df_especializacion"]
-    ws5.merge_cells(start_row=fila_cur_5, start_column=1, end_row=fila_cur_5, end_column=len(df_esp_res.columns))
+    df_esp_res = resultados["df_especializacion"].copy()
+    headers_esp_limpios = [
+        "Comuna",
+        f"Total {anio_0}",
+        f"Total {anio_t}",
+        f"Part. Regional {anio_0} (%)",
+        f"Part. Regional {anio_t} (%)",
+        f"Especialización Qr ({anio_0})",
+        f"Especialización Qr ({anio_t})",
+        "Reestructuración (CRr)",
+        f"Base Exportadora Xj ({anio_t})",
+        f"Prop. Básica {anio_t} (%)",
+        f"Multiplicador Mj ({anio_t})",
+    ]
+    ws5.merge_cells(start_row=fila_cur_5, start_column=1, end_row=fila_cur_5, end_column=len(headers_esp_limpios))
     c_res_t = ws5.cell(
         row=fila_cur_5,
         column=1,
-        value="TABLA RESUMEN CONSOLIDADA POR COMUNA (Qr, CRr, BASE EXPORTADORA Xj Y MULTIPLICADOR Mj)",
+        value="Resumen por comuna (Qr, CRr, Base Exportadora Xj y Multiplicador Mj)",
     )
     c_res_t.fill = fill_subbloque
     c_res_t.font = font_subbloque
     fila_cur_5 += 1
 
-    for c_i, col_name in enumerate(df_esp_res.columns, start=1):
-        ch = ws5.cell(row=fila_cur_5, column=c_i, value=str(col_name))
+    for c_i, col_name in enumerate(headers_esp_limpios, start=1):
+        ch = ws5.cell(row=fila_cur_5, column=c_i, value=col_name)
         ch.fill = fill_header
         ch.font = font_header
         ch.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
@@ -1016,15 +1086,15 @@ def compilar_excel_10_hojas(
     _autoajustar_columnas_hoja(ws5)
 
     # ==========================================================================
-    # HOJA 6: PRODUCCIÓN BÁSICA EXPORTABLE (CELDAS LIMPIAS + ROSADO + Xj y Mj)
+    # HOJA 6: PROD. BÁSICA (Xij y Mj)
     # ==========================================================================
-    ws6 = wb.create_sheet("06_Prod_Basica_Export")
+    ws6 = wb.create_sheet("Prod. Básica")
     n_cols_x = n_comunas + 2
     ws6.merge_cells(start_row=1, start_column=1, end_row=1, end_column=n_cols_x)
     c6_t = ws6.cell(
         row=1,
         column=1,
-        value=f"PRODUCCIÓN BÁSICA EXPORTABLE (Xij) Y MULTIPLICADOR BÁSICO (Mj) — AÑOS {anio_t} Y {anio_0}",
+        value=f"PRODUCCIÓN BÁSICA EXPORTABLE (Xij) Y MULTIPLICADOR BÁSICO (Mj) — {anio_t} Y {anio_0}",
     )
     c6_t.fill = fill_titulo
     c6_t.font = font_titulo
@@ -1034,7 +1104,7 @@ def compilar_excel_10_hojas(
     c6_s = ws6.cell(
         row=2,
         column=1,
-        value="Celdas sin excedente exportador (Qij <= 1) quedan en blanco; rubros exportadores (Xij > 0) se resaltan en rosado (#FFC7CE). Incluye Xj y Mj con fórmulas vivas.",
+        value="Excedente exportador en rubros con Qij > 1 y multiplicador básico comunal (Mj = Vj / Xj).",
     )
     c6_s.font = font_sub
 
@@ -1054,7 +1124,7 @@ def compilar_excel_10_hojas(
         cb = ws6.cell(
             row=fila_cur_6,
             column=1,
-            value=f"MATRIZ DE EXCEDENTE BÁSICO EXPORTABLE (Xij > 0) — AÑO {etq_anio}",
+            value=f"Excedente básico exportable (Xij > 0) — Año {etq_anio}",
         )
         cb.fill = fill_subbloque
         cb.font = font_subbloque
@@ -1104,7 +1174,7 @@ def compilar_excel_10_hojas(
         ws6.conditional_formatting.add(f"B{f_ini_x}:{ult_col_com_x}{f_fin_x}", regla_x_pos)
 
         f_vj = fila_cur_6
-        c_vj_lbl = ws6.cell(row=f_vj, column=1, value=f"Vj (Actividad Total Comunal {etq_anio})")
+        c_vj_lbl = ws6.cell(row=f_vj, column=1, value=f"Vj — Actividad total comunal ({etq_anio})")
         c_vj_lbl.font = font_bold
         c_vj_lbl.fill = fill_subbloque
         c_vj_lbl.border = borde_fino
@@ -1123,7 +1193,7 @@ def compilar_excel_10_hojas(
         fila_cur_6 += 1
 
         f_xj = fila_cur_6
-        c_xj_lbl = ws6.cell(row=f_xj, column=1, value=f"Xj (Producción Básica Exportable Total {etq_anio})")
+        c_xj_lbl = ws6.cell(row=f_xj, column=1, value=f"Xj — Producción básica total ({etq_anio})")
         c_xj_lbl.font = font_bold
         c_xj_lbl.fill = fill_gris_total
         c_xj_lbl.border = borde_total
@@ -1137,15 +1207,15 @@ def compilar_excel_10_hojas(
         fila_cur_6 += 1
 
         f_mj = fila_cur_6
-        c_mj_lbl = ws6.cell(row=f_mj, column=1, value=f"Mj (Multiplicador Básico = Vj / Xj — {etq_anio})")
+        c_mj_lbl = ws6.cell(row=f_mj, column=1, value=f"Mj — Multiplicador básico Vj / Xj ({etq_anio})")
         c_mj_lbl.font = font_bold
-        c_mj_lbl.fill = fill_amarillo_ref
+        c_mj_lbl.fill = fill_ref
         c_mj_lbl.border = borde_total
         for c_i in range(2, n_comunas + 3):
             col_l = get_column_letter(c_i)
             cm = ws6.cell(row=f_mj, column=c_i, value=f"=IF({col_l}{f_xj}>0,{col_l}{f_vj}/{col_l}{f_xj},0)")
             cm.font = font_bold
-            cm.fill = fill_amarillo_ref
+            cm.fill = fill_ref
             cm.number_format = "0.0000"
             cm.border = borde_total
 
@@ -1155,40 +1225,56 @@ def compilar_excel_10_hojas(
     _autoajustar_columnas_hoja(ws6)
 
     # ==========================================================================
-    # HOJA 7: CUADRANTES DE SILVA LIRA (DISEÑO EJECUTIVO SOBRIO + GRÁFICO INMEDIATO)
+    # HOJA 7: CUADRANTES SILVA (FORMATO ESTÁNDAR CON POBLACIÓN Y PER CÁPITA)
     # ==========================================================================
-    ws7 = wb.create_sheet("07_Cuadrantes_Silva")
-    ws7.merge_cells("A1:M1")
+    ws7 = wb.create_sheet("Cuadrantes Silva")
+    T_per = max(int(anio_t) - int(anio_0), 1)
+    df_ss = resultados["df_shift_share"]
+    pob_comunas = _obtener_poblacion_comunas(list(df_ss["Comuna"]))
+    usa_per_capita = pob_comunas is not None
+    lbl_v0, lbl_vt, lbl_pc, fmt_v, fmt_pc = _etiquetas_variable_sii(variable_sel, anio_0, anio_t)
+
+    ws7.merge_cells("A1:L1")
     c7_t = ws7.cell(
         row=1,
         column=1,
-        value=f"CLASIFICACIÓN TERRITORIAL EN CUADRANTES DE SILVA LIRA (CEPAL, 2005) — {region_sel.upper()} ({anio_0}–{anio_t})",
+        value=f"CUADRANTES DE SILVA LIRA (CEPAL, 2005) — {region_sel.upper()} ({anio_0}–{anio_t})",
     )
     c7_t.fill = fill_titulo
     c7_t.font = font_titulo
     ws7.row_dimensions[1].height = 26
 
-    ws7.merge_cells("A2:M2")
-    c7_s = ws7.cell(
-        row=2,
-        column=1,
-        value="Diseño ejecutivo sobrio con fórmulas vivas de tasa anualizada =((Ct/C0)^(1/T))-1, Gráfico de Cuadrantes y Matriz 2x2",
+    ws7.merge_cells("A2:L2")
+    sub_silva = (
+        f"Variable: {variable_sel} | Fuente: SII y Censo 2024 (INE)"
+        if usa_per_capita
+        else f"Variable: {variable_sel} | Fuente: SII"
     )
+    c7_s = ws7.cell(row=2, column=1, value=sub_silva)
     c7_s.font = font_sub
+    ws7.row_dimensions[2].height = 19
 
-    T_per = max(int(anio_t) - int(anio_0), 1)
-    df_ss = resultados["df_shift_share"]
+    if usa_per_capita:
+        headers_silva = [
+            "Comuna",
+            lbl_v0,
+            lbl_vt,
+            "Población",
+            "Tasa prom. de crecimiento",
+            lbl_pc,
+            "Cuadrante Silva Lira",
+        ]
+    else:
+        headers_silva = [
+            "Comuna",
+            lbl_v0,
+            lbl_vt,
+            "Variación absoluta",
+            "Tasa prom. de crecimiento",
+            f"Participación {anio_t} (%)",
+            "Cuadrante Silva Lira",
+        ]
 
-    headers_silva = [
-        "Comuna",
-        f"Nivel {anio_0} (V0)",
-        f"Nivel {anio_t} (Vt)",
-        "Variación Absoluta",
-        f"Crecimiento Acumulado {anio_0}-{anio_t} (%)",
-        f"Tasa Promedio Anualizada (T={T_per} años)",
-        f"Participación Regional {anio_0} (%)",
-        "Cuadrante de Silva Lira (CEPAL, 2005)",
-    ]
     fila_hdr_7 = 4
     for c_i, h_txt in enumerate(headers_silva, start=1):
         ch = ws7.cell(row=fila_hdr_7, column=c_i, value=h_txt)
@@ -1201,114 +1287,158 @@ def compilar_excel_10_hojas(
     fila_ini_7 = 5
     fila_tot_7 = fila_ini_7 + len(df_ss)
 
-    xs_vals = []
-    ys_vals = []
-
-    for idx_r, row_s in enumerate(df_ss.itertuples(index=False), start=fila_ini_7):
-        cuad_str = str(row_s.Cuadrante_Silva_Lira)
-        fill_row_datos = fill_fila_blanca if (idx_r % 2 == 1) else fill_fila_cebra
-        if cuad_str.startswith("I."):
-            fill_col_h = fill_cuad_1
-        elif cuad_str.startswith("II."):
-            fill_col_h = fill_cuad_2
-        elif cuad_str.startswith("III."):
-            fill_col_h = fill_cuad_3
-        else:
-            fill_col_h = fill_cuad_4
-
-        v0_val = float(getattr(row_s, f"Nivel_{anio_0}"))
-        vt_val = float(getattr(row_s, f"Nivel_{anio_t}"))
-
-        part_dec = (v0_val / max(tot["total_reg_0"], 1e-12)) if tot["total_reg_0"] > 0 else 0.0
-        tpa_dec = ((vt_val / v0_val) ** (1.0 / T_per) - 1.0) if v0_val > 0 and vt_val > 0 else 0.0
-        xs_vals.append(part_dec)
-        ys_vals.append(tpa_dec)
-
-        c_com = ws7.cell(row=idx_r, column=1, value=row_s.Comuna)
-        c_v0 = ws7.cell(row=idx_r, column=2, value=v0_val)
-        c_vt = ws7.cell(row=idx_r, column=3, value=vt_val)
-        c_dif = ws7.cell(row=idx_r, column=4, value=f"=C{idx_r}-B{idx_r}")
-        c_var = ws7.cell(row=idx_r, column=5, value=f"=IF(B{idx_r}>0,(C{idx_r}-B{idx_r})/B{idx_r},0)")
-        c_tpa = ws7.cell(row=idx_r, column=6, value=f"=IF(B{idx_r}>0,((C{idx_r}/B{idx_r})^(1/{T_per}))-1,0)")
-        c_par = ws7.cell(row=idx_r, column=7, value=f"=IF($B${fila_tot_7}>0,B{idx_r}/$B${fila_tot_7},0)")
-        c_cua = ws7.cell(row=idx_r, column=8, value=cuad_str)
-
-        # Coordenadas numéricas precalculadas en columnas ocultas O (15) y P (16) para el ScatterChart
-        c_x_num = ws7.cell(row=idx_r, column=15, value=float(part_dec))
-        c_y_num = ws7.cell(row=idx_r, column=16, value=float(tpa_dec))
-        c_x_num.number_format = "0.00%"
-        c_y_num.number_format = "0.00%"
-
-        c_v0.number_format = "#,##0.00"
-        c_vt.number_format = "#,##0.00"
-        c_dif.number_format = "#,##0.00"
-        c_var.number_format = "0.00%"
-        c_tpa.number_format = "0.00%"
-        c_par.number_format = "0.00%"
-
-        for cell_item in (c_com, c_v0, c_vt, c_dif, c_var, c_tpa, c_par):
-            cell_item.fill = fill_row_datos
-            cell_item.font = font_celda
-            cell_item.border = borde_fino
-
-        c_cua.fill = fill_col_h
-        c_cua.font = font_bold if cuad_str.startswith("I.") else font_celda
-        c_cua.border = borde_fino
-
-    ws7.column_dimensions["O"].hidden = True
-    ws7.column_dimensions["P"].hidden = True
-
-    # Fila de Referencia Regional (Suma Total y Promedios Umbrales)
-    ws7.cell(row=fila_tot_7, column=1, value="SUMA TOTAL / UMBRAL REGIONAL").font = font_bold
-    ws7.cell(row=fila_tot_7, column=2, value=f"=SUM(B{fila_ini_7}:B{fila_tot_7-1})").number_format = "#,##0.00"
-    ws7.cell(row=fila_tot_7, column=3, value=f"=SUM(C{fila_ini_7}:C{fila_tot_7-1})").number_format = "#,##0.00"
-    ws7.cell(row=fila_tot_7, column=4, value=f"=C{fila_tot_7}-B{fila_tot_7}").number_format = "#,##0.00"
-    ws7.cell(row=fila_tot_7, column=5, value=f"=IF(B{fila_tot_7}>0,(C{fila_tot_7}-B{fila_tot_7})/B{fila_tot_7},0)").number_format = "0.00%"
-    ws7.cell(row=fila_tot_7, column=6, value=f"=IF(B{fila_tot_7}>0,((C{fila_tot_7}/B{fila_tot_7})^(1/{T_per}))-1,0)").number_format = "0.00%"
-    ws7.cell(row=fila_tot_7, column=7, value=f"=AVERAGE(G{fila_ini_7}:G{fila_tot_7-1})").number_format = "0.00%"
-    ws7.cell(row=fila_tot_7, column=8, value="Corte de Ejes X e Y (Media Regional)")
-
-    for c_i in range(1, 9):
-        cell_tot = ws7.cell(row=fila_tot_7, column=c_i)
-        cell_tot.fill = fill_gris_total
-        cell_tot.font = font_bold
-        cell_tot.border = borde_total
-
-    # Coordenadas Auxiliares para las 2 Líneas de Corte del Cuadrante
-    umbral_x = 1.0 / max(n_comunas, 1)
     umbral_y = (
         ((tot["total_reg_t"] / tot["total_reg_0"]) ** (1.0 / T_per) - 1.0)
         if tot["total_reg_0"] > 0 and tot["total_reg_t"] > 0
         else 0.0
     )
-    x_max_plot = max(max(xs_vals) * 1.12, umbral_x * 1.5, 0.05) if xs_vals else 0.20
+    if usa_per_capita:
+        total_pob_reg = float(sum(pob_comunas))
+        umbral_x = tot["total_reg_t"] / max(total_pob_reg, 1.0)
+    else:
+        umbral_x = 1.0 / max(n_comunas, 1)
+
+    xs_vals = []
+    ys_vals = []
+    com_q1, com_q2, com_q3, com_q4 = [], [], [], []
+
+    for idx_offset, row_s in enumerate(df_ss.itertuples(index=False)):
+        idx_r = fila_ini_7 + idx_offset
+        com_nom = str(row_s.Comuna)
+        v0_val = float(getattr(row_s, f"Nivel_{anio_0}"))
+        vt_val = float(getattr(row_s, f"Nivel_{anio_t}"))
+        tpa_dec = ((vt_val / v0_val) ** (1.0 / T_per) - 1.0) if v0_val > 0 and vt_val > 0 else 0.0
+
+        if usa_per_capita:
+            pob_i = int(pob_comunas[idx_offset])
+            x_val = vt_val / max(float(pob_i), 1.0)
+        else:
+            x_val = (vt_val / max(tot["total_reg_t"], 1e-12)) if tot["total_reg_t"] > 0 else 0.0
+
+        xs_vals.append(x_val)
+        ys_vals.append(tpa_dec)
+
+        alto_x = x_val >= umbral_x
+        alto_y = tpa_dec >= umbral_y
+        if alto_x and alto_y:
+            com_q1.append(com_nom)
+            fill_col_g = fill_cuad_1
+            es_dinamica = True
+        elif (not alto_x) and alto_y:
+            com_q2.append(com_nom)
+            fill_col_g = fill_cuad_2
+            es_dinamica = False
+        elif alto_x and (not alto_y):
+            com_q3.append(com_nom)
+            fill_col_g = fill_cuad_3
+            es_dinamica = False
+        else:
+            com_q4.append(com_nom)
+            fill_col_g = fill_cuad_4
+            es_dinamica = False
+
+        fill_row_datos = fill_fila_blanca if (idx_r % 2 == 1) else fill_fila_cebra
+
+        c_com = ws7.cell(row=idx_r, column=1, value=com_nom)
+        c_v0 = ws7.cell(row=idx_r, column=2, value=v0_val)
+        c_vt = ws7.cell(row=idx_r, column=3, value=vt_val)
+        if usa_per_capita:
+            c_col4 = ws7.cell(row=idx_r, column=4, value=pob_i)
+            c_col4.number_format = "#,##0"
+            c_col6 = ws7.cell(row=idx_r, column=6, value=f"=IF(D{idx_r}>0,C{idx_r}/D{idx_r},0)")
+            c_col6.number_format = fmt_pc
+        else:
+            c_col4 = ws7.cell(row=idx_r, column=4, value=f"=C{idx_r}-B{idx_r}")
+            c_col4.number_format = fmt_v
+            c_col6 = ws7.cell(row=idx_r, column=6, value=f"=IF($C${fila_tot_7}>0,C{idx_r}/$C${fila_tot_7},0)")
+            c_col6.number_format = "0.00%"
+
+        c_tpa = ws7.cell(row=idx_r, column=5, value=f"=IF(B{idx_r}>0,((C{idx_r}/B{idx_r})^(1/{T_per}))-1,0)")
+        c_cua = ws7.cell(
+            row=idx_r,
+            column=7,
+            value=(
+                f'=IF(AND(F{idx_r}>=$F${fila_tot_7},E{idx_r}>=$E${fila_tot_7}),"I. Dinámica",'
+                f'IF(AND(F{idx_r}<$F${fila_tot_7},E{idx_r}>=$E${fila_tot_7}),"II. Emergente",'
+                f'IF(AND(F{idx_r}>=$F${fila_tot_7},E{idx_r}<$E${fila_tot_7}),"III. Estancada","IV. En retroceso")))'
+            ),
+        )
+
+        # Coordenadas numéricas en columnas ocultas O (15) y P (16) para el ScatterChart
+        c_x_num = ws7.cell(row=idx_r, column=15, value=float(x_val))
+        c_y_num = ws7.cell(row=idx_r, column=16, value=float(tpa_dec))
+        c_x_num.number_format = fmt_pc if usa_per_capita else "0.00%"
+        c_y_num.number_format = "0.00%"
+
+        c_v0.number_format = fmt_v
+        c_vt.number_format = fmt_v
+        c_tpa.number_format = "0.00%"
+
+        for cell_item in (c_com, c_v0, c_vt, c_col4, c_tpa, c_col6):
+            cell_item.fill = fill_row_datos
+            cell_item.font = font_celda
+            cell_item.border = borde_fino
+        c_com.alignment = Alignment(horizontal="left", vertical="center")
+        for cell_num in (c_v0, c_vt, c_col4, c_tpa, c_col6):
+            cell_num.alignment = Alignment(horizontal="right", vertical="center")
+
+        c_cua.fill = fill_col_g
+        c_cua.font = font_bold if es_dinamica else font_celda
+        c_cua.alignment = Alignment(horizontal="left", vertical="center")
+        c_cua.border = borde_fino
+
+    # Fila Suma total / Promedio regional
+    ws7.cell(row=fila_tot_7, column=1, value="Suma total").alignment = Alignment(horizontal="left", vertical="center")
+    ws7.cell(row=fila_tot_7, column=2, value=f"=SUM(B{fila_ini_7}:B{fila_tot_7-1})").number_format = fmt_v
+    ws7.cell(row=fila_tot_7, column=3, value=f"=SUM(C{fila_ini_7}:C{fila_tot_7-1})").number_format = fmt_v
+    if usa_per_capita:
+        ws7.cell(row=fila_tot_7, column=4, value=f"=SUM(D{fila_ini_7}:D{fila_tot_7-1})").number_format = "#,##0"
+        ws7.cell(row=fila_tot_7, column=6, value=f"=IF(D{fila_tot_7}>0,C{fila_tot_7}/D{fila_tot_7},0)").number_format = fmt_pc
+    else:
+        ws7.cell(row=fila_tot_7, column=4, value=f"=C{fila_tot_7}-B{fila_tot_7}").number_format = fmt_v
+        ws7.cell(row=fila_tot_7, column=6, value=f"=AVERAGE(F{fila_ini_7}:F{fila_tot_7-1})").number_format = "0.00%"
+
+    ws7.cell(row=fila_tot_7, column=5, value=f"=IF(B{fila_tot_7}>0,((C{fila_tot_7}/B{fila_tot_7})^(1/{T_per}))-1,0)").number_format = "0.00%"
+    ws7.cell(row=fila_tot_7, column=7, value="Promedio regional").alignment = Alignment(horizontal="left", vertical="center")
+
+    for c_i in range(1, 8):
+        cell_tot = ws7.cell(row=fila_tot_7, column=c_i)
+        cell_tot.fill = fill_gris_total
+        cell_tot.font = font_bold
+        cell_tot.border = borde_total
+        if c_i in (2, 3, 4, 5, 6):
+            cell_tot.alignment = Alignment(horizontal="right", vertical="center")
+
+    # Coordenadas de las 2 líneas de corte en columnas ocultas Q (17) y R (18) — nada visible bajo la tabla
+    x_max_plot = max(max(xs_vals) * 1.12, umbral_x * 1.5, 0.05) if xs_vals else 100.0
     y_min_val = min(ys_vals + [umbral_y]) if ys_vals else -0.05
     y_max_val = max(ys_vals + [umbral_y]) if ys_vals else 0.10
     margen_y = max((y_max_val - y_min_val) * 0.15, 0.015)
     y_min_plot = y_min_val - margen_y
     y_max_plot = y_max_val + margen_y
 
-    fila_aux = fila_tot_7 + 3
-    ws7.cell(row=fila_aux, column=1, value="Parámetros Ejes de Corte Cuadrante").font = font_sub
-    ws7.cell(row=fila_aux + 1, column=2, value=float(umbral_x)).number_format = "0.00%"
-    ws7.cell(row=fila_aux + 1, column=3, value=float(y_min_plot)).number_format = "0.00%"
-    ws7.cell(row=fila_aux + 2, column=2, value=float(umbral_x)).number_format = "0.00%"
-    ws7.cell(row=fila_aux + 2, column=3, value=float(y_max_plot)).number_format = "0.00%"
+    ws7.cell(row=5, column=17, value=float(umbral_x))
+    ws7.cell(row=5, column=18, value=float(y_min_plot))
+    ws7.cell(row=6, column=17, value=float(umbral_x))
+    ws7.cell(row=6, column=18, value=float(y_max_plot))
 
-    ws7.cell(row=fila_aux + 3, column=2, value=0.0).number_format = "0.00%"
-    ws7.cell(row=fila_aux + 3, column=3, value=float(umbral_y)).number_format = "0.00%"
-    ws7.cell(row=fila_aux + 4, column=2, value=float(x_max_plot)).number_format = "0.00%"
-    ws7.cell(row=fila_aux + 4, column=3, value=float(umbral_y)).number_format = "0.00%"
+    ws7.cell(row=7, column=17, value=0.0)
+    ws7.cell(row=7, column=18, value=float(umbral_y))
+    ws7.cell(row=8, column=17, value=float(x_max_plot))
+    ws7.cell(row=8, column=18, value=float(umbral_y))
 
-    # Gráfico de Dispersión Nativo en J4 leyendo las columnas numéricas O y P
+    for col_oculta in ("O", "P", "Q", "R"):
+        ws7.column_dimensions[col_oculta].hidden = True
+
+    # Gráfico de dispersión en I4 leyendo columnas ocultas O:R
     chart_silva = ScatterChart()
-    chart_silva.visible_cells_only = False  # Permite graficar columnas ocultas O y P
-    chart_silva.title = f"Cuadrante de Silva Lira ({region_sel}, {anio_0}–{anio_t})"
+    chart_silva.visible_cells_only = False
+    chart_silva.title = f"Cuadrantes de Silva Lira ({region_sel}, {anio_0}–{anio_t})"
     chart_silva.style = 2
     chart_silva.legend = None
-    chart_silva.x_axis.title = f"Participación Comunal Inicial {anio_0} (%)"
-    chart_silva.y_axis.title = f"Crecimiento Anualizado de {variable_sel} ({anio_0}-{anio_t})"
-    chart_silva.x_axis.number_format = "0.0%"
+    chart_silva.x_axis.title = lbl_pc if usa_per_capita else f"Participación Comunal {anio_t} (%)"
+    chart_silva.y_axis.title = f"Tasa promedio anual de crecimiento ({anio_0}–{anio_t})"
+    chart_silva.x_axis.number_format = fmt_pc if usa_per_capita else "0.0%"
     chart_silva.y_axis.number_format = "0.0%"
     chart_silva.x_axis.tickLblPos = "low"
     chart_silva.y_axis.tickLblPos = "low"
@@ -1337,144 +1467,151 @@ def compilar_excel_10_hojas(
         s_com.dLbls.showLegendKey = False
         chart_silva.series.append(s_com)
 
-    xv_ref = Reference(ws7, min_col=2, min_row=fila_aux + 1, max_row=fila_aux + 2)
-    yv_ref = Reference(ws7, min_col=3, min_row=fila_aux + 1, max_row=fila_aux + 2)
-    s_linea_v = Series(yv_ref, xv_ref, title="Umbral Peso Medio")
+    xv_ref = Reference(ws7, min_col=17, min_row=5, max_row=6)
+    yv_ref = Reference(ws7, min_col=18, min_row=5, max_row=6)
+    s_linea_v = Series(yv_ref, xv_ref, title="Promedio Regional X")
     s_linea_v.marker.symbol = "none"
     s_linea_v.graphicalProperties.line.solidFill = "991B1B"
     s_linea_v.graphicalProperties.line.width = 22000
 
-    xh_ref = Reference(ws7, min_col=2, min_row=fila_aux + 3, max_row=fila_aux + 4)
-    yh_ref = Reference(ws7, min_col=3, min_row=fila_aux + 3, max_row=fila_aux + 4)
-    s_linea_h = Series(yh_ref, xh_ref, title="Umbral Crecimiento Regional")
+    xh_ref = Reference(ws7, min_col=17, min_row=7, max_row=8)
+    yh_ref = Reference(ws7, min_col=18, min_row=7, max_row=8)
+    s_linea_h = Series(yh_ref, xh_ref, title="Promedio Regional Y")
     s_linea_h.marker.symbol = "none"
     s_linea_h.graphicalProperties.line.solidFill = "991B1B"
     s_linea_h.graphicalProperties.line.width = 22000
 
     chart_silva.series.append(s_linea_v)
     chart_silva.series.append(s_linea_h)
-    ws7.add_chart(chart_silva, "J4")
+    ws7.add_chart(chart_silva, "I4")
 
-    # Matriz Visual 2x2 de Cuadrantes de Silva Lira debajo del gráfico (J35:M46) en tonos grises neutros
-    com_q1 = sorted(df_ss[df_ss["Cuadrante_Silva_Lira"].str.startswith("I.")]["Comuna"].tolist())
-    com_q2 = sorted(df_ss[df_ss["Cuadrante_Silva_Lira"].str.startswith("II.")]["Comuna"].tolist())
-    com_q3 = sorted(df_ss[df_ss["Cuadrante_Silva_Lira"].str.startswith("III.")]["Comuna"].tolist())
-    com_q4 = sorted(df_ss[df_ss["Cuadrante_Silva_Lira"].str.startswith("IV.")]["Comuna"].tolist())
+    # Matriz 2x2 debajo del gráfico (I35:L46)
+    com_q1, com_q2, com_q3, com_q4 = sorted(com_q1), sorted(com_q2), sorted(com_q3), sorted(com_q4)
+    if usa_per_capita:
+        txt_x_bajo = f"BAJO NIVEL PER CÁPITA (< {umbral_x:,.1f})" if umbral_x >= 10 else f"BAJO NIVEL PER CÁPITA (< {umbral_x:.3f})"
+        txt_x_alto = f"ALTO NIVEL PER CÁPITA (>= {umbral_x:,.1f})" if umbral_x >= 10 else f"ALTO NIVEL PER CÁPITA (>= {umbral_x:.3f})"
+        eje_x_lbl = "Nivel per cápita (X)"
+    else:
+        txt_x_bajo = "BAJA PARTICIPACIÓN (< Prom. comunal)"
+        txt_x_alto = "ALTA PARTICIPACIÓN (>= Prom. comunal)"
+        eje_x_lbl = "Participación (X)"
 
     f_m2 = 35
-    ws7.merge_cells(start_row=f_m2, start_column=10, end_row=f_m2, end_column=13)
-    c_m2_tit = ws7.cell(row=f_m2, column=10, value="MATRIZ VISUAL 2×2 DE CUADRANTES DE SILVA LIRA (CEPAL, 2005)")
+    ws7.merge_cells(start_row=f_m2, start_column=9, end_row=f_m2, end_column=12)
+    c_m2_tit = ws7.cell(row=f_m2, column=9, value="MATRIZ 2×2 — CLASIFICACIÓN DE SILVA LIRA (CEPAL, 2005)")
     c_m2_tit.fill = fill_titulo
     c_m2_tit.font = font_header
     c_m2_tit.alignment = Alignment(horizontal="center", vertical="center")
 
-    ws7.cell(row=f_m2 + 1, column=10, value="Eje Crecimiento (Y) \\ Eje Peso Inicial (X)").fill = fill_header
-    ws7.cell(row=f_m2 + 1, column=10).font = font_header
-    ws7.cell(row=f_m2 + 1, column=10).alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+    ws7.cell(row=f_m2 + 1, column=9, value=f"Crecimiento (Y) \\ {eje_x_lbl}").fill = fill_header
+    ws7.cell(row=f_m2 + 1, column=9).font = font_header
+    ws7.cell(row=f_m2 + 1, column=9).alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
 
-    ws7.merge_cells(start_row=f_m2 + 1, start_column=11, end_row=f_m2 + 1, end_column=12)
-    c_x_bajo = ws7.cell(row=f_m2 + 1, column=11, value="BAJO PESO INICIAL (< Media Comunal)")
+    ws7.merge_cells(start_row=f_m2 + 1, start_column=10, end_row=f_m2 + 1, end_column=11)
+    c_x_bajo = ws7.cell(row=f_m2 + 1, column=10, value=txt_x_bajo)
     c_x_bajo.fill = fill_header
     c_x_bajo.font = font_header
     c_x_bajo.alignment = Alignment(horizontal="center", vertical="center")
 
-    c_x_alto = ws7.cell(row=f_m2 + 1, column=13, value="ALTO PESO INICIAL (>= Media Comunal)")
+    c_x_alto = ws7.cell(row=f_m2 + 1, column=12, value=txt_x_alto)
     c_x_alto.fill = fill_header
     c_x_alto.font = font_header
     c_x_alto.alignment = Alignment(horizontal="center", vertical="center")
 
-    ws7.merge_cells(start_row=f_m2 + 2, start_column=10, end_row=f_m2 + 6, end_column=10)
+    ws7.merge_cells(start_row=f_m2 + 2, start_column=9, end_row=f_m2 + 6, end_column=9)
     c_y_alto = ws7.cell(
         row=f_m2 + 2,
-        column=10,
-        value=f"ALTO DINAMISMO\nCrecimiento >= Media Regional ({tot['tasa_var_reg']:.1f}%)",
+        column=9,
+        value=f"ALTO DINAMISMO\nCrec. anual >= {umbral_y * 100:.2f}%",
     )
     c_y_alto.fill = fill_subbloque
     c_y_alto.font = font_bold
     c_y_alto.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
 
-    ws7.merge_cells(start_row=f_m2 + 2, start_column=11, end_row=f_m2 + 6, end_column=12)
+    ws7.merge_cells(start_row=f_m2 + 2, start_column=10, end_row=f_m2 + 6, end_column=11)
     txt_q2 = (
-        f"CUADRANTE II: EMERGENTES / CONVERGENTES ({len(com_q2)} comunas)\n"
-        f"(Bajo Peso Inicial + Alto Crecimiento)\n\n"
+        f"CUADRANTE II: EMERGENTES ({len(com_q2)} comunas)\n\n"
         + (", ".join(com_q2) if com_q2 else "Sin comunas en este cuadrante")
     )
-    c_box_q2 = ws7.cell(row=f_m2 + 2, column=11, value=txt_q2)
+    c_box_q2 = ws7.cell(row=f_m2 + 2, column=10, value=txt_q2)
     c_box_q2.fill = fill_cuad_2
     c_box_q2.font = font_celda
     c_box_q2.alignment = Alignment(horizontal="left", vertical="top", wrap_text=True)
 
-    ws7.merge_cells(start_row=f_m2 + 2, start_column=13, end_row=f_m2 + 6, end_column=13)
+    ws7.merge_cells(start_row=f_m2 + 2, start_column=12, end_row=f_m2 + 6, end_column=12)
     txt_q1 = (
-        f"CUADRANTE I: DINÁMICAS / GANADORAS ({len(com_q1)} comunas)\n"
-        f"(Alto Peso Inicial + Alto Crecimiento)\n\n"
+        f"CUADRANTE I: DINÁMICAS ({len(com_q1)} comunas)\n\n"
         + (", ".join(com_q1) if com_q1 else "Sin comunas en este cuadrante")
     )
-    c_box_q1 = ws7.cell(row=f_m2 + 2, column=13, value=txt_q1)
+    c_box_q1 = ws7.cell(row=f_m2 + 2, column=12, value=txt_q1)
     c_box_q1.fill = fill_cuad_1
     c_box_q1.font = font_celda
     c_box_q1.alignment = Alignment(horizontal="left", vertical="top", wrap_text=True)
 
-    ws7.merge_cells(start_row=f_m2 + 7, start_column=10, end_row=f_m2 + 11, end_column=10)
+    ws7.merge_cells(start_row=f_m2 + 7, start_column=9, end_row=f_m2 + 11, end_column=9)
     c_y_bajo = ws7.cell(
         row=f_m2 + 7,
-        column=10,
-        value=f"BAJO DINAMISMO\nCrecimiento < Media Regional ({tot['tasa_var_reg']:.1f}%)",
+        column=9,
+        value=f"BAJO DINAMISMO\nCrec. anual < {umbral_y * 100:.2f}%",
     )
     c_y_bajo.fill = fill_subbloque
     c_y_bajo.font = font_bold
     c_y_bajo.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
 
-    ws7.merge_cells(start_row=f_m2 + 7, start_column=11, end_row=f_m2 + 11, end_column=12)
+    ws7.merge_cells(start_row=f_m2 + 7, start_column=10, end_row=f_m2 + 11, end_column=11)
     txt_q4 = (
-        f"CUADRANTE IV: EN RETROCESO / REZAGADAS ({len(com_q4)} comunas)\n"
-        f"(Bajo Peso Inicial + Bajo Crecimiento)\n\n"
+        f"CUADRANTE IV: EN RETROCESO ({len(com_q4)} comunas)\n\n"
         + (", ".join(com_q4) if com_q4 else "Sin comunas en este cuadrante")
     )
-    c_box_q4 = ws7.cell(row=f_m2 + 7, column=11, value=txt_q4)
+    c_box_q4 = ws7.cell(row=f_m2 + 7, column=10, value=txt_q4)
     c_box_q4.fill = fill_cuad_4
     c_box_q4.font = font_celda
     c_box_q4.alignment = Alignment(horizontal="left", vertical="top", wrap_text=True)
 
-    ws7.merge_cells(start_row=f_m2 + 7, start_column=13, end_row=f_m2 + 11, end_column=13)
+    ws7.merge_cells(start_row=f_m2 + 7, start_column=12, end_row=f_m2 + 11, end_column=12)
     txt_q3 = (
-        f"CUADRANTE III: ESTANCADAS / MADURAS ({len(com_q3)} comunas)\n"
-        f"(Alto Peso Inicial + Bajo Crecimiento)\n\n"
+        f"CUADRANTE III: ESTANCADAS ({len(com_q3)} comunas)\n\n"
         + (", ".join(com_q3) if com_q3 else "Sin comunas en este cuadrante")
     )
-    c_box_q3 = ws7.cell(row=f_m2 + 7, column=13, value=txt_q3)
+    c_box_q3 = ws7.cell(row=f_m2 + 7, column=12, value=txt_q3)
     c_box_q3.font = font_celda
     c_box_q3.fill = fill_cuad_3
     c_box_q3.alignment = Alignment(horizontal="left", vertical="top", wrap_text=True)
 
     for r_box in range(f_m2, f_m2 + 12):
         ws7.row_dimensions[r_box].height = 24
-        for c_box in range(10, 14):
+        for c_box in range(9, 13):
             ws7.cell(row=r_box, column=c_box).border = borde_fino
 
     ws7.freeze_panes = "B5"
-    _autoajustar_columnas_hoja(ws7)
-    ws7.column_dimensions["J"].width = 24
-    ws7.column_dimensions["K"].width = 22
-    ws7.column_dimensions["L"].width = 22
-    ws7.column_dimensions["M"].width = 38
+    _autoajustar_columnas_hoja(ws7, max_width=26, min_width=14, col_a_max=24)
+    ws7.column_dimensions["G"].width = 20
+    ws7.column_dimensions["H"].width = 3
+    ws7.column_dimensions["I"].width = 23
+    ws7.column_dimensions["J"].width = 21
+    ws7.column_dimensions["K"].width = 21
+    ws7.column_dimensions["L"].width = 36
 
     # ==========================================================================
-    # HOJA 8: SHIFT & SHARE MADE CLÁSICO (MATRICES ED y EE + FÓRMULAS VIVAS)
+    # HOJA 8: MADE (SHIFT & SHARE CLÁSICO)
     # ==========================================================================
-    ws8 = wb.create_sheet("08_ShiftShare_Clasico")
+    ws8 = wb.create_sheet("MADE")
     n_cols_ss = n_comunas + 1
     ws8.merge_cells(start_row=1, start_column=1, end_row=1, end_column=n_cols_ss)
     c8_t = ws8.cell(
         row=1,
         column=1,
-        value=f"DESCOMPOSICIÓN SHIFT & SHARE — MADE CLÁSICO (MATRICES RUBRO × COMUNA ED Y EE, {anio_0}–{anio_t})",
+        value=f"MÉTODO DIFERENCIAL-ESTRUCTURAL (MADE CLÁSICO) — {anio_0}–{anio_t}",
     )
     c8_t.fill = fill_titulo
     c8_t.font = font_titulo
     ws8.row_dimensions[1].height = 26
 
-    f_cur_8 = 3
+    ws8.merge_cells(start_row=2, start_column=1, end_row=2, end_column=n_cols_ss)
+    c8_s = ws8.cell(row=2, column=1, value=sub_general)
+    c8_s.font = font_sub
+
+    f_cur_8 = 4
     ws8.cell(row=f_cur_8, column=1, value="Comuna").fill = fill_header
     ws8.cell(row=f_cur_8, column=1).font = font_header
     for c_i, com in enumerate(comunas, start=2):
@@ -1500,12 +1637,12 @@ def compilar_excel_10_hojas(
     f_cur_8 += 2
 
     ws8.merge_cells(start_row=f_cur_8, start_column=1, end_row=f_cur_8, end_column=n_cols_ss)
-    cb_ed = ws8.cell(row=f_cur_8, column=1, value=f"EFECTO DIFERENCIAL ({anio_0}–{anio_t})")
+    cb_ed = ws8.cell(row=f_cur_8, column=1, value=f"Efecto Diferencial ({anio_0}–{anio_t})")
     cb_ed.fill = fill_subbloque
     cb_ed.font = font_subbloque
     f_cur_8 += 1
 
-    ws8.cell(row=f_cur_8, column=1, value="Etiquetas de fila").fill = fill_header
+    ws8.cell(row=f_cur_8, column=1, value="Rubro Económico").fill = fill_header
     ws8.cell(row=f_cur_8, column=1).font = font_header
     for c_i, com in enumerate(comunas, start=2):
         ch = ws8.cell(row=f_cur_8, column=c_i, value=com)
@@ -1543,12 +1680,12 @@ def compilar_excel_10_hojas(
     f_cur_8 += 3
 
     ws8.merge_cells(start_row=f_cur_8, start_column=1, end_row=f_cur_8, end_column=n_cols_ss)
-    cb_ee = ws8.cell(row=f_cur_8, column=1, value=f"EFECTO ESTRUCTURAL ({anio_0}–{anio_t})")
+    cb_ee = ws8.cell(row=f_cur_8, column=1, value=f"Efecto Estructural ({anio_0}–{anio_t})")
     cb_ee.fill = fill_subbloque
     cb_ee.font = font_subbloque
     f_cur_8 += 1
 
-    ws8.cell(row=f_cur_8, column=1, value="Etiquetas de fila").fill = fill_header
+    ws8.cell(row=f_cur_8, column=1, value="Rubro Económico").fill = fill_header
     ws8.cell(row=f_cur_8, column=1).font = font_header
     for c_i, com in enumerate(comunas, start=2):
         ch = ws8.cell(row=f_cur_8, column=c_i, value=com)
@@ -1572,7 +1709,7 @@ def compilar_excel_10_hojas(
     f_fin_ee = f_cur_8 - 1
 
     f_sum_ee = f_cur_8
-    c_ee_lbl = ws8.cell(row=f_sum_ee, column=1, value="Total general (Efecto Estructural)")
+    c_ee_lbl = ws8.cell(row=f_sum_ee, column=1, value="Efecto Estructural")
     c_ee_lbl.font = font_bold
     c_ee_lbl.fill = fill_gris_total
     c_ee_lbl.border = borde_total
@@ -1586,15 +1723,15 @@ def compilar_excel_10_hojas(
     f_cur_8 += 2
 
     f_chk_et = f_cur_8
-    c_chk_lbl = ws8.cell(row=f_chk_et, column=1, value="ET = ED + EE")
+    c_chk_lbl = ws8.cell(row=f_chk_et, column=1, value="Comprobación (ET = ED + EE)")
     c_chk_lbl.font = font_bold
-    c_chk_lbl.fill = fill_amarillo_ref
+    c_chk_lbl.fill = fill_ref
     c_chk_lbl.border = borde_total
     for c_i in range(2, n_cols_ss + 1):
         col_l = get_column_letter(c_i)
         cchk = ws8.cell(row=f_chk_et, column=c_i, value=f"={col_l}{f_sum_ed}+{col_l}{f_sum_ee}")
         cchk.font = font_bold
-        cchk.fill = fill_amarillo_ref
+        cchk.fill = fill_ref
         cchk.number_format = "#,##0.00"
         cchk.border = borde_total
 
@@ -1602,21 +1739,25 @@ def compilar_excel_10_hojas(
     _autoajustar_columnas_hoja(ws8)
 
     # ==========================================================================
-    # HOJA 9: SHIFT & SHARE MADE MODIFICADO (MATRICES EE y EI + FRANJAS SOBRIAS)
+    # HOJA 9: MADE MODIFICADO
     # ==========================================================================
-    ws9 = wb.create_sheet("09_MADE_Modificado")
+    ws9 = wb.create_sheet("MADE Modificado")
     ws9.merge_cells(start_row=1, start_column=1, end_row=1, end_column=n_cols_ss)
     c9_t = ws9.cell(
         row=1,
         column=1,
-        value=f"DESCOMPOSICIÓN SHIFT & SHARE — MADE MODIFICADO (MATRICES EE, EI, EM Y ERM, {anio_0}–{anio_t})",
+        value=f"MÉTODO DIFERENCIAL-ESTRUCTURAL (MADE MODIFICADO) — {anio_0}–{anio_t}",
     )
     c9_t.fill = fill_titulo
     c9_t.font = font_titulo
     ws9.row_dimensions[1].height = 26
 
-    f_cur_9 = 3
-    ws9.cell(row=f_cur_9, column=1, value="Etiquetas de fila").fill = fill_header
+    ws9.merge_cells(start_row=2, start_column=1, end_row=2, end_column=n_cols_ss)
+    c9_s = ws9.cell(row=2, column=1, value=sub_general)
+    c9_s.font = font_sub
+
+    f_cur_9 = 4
+    ws9.cell(row=f_cur_9, column=1, value="Rubro Económico").fill = fill_header
     ws9.cell(row=f_cur_9, column=1).font = font_header
     for c_i, com in enumerate(comunas, start=2):
         ch = ws9.cell(row=f_cur_9, column=c_i, value=com)
@@ -1642,18 +1783,18 @@ def compilar_excel_10_hojas(
     f_sum_ee9 = f_cur_9
     c_ee9_lbl = ws9.cell(row=f_sum_ee9, column=1, value="Efecto Estructural")
     c_ee9_lbl.font = font_bold
-    c_ee9_lbl.fill = fill_amarillo_made
+    c_ee9_lbl.fill = fill_made_mod
     c_ee9_lbl.border = borde_total
     for c_i in range(2, n_cols_ss + 1):
         col_l = get_column_letter(c_i)
         csum = ws9.cell(row=f_sum_ee9, column=c_i, value=f"=SUM({col_l}{f_ini_ee9}:{col_l}{f_fin_ee9})")
         csum.font = font_bold
-        csum.fill = fill_amarillo_made
+        csum.fill = fill_made_mod
         csum.number_format = "#,##0.00"
         csum.border = borde_total
     f_cur_9 += 3
 
-    ws9.cell(row=f_cur_9, column=1, value="Etiquetas de fila").fill = fill_header
+    ws9.cell(row=f_cur_9, column=1, value="Rubro Económico").fill = fill_header
     ws9.cell(row=f_cur_9, column=1).font = font_header
     for c_i, com in enumerate(comunas, start=2):
         ch = ws9.cell(row=f_cur_9, column=c_i, value=com)
@@ -1679,13 +1820,13 @@ def compilar_excel_10_hojas(
     f_sum_ei9 = f_cur_9
     c_ei9_lbl = ws9.cell(row=f_sum_ei9, column=1, value="Efecto Inverso")
     c_ei9_lbl.font = font_bold
-    c_ei9_lbl.fill = fill_amarillo_made
+    c_ei9_lbl.fill = fill_made_mod
     c_ei9_lbl.border = borde_total
     for c_i in range(2, n_cols_ss + 1):
         col_l = get_column_letter(c_i)
         csum = ws9.cell(row=f_sum_ei9, column=c_i, value=f"=SUM({col_l}{f_ini_ei9}:{col_l}{f_fin_ei9})")
         csum.font = font_bold
-        csum.fill = fill_amarillo_made
+        csum.fill = fill_made_mod
         csum.number_format = "#,##0.00"
         csum.border = borde_total
     f_cur_9 += 2
@@ -1704,21 +1845,20 @@ def compilar_excel_10_hojas(
         cem.border = borde_total
     f_cur_9 += 2
 
-    # Franja sobria: Efecto comunal Modificado (ERM_j = ET_j - EI_j) vinculada a Hoja 8
     f_erm9 = f_cur_9
-    c_erm9_lbl = ws9.cell(row=f_erm9, column=1, value="Efecto comunal Modificado")
+    c_erm9_lbl = ws9.cell(row=f_erm9, column=1, value="Efecto Comunal Modificado")
     c_erm9_lbl.font = font_bold
-    c_erm9_lbl.fill = fill_amarillo_ref
+    c_erm9_lbl.fill = fill_ref
     c_erm9_lbl.border = borde_total
     for c_i in range(2, n_cols_ss + 1):
         col_l = get_column_letter(c_i)
         cerm = ws9.cell(
             row=f_erm9,
             column=c_i,
-            value=f"='08_ShiftShare_Clasico'!{col_l}{f_et_top}-{col_l}{f_sum_ei9}",
+            value=f"='MADE'!{col_l}{f_et_top}-{col_l}{f_sum_ei9}",
         )
         cerm.font = font_bold
-        cerm.fill = fill_amarillo_ref
+        cerm.fill = fill_ref
         cerm.number_format = "#,##0.00"
         cerm.border = borde_total
 
@@ -1726,14 +1866,16 @@ def compilar_excel_10_hojas(
     _autoajustar_columnas_hoja(ws9)
 
     # ==========================================================================
-    # HOJA 10: CONVERGENCIA Y CONCENTRACIÓN REAT
+    # HOJA 10: CONVERGENCIA
     # ==========================================================================
-    ws10 = wb.create_sheet("10_Convergencia_REAT")
+    ws10 = wb.create_sheet("Convergencia")
+    df_reat_excel = resultados["df_reat_resumen"].copy()
+    df_reat_excel.columns = ["Indicador", f"Año {anio_0}", f"Año {anio_t}", "Variación", "Interpretación"]
     _estilizar_hoja_excel(
         ws10,
-        f"DISPARIDADES, CONCENTRACIÓN Y CONVERGENCIA REGIONAL (MOTOR REAT - ALPHA={alpha_hk})",
+        f"DISPARIDADES, CONCENTRACIÓN Y CONVERGENCIA REGIONAL (α = {alpha_hk})",
         sub_general,
-        resultados["df_reat_resumen"],
+        df_reat_excel,
     )
 
     buffer = io.BytesIO()
@@ -1812,7 +1954,6 @@ def renderizar_exportador_sii(ruta_excel_default: str = ARCHIVO_DEFAULT_REPO):
     else:
         regiones_disp = ["Todas (Consolidado)"]
 
-    # Selección por defecto: Región del Biobío y año inicial 2014 (si existe en la base)
     idx_reg_default = 0
     for i, r in enumerate(regiones_disp):
         if "biob" in _normalizar_texto(r):
@@ -1852,7 +1993,6 @@ def renderizar_exportador_sii(ruta_excel_default: str = ARCHIVO_DEFAULT_REPO):
     tot = resultados["totales"]
     mb = resultados["metricas_beta"]
 
-    # KPIs Superiores
     k1, k2, k3, k4, k5 = st.columns(5)
     k1.metric("Comunas / Rubros", f"{tot['n_comunas']} / {tot['n_rubros']}")
     k2.metric(f"Total Regional {anio_0}", f"{tot['total_reg_0']:,.1f}")
@@ -1868,7 +2008,6 @@ def renderizar_exportador_sii(ruta_excel_default: str = ARCHIVO_DEFAULT_REPO):
     )
     k5.metric("Ajuste R² / p-valor", f"{mb['r2']:.3f} (p={mb['p_value']:.3f})")
 
-    # Botón de descarga del libro Excel de 10 hojas mejorado
     bytes_excel = compilar_excel_10_hojas(
         resultados=resultados,
         region_sel=region_sel,
@@ -1881,7 +2020,7 @@ def renderizar_exportador_sii(ruta_excel_default: str = ARCHIVO_DEFAULT_REPO):
         f"Reporte_Territorial_SII_{_normalizar_texto(region_sel).replace(' ', '_')}_{anio_0}_{anio_t}.xlsx"
     )
     st.download_button(
-        label="Descargar Libro Maestro Excel (10 Hojas con Formato Condicional, Fórmulas Vivas y Cuadrante de Silva Lira)",
+        label="Descargar Reporte Excel (10 Hojas — ILPES, Silva Lira, MADE y REAT)",
         data=bytes_excel,
         file_name=nombre_archivo_salida,
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -1940,58 +2079,109 @@ def renderizar_exportador_sii(ruta_excel_default: str = ARCHIVO_DEFAULT_REPO):
 
     with tabs[3]:
         df_ss = resultados["df_shift_share"].copy()
-        part_inicial = (df_ss[f"Nivel_{anio_0}"] / max(tot["total_reg_0"], 1e-9)) * 100.0
-        part_media = 100.0 / max(tot["n_comunas"], 1)
-        df_ss["Participacion_Inicial_%"] = part_inicial
+        T_per = max(int(anio_t) - int(anio_0), 1)
+        pob_st = _obtener_poblacion_comunas(list(df_ss["Comuna"]))
+        lbl_v0, lbl_vt, lbl_pc, _, _ = _etiquetas_variable_sii(variable_sel, anio_0, anio_t)
+
+        v0_arr = df_ss[f"Nivel_{anio_0}"].values.astype(float)
+        vt_arr = df_ss[f"Nivel_{anio_t}"].values.astype(float)
+        tpa_pct = np.where((v0_arr > 0) & (vt_arr > 0), ((vt_arr / v0_arr) ** (1.0 / T_per) - 1.0) * 100.0, 0.0)
+        tpa_reg_pct = (
+            ((tot["total_reg_t"] / tot["total_reg_0"]) ** (1.0 / T_per) - 1.0) * 100.0
+            if tot["total_reg_0"] > 0 and tot["total_reg_t"] > 0
+            else 0.0
+        )
+
+        if pob_st is not None:
+            pob_arr = np.array(pob_st, dtype=float)
+            pc_arr = vt_arr / np.maximum(pob_arr, 1.0)
+            umbral_x_st = tot["total_reg_t"] / max(float(np.sum(pob_arr)), 1.0)
+            cuads_st = [
+                "I. Dinámica" if (pc_arr[i] >= umbral_x_st and tpa_pct[i] >= tpa_reg_pct)
+                else ("II. Emergente" if (pc_arr[i] < umbral_x_st and tpa_pct[i] >= tpa_reg_pct)
+                else ("III. Estancada" if (pc_arr[i] >= umbral_x_st and tpa_pct[i] < tpa_reg_pct)
+                else "IV. En retroceso"))
+                for i in range(len(df_ss))
+            ]
+            df_silva_st = pd.DataFrame({
+                "Comuna": df_ss["Comuna"].values,
+                lbl_v0: v0_arr,
+                lbl_vt: vt_arr,
+                "Población": pob_st,
+                "Tasa prom. de crecimiento (%)": tpa_pct,
+                lbl_pc: pc_arr,
+                "Cuadrante Silva Lira": cuads_st,
+            })
+            x_col_st, x_label_st, vline_txt = lbl_pc, lbl_pc, f"Promedio Regional ({umbral_x_st:,.1f})"
+        else:
+            part_arr = (vt_arr / max(tot["total_reg_t"], 1e-9)) * 100.0
+            umbral_x_st = 100.0 / max(tot["n_comunas"], 1)
+            cuads_st = [
+                "I. Dinámica" if (part_arr[i] >= umbral_x_st and tpa_pct[i] >= tpa_reg_pct)
+                else ("II. Emergente" if (part_arr[i] < umbral_x_st and tpa_pct[i] >= tpa_reg_pct)
+                else ("III. Estancada" if (part_arr[i] >= umbral_x_st and tpa_pct[i] < tpa_reg_pct)
+                else "IV. En retroceso"))
+                for i in range(len(df_ss))
+            ]
+            df_silva_st = pd.DataFrame({
+                "Comuna": df_ss["Comuna"].values,
+                lbl_v0: v0_arr,
+                lbl_vt: vt_arr,
+                "Tasa prom. de crecimiento (%)": tpa_pct,
+                f"Participación {anio_t} (%)": part_arr,
+                "Cuadrante Silva Lira": cuads_st,
+            })
+            x_col_st = f"Participación {anio_t} (%)"
+            x_label_st = x_col_st
+            vline_txt = f"Participación Media ({umbral_x_st:.2f}%)"
 
         fig_silva = px.scatter(
-            df_ss,
-            x="Participacion_Inicial_%",
-            y="Var_Porcentual_%",
-            color="Cuadrante_Silva_Lira",
+            df_silva_st,
+            x=x_col_st,
+            y="Tasa prom. de crecimiento (%)",
+            color="Cuadrante Silva Lira",
             hover_name="Comuna",
             text="Comuna",
-            size=np.maximum(df_ss[f"Nivel_{anio_t}"], 1.0),
             labels={
-                "Participacion_Inicial_%": f"Participación Comunal Inicial {anio_0} (%)",
-                "Var_Porcentual_%": f"Variación Porcentual {anio_0}-{anio_t} (%)",
+                x_col_st: x_label_st,
+                "Tasa prom. de crecimiento (%)": f"Tasa promedio anual {anio_0}–{anio_t} (%)",
             },
-            title=f"Tipología Territorial en Cuadrantes de Silva Lira (CEPAL, 2005 — {anio_0}–{anio_t})",
+            title=f"Cuadrantes de Silva Lira (CEPAL, 2005 — {region_sel}, {anio_0}–{anio_t})",
         )
         fig_silva.update_traces(textposition="top center")
         fig_silva.add_hline(
-            y=tot["tasa_var_reg"],
+            y=tpa_reg_pct,
             line_dash="dash",
             line_color="red",
-            annotation_text=f"Crecimiento Regional ({tot['tasa_var_reg']:.1f}%)",
+            annotation_text=f"Crecimiento Regional ({tpa_reg_pct:.2f}%)",
         )
         fig_silva.add_vline(
-            x=part_media,
+            x=umbral_x_st,
             line_dash="dash",
             line_color="navy",
-            annotation_text=f"Participación Media ({part_media:.2f}%)",
+            annotation_text=vline_txt,
         )
         st.plotly_chart(fig_silva, use_container_width=True)
+        st.dataframe(df_silva_st.round(2), use_container_width=True, hide_index=True)
 
-        # Matriz Visual 2x2 en Streamlit
-        c_q1 = ", ".join(sorted(df_ss[df_ss["Cuadrante_Silva_Lira"].str.startswith("I.")]["Comuna"].tolist())) or "Ninguna"
-        c_q2 = ", ".join(sorted(df_ss[df_ss["Cuadrante_Silva_Lira"].str.startswith("II.")]["Comuna"].tolist())) or "Ninguna"
-        c_q3 = ", ".join(sorted(df_ss[df_ss["Cuadrante_Silva_Lira"].str.startswith("III.")]["Comuna"].tolist())) or "Ninguna"
-        c_q4 = ", ".join(sorted(df_ss[df_ss["Cuadrante_Silva_Lira"].str.startswith("IV.")]["Comuna"].tolist())) or "Ninguna"
+        c_q1 = ", ".join(sorted(df_silva_st[df_silva_st["Cuadrante Silva Lira"] == "I. Dinámica"]["Comuna"].tolist())) or "Ninguna"
+        c_q2 = ", ".join(sorted(df_silva_st[df_silva_st["Cuadrante Silva Lira"] == "II. Emergente"]["Comuna"].tolist())) or "Ninguna"
+        c_q3 = ", ".join(sorted(df_silva_st[df_silva_st["Cuadrante Silva Lira"] == "III. Estancada"]["Comuna"].tolist())) or "Ninguna"
+        c_q4 = ", ".join(sorted(df_silva_st[df_silva_st["Cuadrante Silva Lira"] == "IV. En retroceso"]["Comuna"].tolist())) or "Ninguna"
 
-        st.markdown("**Matriz 2×2 de Clasificación Comunal de Silva Lira**")
+        st.markdown("**Matriz 2×2 — Clasificación de Silva Lira**")
         df_mat_2x2 = pd.DataFrame({
-            "Dinámica de Crecimiento \\ Peso Inicial": [
-                f"Crecimiento >= Media Regional ({tot['tasa_var_reg']:.1f}%)",
-                f"Crecimiento < Media Regional ({tot['tasa_var_reg']:.1f}%)",
+            "Dinámica de Crecimiento": [
+                f"Crecimiento anual >= Promedio Regional ({tpa_reg_pct:.2f}%)",
+                f"Crecimiento anual < Promedio Regional ({tpa_reg_pct:.2f}%)",
             ],
-            f"Bajo Peso Inicial (< {part_media:.2f}%)": [
-                f"II. Emergentes / Convergentes: {c_q2}",
-                f"IV. En Retroceso / Rezagadas: {c_q4}",
+            f"Bajo {x_label_st}": [
+                f"II. Emergentes: {c_q2}",
+                f"IV. En retroceso: {c_q4}",
             ],
-            f"Alto Peso Inicial (>= {part_media:.2f}%)": [
-                f"I. Dinámicas / Ganadoras: {c_q1}",
-                f"III. Estancadas / Maduras: {c_q3}",
+            f"Alto {x_label_st}": [
+                f"I. Dinámicas: {c_q1}",
+                f"III. Estancadas: {c_q3}",
             ],
         })
         st.dataframe(df_mat_2x2, use_container_width=True, hide_index=True)
@@ -2063,5 +2253,3 @@ def renderizar_exportador_sii(ruta_excel_default: str = ARCHIVO_DEFAULT_REPO):
 # Alias de compatibilidad para importación desde app.py
 renderizar_modulo_exportador_sii = renderizar_exportador_sii
 mostrar_exportador_sii = renderizar_exportador_sii
-
-
