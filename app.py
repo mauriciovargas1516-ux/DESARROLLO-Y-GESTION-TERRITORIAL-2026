@@ -178,12 +178,12 @@ def vista_modulo_1_ilpes():
             titulo_boton="Tip: ¿Cómo leer Silva Lira?",
             titulo_interno="Cuadrantes de Silva Lira (CEPAL, 2005)",
             explicacion_md=(
-                "- **Eje X (Peso Inicial):** Compara la cuota comunal inicial con el promedio regional ($100\\% / N$).\n"
-                "- **Eje Y (Dinamismo):** Compara el crecimiento comunal con la tasa regional.\n"
-                "- **I. Dinámica (+,+):** Alto peso y crece más que la región.\n"
-                "- **II. Emergente (-,+):** Bajo peso pero crece rápido (convergente).\n"
-                "- **III. Estancada (+,-):** Alto peso pero crece lento.\n"
-                "- **IV. En Retroceso (-,-):** Bajo peso y rezagada."
+                "- **Eje X (Nivel per cápita):** Compara el valor per cápita comunal (Censo 2024) con el promedio regional (o participación si no hay población precargada).\n"
+                "- **Eje Y (Dinamismo):** Compara la tasa promedio anual de crecimiento $((V_t/V_0)^{1/T}-1)$ con la tasa promedio anual regional.\n"
+                "- **I. Dinámica (+,+):** Alto nivel per cápita y crece sobre el promedio regional.\n"
+                "- **II. Emergente (-,+):** Bajo nivel per cápita pero crece rápido (convergente).\n"
+                "- **III. Estancada (+,-):** Alto nivel per cápita pero crece bajo el promedio.\n"
+                "- **IV. En retroceso (-,-):** Bajo nivel per cápita y bajo dinamismo."
             ),
         )
     with b2:
@@ -228,39 +228,92 @@ def vista_modulo_1_ilpes():
 
     with subtabs[0]:
         df_ss = res["df_shift_share"].copy()
-        part_ini = (df_ss[f"Nivel_{a0}"] / max(tot["total_reg_0"], 1e-9)) * 100.0
-        part_prom = 100.0 / max(tot["n_comunas"], 1)
-        df_ss["Participacion_Inicial_%"] = part_ini
+        T_per = max(int(at) - int(a0), 1)
+        pob_m1 = msii._obtener_poblacion_comunas(list(df_ss["Comuna"]))
+        lbl_v0, lbl_vt, lbl_pc, _, _ = msii._etiquetas_variable_sii(var_sel, a0, at)
+
+        v0_arr = df_ss[f"Nivel_{a0}"].values.astype(float)
+        vt_arr = df_ss[f"Nivel_{at}"].values.astype(float)
+        tpa_pct = np.where((v0_arr > 0) & (vt_arr > 0), ((vt_arr / v0_arr) ** (1.0 / T_per) - 1.0) * 100.0, 0.0)
+        tpa_reg_pct = (
+            ((tot["total_reg_t"] / tot["total_reg_0"]) ** (1.0 / T_per) - 1.0) * 100.0
+            if tot["total_reg_0"] > 0 and tot["total_reg_t"] > 0
+            else 0.0
+        )
+
+        if pob_m1 is not None:
+            pob_arr = np.array(pob_m1, dtype=float)
+            pc_arr = vt_arr / np.maximum(pob_arr, 1.0)
+            umbral_x_m1 = tot["total_reg_t"] / max(float(np.sum(pob_arr)), 1.0)
+            cuads_m1 = [
+                "I. Dinámica" if (pc_arr[i] >= umbral_x_m1 and tpa_pct[i] >= tpa_reg_pct)
+                else ("II. Emergente" if (pc_arr[i] < umbral_x_m1 and tpa_pct[i] >= tpa_reg_pct)
+                else ("III. Estancada" if (pc_arr[i] >= umbral_x_m1 and tpa_pct[i] < tpa_reg_pct)
+                else "IV. En retroceso"))
+                for i in range(len(df_ss))
+            ]
+            df_silva_m1 = pd.DataFrame({
+                "Comuna": df_ss["Comuna"].values,
+                lbl_v0: v0_arr,
+                lbl_vt: vt_arr,
+                "Población": pob_m1,
+                "Tasa prom. de crecimiento (%)": tpa_pct,
+                lbl_pc: pc_arr,
+                "Cuadrante Silva Lira": cuads_m1,
+            })
+            x_col_m1, x_lbl_m1, vline_txt_m1 = lbl_pc, lbl_pc, f"Promedio Regional ({umbral_x_m1:,.1f})"
+        else:
+            part_arr = (vt_arr / max(tot["total_reg_t"], 1e-9)) * 100.0
+            umbral_x_m1 = 100.0 / max(tot["n_comunas"], 1)
+            cuads_m1 = [
+                "I. Dinámica" if (part_arr[i] >= umbral_x_m1 and tpa_pct[i] >= tpa_reg_pct)
+                else ("II. Emergente" if (part_arr[i] < umbral_x_m1 and tpa_pct[i] >= tpa_reg_pct)
+                else ("III. Estancada" if (part_arr[i] >= umbral_x_m1 and tpa_pct[i] < tpa_reg_pct)
+                else "IV. En retroceso"))
+                for i in range(len(df_ss))
+            ]
+            df_silva_m1 = pd.DataFrame({
+                "Comuna": df_ss["Comuna"].values,
+                lbl_v0: v0_arr,
+                lbl_vt: vt_arr,
+                "Tasa prom. de crecimiento (%)": tpa_pct,
+                f"Participación {at} (%)": part_arr,
+                "Cuadrante Silva Lira": cuads_m1,
+            })
+            x_col_m1 = f"Participación {at} (%)"
+            x_lbl_m1 = x_col_m1
+            vline_txt_m1 = f"Participación Media ({umbral_x_m1:.2f}%)"
 
         fig_silva = px.scatter(
-            df_ss,
-            x="Participacion_Inicial_%",
-            y="Var_Porcentual_%",
-            color="Cuadrante_Silva_Lira",
+            df_silva_m1,
+            x=x_col_m1,
+            y="Tasa prom. de crecimiento (%)",
+            color="Cuadrante Silva Lira",
             hover_name="Comuna",
-            size=np.maximum(df_ss[f"Nivel_{at}"], 1.0),
+            text="Comuna",
             labels={
-                "Participacion_Inicial_%": f"Participación Comunal Inicial {a0} (%)",
-                "Var_Porcentual_%": f"Crecimiento Acumulado {a0}-{at} (%)",
+                x_col_m1: x_lbl_m1,
+                "Tasa prom. de crecimiento (%)": f"Tasa promedio anual {a0}–{at} (%)",
             },
-            title=f"Clasificación Comunal en Cuadrantes de Silva Lira ({reg_sel}, {a0}–{at})",
+            title=f"Cuadrantes de Silva Lira (CEPAL, 2005 — {reg_sel}, {a0}–{at})",
         )
+        fig_silva.update_traces(textposition="top center")
         fig_silva.add_hline(
-            y=tot["tasa_var_reg"],
+            y=tpa_reg_pct,
             line_dash="dash",
             line_color="#dc2626",
-            annotation_text=f"Media Regional ({tot['tasa_var_reg']:.1f}%)",
+            annotation_text=f"Crecimiento Regional ({tpa_reg_pct:.2f}%)",
         )
         fig_silva.add_vline(
-            x=part_prom,
+            x=umbral_x_m1,
             line_dash="dash",
             line_color="#1d4ed8",
-            annotation_text=f"Umbral Peso Medio ({part_prom:.2f}%)",
+            annotation_text=vline_txt_m1,
         )
         st.plotly_chart(fig_silva, use_container_width=True)
 
         resumen_cuad = (
-            df_ss.groupby("Cuadrante_Silva_Lira")
+            df_silva_m1.groupby("Cuadrante Silva Lira")
             .agg(
                 Numero_Comunas=("Comuna", "count"),
                 Comunas=("Comuna", lambda x: ", ".join(sorted(x))),
@@ -689,7 +742,7 @@ def vista_modulo_4_ordenamiento():
         renderizar_burbuja_tip(
             titulo_boton="Tip: ¿Cómo funciona la Ponderación de Rondinelli / Guttman?",
             titulo_interno="Escalograma Funcional de Guttman y Pesos de Rondinelli (`06 OT 2024.pdf`)",
-            formula_latex=r"W_k = \frac{N}{f_k} \quad ; \quad IC_i = \sum_{k=1}^{m} X_{ik} \cdot W_k",
+            formula_latex=r"W_k = \frac{100}{f_k} \quad ; \quad IC_i = \sum_{k=1}^{m} X_{ik} \cdot W_k",
             explicacion_md=(
                 "- **$X_{ik} \\in \\{0, 1\\}$:** Registra si el equipamiento o servicio $k$ está presente ($1$) o ausente ($0$) en la comuna $i$.\n"
                 "- **Peso Inverso $W_k$:** Mientras más escaso y especializado es un servicio en la región (ej. Hospital Tipo 1 o Corte de Apelaciones), menor es su frecuencia $f_k$ y **mayor es el puntaje de centralidad** que otorga."
@@ -738,7 +791,7 @@ def vista_modulo_4_ordenamiento():
 
         M = df_rond.to_numpy(dtype=float, copy=True)
         freq_funcion = np.sum(M, axis=0)
-        pesos_funcion = np.where(freq_funcion > 0, len(asentamientos) / freq_funcion, 0.0)
+        pesos_funcion = np.where(freq_funcion > 0, 100.0 / freq_funcion, 0.0)
         indice_centralidad = M @ pesos_funcion
         num_funciones_ciudad = np.sum(M, axis=1)
 
@@ -747,8 +800,8 @@ def vista_modulo_4_ordenamiento():
             "Funciones_Presentes": num_funciones_ciudad.astype(int),
             "Indice_Centralidad_Rondinelli": indice_centralidad.round(2),
             "Jerarquia_Funcional": [
-                "Nivel 1: Centro Metropolitano / Primario" if ic >= 12
-                else ("Nivel 2: Centro Intermedio / Subregional" if ic >= 6 else "Nivel 3: Centro Local / Básico")
+                "Nivel 1: Centro Metropolitano / Primario" if ic >= 120
+                else ("Nivel 2: Centro Intermedio / Subregional" if ic >= 60 else "Nivel 3: Centro Local / Básico")
                 for ic in indice_centralidad
             ],
         }).sort_values("Indice_Centralidad_Rondinelli", ascending=False)
