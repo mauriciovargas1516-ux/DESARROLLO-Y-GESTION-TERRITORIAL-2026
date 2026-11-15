@@ -8,7 +8,7 @@
 Motor econométrico, sociométrico y espacial desarrollado en **Python (`Streamlit`, `Pandas`, `NumPy`, `SciPy`, `Plotly`, `OpenPyXL`)** para la asignatura **Desarrollo y Gestión Territorial** (Carrera de Ingeniería Comercial, Universidad de Los Lagos — Prof. Claudio Mancilla). Integra en **8 módulos interactivos** el procesamiento de estadísticas tributarias comunales del **SII (2014–2024)**, metodologías de análisis regional de **ILPES / CEPAL (Lira y Quiroga; Silva Lira)**, réplica econométrica del paquete **REAT** de R, **Sistemas Productivos Locales y Redes Empresariales (Dini, 2010; UCINET)**, **Cadenas de Valor (Padilla y Oddone, 2016)** y **Ordenamiento Territorial (Rondinelli, Guttman, Primacía Urbana, von Thünen, Boisier ELITE y PROT)**.
 
 **Acceso directo a la aplicación web en vivo:**  
-https://desarrollo-y-gestion-territorial-2026-ec6keylhsgra88s77bkl6f.streamlit.app/
+https://desarrollo-y-gestion-territorial-2026-azi4k3liecm2g45r97lkff.streamlit.app/
 
 ---
 
