@@ -1,4 +1,4 @@
-[readme_desarrollo_y_gestion_territorial_2026.md](https://github.com/user-attachments/files/34865658/readme_desarrollo_y_gestion_territorial_2026.md)
+
 # Plataforma Integral de Desarrollo y Gestión Territorial 2026 — ULagos
 
 [![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://desarrollo-y-gestion-territorial-2026-ec6keylhsgra88s77bkl6f.streamlit.app/)
