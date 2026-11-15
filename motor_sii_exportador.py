@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-MOTOR ECONOMÉTRICO Y EXPORTADOR SII - ILPES / MADE / REAT
+MOTOR ECONOMÉTRICO Y EXPORTADOR SII - ILPES / MADE / REAT (EDICIÓN EJECUTIVA SOBRIA)
 Asignatura: Desarrollo y Gestión Territorial - Universidad de Los Lagos
-Archivo: motor_sii_exportador.py (PARTE 1 DE 2)
+Archivo: motor_sii_exportador.py
+- Paleta monocromática ejecutiva (Gris Carbón #262626, Gris Pizarra #404040, Gris Piedra #E5E7EB) sin azules.
+- Hoja 07_Cuadrantes_Silva sobria (filas en blanco/cebra tenue, Matriz 2x2 en tonos piedra neutros).
+- Gráfico de dispersión de Silva Lira con coordenadas precalculadas en columnas ocultas O y P para
+  renderizado inmediato incluso en 'Vista Protegida' de Excel, manteniendo fórmulas vivas en la tabla.
 """
 
 import io
@@ -334,25 +338,20 @@ def calcular_todo_el_ramo(
     r_reg = (total_reg_t / max(total_reg_0, eps)) if total_reg_0 > 0 else 1.0
     r_i_sec = (total_rubro_t / total_rubro_0.replace(0, np.nan)).fillna(1.0)
 
-    # Efecto Total ILPES: ET_j = V_tj - V_0j * r_SR (idéntico a fila 2 de hoja MADE)
     ET_j = total_comuna_t - (total_comuna_0 * r_reg)
     EG_j = total_comuna_0 * (r_reg - 1.0)
 
-    # Matriz Rubro x Comuna de Efecto Estructural: EE_ij = V_0ij * (r_Si - r_SR)
     EE_mat = V0.multiply(r_i_sec - r_reg, axis=0)
     EE_j = EE_mat.sum(axis=0)
 
-    # Matriz Rubro x Comuna de Efecto Diferencial: ED_ij = V_tij - V_0ij * r_Si
     ED_mat = Vt - V0.multiply(r_i_sec, axis=0)
     ED_j = ED_mat.sum(axis=0)
 
-    # Matriz Rubro x Comuna de Efecto Inverso (Made Modificado): EI_ij = V_tij * (1/r_SR - 1/r_Si)
     inv_r_reg = (total_reg_0 / max(total_reg_t, eps)) if total_reg_t > 0 else 1.0
     inv_r_i_sec = (total_rubro_0 / total_rubro_t.replace(0, np.nan)).fillna(1.0)
     EI_mat = Vt.multiply(inv_r_reg - inv_r_i_sec, axis=0)
     EI_j = EI_mat.sum(axis=0)
 
-    # Efecto Modificado (EM_j = EI_j - EE_j) y Efecto Comunal Modificado (ERM_j = ET_j - EI_j)
     EM_j = EI_j - EE_j
     ERM_j = ET_j - EI_j
 
@@ -571,20 +570,21 @@ def calcular_todo_el_ramo(
 
 
 def _estilizar_hoja_excel(ws, titulo_hoja: str, subtitulo: str, df_tabla: pd.DataFrame):
-    fill_titulo = PatternFill("solid", fgColor="1B365D")
-    fill_header = PatternFill("solid", fgColor="2C5282")
-    fill_zebra = PatternFill("solid", fgColor="F4F7FA")
+    """Aplica diseño ejecutivo monocromático (Gris Carbón y Gris Pizarra, sin tonos azules)."""
+    fill_titulo = PatternFill("solid", fgColor="262626")
+    fill_header = PatternFill("solid", fgColor="404040")
+    fill_zebra = PatternFill("solid", fgColor="F9FAFB")
 
-    font_titulo = Font(name="Calibri", size=13, bold=True, color="FFFFFF")
-    font_sub = Font(name="Calibri", size=10, italic=True, color="1B365D")
+    font_titulo = Font(name="Calibri", size=12, bold=True, color="FFFFFF")
+    font_sub = Font(name="Calibri", size=10, italic=True, color="374151")
     font_header = Font(name="Calibri", size=10, bold=True, color="FFFFFF")
-    font_celda = Font(name="Calibri", size=10, color="111111")
+    font_celda = Font(name="Calibri", size=10, color="111827")
 
     borde_fino = Border(
-        left=Side(style="thin", color="D0D7DE"),
-        right=Side(style="thin", color="D0D7DE"),
-        top=Side(style="thin", color="D0D7DE"),
-        bottom=Side(style="thin", color="D0D7DE"),
+        left=Side(style="thin", color="D1D5DB"),
+        right=Side(style="thin", color="D1D5DB"),
+        top=Side(style="thin", color="D1D5DB"),
+        bottom=Side(style="thin", color="D1D5DB"),
     )
 
     n_cols = max(len(df_tabla.columns), 2)
@@ -651,6 +651,8 @@ def _estilizar_hoja_excel(ws, titulo_hoja: str, subtitulo: str, df_tabla: pd.Dat
 def _autoajustar_columnas_hoja(ws, max_width: int = 34, min_width: int = 12):
     for col_idx in range(1, ws.max_column + 1):
         col_letter = get_column_letter(col_idx)
+        if ws.column_dimensions[col_letter].hidden:
+            continue
         max_len = 0
         for r_idx in range(3, min(ws.max_row + 1, 95)):
             val = ws.cell(row=r_idx, column=col_idx).value
@@ -660,10 +662,6 @@ def _autoajustar_columnas_hoja(ws, max_width: int = 34, min_width: int = 12):
                     max_len = max(max_len, len(s_val))
         ws.column_dimensions[col_letter].width = max(min(max_len + 4, max_width), min_width)
 
-# ==============================================================================
-# PARTE 2 DE 2: COMPILADOR EXCEL DE 10 HOJAS E INTERFAZ STREAMLIT
-# (Pegar inmediatamente debajo de def _autoajustar_columnas_hoja en Parte 1)
-# ==============================================================================
 
 def compilar_excel_10_hojas(
     resultados: dict,
@@ -674,15 +672,10 @@ def compilar_excel_10_hojas(
     alpha_hk: float = 2.0,
 ) -> bytes:
     """
-    Genera en memoria un libro Excel (.xlsx) con 10 hojas completas, incluyendo:
-    - Hojas 02 y 03: Matrices V0 y Vt con fórmulas =SUM(...).
-    - Hoja 04: Localización Q_ij (bloques t0 y tf) con formato condicional rosado/rojo (#FFC7CE / #9C0006).
-    - Hoja 05: Matriz Rubro x Comuna de Especialización |P_ij - P_i| con franja gris y fórmula =SUM(...)/2.
-    - Hoja 06: Base Exportable X_ij con celdas limpias en blanco cuando Q_ij <= 1, resaltado rosado y filas X_j y M_j vivas.
-    - Hoja 07: Cuadrantes de Silva Lira con fórmulas vivas, Gráfico de Dispersión con nombres de comunas + ejes rojos y Matriz 2x2.
-    - Hoja 08: Shift & Share Clásico (MADE) con matrices Rubro x Comuna (ED y EE) y comprobación viva ET = ED + EE.
-    - Hoja 09: MADE Modificado con matrices Rubro x Comuna (EE y EI) y franjas amarillas (#FFFF00) con fórmulas vivas.
-    - Hoja 10: Indicadores Econométricos REAT.
+    Genera en memoria un libro Excel (.xlsx) con 10 hojas completas en diseño ejecutivo sobrio:
+    - Paleta Gris Carbón (#262626) / Gris Pizarra (#404040) / Gris Piedra (#E5E7EB) sin tonos azules.
+    - Hoja 07 (Cuadrantes de Silva Lira) limpia sin arcoíris por fila y con coordenadas precalculadas
+      en columnas ocultas (O y P) para que el gráfico se visualice perfecto incluso en Vista Protegida.
     """
     wb = Workbook()
     wb.remove(wb.active)
@@ -692,39 +685,42 @@ def compilar_excel_10_hojas(
         f"Periodo: {anio_0}-{anio_t} | Universidad de Los Lagos"
     )
 
-    fill_titulo = PatternFill("solid", fgColor="1B365D")
-    fill_header = PatternFill("solid", fgColor="2C5282")
-    fill_subbloque = PatternFill("solid", fgColor="D9E1F2")
-    fill_gris_total = PatternFill("solid", fgColor="D9D9D9")
-    fill_amarillo_ref = PatternFill("solid", fgColor="FFFFCC")
-    fill_amarillo_made = PatternFill("solid", fgColor="FFFF00")  # Amarillo intenso hoja Made Modificado
-    fill_rosado_q = PatternFill("solid", fgColor="FFC7CE")
+    # Paleta Ejecutiva Monocromática (Sin Azules ni Colores Chillones)
+    fill_titulo = PatternFill("solid", fgColor="262626")         # Gris Carbón Oscuro
+    fill_header = PatternFill("solid", fgColor="404040")         # Gris Pizarra Ejecutivo
+    fill_subbloque = PatternFill("solid", fgColor="E5E7EB")      # Gris Piedra Suave
+    fill_gris_total = PatternFill("solid", fgColor="D4D4D8")     # Gris Ceniza Totales
+    fill_amarillo_ref = PatternFill("solid", fgColor="E4E4E7")   # Gris Perla Referencia (reemplaza amarillo chillón)
+    fill_amarillo_made = PatternFill("solid", fgColor="F3F4F6")  # Gris Claro Institucional para franjas MADE Modificado
+    fill_rosado_q = PatternFill("solid", fgColor="FFC7CE")       # Formato condicional exigido para Q_ij > 1
 
-    # Colores de Cuadrantes de Silva Lira
-    fill_cuad_1 = PatternFill("solid", fgColor="D9EAD3")  # Verde suave: Dinámica (I)
-    fill_cuad_2 = PatternFill("solid", fgColor="FFFFCC")  # Amarillo suave: Emergente (II)
-    fill_cuad_3 = PatternFill("solid", fgColor="FCE5CD")  # Damasco suave: Estancada (III)
-    fill_cuad_4 = PatternFill("solid", fgColor="F2DBDB")  # Rosado suave: En Retroceso (IV)
+    # Rellenos sobrios para la hoja 07_Cuadrantes_Silva (sin arcoíris)
+    fill_fila_blanca = PatternFill("solid", fgColor="FFFFFF")
+    fill_fila_cebra = PatternFill("solid", fgColor="F9FAFB")
+    fill_cuad_1 = PatternFill("solid", fgColor="F3F4F6")         # Gris Perla Claro (Cuadrante I)
+    fill_cuad_2 = PatternFill("solid", fgColor="FAFAFA")         # Blanco Humo (Cuadrante II)
+    fill_cuad_3 = PatternFill("solid", fgColor="F4F4F5")         # Gris Zinc Tenue (Cuadrante III)
+    fill_cuad_4 = PatternFill("solid", fgColor="EBECEF")         # Gris Piedra Tenue (Cuadrante IV)
 
-    font_titulo = Font(name="Calibri", size=13, bold=True, color="FFFFFF")
-    font_sub = Font(name="Calibri", size=10, italic=True, color="1B365D")
+    font_titulo = Font(name="Calibri", size=12, bold=True, color="FFFFFF")
+    font_sub = Font(name="Calibri", size=10, italic=True, color="374151")
     font_header = Font(name="Calibri", size=10, bold=True, color="FFFFFF")
-    font_subbloque = Font(name="Calibri", size=11, bold=True, color="1B365D")
-    font_bold = Font(name="Calibri", size=10, bold=True, color="111111")
-    font_celda = Font(name="Calibri", size=10, color="111111")
+    font_subbloque = Font(name="Calibri", size=10, bold=True, color="111827")
+    font_bold = Font(name="Calibri", size=10, bold=True, color="111827")
+    font_celda = Font(name="Calibri", size=10, color="1F2937")
     font_rojo_q = Font(name="Calibri", size=10, bold=True, color="9C0006")
 
     borde_fino = Border(
-        left=Side(style="thin", color="D0D7DE"),
-        right=Side(style="thin", color="D0D7DE"),
-        top=Side(style="thin", color="D0D7DE"),
-        bottom=Side(style="thin", color="D0D7DE"),
+        left=Side(style="thin", color="D1D5DB"),
+        right=Side(style="thin", color="D1D5DB"),
+        top=Side(style="thin", color="D1D5DB"),
+        bottom=Side(style="thin", color="D1D5DB"),
     )
     borde_total = Border(
-        left=Side(style="thin", color="888888"),
-        right=Side(style="thin", color="888888"),
-        top=Side(style="medium", color="1B365D"),
-        bottom=Side(style="double", color="1B365D"),
+        left=Side(style="thin", color="9CA3AF"),
+        right=Side(style="thin", color="9CA3AF"),
+        top=Side(style="thin", color="262626"),
+        bottom=Side(style="double", color="262626"),
     )
 
     mb = resultados["metricas_beta"]
@@ -903,7 +899,7 @@ def compilar_excel_10_hojas(
         ws4.conditional_formatting.add(rango_q, regla_q_mayor_1)
         fila_cursor += 2
 
-    ws4.freeze_panes = "B6"
+    ws4.freeze_panes = "B1"
     _autoajustar_columnas_hoja(ws4)
 
     # ==========================================================================
@@ -970,7 +966,6 @@ def compilar_excel_10_hojas(
             fila_cur_5 += 1
         f_fin_d = fila_cur_5 - 1
 
-        # Franja gris con fórmula activa =SUM(...)/2
         c_qr_lbl = ws5.cell(row=fila_cur_5, column=1, value=f"Coeficiente Especialización (Qr {etq_anio})")
         c_qr_lbl.font = font_bold
         c_qr_lbl.fill = fill_gris_total
@@ -988,7 +983,6 @@ def compilar_excel_10_hojas(
         ws5.row_dimensions[fila_cur_5].height = 22
         fila_cur_5 += 3
 
-    # Tabla Resumen Consolidada al pie de la Hoja 5
     df_esp_res = resultados["df_especializacion"]
     ws5.merge_cells(start_row=fila_cur_5, start_column=1, end_row=fila_cur_5, end_column=len(df_esp_res.columns))
     c_res_t = ws5.cell(
@@ -1018,7 +1012,7 @@ def compilar_excel_10_hojas(
                 cc.alignment = Alignment(horizontal="right", vertical="center")
         fila_cur_5 += 1
 
-    ws5.freeze_panes = "B6"
+    ws5.freeze_panes = "B1"
     _autoajustar_columnas_hoja(ws5)
 
     # ==========================================================================
@@ -1109,7 +1103,6 @@ def compilar_excel_10_hojas(
         f_fin_x = fila_cur_6 - 1
         ws6.conditional_formatting.add(f"B{f_ini_x}:{ult_col_com_x}{f_fin_x}", regla_x_pos)
 
-        # Fila 1 al pie: Vj (Actividad Total Comunal)
         f_vj = fila_cur_6
         c_vj_lbl = ws6.cell(row=f_vj, column=1, value=f"Vj (Actividad Total Comunal {etq_anio})")
         c_vj_lbl.font = font_bold
@@ -1129,7 +1122,6 @@ def compilar_excel_10_hojas(
         cv_tot.border = borde_fino
         fila_cur_6 += 1
 
-        # Fila 2 al pie: Xj = SUM(Xij) con fórmula activa
         f_xj = fila_cur_6
         c_xj_lbl = ws6.cell(row=f_xj, column=1, value=f"Xj (Producción Básica Exportable Total {etq_anio})")
         c_xj_lbl.font = font_bold
@@ -1144,7 +1136,6 @@ def compilar_excel_10_hojas(
             cx.border = borde_total
         fila_cur_6 += 1
 
-        # Fila 3 al pie: Multiplicador Básico Mj = Vj / Xj con fórmula activa
         f_mj = fila_cur_6
         c_mj_lbl = ws6.cell(row=f_mj, column=1, value=f"Mj (Multiplicador Básico = Vj / Xj — {etq_anio})")
         c_mj_lbl.font = font_bold
@@ -1160,11 +1151,11 @@ def compilar_excel_10_hojas(
 
         fila_cur_6 += 3
 
-    ws6.freeze_panes = "B6"
+    ws6.freeze_panes = "B1"
     _autoajustar_columnas_hoja(ws6)
 
     # ==========================================================================
-    # HOJA 7: CUADRANTES DE SILVA LIRA (GRÁFICO CON NOMBRES DE COMUNAS + EJES ROJOS)
+    # HOJA 7: CUADRANTES DE SILVA LIRA (DISEÑO EJECUTIVO SOBRIO + GRÁFICO INMEDIATO)
     # ==========================================================================
     ws7 = wb.create_sheet("07_Cuadrantes_Silva")
     ws7.merge_cells("A1:M1")
@@ -1181,7 +1172,7 @@ def compilar_excel_10_hojas(
     c7_s = ws7.cell(
         row=2,
         column=1,
-        value="Incluye fórmulas vivas de tasa anualizada =((Ct/C0)^(1/T))-1, Gráfico de Cuadrantes con nombres de comunas y ejes rojos de corte regional, y Matriz 2x2",
+        value="Diseño ejecutivo sobrio con fórmulas vivas de tasa anualizada =((Ct/C0)^(1/T))-1, Gráfico de Cuadrantes y Matriz 2x2",
     )
     c7_s.font = font_sub
 
@@ -1215,14 +1206,15 @@ def compilar_excel_10_hojas(
 
     for idx_r, row_s in enumerate(df_ss.itertuples(index=False), start=fila_ini_7):
         cuad_str = str(row_s.Cuadrante_Silva_Lira)
+        fill_row_datos = fill_fila_blanca if (idx_r % 2 == 1) else fill_fila_cebra
         if cuad_str.startswith("I."):
-            fill_row = fill_cuad_1
+            fill_col_h = fill_cuad_1
         elif cuad_str.startswith("II."):
-            fill_row = fill_cuad_2
+            fill_col_h = fill_cuad_2
         elif cuad_str.startswith("III."):
-            fill_row = fill_cuad_3
+            fill_col_h = fill_cuad_3
         else:
-            fill_row = fill_cuad_4
+            fill_col_h = fill_cuad_4
 
         v0_val = float(getattr(row_s, f"Nivel_{anio_0}"))
         vt_val = float(getattr(row_s, f"Nivel_{anio_t}"))
@@ -1241,6 +1233,12 @@ def compilar_excel_10_hojas(
         c_par = ws7.cell(row=idx_r, column=7, value=f"=IF($B${fila_tot_7}>0,B{idx_r}/$B${fila_tot_7},0)")
         c_cua = ws7.cell(row=idx_r, column=8, value=cuad_str)
 
+        # Coordenadas numéricas precalculadas en columnas ocultas O (15) y P (16) para el ScatterChart
+        c_x_num = ws7.cell(row=idx_r, column=15, value=float(part_dec))
+        c_y_num = ws7.cell(row=idx_r, column=16, value=float(tpa_dec))
+        c_x_num.number_format = "0.00%"
+        c_y_num.number_format = "0.00%"
+
         c_v0.number_format = "#,##0.00"
         c_vt.number_format = "#,##0.00"
         c_dif.number_format = "#,##0.00"
@@ -1248,10 +1246,17 @@ def compilar_excel_10_hojas(
         c_tpa.number_format = "0.00%"
         c_par.number_format = "0.00%"
 
-        for cell_item in (c_com, c_v0, c_vt, c_dif, c_var, c_tpa, c_par, c_cua):
-            cell_item.fill = fill_row
+        for cell_item in (c_com, c_v0, c_vt, c_dif, c_var, c_tpa, c_par):
+            cell_item.fill = fill_row_datos
             cell_item.font = font_celda
             cell_item.border = borde_fino
+
+        c_cua.fill = fill_col_h
+        c_cua.font = font_bold if cuad_str.startswith("I.") else font_celda
+        c_cua.border = borde_fino
+
+    ws7.column_dimensions["O"].hidden = True
+    ws7.column_dimensions["P"].hidden = True
 
     # Fila de Referencia Regional (Suma Total y Promedios Umbrales)
     ws7.cell(row=fila_tot_7, column=1, value="SUMA TOTAL / UMBRAL REGIONAL").font = font_bold
@@ -1265,11 +1270,11 @@ def compilar_excel_10_hojas(
 
     for c_i in range(1, 9):
         cell_tot = ws7.cell(row=fila_tot_7, column=c_i)
-        cell_tot.fill = fill_amarillo_ref
+        cell_tot.fill = fill_gris_total
         cell_tot.font = font_bold
         cell_tot.border = borde_total
 
-    # Coordenadas Auxiliares para las 2 Líneas Rojas de Corte del Cuadrante
+    # Coordenadas Auxiliares para las 2 Líneas de Corte del Cuadrante
     umbral_x = 1.0 / max(n_comunas, 1)
     umbral_y = (
         ((tot["total_reg_t"] / tot["total_reg_0"]) ** (1.0 / T_per) - 1.0)
@@ -1284,7 +1289,7 @@ def compilar_excel_10_hojas(
     y_max_plot = y_max_val + margen_y
 
     fila_aux = fila_tot_7 + 3
-    ws7.cell(row=fila_aux, column=1, value="Parámetros Ejes Rojos Cuadrante").font = font_sub
+    ws7.cell(row=fila_aux, column=1, value="Parámetros Ejes de Corte Cuadrante").font = font_sub
     ws7.cell(row=fila_aux + 1, column=2, value=float(umbral_x)).number_format = "0.00%"
     ws7.cell(row=fila_aux + 1, column=3, value=float(y_min_plot)).number_format = "0.00%"
     ws7.cell(row=fila_aux + 2, column=2, value=float(umbral_x)).number_format = "0.00%"
@@ -1295,8 +1300,9 @@ def compilar_excel_10_hojas(
     ws7.cell(row=fila_aux + 4, column=2, value=float(x_max_plot)).number_format = "0.00%"
     ws7.cell(row=fila_aux + 4, column=3, value=float(umbral_y)).number_format = "0.00%"
 
-    # Gráfico de Dispersión Nativo en J4 con Nombres de Comunas + Líneas Rojas
+    # Gráfico de Dispersión Nativo en J4 leyendo las columnas numéricas O y P
     chart_silva = ScatterChart()
+    chart_silva.visible_cells_only = False  # Permite graficar columnas ocultas O y P
     chart_silva.title = f"Cuadrante de Silva Lira ({region_sel}, {anio_0}–{anio_t})"
     chart_silva.style = 2
     chart_silva.legend = None
@@ -1315,13 +1321,13 @@ def compilar_excel_10_hojas(
 
     for idx_r in range(fila_ini_7, fila_tot_7):
         nom_comuna = str(ws7.cell(row=idx_r, column=1).value)
-        x_ref = Reference(ws7, min_col=7, min_row=idx_r, max_row=idx_r)
-        y_ref = Reference(ws7, min_col=6, min_row=idx_r, max_row=idx_r)
+        x_ref = Reference(ws7, min_col=15, min_row=idx_r, max_row=idx_r)
+        y_ref = Reference(ws7, min_col=16, min_row=idx_r, max_row=idx_r)
         s_com = Series(y_ref, x_ref, title=nom_comuna)
         s_com.marker.symbol = "circle"
         s_com.marker.size = 7
-        s_com.marker.graphicalProperties.solidFill = "4472C4"
-        s_com.marker.graphicalProperties.line.solidFill = "2F5597"
+        s_com.marker.graphicalProperties.solidFill = "374151"
+        s_com.marker.graphicalProperties.line.solidFill = "111827"
         s_com.graphicalProperties.line.noFill = True
 
         s_com.dLbls = DataLabelList()
@@ -1335,21 +1341,21 @@ def compilar_excel_10_hojas(
     yv_ref = Reference(ws7, min_col=3, min_row=fila_aux + 1, max_row=fila_aux + 2)
     s_linea_v = Series(yv_ref, xv_ref, title="Umbral Peso Medio")
     s_linea_v.marker.symbol = "none"
-    s_linea_v.graphicalProperties.line.solidFill = "C00000"
-    s_linea_v.graphicalProperties.line.width = 28575
+    s_linea_v.graphicalProperties.line.solidFill = "991B1B"
+    s_linea_v.graphicalProperties.line.width = 22000
 
     xh_ref = Reference(ws7, min_col=2, min_row=fila_aux + 3, max_row=fila_aux + 4)
     yh_ref = Reference(ws7, min_col=3, min_row=fila_aux + 3, max_row=fila_aux + 4)
     s_linea_h = Series(yh_ref, xh_ref, title="Umbral Crecimiento Regional")
     s_linea_h.marker.symbol = "none"
-    s_linea_h.graphicalProperties.line.solidFill = "C00000"
-    s_linea_h.graphicalProperties.line.width = 28575
+    s_linea_h.graphicalProperties.line.solidFill = "991B1B"
+    s_linea_h.graphicalProperties.line.width = 22000
 
     chart_silva.series.append(s_linea_v)
     chart_silva.series.append(s_linea_h)
     ws7.add_chart(chart_silva, "J4")
 
-    # Matriz Visual 2x2 de Cuadrantes de Silva Lira debajo del gráfico (J35:M46)
+    # Matriz Visual 2x2 de Cuadrantes de Silva Lira debajo del gráfico (J35:M46) en tonos grises neutros
     com_q1 = sorted(df_ss[df_ss["Cuadrante_Silva_Lira"].str.startswith("I.")]["Comuna"].tolist())
     com_q2 = sorted(df_ss[df_ss["Cuadrante_Silva_Lira"].str.startswith("II.")]["Comuna"].tolist())
     com_q3 = sorted(df_ss[df_ss["Cuadrante_Silva_Lira"].str.startswith("III.")]["Comuna"].tolist())
@@ -1468,7 +1474,6 @@ def compilar_excel_10_hojas(
     c8_t.font = font_titulo
     ws8.row_dimensions[1].height = 26
 
-    # Fila Superior: EFECTO TOTAL (ET_j = V_tj - V_0j * r_SR) igual a la hoja MADE original
     f_cur_8 = 3
     ws8.cell(row=f_cur_8, column=1, value="Comuna").fill = fill_header
     ws8.cell(row=f_cur_8, column=1).font = font_header
@@ -1494,7 +1499,6 @@ def compilar_excel_10_hojas(
         cet.border = borde_total
     f_cur_8 += 2
 
-    # Bloque 1: Matriz Rubro x Comuna de EFECTO DIFERENCIAL (ED_ij)
     ws8.merge_cells(start_row=f_cur_8, start_column=1, end_row=f_cur_8, end_column=n_cols_ss)
     cb_ed = ws8.cell(row=f_cur_8, column=1, value=f"EFECTO DIFERENCIAL ({anio_0}–{anio_t})")
     cb_ed.fill = fill_subbloque
@@ -1538,7 +1542,6 @@ def compilar_excel_10_hojas(
         csum.border = borde_total
     f_cur_8 += 3
 
-    # Bloque 2: Matriz Rubro x Comuna de EFECTO ESTRUCTURAL (EE_ij)
     ws8.merge_cells(start_row=f_cur_8, start_column=1, end_row=f_cur_8, end_column=n_cols_ss)
     cb_ee = ws8.cell(row=f_cur_8, column=1, value=f"EFECTO ESTRUCTURAL ({anio_0}–{anio_t})")
     cb_ee.fill = fill_subbloque
@@ -1582,7 +1585,6 @@ def compilar_excel_10_hojas(
         csum.border = borde_total
     f_cur_8 += 2
 
-    # Fila de Comprobación Activa: ET = ED + EE
     f_chk_et = f_cur_8
     c_chk_lbl = ws8.cell(row=f_chk_et, column=1, value="ET = ED + EE")
     c_chk_lbl.font = font_bold
@@ -1596,11 +1598,11 @@ def compilar_excel_10_hojas(
         cchk.number_format = "#,##0.00"
         cchk.border = borde_total
 
-    ws8.freeze_panes = "B5"
+    ws8.freeze_panes = "B1"
     _autoajustar_columnas_hoja(ws8)
 
     # ==========================================================================
-    # HOJA 9: SHIFT & SHARE MADE MODIFICADO (MATRICES EE y EI + FRANJAS AMARILLAS)
+    # HOJA 9: SHIFT & SHARE MADE MODIFICADO (MATRICES EE y EI + FRANJAS SOBRIAS)
     # ==========================================================================
     ws9 = wb.create_sheet("09_MADE_Modificado")
     ws9.merge_cells(start_row=1, start_column=1, end_row=1, end_column=n_cols_ss)
@@ -1614,7 +1616,6 @@ def compilar_excel_10_hojas(
     ws9.row_dimensions[1].height = 26
 
     f_cur_9 = 3
-    # Bloque 1: Matriz Rubro x Comuna de Efecto Estructural con Franja Amarilla =SUM(...)
     ws9.cell(row=f_cur_9, column=1, value="Etiquetas de fila").fill = fill_header
     ws9.cell(row=f_cur_9, column=1).font = font_header
     for c_i, com in enumerate(comunas, start=2):
@@ -1652,7 +1653,6 @@ def compilar_excel_10_hojas(
         csum.border = borde_total
     f_cur_9 += 3
 
-    # Bloque 2: Matriz Rubro x Comuna de Efecto Inverso con Franja Amarilla =SUM(...)
     ws9.cell(row=f_cur_9, column=1, value="Etiquetas de fila").fill = fill_header
     ws9.cell(row=f_cur_9, column=1).font = font_header
     for c_i, com in enumerate(comunas, start=2):
@@ -1690,26 +1690,25 @@ def compilar_excel_10_hojas(
         csum.border = borde_total
     f_cur_9 += 2
 
-    # Franja Amarilla: Efecto Modificado (EM_j = EI_j - EE_j) con fórmula activa
     f_em9 = f_cur_9
     c_em9_lbl = ws9.cell(row=f_em9, column=1, value="Efecto Modificado")
     c_em9_lbl.font = font_bold
-    c_em9_lbl.fill = fill_amarillo_made
+    c_em9_lbl.fill = fill_gris_total
     c_em9_lbl.border = borde_total
     for c_i in range(2, n_cols_ss + 1):
         col_l = get_column_letter(c_i)
         cem = ws9.cell(row=f_em9, column=c_i, value=f"={col_l}{f_sum_ei9}-{col_l}{f_sum_ee9}")
         cem.font = font_bold
-        cem.fill = fill_amarillo_made
+        cem.fill = fill_gris_total
         cem.number_format = "#,##0.00"
         cem.border = borde_total
     f_cur_9 += 2
 
-    # Franja Amarilla: Efecto comunal Modificado (ERM_j = ET_j - EI_j) vinculada a Hoja 8
+    # Franja sobria: Efecto comunal Modificado (ERM_j = ET_j - EI_j) vinculada a Hoja 8
     f_erm9 = f_cur_9
     c_erm9_lbl = ws9.cell(row=f_erm9, column=1, value="Efecto comunal Modificado")
     c_erm9_lbl.font = font_bold
-    c_erm9_lbl.fill = fill_amarillo_made
+    c_erm9_lbl.fill = fill_amarillo_ref
     c_erm9_lbl.border = borde_total
     for c_i in range(2, n_cols_ss + 1):
         col_l = get_column_letter(c_i)
@@ -1719,11 +1718,11 @@ def compilar_excel_10_hojas(
             value=f"='08_ShiftShare_Clasico'!{col_l}{f_et_top}-{col_l}{f_sum_ei9}",
         )
         cerm.font = font_bold
-        cerm.fill = fill_amarillo_made
+        cerm.fill = fill_amarillo_ref
         cerm.number_format = "#,##0.00"
         cerm.border = borde_total
 
-    ws9.freeze_panes = "B4"
+    ws9.freeze_panes = "B1"
     _autoajustar_columnas_hoja(ws9)
 
     # ==========================================================================
