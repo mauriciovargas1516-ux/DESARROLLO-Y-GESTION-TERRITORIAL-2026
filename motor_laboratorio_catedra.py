@@ -318,76 +318,141 @@ def cargar_pib_y_poblacion_chile():
 
 
 # ==============================================================================
-# 3. GENERADOR DE EXCEL CON FÓRMULAS NATIVAS VIVAS ADENTRO
+# 3. GENERADOR DE EXCEL CON FÓRMULAS NATIVAS
 # ==============================================================================
-def _aplicar_estilo_cabecera(ws, fila: int, n_cols: int):
-    fill_h = PatternFill("solid", fgColor="1E3A8A")
-    font_h = Font(name="Calibri", size=10, bold=True, color="FFFFFF")
-    for c in range(1, n_cols + 1):
+def _aplicar_estilo_cabecera(ws, fila: int, col_ini: int, col_fin: int, fill_h, font_h, borde):
+    for c in range(col_ini, col_fin + 1):
         cell = ws.cell(row=fila, column=c)
         cell.fill = fill_h
         cell.font = font_h
         cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+        cell.border = borde
+    ws.row_dimensions[fila].height = 24
+
+
+def _autoajustar_columnas_lab(ws, max_width: int = 34, min_width: int = 13, col_a_max: int = 42):
+    for col_idx in range(1, ws.max_column + 1):
+        col_letter = get_column_letter(col_idx)
+        max_len = 0
+        for r_idx in range(3, min(ws.max_row + 1, 60)):
+            val = ws.cell(row=r_idx, column=col_idx).value
+            if val is not None:
+                s_val = str(val)
+                if not s_val.startswith("="):
+                    max_len = max(max_len, len(s_val))
+        limite_sup = col_a_max if col_idx == 1 else max_width
+        ws.column_dimensions[col_letter].width = max(min(max_len + 4, limite_sup), min_width)
 
 
 def exportar_excel_formulas_vivas() -> bytes:
     """
-    Construye un libro Excel (.xlsx) pedagógico y profesional donde todos los ejercicios
-    de cátedra están resueltos mediante FÓRMULAS NATIVAS DE EXCEL (=LN, =SLOPE, =STDEV.P,
-    =SUM, =ABS, trapecios de Lorenz, MADE Clásico/Modificado y Matriz de Rondinelli).
+    Construye un libro Excel (.xlsx) en estilo monocromático sobrio con fórmulas
+    nativas activas para los casos de cátedra: Convergencia, Lorenz y Gini,
+    MADE (Badalona) y Escalograma de Rondinelli.
     """
     wb = Workbook()
     wb.remove(wb.active)
 
-    fill_input = PatternFill("solid", fgColor="FEF9C3")  # Amarillo suave para celdas editables
-    fill_calc = PatternFill("solid", fgColor="EFF6FF")   # Azul suave para fórmulas
+    fill_titulo = PatternFill("solid", fgColor="262626")
+    fill_header = PatternFill("solid", fgColor="404040")
+    fill_subbloque = PatternFill("solid", fgColor="E5E7EB")
+    fill_total = PatternFill("solid", fgColor="D4D4D8")
+    fill_input = PatternFill("solid", fgColor="FFFFFF")
+    fill_calc = PatternFill("solid", fgColor="F3F4F6")
+
+    font_titulo = Font(name="Calibri", size=12, bold=True, color="FFFFFF")
+    font_sub = Font(name="Calibri", size=10, italic=True, color="374151")
+    font_header = Font(name="Calibri", size=10, bold=True, color="FFFFFF")
+    font_subbloque = Font(name="Calibri", size=10, bold=True, color="111827")
+    font_bold = Font(name="Calibri", size=10, bold=True, color="111827")
+    font_celda = Font(name="Calibri", size=10, color="1F2937")
+
     borde = Border(
-        left=Side(style="thin", color="CBD5E1"),
-        right=Side(style="thin", color="CBD5E1"),
-        top=Side(style="thin", color="CBD5E1"),
-        bottom=Side(style="thin", color="CBD5E1"),
+        left=Side(style="thin", color="D1D5DB"),
+        right=Side(style="thin", color="D1D5DB"),
+        top=Side(style="thin", color="D1D5DB"),
+        bottom=Side(style="thin", color="D1D5DB"),
+    )
+    borde_total = Border(
+        left=Side(style="thin", color="9CA3AF"),
+        right=Side(style="thin", color="9CA3AF"),
+        top=Side(style="thin", color="262626"),
+        bottom=Side(style="double", color="262626"),
     )
 
+    def _banner(ws, n_cols: int, titulo: str, subtitulo: str):
+        ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=n_cols)
+        ct = ws.cell(row=1, column=1, value=titulo)
+        ct.fill = fill_titulo
+        ct.font = font_titulo
+        ct.alignment = Alignment(horizontal="left", vertical="center")
+        ws.row_dimensions[1].height = 26
+
+        ws.merge_cells(start_row=2, start_column=1, end_row=2, end_column=n_cols)
+        cs = ws.cell(row=2, column=1, value=subtitulo)
+        cs.font = font_sub
+        cs.alignment = Alignment(horizontal="left", vertical="center")
+        ws.row_dimensions[2].height = 19
+
     # ------------------------------------------------------------------
-    # HOJA 1: CONVERGENCIA SIGMA Y BETA (BASE 1 - 7 TERRITORIOS)
+    # HOJA 1: CONVERGENCIA (BASE 1 — 7 TERRITORIOS)
     # ------------------------------------------------------------------
-    ws1 = wb.create_sheet("01_Convergencia_Formulas")
-    ws1["A1"] = "LABORATORIO DE CONVERGENCIA SIGMA Y BETA (FÓRMULAS EXCEL ACTIVAS)"
-    ws1["A1"].font = Font(size=13, bold=True, color="1E3A8A")
-    ws1["A2"] = "Amarillo = Celdas de entrada editables | Azul = Fórmulas dinámicas de Excel"
-    ws1["G4"] = "Años T"
-    ws1["H4"] = 10
-    ws1["H4"].fill = fill_input
+    ws1 = wb.create_sheet("Convergencia")
+    _banner(
+        ws1,
+        10,
+        "CONVERGENCIA SIGMA Y BETA — CASO BASE 1 (2010–2020)",
+        "Desarrollo y Gestión Territorial | Universidad de Los Lagos",
+    )
+
+    c_t_lbl = ws1.cell(row=4, column=7, value="Periodo (T años)")
+    c_t_lbl.font = font_bold
+    c_t_lbl.alignment = Alignment(horizontal="right", vertical="center")
+    c_t_val = ws1.cell(row=4, column=8, value=10)
+    c_t_val.fill = fill_input
+    c_t_val.font = font_bold
+    c_t_val.alignment = Alignment(horizontal="center", vertical="center")
+    c_t_val.border = borde
 
     headers_1 = ["Territorio", "2010 (y0)", "2020 (y1)", "ln(y0)", "ln(y1)", "g = ln(y1/y0)/T"]
     for idx, h in enumerate(headers_1, start=1):
         ws1.cell(row=6, column=idx, value=h)
-    _aplicar_estilo_cabecera(ws1, 6, 6)
+    _aplicar_estilo_cabecera(ws1, 6, 1, 6, fill_header, font_header, borde)
 
     datos_base1 = [
         ("A", 49, 94), ("B", 11, 23), ("C", 50, 121),
         ("D", 19, 67), ("E", 61, 107), ("F", 146, 311), ("G", 32, 116),
     ]
     for i, (terr, v0, vt) in enumerate(datos_base1, start=7):
-        ws1.cell(row=i, column=1, value=terr)
+        c_t = ws1.cell(row=i, column=1, value=terr)
+        c_t.font = font_celda
+        c_t.alignment = Alignment(horizontal="center", vertical="center")
+        c_t.border = borde
+
         c_v0 = ws1.cell(row=i, column=2, value=v0)
         c_vt = ws1.cell(row=i, column=3, value=vt)
-        c_v0.fill = fill_input
-        c_vt.fill = fill_input
+        for c_in in (c_v0, c_vt):
+            c_in.fill = fill_input
+            c_in.font = font_celda
+            c_in.number_format = "#,##0"
+            c_in.alignment = Alignment(horizontal="right", vertical="center")
+            c_in.border = borde
 
         c_ln0 = ws1.cell(row=i, column=4, value=f"=LN(B{i})")
         c_lnt = ws1.cell(row=i, column=5, value=f"=LN(C{i})")
         c_g = ws1.cell(row=i, column=6, value=f"=(E{i}-D{i})/$H$4")
         for c in (c_ln0, c_lnt, c_g):
             c.fill = fill_calc
+            c.font = font_celda
             c.number_format = "0.0000"
+            c.alignment = Alignment(horizontal="right", vertical="center")
             c.border = borde
 
-    # Tabla lateral de indicadores con fórmulas Excel
-    ws1["H6"] = "Indicador Econométrico"
-    ws1["I6"] = "Año 2010 / Valor"
-    ws1["J6"] = "Año 2020"
-    _aplicar_estilo_cabecera(ws1, 6, 10)
+    # Tabla lateral de indicadores econométricos
+    ws1.cell(row=6, column=8, value="Indicador econométrico")
+    ws1.cell(row=6, column=9, value="2010 / Estimación")
+    ws1.cell(row=6, column=10, value="2020")
+    _aplicar_estilo_cabecera(ws1, 6, 8, 10, fill_header, font_header, borde)
 
     metricas_form = [
         ("Sigma de logaritmos (divisor N)", "=STDEV.P(D7:D13)", "=STDEV.P(E7:E13)"),
@@ -398,39 +463,62 @@ def exportar_excel_formulas_vivas() -> bytes:
         ("Error estándar de Beta", "=STEYX(F7:F13,D7:D13)/SQRT(DEVSQ(D7:D13))", ""),
         ("Estadístico t de Beta", "=I9/I12", ""),
         ("Velocidad anual Lambda (λ)", "=-LN(1+I9*$H$4)/$H$4", ""),
-        ("Semivida / Half-life (años)", "=LN(2)/I14", ""),
+        ("Semivida (años)", "=LN(2)/I14", ""),
     ]
     for idx_m, (nom_m, f1, f2) in enumerate(metricas_form, start=7):
-        ws1.cell(row=idx_m, column=8, value=nom_m).border = borde
+        cm_lbl = ws1.cell(row=idx_m, column=8, value=nom_m)
+        cm_lbl.font = font_celda
+        cm_lbl.border = borde
+
         c1 = ws1.cell(row=idx_m, column=9, value=f1)
         c1.fill = fill_calc
+        c1.font = font_celda
         c1.number_format = "0.0000"
+        c1.alignment = Alignment(horizontal="right", vertical="center")
         c1.border = borde
+
+        c2 = ws1.cell(row=idx_m, column=10, value=f2 if f2 else None)
+        c2.font = font_celda
+        c2.border = borde
         if f2:
-            c2 = ws1.cell(row=idx_m, column=10, value=f2)
             c2.fill = fill_calc
             c2.number_format = "0.0000"
-            c2.border = borde
+            c2.alignment = Alignment(horizontal="right", vertical="center")
+
+    ws1.freeze_panes = "B7"
+    _autoajustar_columnas_lab(ws1)
+    ws1.column_dimensions["G"].width = 16
+    ws1.column_dimensions["H"].width = 32
 
     # ------------------------------------------------------------------
-    # HOJA 2: CURVA DE LORENZ, GINI POR TRAPECIOS Y THEIL (CON FÓRMULAS)
+    # HOJA 2: LORENZ Y GINI (MÉTODO DE TRAPECIOS)
     # ------------------------------------------------------------------
-    ws2 = wb.create_sheet("02_Lorenz_Gini_Theil")
-    ws2["A1"] = "CURVA DE LORENZ, ÍNDICE DE GINI (MÉTODO DE TRAPECIOS) Y ENTROPÍA DE THEIL"
-    ws2["A1"].font = Font(size=13, bold=True, color="1E3A8A")
+    ws2 = wb.create_sheet("Lorenz y Gini")
+    _banner(
+        ws2,
+        9,
+        "CURVA DE LORENZ E ÍNDICE DE GINI — MÉTODO DE TRAPECIOS",
+        "Desarrollo y Gestión Territorial | Universidad de Los Lagos",
+    )
 
     headers_2 = [
-        "Grupo", "Ingreso xi", "Personas ni", "Masa xi*ni",
-        "N Acumulado", "Masa Acumulada", "pi Acumulado", "qi Acumulado",
-        "Trapecio (pi - pi-1)*(qi + qi-1)",
+        "Grupo", "Ingreso xi", "Personas ni", "Masa xi·ni",
+        "N acumulado", "Masa acumulada", "pi acumulado", "qi acumulado",
+        "Trapecio (pi - pi-1)·(qi + qi-1)",
     ]
     for idx, h in enumerate(headers_2, start=1):
         ws2.cell(row=4, column=idx, value=h)
-    _aplicar_estilo_cabecera(ws2, 4, len(headers_2))
+    _aplicar_estilo_cabecera(ws2, 4, 1, len(headers_2), fill_header, font_header, borde)
 
-    ws2.cell(row=5, column=1, value="Origen")
+    c_ori = ws2.cell(row=5, column=1, value="Origen")
+    c_ori.font = font_celda
+    c_ori.border = borde
     for c_idx in range(2, 10):
-        ws2.cell(row=5, column=c_idx, value=0.0)
+        co = ws2.cell(row=5, column=c_idx, value=0.0)
+        co.font = font_celda
+        co.number_format = "0.00" if c_idx in (2, 4, 6) else ("0" if c_idx in (3, 5) else "0.0000")
+        co.alignment = Alignment(horizontal="right", vertical="center")
+        co.border = borde
 
     grupos_lorenz = [
         (1, 7512.65, 2),
@@ -440,12 +528,23 @@ def exportar_excel_formulas_vivas() -> bytes:
         (5, 39065.79, 2),
     ]
     for r_i, (g_id, x_val, n_val) in enumerate(grupos_lorenz, start=6):
-        ws2.cell(row=r_i, column=1, value=g_id)
+        cg = ws2.cell(row=r_i, column=1, value=g_id)
+        cg.font = font_celda
+        cg.alignment = Alignment(horizontal="center", vertical="center")
+        cg.border = borde
+
         cx = ws2.cell(row=r_i, column=2, value=x_val)
         cn = ws2.cell(row=r_i, column=3, value=n_val)
         cx.fill = fill_input
         cn.fill = fill_input
+        cx.font = font_celda
+        cn.font = font_celda
         cx.number_format = "#,##0.00"
+        cn.number_format = "#,##0"
+        cx.alignment = Alignment(horizontal="right", vertical="center")
+        cn.alignment = Alignment(horizontal="right", vertical="center")
+        cx.border = borde
+        cn.border = borde
 
         cmasa = ws2.cell(row=r_i, column=4, value=f"=B{r_i}*C{r_i}")
         cn_ac = ws2.cell(row=r_i, column=5, value=f"=E{r_i-1}+C{r_i}")
@@ -455,131 +554,205 @@ def exportar_excel_formulas_vivas() -> bytes:
         ctrap = ws2.cell(row=r_i, column=9, value=f"=(G{r_i}-G{r_i-1})*(H{r_i}+H{r_i-1})")
 
         for c_f, fmt in [
-            (cmasa, "#,##0.00"), (cn_ac, "0"), (cm_ac, "#,##0.00"),
+            (cmasa, "#,##0.00"), (cn_ac, "#,##0"), (cm_ac, "#,##0.00"),
             (cp_ac, "0.0000"), (cq_ac, "0.0000"), (ctrap, "0.000000"),
         ]:
             c_f.fill = fill_calc
+            c_f.font = font_celda
             c_f.number_format = fmt
+            c_f.alignment = Alignment(horizontal="right", vertical="center")
             c_f.border = borde
 
-    ws2.cell(row=11, column=1, value="Total").font = Font(bold=True)
-    ws2.cell(row=11, column=3, value="=SUM(C6:C10)").fill = fill_calc
-    ws2.cell(row=11, column=4, value="=SUM(D6:D10)").fill = fill_calc
-    ws2.cell(row=11, column=4).number_format = "#,##0.00"
-    ws2.cell(row=11, column=9, value="=SUM(I6:I10)").fill = fill_calc
-    ws2.cell(row=11, column=9).number_format = "0.000000"
+    ws2.cell(row=11, column=1, value="Total")
+    ws2.cell(row=11, column=3, value="=SUM(C6:C10)").number_format = "#,##0"
+    ws2.cell(row=11, column=4, value="=SUM(D6:D10)").number_format = "#,##0.00"
+    ws2.cell(row=11, column=9, value="=SUM(I6:I10)").number_format = "0.000000"
+    for c_i in range(1, 10):
+        ct = ws2.cell(row=11, column=c_i)
+        ct.font = font_bold
+        ct.fill = fill_total
+        ct.border = borde_total
+        if c_i > 1:
+            ct.alignment = Alignment(horizontal="right", vertical="center")
 
-    ws2["A13"] = "Índice de Gini Estándar (1 - Suma Trapecios)"
-    ws2["B13"] = "=1-I11"
-    ws2["B13"].fill = fill_calc
-    ws2["B13"].number_format = "0.000000"
+    for r_g, etq_g, form_g in [
+        (13, "Índice de Gini estándar (1 - Suma trapecios)", "=1-I11"),
+        (14, "Índice de Gini normalizado G* = G · N/(N-1)", "=B13*(C11/(C11-1))"),
+    ]:
+        ws2.merge_cells(start_row=r_g, start_column=1, end_row=r_g, end_column=3)
+        cl = ws2.cell(row=r_g, column=1, value=etq_g)
+        cl.font = font_bold
+        cl.fill = fill_subbloque
+        for col_m in range(1, 4):
+            ws2.cell(row=r_g, column=col_m).border = borde
+        cv = ws2.cell(row=r_g, column=4, value=form_g)
+        cv.fill = fill_calc
+        cv.font = font_bold
+        cv.number_format = "0.000000"
+        cv.alignment = Alignment(horizontal="right", vertical="center")
+        cv.border = borde
+    # Ajustar referencia de Gini normalizado a D13
+    ws2.cell(row=14, column=4, value="=D13*(C11/(C11-1))")
 
-    ws2["A14"] = "Índice de Gini Normalizado G* = G * N/(N-1)"
-    ws2["B14"] = "=B13*(C11/(C11-1))"
-    ws2["B14"].fill = fill_calc
-    ws2["B14"].number_format = "0.000000"
+    ws2.freeze_panes = "B5"
+    _autoajustar_columnas_lab(ws2)
 
     # ------------------------------------------------------------------
-    # HOJA 3: SISTEMA TAREA / MADE CLÁSICO Y MODIFICADO (CON FÓRMULAS)
+    # HOJA 3: MADE BADALONA (SISTEMA TAREA CLÁSICO Y MODIFICADO)
     # ------------------------------------------------------------------
-    ws3 = wb.create_sheet("03_MADE_Clasico_y_Mod")
-    ws3["A1"] = "CASO CÁTEDRA: BADALONA, PUEBLO SECO Y PUEBLO NUEVO (MADE CLÁSICO Y MODIFICADO)"
-    ws3["A1"].font = Font(size=13, bold=True, color="1E3A8A")
+    ws3 = wb.create_sheet("MADE Badalona")
+    _banner(
+        ws3,
+        5,
+        "CASO CÁTEDRA: BADALONA, PUEBLO SECO Y PUEBLO NUEVO — MADE CLÁSICO Y MODIFICADO",
+        "Manual 59 ILPES (Lira y Quiroga) | Universidad de Los Lagos",
+    )
 
     V0_b, Vt_b = obtener_caso_badalona()
-    ws3["A3"] = "MATRIZ AÑO INICIAL V(0)"
+    ws3.merge_cells("A3:E3")
+    c_m0 = ws3.cell(row=3, column=1, value="Matriz año inicial V(0)")
+    c_m0.fill = fill_subbloque
+    c_m0.font = font_subbloque
+    ws3.row_dimensions[3].height = 20
+
     headers_b = ["Sector", "Badalona", "Pueblo Seco", "Pueblo Nuevo", "Total Sector (0)"]
     for idx, h in enumerate(headers_b, start=1):
         ws3.cell(row=4, column=idx, value=h)
-    _aplicar_estilo_cabecera(ws3, 4, 5)
+    _aplicar_estilo_cabecera(ws3, 4, 1, 5, fill_header, font_header, borde)
 
     for r_idx, sec in enumerate(V0_b.index, start=5):
-        ws3.cell(row=r_idx, column=1, value=sec)
+        cs = ws3.cell(row=r_idx, column=1, value=sec)
+        cs.font = font_celda
+        cs.border = borde
         for c_idx, reg in enumerate(V0_b.columns, start=2):
             c = ws3.cell(row=r_idx, column=c_idx, value=float(V0_b.loc[sec, reg]))
             c.fill = fill_input
+            c.font = font_celda
+            c.number_format = "#,##0"
+            c.alignment = Alignment(horizontal="right", vertical="center")
+            c.border = borde
         c_tot = ws3.cell(row=r_idx, column=5, value=f"=SUM(B{r_idx}:D{r_idx})")
         c_tot.fill = fill_calc
+        c_tot.font = font_bold
+        c_tot.number_format = "#,##0"
+        c_tot.alignment = Alignment(horizontal="right", vertical="center")
+        c_tot.border = borde
 
-    ws3.cell(row=9, column=1, value="Total Regional (0)").font = Font(bold=True)
+    ws3.cell(row=9, column=1, value="Total regional (0)").font = font_bold
+    ws3.cell(row=9, column=1).fill = fill_total
+    ws3.cell(row=9, column=1).border = borde_total
     for c_idx, col_l in enumerate(["B", "C", "D", "E"], start=2):
         c = ws3.cell(row=9, column=c_idx, value=f"=SUM({col_l}5:{col_l}8)")
-        c.fill = fill_calc
+        c.fill = fill_total
+        c.font = font_bold
+        c.number_format = "#,##0"
+        c.alignment = Alignment(horizontal="right", vertical="center")
+        c.border = borde_total
 
-    ws3["A11"] = "MATRIZ AÑO FINAL V(t)"
+    ws3.merge_cells("A11:E11")
+    c_mt = ws3.cell(row=11, column=1, value="Matriz año final V(t)")
+    c_mt.fill = fill_subbloque
+    c_mt.font = font_subbloque
+    ws3.row_dimensions[11].height = 20
+
     headers_bt = ["Sector", "Badalona", "Pueblo Seco", "Pueblo Nuevo", "Total Sector (t)"]
     for idx, h in enumerate(headers_bt, start=1):
         ws3.cell(row=12, column=idx, value=h)
-    _aplicar_estilo_cabecera(ws3, 12, 5)
+    _aplicar_estilo_cabecera(ws3, 12, 1, 5, fill_header, font_header, borde)
 
     for r_idx, sec in enumerate(Vt_b.index, start=13):
-        ws3.cell(row=r_idx, column=1, value=sec)
+        cs = ws3.cell(row=r_idx, column=1, value=sec)
+        cs.font = font_celda
+        cs.border = borde
         for c_idx, reg in enumerate(Vt_b.columns, start=2):
             c = ws3.cell(row=r_idx, column=c_idx, value=float(Vt_b.loc[sec, reg]))
             c.fill = fill_input
+            c.font = font_celda
+            c.number_format = "#,##0"
+            c.alignment = Alignment(horizontal="right", vertical="center")
+            c.border = borde
         c_tot = ws3.cell(row=r_idx, column=5, value=f"=SUM(B{r_idx}:D{r_idx})")
         c_tot.fill = fill_calc
+        c_tot.font = font_bold
+        c_tot.number_format = "#,##0"
+        c_tot.alignment = Alignment(horizontal="right", vertical="center")
+        c_tot.border = borde
 
-    ws3.cell(row=17, column=1, value="Total Regional (t)").font = Font(bold=True)
+    ws3.cell(row=17, column=1, value="Total regional (t)").font = font_bold
+    ws3.cell(row=17, column=1).fill = fill_total
+    ws3.cell(row=17, column=1).border = borde_total
     for c_idx, col_l in enumerate(["B", "C", "D", "E"], start=2):
         c = ws3.cell(row=17, column=c_idx, value=f"=SUM({col_l}13:{col_l}16)")
-        c.fill = fill_calc
+        c.fill = fill_total
+        c.font = font_bold
+        c.number_format = "#,##0"
+        c.alignment = Alignment(horizontal="right", vertical="center")
+        c.border = borde_total
 
-    # Cuadro Resumen de Efectos MADE Clásico y Modificado con Fórmulas
-    ws3["A19"] = "DESCOMPOSICIÓN SHIFT & SHARE (FÓRMULAS AUTOMÁTICAS)"
+    ws3.merge_cells("A19:D19")
+    c_ss_t = ws3.cell(row=19, column=1, value="Descomposición Shift & Share (MADE Clásico y Modificado)")
+    c_ss_t.fill = fill_subbloque
+    c_ss_t.font = font_subbloque
+    ws3.row_dimensions[19].height = 20
+
     headers_ss = ["Efecto / Indicador", "Badalona", "Pueblo Seco", "Pueblo Nuevo"]
     for idx, h in enumerate(headers_ss, start=1):
         ws3.cell(row=20, column=idx, value=h)
-    _aplicar_estilo_cabecera(ws3, 20, 4)
+    _aplicar_estilo_cabecera(ws3, 20, 1, 4, fill_header, font_header, borde)
+
+    etiquetas_ss = [
+        (21, "Efecto Total (ETj)"),
+        (22, "Efecto Estructural (EEj)"),
+        (23, "Efecto Diferencial (EDj)"),
+        (24, "Efecto Estructural Inverso (EIj)"),
+        (25, "Efecto Estructural Modificado (EMj = EIj - EEj)"),
+        (26, "Efecto Regional Modificado (ERMj = ETj - EIj)"),
+    ]
+    for r_e, txt_e in etiquetas_ss:
+        cl = ws3.cell(row=r_e, column=1, value=txt_e)
+        cl.font = font_bold if r_e in (21, 25, 26) else font_celda
+        cl.border = borde
 
     for c_idx, col_l in enumerate(["B", "C", "D"], start=2):
-        # ETj = Sum Vij(t) - Sum Vij(0) * (Total_t / Total_0)
-        ws3.cell(row=21, column=1, value="Efecto Total (ETj)")
         c_et = ws3.cell(row=21, column=c_idx, value=f"={col_l}17-{col_l}9*($E$17/$E$9)")
-
-        # EEj = Sum_i Vij(0) * (E_i(t)/E_i(0) - E_tot(t)/E_tot(0))
-        ws3.cell(row=22, column=1, value="Efecto Estructural (EEj)")
         f_ee = "+".join([f"{col_l}{r}*(($E${r+8}/$E${r})-($E$17/$E$9))" for r in range(5, 9)])
         c_ee = ws3.cell(row=22, column=c_idx, value=f"={f_ee}")
-
-        # EDj = ETj - EEj
-        ws3.cell(row=23, column=1, value="Efecto Diferencial (EDj)")
         c_ed = ws3.cell(row=23, column=c_idx, value=f"={col_l}21-{col_l}22")
-
-        # EIj = Sum_i Vij(t) * (E_tot(0)/E_tot(t) - E_i(0)/E_i(t))
-        ws3.cell(row=24, column=1, value="Efecto Estructural Inverso (EIj)")
         f_ei = "+".join([f"{col_l}{r+8}*(($E$9/$E$17)-($E${r}/$E${r+8}))" for r in range(5, 9)])
         c_ei = ws3.cell(row=24, column=c_idx, value=f"={f_ei}")
-
-        # EMj = EIj - EEj
-        ws3.cell(row=25, column=1, value="Efecto Estructural Modificado (EMj = EIj - EEj)")
         c_em = ws3.cell(row=25, column=c_idx, value=f"={col_l}24-{col_l}22")
-
-        # ERMj = ETj - EIj
-        ws3.cell(row=26, column=1, value="Efecto Regional Modificado (ERMj = ETj - EIj)")
         c_erm = ws3.cell(row=26, column=c_idx, value=f"={col_l}21-{col_l}24")
 
         for cell_f in (c_et, c_ee, c_ed, c_ei, c_em, c_erm):
             cell_f.fill = fill_calc
+            cell_f.font = font_bold if cell_f in (c_et, c_em, c_erm) else font_celda
             cell_f.number_format = "#,##0.00"
+            cell_f.alignment = Alignment(horizontal="right", vertical="center")
             cell_f.border = borde
 
-    # ------------------------------------------------------------------
-    # HOJA 4: MATRIZ DE RONDINELLI / GUTTMAN (CON FÓRMULAS EXCEL)
-    # ------------------------------------------------------------------
-    ws4 = wb.create_sheet("04_Matriz_Rondinelli_OT")
-    ws4["A1"] = "ESCALOGRAMA FUNCIONAL DE GUTTMAN Y MATRIZ DE RONDINELLI (CON FÓRMULAS)"
-    ws4["A1"].font = Font(size=13, bold=True, color="1E3A8A")
+    ws3.freeze_panes = "B1"
+    _autoajustar_columnas_lab(ws3)
 
+    # ------------------------------------------------------------------
+    # HOJA 4: RONDINELLI (ESCALOGRAMA FUNCIONAL DE GUTTMAN)
+    # ------------------------------------------------------------------
+    ws4 = wb.create_sheet("Rondinelli")
     headers_r = [
         "Asentamiento Humano", "Población", "% Población",
         "Educación Diversificada", "Universidades", "Centros Atención Médica",
         "Seguro Social", "Guarderías Infantiles", "Programas Vivienda",
         "Atención a la Mujer", "Suma Funciones", "Índice Centralidad Rondinelli",
     ]
+    _banner(
+        ws4,
+        len(headers_r),
+        "ESCALOGRAMA FUNCIONAL DE GUTTMAN Y MATRIZ DE RONDINELLI",
+        "Presencia (1) o ausencia (0) funcional y centralidad ponderada | Fuente: Cátedra OT",
+    )
+
     for idx, h in enumerate(headers_r, start=1):
-        ws4.cell(row=3, column=idx, value=h)
-    _aplicar_estilo_cabecera(ws4, 3, len(headers_r))
+        ws4.cell(row=4, column=idx, value=h)
+    _aplicar_estilo_cabecera(ws4, 4, 1, len(headers_r), fill_header, font_header, borde)
 
     datos_rond = [
         ("Flores (GT)", 51535, [1, 1, 1, 1, 1, 1, 1]),
@@ -587,48 +760,73 @@ def exportar_excel_formulas_vivas() -> bytes:
         ("San Ignacio/Santa Elena (BZE)", 16977, [1, 1, 1, 1, 0, 1, 1]),
         ("Benque Viejo (BZE)", 5824, [0, 0, 1, 1, 0, 1, 1]),
     ]
-    for r_i, (nom_a, pob_a, funcs) in enumerate(datos_rond, start=4):
-        ws4.cell(row=r_i, column=1, value=nom_a)
+    for r_i, (nom_a, pob_a, funcs) in enumerate(datos_rond, start=5):
+        cnom = ws4.cell(row=r_i, column=1, value=nom_a)
+        cnom.font = font_celda
+        cnom.border = borde
+
         cpob = ws4.cell(row=r_i, column=2, value=pob_a)
         cpob.fill = fill_input
+        cpob.font = font_celda
         cpob.number_format = "#,##0"
+        cpob.alignment = Alignment(horizontal="right", vertical="center")
+        cpob.border = borde
 
-        cpct = ws4.cell(row=r_i, column=3, value=f"=B{r_i}/$B$8")
+        cpct = ws4.cell(row=r_i, column=3, value=f"=B{r_i}/$B$9")
         cpct.fill = fill_calc
+        cpct.font = font_celda
         cpct.number_format = "0.00%"
+        cpct.alignment = Alignment(horizontal="right", vertical="center")
+        cpct.border = borde
 
         for f_idx, f_val in enumerate(funcs, start=4):
             cf = ws4.cell(row=r_i, column=f_idx, value=f_val)
             cf.fill = fill_input
-            cf.alignment = Alignment(horizontal="center")
+            cf.font = font_celda
+            cf.alignment = Alignment(horizontal="center", vertical="center")
+            cf.border = borde
 
         csum = ws4.cell(row=r_i, column=11, value=f"=SUM(D{r_i}:J{r_i})")
         csum.fill = fill_calc
+        csum.font = font_bold
+        csum.alignment = Alignment(horizontal="right", vertical="center")
+        csum.border = borde
 
-        # Índice ponderado = suma producto de presencia por ponderación de fila 9
-        f_pond = "+".join([f"{get_column_letter(c)}{r_i}*${get_column_letter(c)}$9" for c in range(4, 11)])
+        f_pond = "+".join([f"{get_column_letter(c)}{r_i}*${get_column_letter(c)}$10" for c in range(4, 11)])
         cic = ws4.cell(row=r_i, column=12, value=f"={f_pond}")
         cic.fill = fill_calc
+        cic.font = font_bold
         cic.number_format = "0.00"
+        cic.alignment = Alignment(horizontal="right", vertical="center")
+        cic.border = borde
 
-    ws4.cell(row=8, column=1, value="Suma Total").font = Font(bold=True)
-    ws4.cell(row=8, column=2, value="=SUM(B4:B7)").fill = fill_calc
-    ws4.cell(row=8, column=2).number_format = "#,##0"
-    ws4.cell(row=8, column=3, value="=SUM(C4:C7)").fill = fill_calc
-    ws4.cell(row=8, column=3).number_format = "0.00%"
+    ws4.cell(row=9, column=1, value="Suma total")
+    ws4.cell(row=9, column=2, value="=SUM(B5:B8)").number_format = "#,##0"
+    ws4.cell(row=9, column=3, value="=SUM(C5:C8)").number_format = "0.00%"
 
-    ws4.cell(row=9, column=1, value="Ponderación Rondinelli (100 / Suma)").font = Font(bold=True)
+    ws4.cell(row=10, column=1, value="Ponderación Rondinelli (100 / Suma)")
     for c_idx in range(4, 11):
         col_let = get_column_letter(c_idx)
-        c_s = ws4.cell(row=8, column=c_idx, value=f"=SUM({col_let}4:{col_let}7)")
-        c_s.fill = fill_calc
-        c_p = ws4.cell(row=9, column=c_idx, value=f"=IF({col_let}8>0, 100/{col_let}8, 0)")
-        c_p.fill = fill_calc
+        ws4.cell(row=9, column=c_idx, value=f"=SUM({col_let}5:{col_let}8)").alignment = Alignment(horizontal="center", vertical="center")
+        c_p = ws4.cell(row=10, column=c_idx, value=f"=IF({col_let}9>0,100/{col_let}9,0)")
         c_p.number_format = "0.00"
+        c_p.alignment = Alignment(horizontal="right", vertical="center")
 
-    for ws in [ws1, ws2, ws3, ws4]:
-        for col in range(1, ws.max_column + 1):
-            ws.column_dimensions[get_column_letter(col)].width = 20
+    for c_i in range(1, 13):
+        c9 = ws4.cell(row=9, column=c_i)
+        c9.font = font_bold
+        c9.fill = fill_total
+        c9.border = borde_total
+        if c_i in (2, 3):
+            c9.alignment = Alignment(horizontal="right", vertical="center")
+
+        c10 = ws4.cell(row=10, column=c_i)
+        c10.font = font_bold
+        c10.fill = fill_subbloque
+        c10.border = borde
+
+    ws4.freeze_panes = "B5"
+    _autoajustar_columnas_lab(ws4, max_width=24, min_width=13, col_a_max=34)
 
     buf = io.BytesIO()
     wb.save(buf)
@@ -651,9 +849,9 @@ def renderizar_laboratorio_catedra():
 
     bytes_xlsx_formulas = exportar_excel_formulas_vivas()
     st.download_button(
-        label="Descargar Libro Excel con Fórmulas Vivas de Cátedra (.xlsx — Convergencia, Lorenz, MADE y Rondinelli)",
+        label="Descargar Cuaderno Excel de Cátedra (.xlsx — Convergencia, Lorenz, MADE y Rondinelli)",
         data=bytes_xlsx_formulas,
-        file_name="Laboratorio_Catedra_Formulas_Vivas_ULagos.xlsx",
+        file_name="Laboratorio_Catedra_ULagos.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         use_container_width=True,
     )
