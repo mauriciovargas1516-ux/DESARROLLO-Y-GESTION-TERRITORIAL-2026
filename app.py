@@ -120,7 +120,7 @@ def obtener_resultados_base_repo(
 # MÓDULO 1: TÉCNICAS DE ANÁLISIS REGIONAL (ILPES / SII BIOBÍO 2014-2024)
 # ==============================================================================
 def vista_modulo_1_ilpes():
-    st.header("1. Técnicas de Análisis Regional (ILPES / SII 2014–2024)")
+    st.header("2. Técnicas de Análisis Regional (ILPES / SII 2014–2024)")
     st.markdown(
         "Evaluación estructural e intertemporal mediante matrices sectoriales-comunales del SII: "
         "**Cociente de Localización ($Q_{ij}$)**, **Coeficiente de Especialización ($Q_r$)**, "
@@ -131,7 +131,7 @@ def vista_modulo_1_ilpes():
     if not os.path.exists(ARCHIVO_EXCEL_REPO):
         st.warning(
             f"No se encontró `{ARCHIVO_EXCEL_REPO}` en la raíz. "
-            "Dirígete al Módulo 5 (Exportador SII) para subir un archivo manualmente."
+            "Dirígete al Módulo 9 (Exportador Maestro SII) para subir un archivo manualmente."
         )
         return
 
@@ -385,7 +385,7 @@ def vista_modulo_1_ilpes():
 # MÓDULO 2: DISPARIDADES, CONCENTRACIÓN Y CONVERGENCIA REGIONAL (MOTOR REAT)
 # ==============================================================================
 def vista_modulo_2_reat():
-    st.header("2. Disparidades, Concentración y Convergencia Regional (Motor REAT)")
+    st.header("3. Disparidades, Concentración y Convergencia Regional (Motor REAT)")
     st.markdown(
         "Réplica en Python de las funciones econométricas del paquete **`REAT` (Regional Economic Analysis Toolbox)** de R: "
         "**Convergencia Sigma ($\\sigma_t, CV_t$)**, **Convergencia Beta Absoluta ($\\beta$, velocidad $\\lambda$, semivida)**, "
@@ -542,7 +542,7 @@ def vista_modulo_2_reat():
 # MÓDULO 3: SPL, REDES EMPRESARIALES (UCINET / DINI) Y CADENAS DE VALOR (CEPAL)
 # ==============================================================================
 def vista_modulo_3_redes_cadenas():
-    st.header("3. Sistemas Productivos Locales (SPL), Redes Empresariales y Cadenas de Valor")
+    st.header("4. Sistemas Productivos Locales (SPL), Redes Empresariales y Cadenas de Valor")
     st.markdown(
         "Análisis de articulación productiva local según **Dini (2010, CEPAL)** (reemplazo interactivo de **UCINET** "
         "para matrices de adyacencia y centralidad de grafos) y diagnóstico de **Cadenas de Valor** bajo metodología "
@@ -606,7 +606,7 @@ def vista_modulo_3_redes_cadenas():
             explicacion_md=(
                 "- **OutDegree / InDegree:** En una matriz dirigida, mide cuántos vínculos emite (salida) y recibe (entrada) cada actor.\n"
                 "- **Centralidad $\\ge 60\\%$:** Identifica al **Nodo Articulador / Gobernanza** (ej. *Gremio PymeMad* o *Remanufactura*).\n"
-                "- **¿Quieres ver la red armarse paso a paso con animación?** Abre el **Módulo 8** en la barra lateral izquierda."
+                "- **¿Quieres ver la red armarse paso a paso o editarla en vivo?** Abre el **Módulo 5** en la barra lateral izquierda."
             ),
         )
 
@@ -727,7 +727,7 @@ def vista_modulo_3_redes_cadenas():
 # MÓDULO 4: ORDENAMIENTO TERRITORIAL, RONDINELLI Y GEORREFERENCIACIÓN
 # ==============================================================================
 def vista_modulo_4_ordenamiento():
-    st.header("4. Ordenamiento Territorial, Matriz de Rondinelli y Georreferenciación")
+    st.header("6. Ordenamiento Territorial, Matriz de Rondinelli y Georreferenciación")
     st.markdown(
         "Análisis del sistema de asentamientos humanos mediante el **Escalograma Funcional de Rondinelli (1985)** "
         "(cálculo de pesos de centralidad funcional e índice jerárquico urbano) y cartografía georreferenciada."
@@ -848,7 +848,7 @@ def vista_modulo_4_ordenamiento():
 
 
 # ==============================================================================
-# NAVEGACIÓN PRINCIPAL EN BARRA LATERAL (8 MÓDULOS CONECTADOS)
+# NAVEGACIÓN PRINCIPAL EN BARRA LATERAL (9 MÓDULOS EN SECUENCIA PEDAGÓGICA)
 # ==============================================================================
 def main():
     with st.sidebar:
@@ -856,17 +856,17 @@ def main():
         st.caption("Ingeniería Comercial — Universidad de Los Lagos")
         st.markdown("---")
         modulo_activo = st.radio(
-            "Seleccione Módulo de Trabajo:",
+            "Seleccione Módulo de Trabajo (Ruta Pedagógica):",
             [
-                "1. Análisis Regional (ILPES / SII)",
-                "2. Convergencia y Desigualdad (REAT)",
-                "3. Redes (UCINET) y Cadenas de Valor",
-                "4. Ordenamiento Territorial y Rondinelli",
-                "5. Exportador Maestro SII (Excel 10 Hojas)",
-                "6. Laboratorio de Cátedra + Excel Fórmulas Vivas",
-                "7. Controles 2, 4 y 5: My Maps, Cadenas, ELITE y PROT",
-                "8. Extensión: Redes en Vivo (Dini) y Gradientes",
-                "9. Teoría Avanzada (Krugman, Perroux, Granovetter)",
+                "1. Fundamentos y Simulación Teórica (Krugman, Perroux, Granovetter)",
+                "2. Análisis Regional (ILPES / SII)",
+                "3. Convergencia y Desigualdad (REAT)",
+                "4. Redes (UCINET) y Cadenas de Valor",
+                "5. Redes en Vivo (Dini), Constructor y Gradientes",
+                "6. Ordenamiento Territorial y Rondinelli",
+                "7. Laboratorio de Cátedra + Excel Fórmulas Vivas",
+                "8. Controles 2, 4 y 5: My Maps, Cadenas, ELITE y PROT",
+                "9. Exportador Maestro SII (Excel 10 Hojas)",
             ],
         )
         st.markdown("---")
@@ -878,23 +878,23 @@ def main():
         )
 
     if modulo_activo.startswith("1."):
-        vista_modulo_1_ilpes()
-    elif modulo_activo.startswith("2."):
-        vista_modulo_2_reat()
-    elif modulo_activo.startswith("3."):
-        vista_modulo_3_redes_cadenas()
-    elif modulo_activo.startswith("4."):
-        vista_modulo_4_ordenamiento()
-    elif modulo_activo.startswith("5."):
-        msii.renderizar_exportador_sii(ARCHIVO_EXCEL_REPO)
-    elif modulo_activo.startswith("6."):
-        renderizar_laboratorio_catedra()
-    elif modulo_activo.startswith("7."):
-        renderizar_redes_territorio_ot()
-    elif modulo_activo.startswith("8."):
-        renderizar_extension_redes_y_gradientes()
-    elif modulo_activo.startswith("9."):
         renderizar_modulo_teoria_avanzada()
+    elif modulo_activo.startswith("2."):
+        vista_modulo_1_ilpes()
+    elif modulo_activo.startswith("3."):
+        vista_modulo_2_reat()
+    elif modulo_activo.startswith("4."):
+        vista_modulo_3_redes_cadenas()
+    elif modulo_activo.startswith("5."):
+        renderizar_extension_redes_y_gradientes()
+    elif modulo_activo.startswith("6."):
+        vista_modulo_4_ordenamiento()
+    elif modulo_activo.startswith("7."):
+        renderizar_laboratorio_catedra()
+    elif modulo_activo.startswith("8."):
+        renderizar_redes_territorio_ot()
+    elif modulo_activo.startswith("9."):
+        msii.renderizar_exportador_sii(ARCHIVO_EXCEL_REPO)
 
 
 if __name__ == "__main__":
