@@ -42,10 +42,9 @@ def renderizar_modulo_teoria_avanzada():
         renderizar_burbuja_tip(
             titulo_boton="Tip: ¿Cómo funciona el efecto de Krugman en simple?",
             titulo_interno="Fuerzas Centrípetas vs. Centrífugas (Krugman, 1991)",
-            formula_latex=r"	ext{Aglomeración Neta} = 	ext{Economías de Escala} + 	ext{Tamaño de Mercado} - 	ext{Costos de Transporte }(	au)",
+            formula_latex=r"\text{Aglomeración Neta} = \text{Economías de Escala} + \text{Tamaño de Mercado} - \text{Costos de Transporte }(\tau)",
             explicacion_md=(
-                "- **Si transportar es caro:** A las fábricas les conviene quedarse repartidas en cada comuna para no pagar fletes altos.
-"
+                "- **Si transportar es caro:** A las fábricas les conviene quedarse repartidas en cada comuna para no pagar fletes altos.\n"
                 "- **Si transportar se vuelve barato:** Las fábricas prefieren concentrarse en una sola gran ciudad (ej. Concepción o Puerto Montt) para aprovechar proveedores y clientes juntos, despachando desde ahí al resto de la región."
             ),
         )
@@ -179,12 +178,10 @@ def renderizar_modulo_teoria_avanzada():
         renderizar_burbuja_tip(
             titulo_boton="Tip: Diferencia entre Perroux, Myrdal y Hirschman",
             titulo_interno="Tres Conceptos Clave Conectados",
-            formula_latex=r"M_{	ext{Hirschman}} = rac{1}{1 - (b_{	ext{atrás}} + f_{	ext{adelante}})} \quad ; \quad 	ext{Impacto Periferia} = 	ext{Difusión (Spread)} - 	ext{Absorción (Backwash)}",
+            formula_latex=r"M_{\text{Hirschman}} = \frac{1}{1 - (b_{\text{atrás}} + f_{\text{adelante}})} \quad ; \quad \text{Impacto Periferia} = \text{Difusión (Spread)} - \text{Absorción (Backwash)}",
             explicacion_md=(
-                "- **Perroux (Polos):** El crecimiento nace en una industria motriz dominante, no en todas las comunas a la vez.
-"
-                "- **Hirschman (Encadenamientos):** El polo multiplica la actividad si compra insumos locales (*hacia atrás*) y si sus productos se procesan en la misma región (*hacia adelante*).
-"
+                "- **Perroux (Polos):** El crecimiento nace en una industria motriz dominante, no en todas las comunas a la vez.\n"
+                "- **Hirschman (Encadenamientos):** El polo multiplica la actividad si compra insumos locales (*hacia atrás*) y si sus productos se procesan en la misma región (*hacia adelante*).\n"
                 "- **Myrdal (Causalidad Acumulativa):** Si el polo solo succiona trabajadores y capital de los pueblos vecinos (*Backwash* > *Spread*), la desigualdad regional aumenta."
             ),
         )
@@ -433,10 +430,9 @@ def renderizar_modulo_teoria_avanzada():
         renderizar_burbuja_tip(
             titulo_boton="Tip: ¿Qué son el Umbral y el Alcance de Christaller?",
             titulo_interno="Regla de Decisión de Lugares Centrales",
-            formula_latex=r"	ext{Viabilidad: Población Comunal} \ge 	ext{Umbral Mínimo} \quad \wedge \quad 	ext{Alcance Máximo (km)} \ge 	ext{Distancia al Usuario}",
+            formula_latex=r"\text{Viabilidad: Población Comunal} \ge \text{Umbral Mínimo} \quad \wedge \quad \text{Alcance Máximo (km)} \ge \text{Distancia al Usuario}",
             explicacion_md=(
-                "- **Umbral (*Threshold*):** Cantidad mínima de habitantes o clientes necesaria para que el servicio cubra sus costos y no quiebre.
-"
+                "- **Umbral (*Threshold*):** Cantidad mínima de habitantes o clientes necesaria para que el servicio cubra sus costos y no quiebre.\n"
                 "- **Alcance (*Range*):** Distancia máxima (en km) que una persona acepta viajar para usar ese servicio."
             ),
         )
