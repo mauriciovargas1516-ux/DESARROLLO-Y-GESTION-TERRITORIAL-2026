@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-MÓDULO 9: LABORATORIO INTERACTIVO DE TEORÍA REGIONAL AVANZADA
+MÓDULO DE SIMULACIÓN INTERACTIVA DE TEORÍA REGIONAL AVANZADA
 Asignatura: Desarrollo y Gestión Territorial — Universidad de Los Lagos (Prof. Claudio Mancilla)
 Archivo: motor_teoria_territorial.py
 
 Transforma los marcos teóricos de Krugman (NEG), Perroux, Myrdal, Hirschman,
-Granovetter y Christaller en simuladores interactivos en vivo fáciles de entender.
+Granovetter (con grafo interactivo de vínculos fuertes y débiles en vivo) y Christaller
+en simuladores interactivos fáciles de entender.
 """
 
 import numpy as np
@@ -17,23 +18,20 @@ from motor_redes_dinamicas_dini import renderizar_burbuja_tip
 
 
 def renderizar_modulo_teoria_avanzada():
-    st.header("9. Laboratorio Interactivo de Teoría Regional (Probar en Vivo)")
+    st.header("Laboratorio Interactivo de Teoría Regional (Krugman, Perroux, Granovetter, Christaller)")
     st.markdown(
         "Mueve los deslizadores y cambia los datos en cada pestaña para **comprobar en vivo** cómo operan "
         "la **Nueva Economía Geográfica (Krugman)**, los **Polos y Multiplicadores (Perroux, Myrdal, Hirschman)**, "
-        "los **Vínculos Débiles (Granovetter)** y el **Umbral Urbano (Christaller)**."
+        "los **Vínculos Fuertes y Débiles en Red (Granovetter)** y el **Umbral Urbano (Christaller)**."
     )
 
     tabs_teoria = st.tabs([
         "1. Simulador de Krugman (Costos de Transporte y Macrocefalia)",
         "2. Simulador de Perroux, Myrdal y Hirschman (Polos y Multiplicadores)",
-        "3. Simulador de Granovetter (Vínculos Fuertes vs. Débiles)",
+        "3. Simulador de Red en Vivo de Granovetter (Vínculos Fuertes vs. Débiles)",
         "4. Calculadora en Vivo de Christaller (Umbral y Alcance)",
     ])
 
-    # ==========================================================================
-    # PESTAÑA 1: NUEVA ECONOMÍA GEOGRÁFICA (KRUGMAN, 1991)
-    # ==========================================================================
     with tabs_teoria[0]:
         st.subheader("Simulador en Vivo: Nueva Economía Geográfica (Paul Krugman, 1991)")
         st.markdown(
@@ -44,9 +42,10 @@ def renderizar_modulo_teoria_avanzada():
         renderizar_burbuja_tip(
             titulo_boton="Tip: ¿Cómo funciona el efecto de Krugman en simple?",
             titulo_interno="Fuerzas Centrípetas vs. Centrífugas (Krugman, 1991)",
-            formula_latex=r"\text{Aglomeración Neta} = \text{Economías de Escala} + \text{Tamaño de Mercado} - \text{Costos de Transporte }(\tau)",
+            formula_latex=r"	ext{Aglomeración Neta} = 	ext{Economías de Escala} + 	ext{Tamaño de Mercado} - 	ext{Costos de Transporte }(	au)",
             explicacion_md=(
-                "- **Si transportar es caro (derecha a izquierda):** A las fábricas les conviene quedarse repartidas en cada comuna para no pagar fletes altos.\n"
+                "- **Si transportar es caro:** A las fábricas les conviene quedarse repartidas en cada comuna para no pagar fletes altos.
+"
                 "- **Si transportar se vuelve barato:** Las fábricas prefieren concentrarse en una sola gran ciudad (ej. Concepción o Puerto Montt) para aprovechar proveedores y clientes juntos, despachando desde ahí al resto de la región."
             ),
         )
@@ -80,7 +79,6 @@ def renderizar_modulo_teoria_avanzada():
                 key="krug_mov",
             )
 
-        # Cálculo del umbral crítico y cuota de concentración en el Centro
         umbral_critico_tau = round(0.45 * economias_escala + 0.35 * movilidad_laboral, 2)
         presion_aglomeracion = (umbral_critico_tau - costo_transporte) * 1.35
         cuota_centro_pct = float(np.clip(50.0 + 42.0 / (1.0 + np.exp(-presion_aglomeracion)), 50.0, 95.0))
@@ -89,11 +87,7 @@ def renderizar_modulo_teoria_avanzada():
         cuota_periferia_pct = 100.0 - cuota_centro_pct
 
         k1, k2, k3 = st.columns(3)
-        k1.metric(
-            "Umbral Crítico de Transporte (τ*)",
-            f"{umbral_critico_tau:.1f}",
-            "Punto de quiebre territorial",
-        )
+        k1.metric("Umbral Crítico de Transporte (τ*)", f"{umbral_critico_tau:.1f}", "Punto de quiebre territorial")
         k2.metric(
             "Actividad en Capital Regional (Centro)",
             f"{cuota_centro_pct:.1f}%",
@@ -175,9 +169,6 @@ def renderizar_modulo_teoria_avanzada():
             )
             st.plotly_chart(fig_curva_k, use_container_width=True)
 
-    # ==========================================================================
-    # PESTAÑA 2: POLOS DE PERROUX, CAUSALIDAD DE MYRDAL Y ENCADENAMIENTOS DE HIRSCHMAN
-    # ==========================================================================
     with tabs_teoria[1]:
         st.subheader("Simulador en Vivo: Polos de Crecimiento y Multiplicadores (Perroux, Myrdal y Hirschman)")
         st.markdown(
@@ -188,10 +179,12 @@ def renderizar_modulo_teoria_avanzada():
         renderizar_burbuja_tip(
             titulo_boton="Tip: Diferencia entre Perroux, Myrdal y Hirschman",
             titulo_interno="Tres Conceptos Clave Conectados",
-            formula_latex=r"M_{\text{Hirschman}} = \frac{1}{1 - (b_{\text{atrás}} + f_{\text{adelante}})} \quad ; \quad \text{Impacto Periferia} = \text{Difusión (Spread)} - \text{Absorción (Backwash)}",
+            formula_latex=r"M_{	ext{Hirschman}} = rac{1}{1 - (b_{	ext{atrás}} + f_{	ext{adelante}})} \quad ; \quad 	ext{Impacto Periferia} = 	ext{Difusión (Spread)} - 	ext{Absorción (Backwash)}",
             explicacion_md=(
-                "- **Perroux (Polos):** El crecimiento nace en una industria motriz dominante, no en todas las comunas a la vez.\n"
-                "- **Hirschman (Encadenamientos):** El polo multiplica la actividad si compra insumos locales (*hacia atrás*) y si sus productos se procesan en la misma región (*hacia adelante*).\n"
+                "- **Perroux (Polos):** El crecimiento nace en una industria motriz dominante, no en todas las comunas a la vez.
+"
+                "- **Hirschman (Encadenamientos):** El polo multiplica la actividad si compra insumos locales (*hacia atrás*) y si sus productos se procesan en la misma región (*hacia adelante*).
+"
                 "- **Myrdal (Causalidad Acumulativa):** Si el polo solo succiona trabajadores y capital de los pueblos vecinos (*Backwash* > *Spread*), la desigualdad regional aumenta."
             ),
         )
@@ -256,7 +249,6 @@ def renderizar_modulo_teoria_avanzada():
         impacto_total = inversion_inicial * multiplicador_h
         efecto_indirecto = impacto_total - inversion_inicial
 
-        # Balance de Perroux/Myrdal sobre comunas vecinas
         difusion_mm = efecto_indirecto * (pct_difusion / 100.0)
         absorcion_mm = efecto_indirecto * ((100.0 - pct_difusion) / 100.0) * 0.6
         saldo_periferia = difusion_mm - absorcion_mm
@@ -271,7 +263,6 @@ def renderizar_modulo_teoria_avanzada():
             "Polo Integrador" if saldo_periferia >= 0 else "Enclave Absorbente (Backwash)",
         )
 
-        # Simulación por rondas de causalidad acumulativa
         rondas = ["Ronda 1 (Choque Inicial)", "Ronda 2 (Proveedores)", "Ronda 3 (Servicios)", "Ronda 4 (Consumo Local)", "Ronda 5 (Acumulado)"]
         impactos_ronda = [inversion_inicial * (propension_local ** r) for r in range(5)]
         acumulado_ronda = np.cumsum(impactos_ronda)
@@ -292,21 +283,18 @@ def renderizar_modulo_teoria_avanzada():
         )
         st.plotly_chart(fig_hirsch, use_container_width=True)
 
-    # ==========================================================================
-    # PESTAÑA 3: CAPITAL SOCIAL Y VÍNCULOS DÉBILES (GRANOVETTER, 1973)
-    # ==========================================================================
     with tabs_teoria[2]:
-        st.subheader("Simulador en Vivo: La Fuerza de los Vínculos Débiles (Mark Granovetter, 1973)")
+        st.subheader("Simulador de Red en Vivo: La Fuerza de los Vínculos Débiles (Mark Granovetter, 1973)")
         st.markdown(
-            "**¿Qué vas a probar aquí?** Por qué un grupo de empresas que solo habla entre sí (**vínculos fuertes**) "
-            "termina estancado con la misma información, y cómo agregar **vínculos débiles** (puentes con universidades, "
-            "centros tecnológicos o compradores externos) dispara la innovación del clúster."
+            "**¿Qué vas a probar aquí?** Mueve los deslizadores para armar la red en vivo: los **vínculos fuertes (azules)** "
+            "unen a las PyMEs de la misma comuna, mientras que los **vínculos débiles (puentes rojos)** conectan al clúster "
+            "con universidades, centros de I+D y mercados externos evitando el bloqueo (*lock-in*)."
         )
 
         cg1, cg2 = st.columns(2)
         with cg1:
             vinculos_fuertes = st.slider(
-                "1. Vínculos Fuertes Internos (Confianza entre socios de la misma comuna) [0 a 10]:",
+                "1. Vínculos Fuertes Internos (Enlaces azules entre PyMEs locales) [1 a 10]:",
                 min_value=1,
                 max_value=10,
                 value=8,
@@ -314,7 +302,7 @@ def renderizar_modulo_teoria_avanzada():
             )
         with cg2:
             vinculos_debiles = st.slider(
-                "2. Vínculos Débiles / Puentes Externos (Conexión con I+D, ULagos, otros mercados) [0 a 10]:",
+                "2. Vínculos Débiles / Puentes Externos (Puentes rojos a I+D, ULagos, Exportación) [0 a 10]:",
                 min_value=0,
                 max_value=10,
                 value=6,
@@ -327,37 +315,114 @@ def renderizar_modulo_teoria_avanzada():
         puntaje_spl = round(0.45 * cohesion_interna + 0.55 * acceso_innovacion - 0.30 * riesgo_lockin, 1)
 
         m_g1, m_g2, m_g3 = st.columns(3)
-        m_g1.metric("Cohesión y Confianza Local", f"{cohesion_interna:.0f} / 100", "Basado en Vínculos Fuertes")
-        m_g2.metric("Entrada de Ideas e Innovación", f"{acceso_innovacion:.0f} / 100", "Impulsado por Vínculos Débiles")
+        m_g1.metric("Cohesión y Confianza Local", f"{cohesion_interna:.0f} / 100", f"{vinculos_fuertes} enlaces fuertes activos")
+        m_g2.metric("Entrada de Ideas e Innovación", f"{acceso_innovacion:.0f} / 100", f"{vinculos_debiles} puentes débiles activos")
         m_g3.metric(
             "Riesgo de Encierro (Lock-in)",
             f"{riesgo_lockin:.0f}%",
             "Peligro de endogamia" if riesgo_lockin > 40 else "Red abierta y saludable",
         )
 
-        df_gran = pd.DataFrame({
-            "Dimensión de la Red": [
-                "Confianza Interna (Vínculos Fuertes)",
-                "Innovación Externa (Vínculos Débiles)",
-                "Riesgo de Bloqueo / Endogamia (Lock-in)",
-                "Desempeño Global del Clúster",
-            ],
-            "Puntaje (0 a 100)": [cohesion_interna, acceso_innovacion, riesgo_lockin, max(0.0, puntaje_spl)],
-        })
-        fig_gran = px.bar(
-            df_gran,
-            x="Dimensión de la Red",
-            y="Puntaje (0 a 100)",
-            color="Dimensión de la Red",
-            text_auto=".0f",
-            range_y=[0, 105],
-            title="Diagnóstico Sociométrico en Vivo del Sistema Productivo Local",
-        )
-        st.plotly_chart(fig_gran, use_container_width=True)
+        col_gr_grafo, col_gr_bar = st.columns([1.35, 1.0])
+        with col_gr_grafo:
+            nodos_locales = ["PyME Local 1", "PyME Local 2", "PyME Local 3", "PyME Local 4", "Gremio Local"]
+            ang_loc = np.linspace(0, 2 * np.pi, 5, endpoint=False)
+            x_loc = -1.0 + 0.55 * np.cos(ang_loc)
+            y_loc = 0.55 * np.sin(ang_loc)
 
-    # ==========================================================================
-    # PESTAÑA 4: TEORÍA DE LUGARES CENTRALES (CHRISTALLER / LÖSCH)
-    # ==========================================================================
+            nodos_ext = [
+                "Universidad (ULagos)",
+                "Centro I+D (INIA)",
+                "Comprador Internacional",
+                "Proveedor Tecnológico",
+                "Agencia Fomento (CORFO)",
+            ]
+            x_ext = np.array([1.1, 1.25, 1.3, 1.25, 1.1])
+            y_ext = np.array([0.75, 0.38, 0.0, -0.38, -0.75])
+
+            pares_fuertes_posibles = [
+                (0, 1), (1, 2), (2, 3), (3, 4), (4, 0),
+                (0, 2), (1, 3), (2, 4), (0, 3), (1, 4),
+            ]
+            pares_debiles_posibles = [
+                (4, 0), (0, 1), (1, 2), (2, 3), (4, 4),
+                (3, 1), (0, 0), (2, 2), (1, 3), (3, 4),
+            ]
+
+            fx, fy = [], []
+            for u, v in pares_fuertes_posibles[:vinculos_fuertes]:
+                fx.extend([x_loc[u], x_loc[v], None])
+                fy.extend([y_loc[u], y_loc[v], None])
+
+            dx, dy = [], []
+            for u_loc, v_ext in pares_debiles_posibles[:vinculos_debiles]:
+                dx.extend([x_loc[u_loc], x_ext[v_ext], None])
+                dy.extend([y_loc[u_loc], y_ext[v_ext], None])
+
+            fig_red_gran = go.Figure()
+            fig_red_gran.add_trace(
+                go.Scatter(
+                    x=fx, y=fy, mode="lines",
+                    line=dict(width=3, color="#2563eb"),
+                    name="Vínculos Fuertes (Cohesión Local)",
+                )
+            )
+            fig_red_gran.add_trace(
+                go.Scatter(
+                    x=dx, y=dy, mode="lines",
+                    line=dict(width=2.8, color="#dc2626", dash="dash"),
+                    name="Vínculos Débiles (Puentes de Innovación)",
+                )
+            )
+            fig_red_gran.add_trace(
+                go.Scatter(
+                    x=x_loc, y=y_loc, mode="markers+text",
+                    text=nodos_locales, textposition="top center",
+                    marker=dict(size=22, color="#1d4ed8", line=dict(width=2, color="#0f172a")),
+                    name="Clúster Local",
+                )
+            )
+            fig_red_gran.add_trace(
+                go.Scatter(
+                    x=x_ext, y=y_ext, mode="markers+text",
+                    text=nodos_ext, textposition="middle right",
+                    marker=dict(size=20, color="#059669", symbol="diamond", line=dict(width=2, color="#0f172a")),
+                    name="Fuentes Externas de Innovación",
+                )
+            )
+            fig_red_gran.update_layout(
+                title="Grafo en Vivo: Clúster Local (Azul) vs. Puentes Débiles (Rojo)",
+                xaxis=dict(showgrid=False, zeroline=False, showticklabels=False, range=[-1.9, 2.3]),
+                yaxis=dict(showgrid=False, zeroline=False, showticklabels=False, range=[-1.1, 1.1]),
+                height=390,
+                margin=dict(l=10, r=10, t=40, b=10),
+                plot_bgcolor="#f8fafc",
+                legend=dict(orientation="h", y=-0.12),
+            )
+            st.plotly_chart(fig_red_gran, use_container_width=True)
+
+        with col_gr_bar:
+            df_gran = pd.DataFrame({
+                "Dimensión": [
+                    "Confianza Local",
+                    "Innovación Externa",
+                    "Riesgo Lock-in",
+                    "Desempeño Clúster",
+                ],
+                "Puntaje (0 a 100)": [cohesion_interna, acceso_innovacion, riesgo_lockin, max(0.0, puntaje_spl)],
+            })
+            fig_gran = px.bar(
+                df_gran,
+                x="Dimensión",
+                y="Puntaje (0 a 100)",
+                color="Dimensión",
+                text_auto=".0f",
+                range_y=[0, 105],
+                title="Diagnóstico del Clúster en Vivo",
+            )
+            fig_gran.update_layout(height=390, showlegend=False)
+            st.plotly_chart(fig_gran, use_container_width=True)
+
     with tabs_teoria[3]:
         st.subheader("Calculadora en Vivo: Umbral y Alcance de un Servicio Urbano (Walter Christaller)")
         st.markdown(
@@ -368,9 +433,10 @@ def renderizar_modulo_teoria_avanzada():
         renderizar_burbuja_tip(
             titulo_boton="Tip: ¿Qué son el Umbral y el Alcance de Christaller?",
             titulo_interno="Regla de Decisión de Lugares Centrales",
-            formula_latex=r"\text{Viabilidad: Población Comunal} \ge \text{Umbral Mínimo} \quad \wedge \quad \text{Alcance Máximo (km)} \ge \text{Distancia al Usuario}",
+            formula_latex=r"	ext{Viabilidad: Población Comunal} \ge 	ext{Umbral Mínimo} \quad \wedge \quad 	ext{Alcance Máximo (km)} \ge 	ext{Distancia al Usuario}",
             explicacion_md=(
-                "- **Umbral (*Threshold*):** Cantidad mínima de habitantes o clientes necesaria para que el servicio cubra sus costos y no quiebre.\n"
+                "- **Umbral (*Threshold*):** Cantidad mínima de habitantes o clientes necesaria para que el servicio cubra sus costos y no quiebre.
+"
                 "- **Alcance (*Range*):** Distancia máxima (en km) que una persona acepta viajar para usar ese servicio."
             ),
         )
