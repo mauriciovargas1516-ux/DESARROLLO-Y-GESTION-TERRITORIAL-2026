@@ -14,7 +14,7 @@ import plotly.graph_objects as go
 import streamlit as st
 
 import motor_sii_exportador as msii
-from motor_laboratorio_catedra import renderizar_laboratorio_catedra
+from motor_laboratorio_catedra import renderizar_laboratorio_catedra\nfrom motor_teoria_territorial import renderizar_modulo_teoria_avanzada
 from motor_redes_territorio_ot import renderizar_redes_territorio_ot, _renderizar_mapa_puntos_seguro
 from motor_redes_dinamicas_dini import (
     renderizar_extension_redes_y_gradientes,
@@ -220,10 +220,10 @@ def vista_modulo_1_ilpes():
         )
 
     subtabs = st.tabs([
-        "Cuadrantes de Silva Lira (CEPAL, 2005)",
-        "Localización Qij y Especialización Qr (ILPES)",
-        "Base Económica Exportadora de Tiebout (Xj, Mj)",
-        "Shift & Share Clásico y Modificado (MADE / Stilwell)",
+        "Cuadrantes de Silva Lira",
+        "Localización (Qij) y Especialización (Qr, CRr)",
+        "Base Económica Exportadora (Xj y Mj)",
+        "Shift & Share (MADE Clásico y Modificado)",
     ])
 
     with subtabs[0]:
@@ -324,97 +324,14 @@ def vista_modulo_1_ilpes():
 
     with subtabs[1]:
         st.markdown(f"**Matriz de Cociente de Localización ($Q_{{ij}}$) — Año {at}**")
-        st.caption(
-            "Lectura rápida de colores: **Azul** = bajo el promedio regional ($Q_{ij} < 1$), "
-            "**Blanco** = promedio regional ($Q_{ij} = 1$), **Rojo** = comuna especializada ($Q_{ij} > 1$). "
-            "Al pasar el cursor sobre cada celda se muestra el valor exacto, incluso cuando existen valores extremos."
-        )
-
-        cq1, cq2 = st.columns([1.4, 1.6])
-        with cq1:
-            ocultar_sin_info = st.checkbox(
-                'Ocultar fila "Sin información" del mapa de calor',
-                value=True,
-                key="m1_qij_hide_sin_info",
-            )
-        with cq2:
-            tope_color_q = st.slider(
-                "Tope de saturación de color rojo (Q_ij máximo visible en escala):",
-                min_value=2.0,
-                max_value=6.0,
-                value=3.0,
-                step=0.5,
-                key="m1_qij_tope_color",
-                help="Evita que un valor extremo (ej. minería con Q_ij > 50) apague el resto del mapa.",
-            )
-
-        q_mat_plot = res["Q_ij_t"].copy()
-        if ocultar_sin_info:
-            mask_valid = [
-                "sin informacion" not in msii._normalizar_texto(str(idx))
-                for idx in q_mat_plot.index
-            ]
-            if any(mask_valid):
-                q_mat_plot = q_mat_plot.loc[mask_valid]
-
-        # Escala divergente anclada exactamente en Q_ij = 1,0 (blanco)
-        p1 = 1.0 / float(tope_color_q)
-        escala_qij = [
-            [0.0, "#1d4ed8"],
-            [round(p1 * 0.5, 4), "#93c5fd"],
-            [round(p1, 4), "#ffffff"],
-            [round(min(p1 + (1.0 - p1) * 0.45, 0.99), 4), "#fca5a5"],
-            [1.0, "#b91c1c"],
-        ]
-
         fig_q = px.imshow(
-            q_mat_plot,
+            res["Q_ij_t"],
             aspect="auto",
-            zmin=0.0,
-            zmax=float(tope_color_q),
-            color_continuous_scale=escala_qij,
+            color_continuous_scale="RdBu_r",
             labels={"x": "Comuna", "y": "Rubro Económico", "color": "Q_ij"},
         )
-        fig_q.update_traces(
-            hovertemplate="<b>%{x}</b><br>Rubro: %{y}<br>Q_ij exacto: <b>%{z:.2f}</b><extra></extra>"
-        )
-        fig_q.update_layout(
-            height=max(540, 24 * len(q_mat_plot.index) + 170),
-            margin=dict(l=10, r=20, t=25, b=130),
-            xaxis=dict(dtick=1, tickangle=-45, tickfont=dict(size=10)),
-            yaxis=dict(dtick=1, tickfont=dict(size=10)),
-            coloraxis_colorbar=dict(
-                title="Q_ij",
-                tickvals=[0, 1, float(tope_color_q)],
-                ticktext=["0 (Bajo)", "1 (Promedio)", f"≥ {tope_color_q:g} (Alto)"],
-            ),
-        )
+        fig_q.update_layout(height=500)
         st.plotly_chart(fig_q, use_container_width=True)
-
-        # Mini-tabla de lectura rápida: Top 2 rubros especializados por comuna (Q_ij > 1)
-        filas_vocacion = []
-        for com_col in q_mat_plot.columns:
-            serie_com = q_mat_plot[com_col].dropna().sort_values(ascending=False)
-            esp_com = serie_com[serie_com > 1.0]
-            if len(esp_com) >= 1:
-                r1_nom = str(esp_com.index[0])
-                r1_txt = f"{r1_nom} (Q={esp_com.iloc[0]:.2f})"
-            else:
-                r1_txt = "Sin especialización destacada"
-            if len(esp_com) >= 2:
-                r2_nom = str(esp_com.index[1])
-                r2_txt = f"{r2_nom} (Q={esp_com.iloc[1]:.2f})"
-            else:
-                r2_txt = "-"
-            filas_vocacion.append({
-                "Comuna": com_col,
-                "Rubro #1 Especializado (Q > 1)": r1_txt,
-                "Rubro #2 Especializado (Q > 1)": r2_txt,
-                "Rubros con Q > 1": int(len(esp_com)),
-            })
-        df_voc = pd.DataFrame(filas_vocacion)
-        st.markdown(f"**Vocación Productiva por Comuna — Top 2 Rubros Especializados ($Q_{{ij}} > 1$, Año {at})**")
-        st.dataframe(df_voc, use_container_width=True, hide_index=True)
 
         st.markdown("**Coeficiente de Especialización ($Q_r$) y Coeficiente de Reestructuración ($CR_r$)**")
         st.dataframe(res["df_especializacion"].round(4), use_container_width=True, hide_index=True)
@@ -948,6 +865,7 @@ def main():
                 "6. Laboratorio de Cátedra + Excel Fórmulas Vivas",
                 "7. Controles 2, 4 y 5: My Maps, Cadenas, ELITE y PROT",
                 "8. Extensión: Redes en Vivo (Dini) y Gradientes",
+                "9. Teoría Avanzada (Krugman, Perroux, Granovetter)",
             ],
         )
         st.markdown("---")
@@ -974,6 +892,8 @@ def main():
         renderizar_redes_territorio_ot()
     elif modulo_activo.startswith("8."):
         renderizar_extension_redes_y_gradientes()
+    elif modulo_activo.startswith("9."):
+        renderizar_modulo_teoria_avanzada()
 
 
 if __name__ == "__main__":
