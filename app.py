@@ -14,7 +14,8 @@ import plotly.graph_objects as go
 import streamlit as st
 
 import motor_sii_exportador as msii
-from motor_laboratorio_catedra import renderizar_laboratorio_catedra\nfrom motor_teoria_territorial import renderizar_modulo_teoria_avanzada
+from motor_laboratorio_catedra import renderizar_laboratorio_catedra
+from motor_teoria_territorial import renderizar_modulo_teoria_avanzada
 from motor_redes_territorio_ot import renderizar_redes_territorio_ot, _renderizar_mapa_puntos_seguro
 from motor_redes_dinamicas_dini import (
     renderizar_extension_redes_y_gradientes,
