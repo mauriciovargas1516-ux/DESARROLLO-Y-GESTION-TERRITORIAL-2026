@@ -785,12 +785,10 @@ def renderizar_extension_redes_y_gradientes():
             renderizar_burbuja_tip(
                 titulo_boton="¿Qué son n y L?",
                 titulo_interno="Nodos (n) y Vínculos Activos (L)",
-                formula_latex=r"L_{\max} = rac{n(n-1)}{2}",
+                formula_latex=r"L_{\max} = \frac{n(n-1)}{2}",
                 explicacion_md=(
-                    "- **$n$ (Nodos):** Cantidad de empresas, productores o instituciones que integran la red.
-"
-                    "- **$L$ (Vínculos / Líneas):** Acuerdos reales de cooperación, compraventa o transferencia de información activos en este paso.
-"
+                    "- **$n$ (Nodos):** Cantidad de empresas, productores o instituciones que integran la red.\n"
+                    "- **$L$ (Vínculos / Líneas):** Acuerdos reales de cooperación, compraventa o transferencia de información activos en este paso.\n"
                     f"- **Lectura de tu cifra actual:** De los **{res_red['L_max']}** vínculos bilaterales posibles entre estas {res_red['n']} organizaciones, actualmente existen **{res_red['L']}** activos."
                 ),
             )
@@ -804,17 +802,13 @@ def renderizar_extension_redes_y_gradientes():
             renderizar_burbuja_tip(
                 titulo_boton="Fórmula de Densidad D",
                 titulo_interno="Densidad de la Red (Dini 2010 / 04 SPL pág. 14)",
-                formula_latex=r"D = rac{2L}{n(n-1)}",
+                formula_latex=r"D = \frac{2L}{n(n-1)}",
                 explicacion_md=(
-                    "- **Concepto:** Mide qué proporción de todos los vínculos teóricamente posibles entre las empresas se encuentran efectivamente activos.
-"
-                    f"- **Cálculo en vivo:** $D = \frac{{2 \times {res_red['L']}}}{{{res_red['n']} \times ({res_red['n']}-1)}} = {res_red['densidad_prop']:.4f}$ (**{res_red['densidad_pct']:.1f}%**).
-"
-                    "- **¿Qué significa la cifra?:**
-"
-                    "  - **$D > 50\%$:** Alta cohesión horizontal y confianza mutua (rápida difusión de aprendizaje).
-"
-                    "  - **$D < 30\%$:** Red dispersa o dependiente de pocos nodos puente."
+                    "- **Concepto:** Mide qué proporción de todos los vínculos teóricamente posibles entre las empresas se encuentran efectivamente activos.\n"
+                    f"- **Cálculo en vivo:** $D = \\frac{{2 \\times {res_red['L']}}}{{{res_red['n']} \\times ({res_red['n']}-1)}} = {res_red['densidad_prop']:.4f}$ (**{res_red['densidad_pct']:.1f}%**).\n"
+                    "- **¿Qué significa la cifra?:**\n"
+                    "  - **$D > 50\\%$:** Alta cohesión horizontal y confianza mutua (rápida difusión de aprendizaje).\n"
+                    "  - **$D < 30\\%$:** Red dispersa o dependiente de pocos nodos puente."
                 ),
             )
 
@@ -829,10 +823,8 @@ def renderizar_extension_redes_y_gradientes():
                 titulo_interno="Grado de una Empresa en la Red (k_i)",
                 formula_latex=r"k_i = \sum_{j=1}^{n} a_{ij}",
                 explicacion_md=(
-                    "- **Definición (`04 SPL.pdf`, pág. 14):** *'Grado = Número de vínculo de una empresa con las otras'*.
-"
-                    f"- **Lectura de tu cifra actual:** El actor más conectado tiene **{res_red['k_max']} vínculos directos**, mientras que el actor menos conectado tiene **{res_red['k_min']}**.
-"
+                    "- **Definición (`04 SPL.pdf`, pág. 14):** *'Grado = Número de vínculo de una empresa con las otras'*.\n"
+                    f"- **Lectura de tu cifra actual:** El actor más conectado tiene **{res_red['k_max']} vínculos directos**, mientras que el actor menos conectado tiene **{res_red['k_min']}**.\n"
                     "- Una organización con alto grado actúa como **articulador o gobernanza de la red**."
                 ),
             )
@@ -846,17 +838,13 @@ def renderizar_extension_redes_y_gradientes():
             renderizar_burbuja_tip(
                 titulo_boton="¿Qué es el Gradiente?",
                 titulo_interno="Gradiente de Concentración / Centralización de la Red",
-                formula_latex=r"GC_{red} = rac{\sum_{i=1}^{n} (k_{\max} - k_i)}{(n-1)(n-2)}",
+                formula_latex=r"GC_{red} = \frac{\sum_{i=1}^{n} (k_{\max} - k_i)}{(n-1)(n-2)}",
                 explicacion_md=(
-                    "- **Concepto:** Mide qué tan empinada es la jerarquía de poder entre el nodo líder ($k_{\max}$) y el resto de las empresas.
-"
-                    "- **Cómo leer esta cifra en tu informe:**
-"
-                    "  - **$0\%$ a $15\%$:** **Red Simétrica** (ningún actor monopoliza la intermediación).
-"
-                    "  - **$25\%$ a $65\%$:** **Red Jerárquica o Policéntrica** (existen mandos medios o co-liderazgos como Gremio + Cooperativa).
-"
-                    "  - **$70\%$ a $100\%$:** **Red con Liderazgo Fuerte** (toda la coordinación pasa por un único centro)."
+                    "- **Concepto:** Mide qué tan empinada es la jerarquía de poder entre el nodo líder ($k_{\\max}$) y el resto de las empresas.\n"
+                    "- **Cómo leer esta cifra en tu informe:**\n"
+                    "  - **$0\\%$ a $15\\%$:** **Red Simétrica** (ningún actor monopoliza la intermediación).\n"
+                    "  - **$25\\%$ a $65\\%$:** **Red Jerárquica o Policéntrica** (existen mandos medios o co-liderazgos como Gremio + Cooperativa).\n"
+                    "  - **$70\\%$ a $100\\%$:** **Red con Liderazgo Fuerte** (toda la coordinación pasa por un único centro)."
                 ),
             )
 
@@ -937,20 +925,14 @@ def renderizar_extension_redes_y_gradientes():
             renderizar_burbuja_tip(
                 titulo_boton="Ver Fórmula y Escala de Primacía (0 a 3)",
                 titulo_interno="Índice de Primacía Urbana (`06 OT 2024.pdf`, láminas 11 y 12)",
-                formula_latex=r"IP_4 = rac{P_1}{P_2 + P_3 + P_4}",
+                formula_latex=r"IP_4 = \frac{P_1}{P_2 + P_3 + P_4}",
                 explicacion_md=(
-                    "- **¿Qué mide?:** El peso relativo del principal centro poblado ($P_1$) respecto a la suma de los tres asentamientos que le siguen ($P_2 + P_3 + P_4$).
-"
-                    "- **Ejemplo de lámina 12 del Prof. Mancilla:** Villa Esperanza ($5.520$) vs. El Rincón ($4.541$), Pueblo Nuevo ($122$) y El Quebradero ($50$) $\rightarrow IP_4 = 5520 / (4541+122+50) = 1,171$.
-"
-                    "- **Tabla Orientadora de Estandarización en Cátedra:**
-"
-                    "  - **Valor 3 (Altamente Concentrada):** $IP_4 \ge 1,50$ (Macrocefalia urbana).
-"
-                    "  - **Valor 2 (Concentrada):** $1,00 \le IP_4 < 1,50$.
-"
-                    "  - **Valor 1 (Dispersa / Equilibrada):** $0,65 \le IP_4 < 1,00$.
-"
+                    "- **¿Qué mide?:** El peso relativo del principal centro poblado ($P_1$) respecto a la suma de los tres asentamientos que le siguen ($P_2 + P_3 + P_4$).\n"
+                    "- **Ejemplo de lámina 12 del Prof. Mancilla:** Villa Esperanza ($5.520$) vs. El Rincón ($4.541$), Pueblo Nuevo ($122$) y El Quebradero ($50$) $\\rightarrow IP_4 = 5520 / (4541+122+50) = 1,171$.\n"
+                    "- **Tabla Orientadora de Estandarización en Cátedra:**\n"
+                    "  - **Valor 3 (Altamente Concentrada):** $IP_4 \\ge 1,50$ (Macrocefalia urbana).\n"
+                    "  - **Valor 2 (Concentrada):** $1,00 \\le IP_4 < 1,50$.\n"
+                    "  - **Valor 1 (Dispersa / Equilibrada):** $0,65 \\le IP_4 < 1,00$.\n"
                     "  - **Valor 0 (Muy Dispersa):** $IP_4 < 0,65$."
                 ),
             )
@@ -993,9 +975,7 @@ def renderizar_extension_redes_y_gradientes():
 
             st.success(
                 f"**Resultado Índice de Primacía ($IP_4$):** `{ip_4:.4f}` | "
-                f"**Primacía 2 Ciudades ($P_1/P_2$):** `{ip_2:.4f}`
-
-"
+                f"**Primacía 2 Ciudades ($P_1/P_2$):** `{ip_2:.4f}`\n\n"
                 f"**Clasificación Estandarizada (Lámina 11–12):** **{cat_prim} (Valor asignado = {cod_prim})**"
             )
 
@@ -1006,13 +986,10 @@ def renderizar_extension_redes_y_gradientes():
                 titulo_interno="Gradiente de Renta Locacional (`La_teoria_de_la_localizacion.pdf`, pág. 7)",
                 formula_latex=r"LR(d) = Y(m - c) - Y \cdot t \cdot d",
                 explicacion_md=(
-                    "- **$LR(d)$:** Renta económica por unidad de suelo a una distancia $d$ del centro urbano.
-"
-                    "- **$Y$:** Rendimiento o intensidad productiva por unidad de superficie.
-"
-                    "- **$m - c$:** Margen neto unitario (precio de mercado $m$ menos costo de producción $c$).
-"
-                    "- **$-Y \cdot t \cdot d$ (Gradiente de distancia):** Pendiente negativa que explica por qué las actividades más intensivas se concentran en el núcleo y forman anillos concéntricos."
+                    "- **$LR(d)$:** Renta económica por unidad de suelo a una distancia $d$ del centro urbano.\n"
+                    "- **$Y$:** Rendimiento o intensidad productiva por unidad de superficie.\n"
+                    "- **$m - c$:** Margen neto unitario (precio de mercado $m$ menos costo de producción $c$).\n"
+                    "- **$-Y \\cdot t \\cdot d$ (Gradiente de distancia):** Pendiente negativa que explica por qué las actividades más intensivas se concentran en el núcleo y forman anillos concéntricos."
                 ),
             )
 
@@ -1163,7 +1140,7 @@ def renderizar_extension_redes_y_gradientes():
 
         st.markdown("#### Cuadro 2 (Dini 2010 / Schmitz 1999, pág. 13 de `04 SPL.pdf`): Modalidades de Cooperación Interempresarial")
         df_schmitz = pd.DataFrame({
-            "Posición en la Cadena Productiva \ N° Participantes": [
+            "Posición en la Cadena Productiva \\ N° Participantes": [
                 "Horizontal (Empresas del mismo eslabón)",
                 "Vertical (Proveedor — Comprador en distintos eslabones)",
             ],
