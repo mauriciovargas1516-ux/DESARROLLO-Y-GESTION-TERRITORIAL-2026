@@ -28,9 +28,7 @@ from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 from openpyxl.utils import get_column_letter
 
 
-# ==============================================================================
 # 1. FUNCIONES MATEMÁTICAS Y TIPOLOGÍAS OFICIALES (BOISIER Y STILWELL)
-# ==============================================================================
 def clasificar_boisier_6_tipos(et: float, ee: float, ed: float) -> str:
     """Clasificación en 6 tipologías del Método Diferencial-Estructural (Boisier, 1980 / Manual 59)."""
     if et >= 0:
@@ -217,9 +215,7 @@ def ejecutar_sistema_tarea(V0: pd.DataFrame, Vt: pd.DataFrame):
     }
 
 
-# ==============================================================================
 # 2. CARGA DE BASES DE CÁTEDRA (00 DATOS BASE, COLOMBIA TAREA, PIB Y POBLACIÓN)
-# ==============================================================================
 def obtener_caso_badalona():
     sectores = ["Agricultura", "Minería", "Pesca", "Industria"]
     regiones = ["Badalona", "Pueblo Seco", "Pueblo Nuevo"]
@@ -317,9 +313,7 @@ def cargar_pib_y_poblacion_chile():
     return df
 
 
-# ==============================================================================
 # 3. GENERADOR DE EXCEL CON FÓRMULAS NATIVAS
-# ==============================================================================
 def _aplicar_estilo_cabecera(ws, fila: int, col_ini: int, col_fin: int, fill_h, font_h, borde):
     for c in range(col_ini, col_fin + 1):
         cell = ws.cell(row=fila, column=c)
@@ -394,9 +388,7 @@ def exportar_excel_formulas_vivas() -> bytes:
         cs.alignment = Alignment(horizontal="left", vertical="center")
         ws.row_dimensions[2].height = 19
 
-    # ------------------------------------------------------------------
     # HOJA 1: CONVERGENCIA (BASE 1 — 7 TERRITORIOS)
-    # ------------------------------------------------------------------
     ws1 = wb.create_sheet("Convergencia")
     _banner(
         ws1,
@@ -490,9 +482,7 @@ def exportar_excel_formulas_vivas() -> bytes:
     ws1.column_dimensions["G"].width = 16
     ws1.column_dimensions["H"].width = 32
 
-    # ------------------------------------------------------------------
     # HOJA 2: LORENZ Y GINI (MÉTODO DE TRAPECIOS)
-    # ------------------------------------------------------------------
     ws2 = wb.create_sheet("Lorenz y Gini")
     _banner(
         ws2,
@@ -597,9 +587,7 @@ def exportar_excel_formulas_vivas() -> bytes:
     ws2.freeze_panes = "B5"
     _autoajustar_columnas_lab(ws2)
 
-    # ------------------------------------------------------------------
     # HOJA 3: MADE BADALONA (SISTEMA TAREA CLÁSICO Y MODIFICADO)
-    # ------------------------------------------------------------------
     ws3 = wb.create_sheet("MADE Badalona")
     _banner(
         ws3,
@@ -733,9 +721,7 @@ def exportar_excel_formulas_vivas() -> bytes:
     ws3.freeze_panes = "B1"
     _autoajustar_columnas_lab(ws3)
 
-    # ------------------------------------------------------------------
     # HOJA 4: RONDINELLI (ESCALOGRAMA FUNCIONAL DE GUTTMAN)
-    # ------------------------------------------------------------------
     ws4 = wb.create_sheet("Rondinelli")
     headers_r = [
         "Asentamiento Humano", "Población", "% Población",
@@ -834,9 +820,7 @@ def exportar_excel_formulas_vivas() -> bytes:
     return buf.getvalue()
 
 
-# ==============================================================================
 # 4. INTERFAZ STREAMLIT DEL LABORATORIO DE CÁTEDRA
-# ==============================================================================
 def renderizar_laboratorio_catedra():
     st.header("Laboratorio Oficial de Cátedra y Exportador Excel con Fórmulas Vivas")
     st.markdown(
@@ -863,9 +847,7 @@ def renderizar_laboratorio_catedra():
         "4. Unidad 3: Concentración (CRm, HHI, HK_α) y Markov",
     ])
 
-    # ------------------------------------------------------------------
     # TAB 1: PIB REGIONAL (BANCO CENTRAL 2015-2025) + POBLACIÓN CENSO 2024
-    # ------------------------------------------------------------------
     with tabs[0]:
         st.subheader("Dinámica Regional en Chile: PIB Encadenado (2015–2025) y Censo 2024")
         df_chile = cargar_pib_y_poblacion_chile()
@@ -936,9 +918,7 @@ def renderizar_laboratorio_catedra():
             hide_index=True,
         )
 
-    # ------------------------------------------------------------------
     # TAB 2: SISTEMA TAREA (BADALONA / PUEBLO SECO Y COLOMBIA 1980-1996)
-    # ------------------------------------------------------------------
     with tabs[1]:
         st.subheader("Sistema TAREA (ILPES — Lira y Quiroga, Manual 59)")
         caso_sel = st.radio(
@@ -966,9 +946,7 @@ def renderizar_laboratorio_catedra():
             st.markdown("**3. Matriz de Asociación Geográfica ($CA_{i,k}$) entre Sectores**")
             st.dataframe(res_tarea["df_ca_ik"].round(4), use_container_width=True)
 
-    # ------------------------------------------------------------------
     # TAB 3: UNIDAD 3 — CONVERGENCIA, LORENZ, GINI TRAPECIOS Y THEIL
-    # ------------------------------------------------------------------
     with tabs[2]:
         st.subheader("Unidad 3: Convergencia, Curva de Lorenz (Trapecios), Theil y Desigualdad CASEN / APS")
         col_u1, col_u2 = st.columns(2)
@@ -1031,9 +1009,7 @@ def renderizar_laboratorio_catedra():
             })
             st.dataframe(df_casen, use_container_width=True, hide_index=True)
 
-    # ------------------------------------------------------------------
     # TAB 4: CONCENTRACIÓN (CRm, HHI, HK_ALPHA) Y CADENAS DE MARKOV
-    # ------------------------------------------------------------------
     with tabs[3]:
         st.subheader("Concentración Territorial ($CR_m, HH, HH_N, HK_\\alpha$) y Dinámica de Markov (Figueroa & Herrero, 2003)")
         c_m1, c_m2 = st.columns(2)
