@@ -1,12 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-MÓDULO DE SIMULACIÓN INTERACTIVA DE TEORÍA REGIONAL AVANZADA
+Simulación de Teoría Regional y Economía Espacial
 Asignatura: Desarrollo y Gestión Territorial — Universidad de Los Lagos (Prof. Claudio Mancilla)
 Archivo: motor_teoria_territorial.py
-
-Transforma los marcos teóricos de Krugman (NEG), Perroux, Myrdal, Hirschman,
-Granovetter (con grafo interactivo de vínculos fuertes y débiles en vivo) y Christaller
-en simuladores interactivos fáciles de entender.
 """
 
 import numpy as np
@@ -18,41 +14,44 @@ from motor_redes_dinamicas_dini import renderizar_burbuja_tip
 
 
 def renderizar_modulo_teoria_avanzada():
-    st.header("Laboratorio Interactivo de Teoría Regional (Krugman, Perroux, Granovetter, Christaller)")
+    st.header("1. Fundamentos y Simulación Teórica Regional (Krugman, Perroux, Granovetter, Christaller)")
     st.markdown(
-        "Mueve los deslizadores y cambia los datos en cada pestaña para **comprobar en vivo** cómo operan "
-        "la **Nueva Economía Geográfica (Krugman)**, los **Polos y Multiplicadores (Perroux, Myrdal, Hirschman)**, "
-        "los **Vínculos Fuertes y Débiles en Red (Granovetter)** y el **Umbral Urbano (Christaller)**."
+        "Modelamiento interactivo de los marcos teóricos de localización y desarrollo regional: "
+        "**Nueva Economía Geográfica (Krugman, 1991)**, **Polos de Crecimiento y Multiplicadores (Perroux, Myrdal, Hirschman)**, "
+        "**Fuerza de los Vínculos Débiles en Sistemas Productivos Locales (Granovetter, 1973)** y "
+        "**Teoría de Lugares Centrales (Christaller, 1933)**."
     )
 
     tabs_teoria = st.tabs([
-        "1. Simulador de Krugman (Costos de Transporte y Macrocefalia)",
-        "2. Simulador de Perroux, Myrdal y Hirschman (Polos y Multiplicadores)",
-        "3. Simulador de Red en Vivo de Granovetter (Vínculos Fuertes vs. Débiles)",
-        "4. Calculadora en Vivo de Christaller (Umbral y Alcance)",
+        "1. Nueva Economía Geográfica (Krugman)",
+        "2. Polos y Multiplicadores (Perroux, Myrdal, Hirschman)",
+        "3. Redes y Vínculos Débiles (Granovetter)",
+        "4. Umbral y Alcance Urbano (Christaller)",
     ])
 
+    # Pestaña 1: Nueva Economía Geográfica (Krugman, 1991)
     with tabs_teoria[0]:
-        st.subheader("Simulador en Vivo: Nueva Economía Geográfica (Paul Krugman, 1991)")
+        st.subheader("Modelo Centro-Periferia y Costos de Transporte (Paul Krugman, 1991)")
         st.markdown(
-            "**¿Qué vas a probar aquí?** Cómo al bajar los costos de transporte por debajo de un punto crítico, "
-            "las empresas dejan de repartirse en partes iguales y se mudan en masa a la capital regional (**macrocefalia**)."
+            "Evalúa el equilibrio espacial entre fuerzas centrípetas (economías de escala y tamaño de mercado) "
+            "y fuerzas centrífugas (costos de transporte $\\tau$), identificando el umbral crítico en el que "
+            "la actividad productiva se concentra en la capital regional (**macrocefalia**)."
         )
 
         renderizar_burbuja_tip(
-            titulo_boton="Tip: ¿Cómo funciona el efecto de Krugman en simple?",
-            titulo_interno="Fuerzas Centrípetas vs. Centrífugas (Krugman, 1991)",
-            formula_latex=r"\text{Aglomeración Neta} = \text{Economías de Escala} + \text{Tamaño de Mercado} - \text{Costos de Transporte }(\tau)",
+            titulo_boton="Nota Metodológica: Fuerzas Centrípetas vs. Centrífugas",
+            titulo_interno="Equilibrio Centro-Periferia (Krugman, 1991)",
+            formula_latex=r"\text{Aglomeración Neta} = \text{Economías de Escala} + \text{Efecto Mercado Local} - \text{Costos de Transporte }(\tau)",
             explicacion_md=(
-                "- **Si transportar es caro:** A las fábricas les conviene quedarse repartidas en cada comuna para no pagar fletes altos.\n"
-                "- **Si transportar se vuelve barato:** Las fábricas prefieren concentrarse en una sola gran ciudad (ej. Concepción o Puerto Montt) para aprovechar proveedores y clientes juntos, despachando desde ahí al resto de la región."
+                "- **Costos de transporte altos ($\\tau > \\tau^*$):** Las empresas priorizan abastecer la demanda local desde cada comuna para evitar costos logísticos elevados, manteniendo una distribución territorial dispersa.\n"
+                "- **Costos de transporte bajos ($\\tau \\le \\tau^*$):** Se vuelve rentable concentrar la planta productiva en el mercado de mayor tamaño (capital regional) para capturar economías de escala y despachar hacia la periferia."
             ),
         )
 
         col_k1, col_k2, col_k3 = st.columns(3)
         with col_k1:
             costo_transporte = st.slider(
-                "1. Costo de Transporte (τ) [10 = Muy Caro | 1 = Muy Barato]:",
+                "1. Costo de Transporte (τ) [10 = Alto | 1 = Bajo]:",
                 min_value=1.0,
                 max_value=10.0,
                 value=3.5,
@@ -61,7 +60,7 @@ def renderizar_modulo_teoria_avanzada():
             )
         with col_k2:
             economias_escala = st.slider(
-                "2. Ventaja de Producir a Gran Escala (1 a 10):",
+                "2. Retornos Crecientes / Economías de Escala (1 a 10):",
                 min_value=1.0,
                 max_value=10.0,
                 value=7.0,
@@ -70,7 +69,7 @@ def renderizar_modulo_teoria_avanzada():
             )
         with col_k3:
             movilidad_laboral = st.slider(
-                "3. Facilidad de los Trabajadores para Mudarse (1 a 10):",
+                "3. Movilidad Interregional del Trabajo (1 a 10):",
                 min_value=1.0,
                 max_value=10.0,
                 value=6.5,
@@ -86,48 +85,48 @@ def renderizar_modulo_teoria_avanzada():
         cuota_periferia_pct = 100.0 - cuota_centro_pct
 
         k1, k2, k3 = st.columns(3)
-        k1.metric("Umbral Crítico de Transporte (τ*)", f"{umbral_critico_tau:.1f}", "Punto de quiebre territorial")
+        k1.metric("Umbral Crítico de Transporte (τ*)", f"{umbral_critico_tau:.1f}", "Punto de bifurcación espacial")
         k2.metric(
-            "Actividad en Capital Regional (Centro)",
+            "Participación Capital Regional (Centro)",
             f"{cuota_centro_pct:.1f}%",
-            "Macrocefalia Activa" if costo_transporte <= umbral_critico_tau else "Equilibrio Disperso",
+            " Régimen de Aglomeración" if costo_transporte <= umbral_critico_tau else "Equilibrio Disperso",
         )
         k3.metric(
-            "Actividad en Comunas Periféricas",
+            "Participación Comunas Periféricas",
             f"{cuota_periferia_pct:.1f}%",
-            f"{cuota_periferia_pct - 50.0:+.1f}% vs. reparto equitativo",
+            f"{cuota_periferia_pct - 50.0:+.1f} pp respecto a simetría",
         )
 
         if costo_transporte <= umbral_critico_tau:
             st.warning(
-                f"**Diagnóstico en Vivo (Macrocefalia):** Como el costo de transporte actual (**{costo_transporte:.1f}**) "
-                f"bajó del umbral crítico (**{umbral_critico_tau:.1f}**), se activaron las fuerzas centrípetas de Krugman: "
-                f"la capital regional absorbe el **{cuota_centro_pct:.1f}%** de la industria y el empleo."
+                f"**Diagnóstico Territorial (Concentración Centro-Periferia):** Con un costo de transporte $\\tau = {costo_transporte:.1f}$ "
+                f"inferior al umbral crítico ($\\tau^* = {umbral_critico_tau:.1f}$), predominan las fuerzas centrípetas y "
+                f"el nodo metropolitano concentra el **{cuota_centro_pct:.1f}%** de la actividad manufacturera y de servicios."
             )
         else:
             st.success(
-                f"**Diagnóstico en Vivo (Territorio Equilibrado):** Como el costo de transporte (**{costo_transporte:.1f}**) "
-                f"es mayor al umbral crítico (**{umbral_critico_tau:.1f}**), las empresas se mantienen distribuidas entre "
-                f"el centro (**{cuota_centro_pct:.1f}%**) y las comunas periféricas (**{cuota_periferia_pct:.1f}%**)."
+                f"**Diagnóstico Territorial (Distribución Equilibrada):** Con un costo de transporte $\\tau = {costo_transporte:.1f}$ "
+                f"superior al umbral crítico ($\\tau^* = {umbral_critico_tau:.1f}$), los costos de flete actúan como fuerza centrífuga "
+                f"manteniendo una participación de **{cuota_centro_pct:.1f}%** en el centro y **{cuota_periferia_pct:.1f}%** en la periferia."
             )
 
         g_k1, g_k2 = st.columns(2)
         with g_k1:
             df_reparto = pd.DataFrame({
                 "Territorio": ["Capital Regional (Centro)", "Comunas Periféricas"],
-                "Porcentaje de Empresas y Empleo (%)": [cuota_centro_pct, cuota_periferia_pct],
+                "Participación Productiva (%)": [cuota_centro_pct, cuota_periferia_pct],
             })
             fig_bar_k = px.bar(
                 df_reparto,
                 x="Territorio",
-                y="Porcentaje de Empresas y Empleo (%)",
+                y="Participación Productiva (%)",
                 color="Territorio",
                 text_auto=".1f",
                 range_y=[0, 100],
                 color_discrete_sequence=["#1d4ed8", "#64748b"],
-                title="Reparto en Vivo: Capital Regional vs. Periferia",
+                title="Distribución Espacial de la Actividad: Centro vs. Periferia",
             )
-            fig_bar_k.add_hline(y=50, line_dash="dash", line_color="#dc2626", annotation_text="Reparto 50/50")
+            fig_bar_k.add_hline(y=50, line_dash="dash", line_color="#dc2626", annotation_text="Simetría (50%)")
             st.plotly_chart(fig_bar_k, use_container_width=True)
 
         with g_k2:
@@ -140,7 +139,7 @@ def renderizar_modulo_teoria_avanzada():
                     y=cuota_vec,
                     mode="lines",
                     line=dict(color="#1d4ed8", width=3),
-                    name="Concentración en la Capital (%)",
+                    name="Cuota del Centro (%)",
                 )
             )
             fig_curva_k.add_trace(
@@ -148,10 +147,10 @@ def renderizar_modulo_teoria_avanzada():
                     x=[costo_transporte],
                     y=[cuota_centro_pct],
                     mode="markers+text",
-                    text=[f"Tu simulación ({cuota_centro_pct:.1f}%)"],
+                    text=[f"Parámetro actual ({cuota_centro_pct:.1f}%)"],
                     textposition="top center",
-                    marker=dict(size=14, color="#dc2626", line=dict(width=2, color="#ffffff")),
-                    name="Punto Actual",
+                    marker=dict(size=13, color="#dc2626", line=dict(width=2, color="#ffffff")),
+                    name="Estado Evaluado",
                 )
             )
             fig_curva_k.add_vline(
@@ -161,37 +160,39 @@ def renderizar_modulo_teoria_avanzada():
                 annotation_text=f"Umbral Crítico τ*={umbral_critico_tau:.1f}",
             )
             fig_curva_k.update_layout(
-                title="Curva de Krugman: ¿En qué punto se dispara la concentración?",
-                xaxis_title="Costo de Transporte (τ) [Menor costo a la izquierda]",
-                yaxis_title="% Concentrado en la Capital Regional",
+                title="Curva de Aglomeración Espacial según Costo de Transporte (τ)",
+                xaxis_title="Costo de Transporte (τ)",
+                yaxis_title="Participación de la Capital Regional (%)",
                 yaxis_range=[45, 100],
             )
             st.plotly_chart(fig_curva_k, use_container_width=True)
 
+    # Pestaña 2: Polos de Perroux, Causalidad de Myrdal y Encadenamientos de Hirschman
     with tabs_teoria[1]:
-        st.subheader("Simulador en Vivo: Polos de Crecimiento y Multiplicadores (Perroux, Myrdal y Hirschman)")
+        st.subheader("Polos de Crecimiento, Causalidad Acumulativa y Encadenamientos (Perroux, Myrdal, Hirschman)")
         st.markdown(
-            "**¿Qué vas a probar aquí?** Qué pasa cuando se inyecta inversión en una industria motriz (ej. maderera o láctea) "
-            "y cómo sus compras a proveedores locales (**Hirschman**) generan difusión (**Spread**) o absorción (**Backwash**)."
+            "Modela la propagación de un choque de inversión en una industria motriz (**Perroux**), cuantificando "
+            "el multiplicador de encadenamientos hacia atrás y hacia adelante (**Hirschman**) y el saldo neto entre "
+            "efectos de difusión (*Spread*) y absorción (*Backwash*) sobre las comunas vecinas (**Myrdal**)."
         )
 
         renderizar_burbuja_tip(
-            titulo_boton="Tip: Diferencia entre Perroux, Myrdal y Hirschman",
-            titulo_interno="Tres Conceptos Clave Conectados",
-            formula_latex=r"M_{\text{Hirschman}} = \frac{1}{1 - (b_{\text{atrás}} + f_{\text{adelante}})} \quad ; \quad \text{Impacto Periferia} = \text{Difusión (Spread)} - \text{Absorción (Backwash)}",
+            titulo_boton="Nota Metodológica: Ecuaciones de Hirschman y Myrdal",
+            titulo_interno="Multiplicador de Encadenamientos y Saldo Territorial",
+            formula_latex=r"M_{\text{Hirschman}} = \frac{1}{1 - (b_{\text{atrás}} + f_{\text{adelante}})} \quad ; \quad \text{Saldo Periferia} = \text{Spread} - \text{Backwash}",
             explicacion_md=(
-                "- **Perroux (Polos):** El crecimiento nace en una industria motriz dominante, no en todas las comunas a la vez.\n"
-                "- **Hirschman (Encadenamientos):** El polo multiplica la actividad si compra insumos locales (*hacia atrás*) y si sus productos se procesan en la misma región (*hacia adelante*).\n"
-                "- **Myrdal (Causalidad Acumulativa):** Si el polo solo succiona trabajadores y capital de los pueblos vecinos (*Backwash* > *Spread*), la desigualdad regional aumenta."
+                "- **Perroux (1955):** El crecimiento regional se origina en unidades motrices dominantes con capacidad de inducir actividad en su entorno.\n"
+                "- **Hirschman (1958):** El efecto multiplicador depende de la fracción de insumos adquiridos localmente ($b_{\\text{atrás}}$) y del procesamiento local de bienes intermedios ($f_{\\text{adelante}}$).\n"
+                "- **Myrdal (1957):** Si la absorción de capital y mano de obra calificada (*Backwash*) supera las compras a comunas vecinas (*Spread*), el polo opera como enclave y amplía las disparidades."
             ),
         )
 
         caso_polo = st.selectbox(
-            "Selecciona un Caso Aplicado de Cátedra para cargar valores base:",
+            "Caso de referencia regional:",
             [
                 "Caso 1: Clúster Forestal-Maderero PymeMad (Los Ángeles / Biobío)",
                 "Caso 2: Complejo Agroindustrial Lácteo-Quesero (Osorno / Los Lagos)",
-                "Caso 3: Enclave Industrial Aislado (Poca compra a proveedores locales)",
+                "Caso 3: Enclave Extractivo con Baja Articulación Local",
             ],
             key="perroux_caso",
         )
@@ -215,7 +216,7 @@ def renderizar_modulo_teoria_avanzada():
             )
         with c_p2:
             enc_atras = st.slider(
-                "Compras Locales Hacia Atrás (0 a 0.45):",
+                "Coeficiente Hacia Atrás b (0,05 a 0,45):",
                 min_value=0.05,
                 max_value=0.45,
                 value=def_atras,
@@ -224,7 +225,7 @@ def renderizar_modulo_teoria_avanzada():
             )
         with c_p3:
             enc_adelante = st.slider(
-                "Procesamiento Local Hacia Adelante (0 a 0.45):",
+                "Coeficiente Hacia Adelante f (0,05 a 0,45):",
                 min_value=0.05,
                 max_value=0.45,
                 value=def_adel,
@@ -233,7 +234,7 @@ def renderizar_modulo_teoria_avanzada():
             )
         with c_p4:
             pct_difusion = st.slider(
-                "% Difusión a Comunas Vecinas (Spread):",
+                "Proporción de Difusión Regional — Spread (%):",
                 min_value=0,
                 max_value=100,
                 value=def_spread,
@@ -251,47 +252,48 @@ def renderizar_modulo_teoria_avanzada():
         saldo_periferia = difusion_mm - absorcion_mm
 
         p1, p2, p3, p4 = st.columns(4)
-        p1.metric("Multiplicador de Hirschman", f"{multiplicador_h:.2f}x", f"Encadenamiento total: {propension_local*100:.0f}%")
-        p2.metric("Actividad Total Generada", f"{impacto_total:,.0f} MM$", f"+{efecto_indirecto:,.0f} MM$ en encadenamientos")
-        p3.metric("Efecto Difusión (Spread)", f"{difusion_mm:,.0f} MM$", "Compras a comunas vecinas")
+        p1.metric("Multiplicador de Hirschman", f"{multiplicador_h:.2f}x", f"Retención local: {propension_local*100:.0f}%")
+        p2.metric("Producción Total Inducida", f"{impacto_total:,.0f} MM$", f"+{efecto_indirecto:,.0f} MM$ indirectos")
+        p3.metric("Efecto Difusión (Spread)", f"{difusion_mm:,.0f} MM$", "Demanda hacia comunas vecinas")
         p4.metric(
             "Saldo Neto en Periferia (Myrdal)",
             f"{saldo_periferia:+,.0f} MM$",
-            "Polo Integrador" if saldo_periferia >= 0 else "Enclave Absorbente (Backwash)",
+            "Polo Integrador (Spread > Backwash)" if saldo_periferia >= 0 else "Efecto Backwash Predominante",
         )
 
-        rondas = ["Ronda 1 (Choque Inicial)", "Ronda 2 (Proveedores)", "Ronda 3 (Servicios)", "Ronda 4 (Consumo Local)", "Ronda 5 (Acumulado)"]
+        rondas = ["Ronda 1 (Impulso Inicial)", "Ronda 2 (Proveedores Directos)", "Ronda 3 (Servicios Conexos)", "Ronda 4 (Demanda Inducida)", "Ronda 5 (Consolidado)"]
         impactos_ronda = [inversion_inicial * (propension_local ** r) for r in range(5)]
         acumulado_ronda = np.cumsum(impactos_ronda)
 
         df_rondas = pd.DataFrame({
-            "Etapa del Efecto Multiplicador": rondas,
-            "Impacto en cada Ronda (MM$)": np.round(impactos_ronda, 1),
-            "Actividad Acumulada en la Región (MM$)": np.round(acumulado_ronda, 1),
+            "Etapa del Multiplicador": rondas,
+            "Impacto Marginal por Ronda (MM$)": np.round(impactos_ronda, 1),
+            "Producción Acumulada Regional (MM$)": np.round(acumulado_ronda, 1),
         })
 
         fig_hirsch = px.bar(
             df_rondas,
-            x="Etapa del Efecto Multiplicador",
-            y=["Impacto en cada Ronda (MM$)", "Actividad Acumulada en la Región (MM$)"],
+            x="Etapa del Multiplicador",
+            y=["Impacto Marginal por Ronda (MM$)", "Producción Acumulada Regional (MM$)"],
             barmode="group",
             text_auto=".0f",
-            title="Causalidad Acumulativa en Vivo: Propagación del Choque Productivo en 5 Rondas",
+            title="Propagación Iterativa del Efecto Multiplicador Regional (5 Rondas)",
         )
         st.plotly_chart(fig_hirsch, use_container_width=True)
 
+    # Pestaña 3: Capital Social y Vínculos Débiles (Granovetter, 1973)
     with tabs_teoria[2]:
-        st.subheader("Simulador de Red en Vivo: La Fuerza de los Vínculos Débiles (Mark Granovetter, 1973)")
+        st.subheader("Estructura de Red y Fuerza de los Vínculos Débiles (Mark Granovetter, 1973)")
         st.markdown(
-            "**¿Qué vas a probar aquí?** Mueve los deslizadores para armar la red en vivo: los **vínculos fuertes (azules)** "
-            "unen a las PyMEs de la misma comuna, mientras que los **vínculos débiles (puentes rojos)** conectan al clúster "
-            "con universidades, centros de I+D y mercados externos evitando el bloqueo (*lock-in*)."
+            "Analiza el balance sociométrico entre **vínculos fuertes** (cohesión y confianza al interior del clúster comunal) "
+            "y **vínculos débiles** (puentes interinstitucionales hacia universidades, centros de I+D y mercados externos) "
+            "para prevenir el bloqueo cognitivo (*lock-in*)."
         )
 
         cg1, cg2 = st.columns(2)
         with cg1:
             vinculos_fuertes = st.slider(
-                "1. Vínculos Fuertes Internos (Enlaces azules entre PyMEs locales) [1 a 10]:",
+                "1. Vínculos Fuertes Intralocales (Cohesión horizontal entre PyMEs) [1 a 10]:",
                 min_value=1,
                 max_value=10,
                 value=8,
@@ -299,7 +301,7 @@ def renderizar_modulo_teoria_avanzada():
             )
         with cg2:
             vinculos_debiles = st.slider(
-                "2. Vínculos Débiles / Puentes Externos (Puentes rojos a I+D, ULagos, Exportación) [0 a 10]:",
+                "2. Vínculos Débiles Extralocales (Puentes hacia I+D, ULagos y mercados) [0 a 10]:",
                 min_value=0,
                 max_value=10,
                 value=6,
@@ -312,12 +314,12 @@ def renderizar_modulo_teoria_avanzada():
         puntaje_spl = round(0.45 * cohesion_interna + 0.55 * acceso_innovacion - 0.30 * riesgo_lockin, 1)
 
         m_g1, m_g2, m_g3 = st.columns(3)
-        m_g1.metric("Cohesión y Confianza Local", f"{cohesion_interna:.0f} / 100", f"{vinculos_fuertes} enlaces fuertes activos")
-        m_g2.metric("Entrada de Ideas e Innovación", f"{acceso_innovacion:.0f} / 100", f"{vinculos_debiles} puentes débiles activos")
+        m_g1.metric("Índice de Cohesión Local", f"{cohesion_interna:.0f} / 100", f"{vinculos_fuertes} enlaces internos")
+        m_g2.metric("Acceso a Información No Redundante", f"{acceso_innovacion:.0f} / 100", f"{vinculos_debiles} puentes externos")
         m_g3.metric(
-            "Riesgo de Encierro (Lock-in)",
+            "Riesgo de Bloqueo (Lock-in)",
             f"{riesgo_lockin:.0f}%",
-            "Peligro de endogamia" if riesgo_lockin > 40 else "Red abierta y saludable",
+            "Red endogámica" if riesgo_lockin > 40 else "Red abierta con puentes activos",
         )
 
         col_gr_grafo, col_gr_bar = st.columns([1.35, 1.0])
@@ -368,7 +370,7 @@ def renderizar_modulo_teoria_avanzada():
                 go.Scatter(
                     x=dx, y=dy, mode="lines",
                     line=dict(width=2.8, color="#dc2626", dash="dash"),
-                    name="Vínculos Débiles (Puentes de Innovación)",
+                    name="Vínculos Débiles (Puentes Externos)",
                 )
             )
             fig_red_gran.add_trace(
@@ -384,11 +386,11 @@ def renderizar_modulo_teoria_avanzada():
                     x=x_ext, y=y_ext, mode="markers+text",
                     text=nodos_ext, textposition="middle right",
                     marker=dict(size=20, color="#059669", symbol="diamond", line=dict(width=2, color="#0f172a")),
-                    name="Fuentes Externas de Innovación",
+                    name="Entidades Externas de Conocimiento",
                 )
             )
             fig_red_gran.update_layout(
-                title="Grafo en Vivo: Clúster Local (Azul) vs. Puentes Débiles (Rojo)",
+                title="Topología Sociométrica: Vínculos Fuertes vs. Puentes Débiles (Granovetter)",
                 xaxis=dict(showgrid=False, zeroline=False, showticklabels=False, range=[-1.9, 2.3]),
                 yaxis=dict(showgrid=False, zeroline=False, showticklabels=False, range=[-1.1, 1.1]),
                 height=390,
@@ -401,10 +403,10 @@ def renderizar_modulo_teoria_avanzada():
         with col_gr_bar:
             df_gran = pd.DataFrame({
                 "Dimensión": [
-                    "Confianza Local",
+                    "Cohesión Local",
                     "Innovación Externa",
                     "Riesgo Lock-in",
-                    "Desempeño Clúster",
+                    "Desempeño SPL",
                 ],
                 "Puntaje (0 a 100)": [cohesion_interna, acceso_innovacion, riesgo_lockin, max(0.0, puntaje_spl)],
             })
@@ -415,30 +417,32 @@ def renderizar_modulo_teoria_avanzada():
                 color="Dimensión",
                 text_auto=".0f",
                 range_y=[0, 105],
-                title="Diagnóstico del Clúster en Vivo",
+                title="Indicadores de Desempeño Sociométrico",
             )
             fig_gran.update_layout(height=390, showlegend=False)
             st.plotly_chart(fig_gran, use_container_width=True)
 
+    # Pestaña 4: Teoría de Lugares Centrales (Christaller / Lösch)
     with tabs_teoria[3]:
-        st.subheader("Calculadora en Vivo: Umbral y Alcance de un Servicio Urbano (Walter Christaller)")
+        st.subheader("Teoría de Lugares Centrales: Umbral y Alcance (Walter Christaller, 1933)")
         st.markdown(
-            "**¿Qué vas a probar aquí?** Introduce la población de una comuna y la distancia que la gente está dispuesta a viajar "
-            "para comprobar al instante si un servicio especializado es viable o no en ese territorio."
+            "Contrasta la demanda demográfica comunal frente al **Umbral Mínimo (*Threshold*)** requerido para sostener "
+            "un servicio urbano y verifica si la distancia vial hacia las localidades tributarias se encuentra dentro del "
+            "**Alcance Máximo (*Range*)**."
         )
 
         renderizar_burbuja_tip(
-            titulo_boton="Tip: ¿Qué son el Umbral y el Alcance de Christaller?",
-            titulo_interno="Regla de Decisión de Lugares Centrales",
-            formula_latex=r"\text{Viabilidad: Población Comunal} \ge \text{Umbral Mínimo} \quad \wedge \quad \text{Alcance Máximo (km)} \ge \text{Distancia al Usuario}",
+            titulo_boton="Nota Metodológica: Condición de Viabilidad de Christaller",
+            titulo_interno="Umbral de Demanda y Alcance Espacial",
+            formula_latex=r"\text{Población Comunal} \ge \text{Umbral Mínimo} \quad \wedge \quad \text{Alcance Máximo (km)} \ge \text{Distancia Vial}",
             explicacion_md=(
-                "- **Umbral (*Threshold*):** Cantidad mínima de habitantes o clientes necesaria para que el servicio cubra sus costos y no quiebre.\n"
-                "- **Alcance (*Range*):** Distancia máxima (en km) que una persona acepta viajar para usar ese servicio."
+                "- **Umbral (*Threshold*):** Población o masa crítica mínima necesaria para que el equipamiento opere sobre su punto de equilibrio.\n"
+                "- **Alcance (*Range*):** Distancia máxima en kilómetros que la población está dispuesta a recorrer para acceder al servicio."
             ),
         )
 
         servicio_sel = st.selectbox(
-            "Selecciona el tipo de equipamiento o servicio a evaluar:",
+            "Jerarquía del equipamiento o servicio urbano a evaluar:",
             [
                 "1. Hospital de Alta Complejidad / Universidad (Servicio de Orden Superior)",
                 "2. Centro de Negocios / Instituto Técnico / Banco Comercial (Orden Intermedio)",
@@ -457,7 +461,7 @@ def renderizar_modulo_teoria_avanzada():
         cc1, cc2, cc3, cc4 = st.columns(4)
         with cc1:
             pob_comuna = st.number_input(
-                "Población Comuna + Entorno:",
+                "Población Comuna + Área de Influencia:",
                 min_value=1000,
                 max_value=500000,
                 value=37000,
@@ -483,7 +487,7 @@ def renderizar_modulo_teoria_avanzada():
             )
         with cc4:
             dist_real = st.slider(
-                "Distancia de las Localidades Vecinas (km):",
+                "Distancia de Localidades Vecinas (km):",
                 min_value=2,
                 max_value=150,
                 value=35,
@@ -496,24 +500,24 @@ def renderizar_modulo_teoria_avanzada():
 
         if cumple_umbral and cumple_alcance:
             st.success(
-                f"✅ **SERVICIO VIABLE Y SOSTENIBLE EN LA COMUNA:** La población ({pob_comuna:,} hab.) supera el "
-                f"**Umbral Mínimo** ({umbral_min:,} hab. → **{cobertura_pct:.1f}%** de cobertura) y el **Alcance** "
-                f"({alcance_max} km) cubre perfectamente a las localidades vecinas ({dist_real} km)."
+                f"**Factibilidad Positiva (Cumple Umbral y Alcance):** La demanda disponible ({pob_comuna:,} hab.) supera el "
+                f"**Umbral Mínimo** ({umbral_min:,} hab., cobertura del **{cobertura_pct:.1f}%**) y el **Alcance** "
+                f"({alcance_max} km) cubre la distancia de desplazamiento de las localidades tributarias ({dist_real} km)."
             )
         elif not cumple_umbral:
             st.error(
-                f"❌ **NO ALCANZA EL UMBRAL MÍNIMO DE CHRISTALLER:** La comuna tiene **{pob_comuna:,} habitantes**, "
-                f"pero este servicio necesita al menos **{umbral_min:,} habitantes** para sostenerse ({cobertura_pct:.1f}% del umbral). "
-                "Por jerarquía urbana, este servicio tiende a concentrarse en la capital provincial o regional."
+                f"**Restricción de Umbral Demográfico:** La población del área ({pob_comuna:,} hab.) es inferior al "
+                f"**Umbral Mínimo** exigido por el servicio ({umbral_min:,} hab., equivalente al {cobertura_pct:.1f}% del umbral). "
+                "De acuerdo con la jerarquía de lugares centrales, este equipamiento se localiza en cabeceras provinciales o regionales."
             )
         else:
             st.warning(
-                f"⚠️ **PROBLEMA DE ALCANCE ESPACIAL:** Aunque hay población suficiente, la distancia de las localidades "
-                f"vecinas (**{dist_real} km**) supera lo que los usuarios están dispuestos a viajar (**{alcance_max} km**)."
+                f"**Restricción de Alcance Espacial:** Aunque existe masa crítica demográfica, la distancia de las localidades "
+                f"vecinas (**{dist_real} km**) excede el radio máximo de desplazamiento (**{alcance_max} km**)."
             )
 
         df_ch = pd.DataFrame({
-            "Indicador": ["Población Disponible en la Comuna", "Umbral Mínimo Exigido (Christaller)"],
+            "Indicador": ["Población Disponible en el Área", "Umbral Mínimo Requerido (Christaller)"],
             "Habitantes": [pob_comuna, umbral_min],
         })
         fig_ch = px.bar(
@@ -523,6 +527,6 @@ def renderizar_modulo_teoria_avanzada():
             color="Indicador",
             text_auto=",",
             color_discrete_sequence=["#059669" if cumple_umbral else "#dc2626", "#1e293b"],
-            title="Comparación en Vivo: Demanda Comunal vs. Umbral Mínimo de Christaller",
+            title="Evaluación de Umbral Demográfico (Demanda Local vs. Umbral Mínimo)",
         )
         st.plotly_chart(fig_ch, use_container_width=True)
