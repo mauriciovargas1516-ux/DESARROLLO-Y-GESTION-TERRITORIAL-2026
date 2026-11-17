@@ -838,9 +838,7 @@ def compilar_excel_10_hojas(
     n_rubros = len(rubros)
     n_comunas = len(comunas)
 
-    # ==========================================================================
     # HOJA 1: RESUMEN
-    # ==========================================================================
     df_portada = pd.DataFrame([
         {"Indicador": "Región analizada", "Valor": str(region_sel)},
         {"Indicador": "Variable económica (SII)", "Valor": str(variable_sel)},
@@ -868,9 +866,7 @@ def compilar_excel_10_hojas(
         df_portada,
     )
 
-    # ==========================================================================
     # HOJAS 2 Y 3: BASE t0 Y BASE tf
-    # ==========================================================================
     for anio_mat, df_mat in [(anio_0, V0), (anio_t, Vt)]:
         ws_m = wb.create_sheet(f"Base {anio_mat}")
         n_cols_m = n_comunas + 2
@@ -929,9 +925,7 @@ def compilar_excel_10_hojas(
         ws_m.freeze_panes = "B5"
         _autoajustar_columnas_hoja(ws_m)
 
-    # ==========================================================================
     # HOJA 4: LOCALIZACIÓN Qij
-    # ==========================================================================
     ws4 = wb.create_sheet("Localización Qij")
     n_cols_q = n_comunas + 1
     ws4.merge_cells(start_row=1, start_column=1, end_row=1, end_column=n_cols_q)
@@ -1001,9 +995,7 @@ def compilar_excel_10_hojas(
     ws4.freeze_panes = "B1"
     _autoajustar_columnas_hoja(ws4)
 
-    # ==========================================================================
     # HOJA 5: ESPECIALIZACIÓN (Qr y CRr)
-    # ==========================================================================
     ws5 = wb.create_sheet("Especialización")
     n_cols_e = n_comunas + 1
     ws5.merge_cells(start_row=1, start_column=1, end_row=1, end_column=n_cols_e)
@@ -1127,9 +1119,7 @@ def compilar_excel_10_hojas(
     ws5.freeze_panes = "B1"
     _autoajustar_columnas_hoja(ws5)
 
-    # ==========================================================================
     # HOJA 6: PROD. BÁSICA (Xij y Mj)
-    # ==========================================================================
     ws6 = wb.create_sheet("Prod. Básica")
     n_cols_x = n_comunas + 2
     ws6.merge_cells(start_row=1, start_column=1, end_row=1, end_column=n_cols_x)
@@ -1266,9 +1256,7 @@ def compilar_excel_10_hojas(
     ws6.freeze_panes = "B1"
     _autoajustar_columnas_hoja(ws6)
 
-    # ==========================================================================
     # HOJA 7: CUADRANTES SILVA (FORMATO ESTÁNDAR CON POBLACIÓN Y PER CÁPITA)
-    # ==========================================================================
     ws7 = wb.create_sheet("Cuadrantes Silva")
     T_per = max(int(anio_t) - int(anio_0), 1)
     df_ss = resultados["df_shift_share"]
@@ -1634,9 +1622,7 @@ def compilar_excel_10_hojas(
     ws7.column_dimensions["K"].width = 21
     ws7.column_dimensions["L"].width = 36
 
-    # ==========================================================================
     # HOJA 8: MADE (SHIFT & SHARE CLÁSICO)
-    # ==========================================================================
     ws8 = wb.create_sheet("MADE")
     n_cols_ss = n_comunas + 1
     ws8.merge_cells(start_row=1, start_column=1, end_row=1, end_column=n_cols_ss)
@@ -1780,9 +1766,7 @@ def compilar_excel_10_hojas(
     ws8.freeze_panes = "B1"
     _autoajustar_columnas_hoja(ws8)
 
-    # ==========================================================================
     # HOJA 9: MADE MODIFICADO
-    # ==========================================================================
     ws9 = wb.create_sheet("MADE Modificado")
     ws9.merge_cells(start_row=1, start_column=1, end_row=1, end_column=n_cols_ss)
     c9_t = ws9.cell(
@@ -1907,9 +1891,7 @@ def compilar_excel_10_hojas(
     ws9.freeze_panes = "B1"
     _autoajustar_columnas_hoja(ws9)
 
-    # ==========================================================================
     # HOJA 10: CONVERGENCIA
-    # ==========================================================================
     ws10 = wb.create_sheet("Convergencia")
     df_reat_excel = resultados["df_reat_resumen"].copy()
     df_reat_excel.columns = ["Indicador", f"Año {anio_0}", f"Año {anio_t}", "Variación", "Interpretación"]
