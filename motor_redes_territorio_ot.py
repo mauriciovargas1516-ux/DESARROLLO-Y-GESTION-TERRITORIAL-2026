@@ -139,9 +139,7 @@ def _renderizar_mapa_puntos_seguro(
         st.map(df_fallback[["lat", "lon"]])
 
 
-# ==============================================================================
 # 1. BASES DE DATOS GEORREFERENCIADAS (LICEOS.XLSX Y 22 ESTABLECIMIENTOS CONTROL 2/4)
-# ==============================================================================
 def obtener_liceos_osorno_df() -> pd.DataFrame:
     """Retorna los 15 establecimientos exactos del archivo Liceos.xlsx de Osorno con formato My Maps."""
     datos = [
@@ -227,9 +225,7 @@ def validar_base_google_mymaps(df: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(checks, columns=["Criterio de Rúbrica (Actividad Mapa)", "Cumple", "Diagnóstico Técnico"])
 
 
-# ==============================================================================
 # 2. SISTEMA ELITE (BOISIER, 1995 — MANUAL 59 ILPES CAPÍTULO III)
-# ==============================================================================
 def calcular_sistema_elite_boisier(mat_rel: pd.DataFrame, df_cargos: pd.DataFrame):
     """
     Calcula los indicadores del Sociograma Interinstitucional (Boisier, 1995 / Manual 59 ILPES):
@@ -265,9 +261,7 @@ def calcular_sistema_elite_boisier(mat_rel: pd.DataFrame, df_cargos: pd.DataFram
     return resumen_socio, df_out
 
 
-# ==============================================================================
 # 3. DATOS Y CÁLCULOS MULTIRREGIONALES PARA CONTROL 5 (97 COMUNAS EN 4 REGIONES)
-# ==============================================================================
 def recalcular_indicadores_primacia_df(df_base: pd.DataFrame) -> pd.DataFrame:
     """Recalcula rankings, variación intercensal, cuota regional y Ley de Zipf sobre cualquier tabla editada."""
     df = df_base.copy()
@@ -615,9 +609,7 @@ def obtener_matriz_aislamiento_control5(region_sel: str = "Región de Los Lagos 
     return pd.DataFrame(mat, index=localidades, columns=localidades)
 
 
-# ==============================================================================
 # 4. EXPORTADOR EXCEL PARA CONTROL 2 Y CONTROL 5
-# ==============================================================================
 def _autoajustar_columnas_ot(ws, fila_ini: int = 3, max_width: int = 34, min_width: int = 13, col_a_max: int = 36):
     for col_idx in range(1, ws.max_column + 1):
         col_letter = get_column_letter(col_idx)
@@ -947,9 +939,7 @@ def exportar_excel_controles_2_y_5(
     return buf.getvalue()
 
 
-# ==============================================================================
 # 5. INTERFAZ STREAMLIT DEL MOTOR DE REDES, CADENAS Y CONTROLES 2, 4 Y 5
-# ==============================================================================
 def renderizar_redes_territorio_ot():
     st.header("Redes, Cadenas de Valor, Localización My Maps y Ordenamiento Territorial (Controles 2, 4 y 5)")
     st.markdown(
@@ -982,9 +972,7 @@ def renderizar_redes_territorio_ot():
         key="btn_dl_top_general",
     )
 
-    # ------------------------------------------------------------------
     # TAB 1: CONTROL 2 Y CONTROL 4 — GOOGLE MY MAPS Y LICEOS.XLSX
-    # ------------------------------------------------------------------
     with tabs[0]:
         st.subheader("Georreferenciación y Validador para Google My Maps (`Unidad Actividad_mapa.pdf` + `Liceos.xlsx`)")
         base_mapa_sel = st.radio(
@@ -1032,9 +1020,7 @@ def renderizar_redes_territorio_ot():
                 key="btn_dl_mymaps_clean",
             )
 
-    # ------------------------------------------------------------------
     # TAB 2: UNIDAD 4 Y CONTROL 4 — CADENAS DE VALOR Y PAUTA ENTREVISTAS
-    # ------------------------------------------------------------------
     with tabs[1]:
         st.subheader("Cadenas de Valor en el Territorio (`Unidad 4 Cadenas de Valor.pdf`) y Pauta Control 4 (40%)")
         caso_cv = st.radio(
@@ -1153,9 +1139,7 @@ def renderizar_redes_territorio_ot():
                 "8. Para confirmar que entendimos bien: *[resumir vínculo principal y desafío mencionado]*. ¿Es correcto?"
             )
 
-    # ------------------------------------------------------------------
     # TAB 3: SISTEMA ELITE (BOISIER, 1995) Y SOCIOGRAMA UCINET / DINI
-    # ------------------------------------------------------------------
     with tabs[2]:
         st.subheader("Sistema ELITE (Boisier, 1995 — Manual 59 ILPES) y Sociograma tipo UCINET")
         instituciones = [
@@ -1197,9 +1181,7 @@ def renderizar_redes_territorio_ot():
             st.markdown("**Ranking de Importancia Social Relativa (Sistema ELITE — Boisier)**")
             st.dataframe(df_elite_res, use_container_width=True, hide_index=True)
 
-    # ------------------------------------------------------------------
     # TAB 4: CONTROL 5 MULTIRREGIONAL — PRIMACÍA, GUTTMAN Y AISLAMIENTO
-    # ------------------------------------------------------------------
     with tabs[3]:
         st.subheader("Laboratorio Oficial Control 5 Multirregional (`Unidad 5. Ordenamiento Territorial.pdf`)")
         reg_c5 = st.radio(
@@ -1314,9 +1296,7 @@ def renderizar_redes_territorio_ot():
             key="btn_dl_tab4_region",
         )
 
-    # ------------------------------------------------------------------
     # TAB 5: GUÍA PROT SUBDERE-CEPAL (2011) Y BUSCADOR ANEXO 2
-    # ------------------------------------------------------------------
     with tabs[4]:
         st.subheader("Plan Regional de Ordenamiento Territorial (PROT SUBDERE-CEPAL, 2011)")
         c_s1, c_s2 = st.columns(2)
