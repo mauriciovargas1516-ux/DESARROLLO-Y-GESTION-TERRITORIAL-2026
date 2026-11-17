@@ -17,9 +17,7 @@ from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 from openpyxl.utils import get_column_letter
 
 
-# ==============================================================================
 # 1. COMPONENTE DE BURBUJAS INFORMATIVAS (POPUP / TOOLTIP PEDAGÓGICO)
-# ==============================================================================
 def renderizar_burbuja_tip(
     titulo_boton: str,
     titulo_interno: str,
@@ -82,9 +80,7 @@ def inyectar_estilos_burbujas():
     )
 
 
-# ==============================================================================
 # 2. GENERADOR DE TOPOLOGÍAS DE CÁTEDRA (DINI 2010 + CASOS CONTROL 4 + LIENZO LIBRE)
-# ==============================================================================
 def obtener_topologia_dini(tipo_red: str, n_nodos: int = 8):
     """
     Genera las coordenadas (x, y), nombres de nodos, roles y lista ordenada de enlaces (L)
@@ -311,9 +307,7 @@ def obtener_topologia_dini(tipo_red: str, n_nodos: int = 8):
     return nombres, roles, xs, ys, enlaces, descripcion
 
 
-# ==============================================================================
 # 3. CÁLCULO MATEMÁTICO DE CIFRAS DE RED EN CADA PASO DE ARMADO
-# ==============================================================================
 def calcular_metricas_red_en_paso(nombres, roles, enlaces_activos):
     n = len(nombres)
     L = len(enlaces_activos)
@@ -365,9 +359,7 @@ def calcular_metricas_red_en_paso(nombres, roles, enlaces_activos):
     return resumen, df_nodos
 
 
-# ==============================================================================
 # 4. CONSTRUCTOR DE GRAFO ANIMADO EN PLOTLY ("VER LA RED ARMARSE EN VIVO")
-# ==============================================================================
 def construir_figura_red_animada(
     nombres,
     roles,
@@ -525,9 +517,7 @@ def construir_figura_red_animada(
     return fig
 
 
-# ==============================================================================
 # 5. EXPORTADOR EXCEL DE MATRIZ SOCIOMÉTRICA (DINI / UCINET)
-# ==============================================================================
 def exportar_excel_red_dini_formulas(nombres, roles, matriz_A, tipo_red_titulo: str) -> bytes:
     wb = Workbook()
     ws = wb.active
@@ -661,13 +651,11 @@ def exportar_excel_red_dini_formulas(nombres, roles, matriz_A, tipo_red_titulo: 
     return buf.getvalue()
 
 
-# ==============================================================================
 # 6. INTERFAZ PRINCIPAL DEL MÓDULO DE EXTENSIÓN EN STREAMLIT
-# ==============================================================================
 def renderizar_extension_redes_y_gradientes():
     inyectar_estilos_burbujas()
 
-    st.header("Redes Empresariales en Vivo (Dini, 2010), Constructor Interactivo y Gradientes")
+    st.header("5. Redes Empresariales en Vivo (Dini, 2010), Constructor Sociométrico y Gradientes")
     st.markdown(
         '<span class="tip-badge">Guía Metodológica Activa: Despliega las notas técnicas o usa el Constructor en Vivo para armar tu propia red</span>',
         unsafe_allow_html=True,
