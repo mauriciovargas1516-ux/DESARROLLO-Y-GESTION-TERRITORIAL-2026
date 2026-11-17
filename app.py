@@ -24,9 +24,7 @@ from motor_redes_dinamicas_dini import (
 )
 
 
-# ==============================================================================
 # CONFIGURACIÓN DE PÁGINA Y ESTILO INSTITUCIONAL LIMPIO
-# ==============================================================================
 st.set_page_config(
     page_title="Desarrollo y Gestión Territorial 2026 — ULagos",
     layout="wide",
@@ -61,9 +59,7 @@ ARCHIVO_EXCEL_REPO = "ILPES GRUPO 10 29-10-2026.xlsx"
 ARCHIVO_PDF_CUESTIONARIO = "cuestionario_entrevista.pdf"
 
 
-# ==============================================================================
 # UTILIDADES PARA CARGA POR DEFECTO DEL CASO BIOBÍO (2014 - 2024)
-# ==============================================================================
 @st.cache_data(show_spinner=False)
 def obtener_resultados_base_repo(
     ruta_excel: str,
@@ -116,9 +112,7 @@ def obtener_resultados_base_repo(
     return res, contexto, None
 
 
-# ==============================================================================
 # MÓDULO 1: TÉCNICAS DE ANÁLISIS REGIONAL (ILPES / SII BIOBÍO 2014-2024)
-# ==============================================================================
 def vista_modulo_1_ilpes():
     st.header("2. Técnicas de Análisis Regional (ILPES / SII 2014–2024)")
     st.markdown(
@@ -381,9 +375,7 @@ def vista_modulo_1_ilpes():
         st.plotly_chart(fig_made, use_container_width=True)
 
 
-# ==============================================================================
 # MÓDULO 2: DISPARIDADES, CONCENTRACIÓN Y CONVERGENCIA REGIONAL (MOTOR REAT)
-# ==============================================================================
 def vista_modulo_2_reat():
     st.header("3. Disparidades, Concentración y Convergencia Regional (Motor REAT)")
     st.markdown(
@@ -538,9 +530,7 @@ def vista_modulo_2_reat():
         st.plotly_chart(fig_lor, use_container_width=True)
 
 
-# ==============================================================================
 # MÓDULO 3: SPL, REDES EMPRESARIALES (UCINET / DINI) Y CADENAS DE VALOR (CEPAL)
-# ==============================================================================
 def vista_modulo_3_redes_cadenas():
     st.header("4. Sistemas Productivos Locales (SPL), Redes Empresariales y Cadenas de Valor")
     st.markdown(
@@ -723,9 +713,7 @@ def vista_modulo_3_redes_cadenas():
             st.info("El archivo `cuestionario_entrevista.pdf` se cargará automáticamente al estar en la raíz del repositorio.")
 
 
-# ==============================================================================
 # MÓDULO 4: ORDENAMIENTO TERRITORIAL, RONDINELLI Y GEORREFERENCIACIÓN
-# ==============================================================================
 def vista_modulo_4_ordenamiento():
     st.header("6. Ordenamiento Territorial, Matriz de Rondinelli y Georreferenciación")
     st.markdown(
@@ -847,9 +835,7 @@ def vista_modulo_4_ordenamiento():
         )
 
 
-# ==============================================================================
 # NAVEGACIÓN PRINCIPAL EN BARRA LATERAL (9 MÓDULOS EN SECUENCIA PEDAGÓGICA)
-# ==============================================================================
 def main():
     with st.sidebar:
         st.title("Gestión Territorial 2026")
