@@ -23,6 +23,11 @@ from motor_redes_dinamicas_dini import (
     inyectar_estilos_burbujas,
 )
 
+try:
+    from motor_fluidez_territorial_60fps import renderizar_laboratorio_fluido_territorial
+except Exception:
+    renderizar_laboratorio_fluido_territorial = None
+
 
 # CONFIGURACIÓN DE PÁGINA Y ESTILO INSTITUCIONAL LIMPIO
 st.set_page_config(
@@ -853,6 +858,7 @@ def main():
                 "7. Laboratorio de Cátedra + Excel Fórmulas Vivas",
                 "8. Controles 2, 4 y 5: My Maps, Cadenas, ELITE y PROT",
                 "9. Exportador Maestro SII (Excel 10 Hojas)",
+                "10. Laboratorio Fluido 60 FPS (Von Thünen, Weber, Krugman y Lorenz)",
             ],
         )
         st.markdown("---")
@@ -881,6 +887,11 @@ def main():
         renderizar_redes_territorio_ot()
     elif modulo_activo.startswith("9."):
         msii.renderizar_exportador_sii(ARCHIVO_EXCEL_REPO)
+    elif modulo_activo.startswith("10."):
+        if callable(renderizar_laboratorio_fluido_territorial):
+            renderizar_laboratorio_fluido_territorial()
+        else:
+            st.warning("Verifica que 'motor_fluidez_territorial_60fps.py' esté en la raíz del repositorio.")
 
 
 if __name__ == "__main__":
