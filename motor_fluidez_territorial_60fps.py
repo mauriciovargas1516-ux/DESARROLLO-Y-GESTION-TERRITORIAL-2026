@@ -675,6 +675,32 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
 
 <script>
 const NS = "http://www.w3.org/2000/svg";
+
+function drawAxesPizarra(svg, x0, yTop, xRight, yBot, yTitle, xTitle) {
+  el("line", { x1: x0, y1: yBot, x2: xRight + 6, y2: yBot, stroke: "#0F172A", "stroke-width": "1.8", "marker-end": "url(#arr-dark)" }, svg);
+  el("line", { x1: x0, y1: yBot, x2: x0, y2: yTop - 6, stroke: "#0F172A", "stroke-width": "1.8", "marker-end": "url(#arr-dark)" }, svg);
+  if (yTitle) {
+    const ty = el("text", { x: x0 + 8, y: yTop - 7, fill: "#0F172A", "font-size": "11", "font-weight": "800", "text-anchor": "start" }, svg);
+    ty.textContent = yTitle;
+  }
+  if (xTitle) {
+    const tx = el("text", { x: xRight + 4, y: yBot + 36, fill: "#0F172A", "font-size": "11", "font-weight": "800", "text-anchor": "end" }, svg);
+    tx.textContent = xTitle;
+  }
+}
+function drawPill(svg, x, y, text, color, bg="rgba(255,255,255,0.95)", anchor="middle", fs="10.8") {
+  const bw = Math.max(26, text.length * 6.3 + 10);
+  const rx = anchor === "middle" ? x - bw / 2 : (anchor === "start" ? x - 4 : x - bw + 4);
+  el("rect", { x: rx, y: y - 11.5, width: bw, height: 16.5, rx: 4, fill: bg, stroke: color, "stroke-width": "1.1" }, svg);
+  const t = el("text", { x, y: y + 0.5, fill: color, "font-size": fs, "font-weight": "800", "text-anchor": anchor }, svg);
+  t.textContent = text;
+}
+function drawAxisBreakX(svg, xPos, yBot) {
+  el("rect", { x: xPos - 5, y: yBot - 5, width: 10, height: 10, fill: "#FFFFFF" }, svg);
+  el("line", { x1: xPos - 4, y1: yBot + 5, x2: xPos, y2: yBot - 5, stroke: "#0F172A", "stroke-width": "1.5" }, svg);
+  el("line", { x1: xPos + 1, y1: yBot + 5, x2: xPos + 5, y2: yBot - 5, stroke: "#0F172A", "stroke-width": "1.5" }, svg);
+}
+
 function renderPedBox(id, lectura, paradoja, defensa) {
   const box = document.getElementById(id);
   if (!box) return;
@@ -928,8 +954,7 @@ function drawThunen() {
     const tx = el("text", { x: sx(dv), y: H - M.b + 16, fill: "#475569", "font-size": "11", "text-anchor": "middle" }, svg);
     tx.textContent = fmtInt(dv) + " km";
   }
-  el("line", { x1: M.l, y1: H - M.b, x2: W - M.r, y2: H - M.b, stroke: "#334155", "stroke-width": "1.5" }, svg);
-  el("line", { x1: M.l, y1: M.t, x2: M.l, y2: H - M.b, stroke: "#334155", "stroke-width": "1.5" }, svg);
+  drawAxesPizarra(svg, M.l, M.t, W - M.r, H - M.b, "Renta Locacional LR(d)", "Distancia al Mercado (d, km)");
 
   if (cur.r1 > 0.2) el("polygon", { points: `${sx(0)},${sy(0)} ${sx(cur.r1)},${sy(0)} ${sx(cur.r1)},${sy(Math.max(0, s.m1 - s.t1 * cur.r1))} ${sx(0)},${sy(s.m1)}`, fill: "rgba(220,38,38,0.18)" }, svg);
   if (cur.r2 > cur.r1 + 0.2) el("polygon", { points: `${sx(cur.r1)},${sy(0)} ${sx(cur.r2)},${sy(0)} ${sx(cur.r2)},${sy(Math.max(0, s.m2 - s.t2 * cur.r2))} ${sx(cur.r1)},${sy(Math.max(0, s.m2 - s.t2 * cur.r1))}`, fill: "rgba(29,78,216,0.16)" }, svg);
@@ -945,6 +970,22 @@ function drawThunen() {
   drawRL(s.m1, s.t1, "#DC2626");
   drawRL(s.m2, s.t2, "#1D4ED8");
   drawRL(s.m3, s.t3, "#059669");
+  // Rótulos de recta y cortes de transición en el eje X estilo pizarra
+  drawPill(svg, sx(Math.min(maxD * 0.16, cur.r1 * 0.55)), sy(Math.max(12, s.m1 - s.t1 * Math.min(maxD * 0.16, cur.r1 * 0.55))) - 14, "LR1 (Lechería)", "#DC2626", "#FEF2F2", "start", "10");
+  drawPill(svg, sx((cur.r1 + cur.r2) * 0.5), sy(Math.max(12, s.m2 - s.t2 * ((cur.r1 + cur.r2) * 0.5))) - 14, "LR2 (Agroind.)", "#1D4ED8", "#EFF6FF", "middle", "10");
+  drawPill(svg, sx((cur.r2 + cur.r3) * 0.5), sy(Math.max(12, s.m3 - s.t3 * ((cur.r2 + cur.r3) * 0.5))) - 14, "LR3 (Forestal)", "#059669", "#ECFDF5", "middle", "10");
+  if (cur.r1 > 0.5 && cur.r1 < maxD) {
+    const y12 = Math.max(0, s.m1 - s.t1 * cur.r1);
+    el("line", { x1: sx(cur.r1), y1: sy(y12), x2: sx(cur.r1), y2: H - M.b, stroke: "#DC2626", "stroke-dasharray": "4,3" }, svg);
+    el("circle", { cx: sx(cur.r1), cy: sy(y12), r: 4.8, fill: "#DC2626", stroke: "#FFF", "stroke-width": "1.4" }, svg);
+    drawPill(svg, sx(cur.r1), H - M.b + 28, `r1=${fmtDec(cur.r1,1)}`, "#DC2626", "#FEF2F2", "middle", "9.6");
+  }
+  if (cur.r2 > cur.r1 + 0.5 && cur.r2 < maxD) {
+    const y23 = Math.max(0, s.m2 - s.t2 * cur.r2);
+    el("line", { x1: sx(cur.r2), y1: sy(y23), x2: sx(cur.r2), y2: H - M.b, stroke: "#1D4ED8", "stroke-dasharray": "4,3" }, svg);
+    el("circle", { cx: sx(cur.r2), cy: sy(y23), r: 4.8, fill: "#1D4ED8", stroke: "#FFF", "stroke-width": "1.4" }, svg);
+    drawPill(svg, sx(cur.r2), H - M.b + 28, `r2=${fmtDec(cur.r2,1)}`, "#1D4ED8", "#EFF6FF", "middle", "9.6");
+  }
 
   if (Math.abs(dr1) >= 0.4) {
     drawArrow(svg, sx(gho.r1), sy(maxR * 0.84), sx(cur.r1), sy(maxR * 0.84), dr1 > 0 ? "#15803D" : "#DC2626", dr1 > 0 ? "arr-green" : "arr-red",
@@ -1074,6 +1115,7 @@ function drawWeber() {
       isoPts.push(`${(opt.x + Math.cos(ang) * lo).toFixed(1)},${(opt.y + Math.sin(ang) * lo).toFixed(1)}`);
     }
     el("polygon", { points: isoPts.join(" "), fill: convieneL ? "rgba(21,128,61,0.14)" : "rgba(234,88,12,0.10)", stroke: convieneL ? "#15803D" : "#EA580C", "stroke-width": "2", "stroke-dasharray": "6,4" }, svg);
+    drawPill(svg, opt.x, Math.min(378, opt.y + 68), `Isodápana Crítica ($${ah})`, convieneL ? "#15803D" : "#EA580C", "#FFFFFF", "middle", "10.2");
   }
   const drawPull = (vx, vy, w, col) => {
     const dx = vx - opt.x, dy = vy - opt.y, dist = Math.hypot(dx, dy);
@@ -1182,11 +1224,21 @@ function drawKrugman() {
     const tx = el("text", { x: sx(t), y: H - M.b + 16, fill: "#475569", "font-size": "11", "text-anchor": "middle" }, svg);
     tx.textContent = "τ=" + t;
   }
-  el("line", { x1: M.l, y1: H - M.b, x2: W - M.r, y2: H - M.b, stroke: "#334155", "stroke-width": "1.5" }, svg);
-  el("line", { x1: M.l, y1: M.t, x2: M.l, y2: H - M.b, stroke: "#334155", "stroke-width": "1.5" }, svg);
-  el("line", { x1: sx(cur.ust), y1: M.t, x2: sx(cur.ust), y2: H - M.b, stroke: "#D97706", "stroke-width": "2", "stroke-dasharray": "6,4" }, svg);
-  const tUst = el("text", { x: sx(cur.ust) + 5, y: M.t + 14, fill: "#B45309", "font-size": "11", "font-weight": "700" }, svg);
-  tUst.textContent = `τ* = ${fmtDec(cur.ust, 1)}`;
+  // Zonas de régimen estilo pizarra (Aglomeración vs Dispersión)
+  el("rect", { x: M.l, y: M.t, width: Math.max(0, sx(cur.ust) - M.l), height: H - M.b - M.t, fill: "rgba(220,38,38,0.05)" }, svg);
+  el("rect", { x: sx(cur.ust), y: M.t, width: Math.max(0, (W - M.r) - sx(cur.ust)), height: H - M.b - M.t, fill: "rgba(21,128,61,0.05)" }, svg);
+  el("line", { x1: M.l, y1: sy(50), x2: W - M.r, y2: sy(50), stroke: "#94A3B8", "stroke-dasharray": "4,3" }, svg);
+  drawAxesPizarra(svg, M.l, M.t, W - M.r, H - M.b, "Cuota Capital Regional (%)", "Costo de Transporte (τ)");
+  el("line", { x1: sx(cur.ust), y1: M.t, x2: sx(cur.ust), y2: H - M.b, stroke: "#D97706", "stroke-width": "2.2", "stroke-dasharray": "6,4" }, svg);
+  drawPill(svg, sx(cur.ust), M.t + 14, `Umbral τ* = ${fmtDec(cur.ust, 1)}`, "#B45309", "#FEF3C7", "middle", "10.2");
+  if (sx(cur.ust) - M.l > 110) {
+    const tz1 = el("text", { x: (M.l + sx(cur.ust)) / 2, y: sy(54), fill: "#991B1B", "font-size": "10.3", "font-weight": "800", "text-anchor": "middle" }, svg);
+    tz1.textContent = "Centro-Periferia (τ ≤ τ*)";
+  }
+  if ((W - M.r) - sx(cur.ust) > 110) {
+    const tz2 = el("text", { x: (sx(cur.ust) + (W - M.r)) / 2, y: sy(92), fill: "#166534", "font-size": "10.3", "font-weight": "800", "text-anchor": "middle" }, svg);
+    tz2.textContent = "Equilibrio Disperso (τ > τ*)";
+  }
 
   const pts = [];
   for (let t = 1; t <= 10.01; t += 0.15) pts.push(`${sx(t).toFixed(1)},${sy(calcKrugman(t, esc, mov).cen).toFixed(1)}`);
@@ -1525,9 +1577,9 @@ function drawLorenz() {
     const tx = el("text", { x: sx(v), y: H - M.b + 16, fill: "#475569", "font-size": "11", "text-anchor": "middle" }, svg);
     tx.textContent = Math.round(v * 100) + "%";
   }
-  el("line", { x1: M.l, y1: H - M.b, x2: W - M.r, y2: H - M.b, stroke: "#334155", "stroke-width": "1.5" }, svg);
-  el("line", { x1: M.l, y1: M.t, x2: M.l, y2: H - M.b, stroke: "#334155", "stroke-width": "1.5" }, svg);
-  el("line", { x1: sx(0), y1: sy(0), x2: sx(1), y2: sy(1), stroke: "#64748B", "stroke-width": "1.8", "stroke-dasharray": "6,4" }, svg);
+  drawAxesPizarra(svg, M.l, M.t, W - M.r, H - M.b, "% Población Acum. (q_i)", "% Ciudades Acum. (p_i)");
+  el("line", { x1: sx(0), y1: sy(0), x2: sx(1), y2: sy(1), stroke: "#64748B", "stroke-width": "1.9", "stroke-dasharray": "6,4" }, svg);
+  drawPill(svg, sx(0.42), sy(0.55), "45° Equidad Perfecta", "#475569", "#FFFFFF", "middle", "10");
   el("polygon", { points: cur.pts.map(pt => `${sx(pt.p)},${sy(pt.q)}`).join(" ") + ` ${sx(0)},${sy(0)}`, fill: "rgba(220,38,38,0.16)" }, svg);
   if (Math.abs(dg) > 0.004) {
     el("polyline", { points: gho.pts.map(pt => `${sx(pt.p)},${sy(pt.q)}`).join(" "), fill: "none", stroke: "#94A3B8", "stroke-width": "2", "stroke-dasharray": "4,4" }, svg);
@@ -1535,6 +1587,7 @@ function drawLorenz() {
   }
   el("polyline", { points: cur.pts.map(pt => `${sx(pt.p)},${sy(pt.q)}`).join(" "), fill: "none", stroke: "#DC2626", "stroke-width": "2.8" }, svg);
   cur.pts.forEach(pt => el("circle", { cx: sx(pt.p), cy: sy(pt.q), r: 4.5, fill: "#DC2626" }, svg));
+  drawPill(svg, sx(0.66), sy(0.24), `Área A · G = ${fmtDec(cur.gini,3)}`, "#DC2626", "#FEF2F2", "middle", "10.3");
 
   // Termómetro IP4 derecho
   const bx = 575, bw = 370, by = 185, bh = 32, maxIP = 2.4;
