@@ -176,7 +176,7 @@ def main():
         st.markdown("---")
 
         opciones_nav = [
-            "1. Estudio Fluido 60 FPS y Hoja Mecánica",
+            "1. Modelos Interactivos, Formulario y Teoría",
             "2. Biblioteca y Visor PDF (Drive 5 TB)",
         ]
         if not st.session_state.modo_catedra_terr:
@@ -198,7 +198,7 @@ def main():
             "Modo Presentación Cátedra",
             value=st.session_state.modo_catedra_terr,
             key="toggle_modo_catedra_terr",
-            help="Deja visibles únicamente el Estudio 60 FPS y la Biblioteca Oficial.",
+            help="Muestra únicamente el módulo principal de cátedra y la biblioteca oficial.",
         )
         if _nuevo_modo != st.session_state.modo_catedra_terr:
             st.session_state.modo_catedra_terr = _nuevo_modo
@@ -211,9 +211,9 @@ def main():
     if vista_activa.startswith("1."):
         st.markdown(
             """
-            <div style="background-color:#0F172A;color:#FFFFFF;padding:12px 20px;border-radius:8px;margin-bottom:10px;">
-                <div style="font-size:15.5px;font-weight:700;">ESTUDIO INTERACTIVO A 60 FPS — DESARROLLO Y GESTIÓN TERRITORIAL (ULAGOS 2026)</div>
-                <div style="font-size:12px;color:#CBD5E1;margin-top:2px;">9 módulos sin lag: Von Thünen (editor ecuaciones), Weber, Krugman, Perroux/Myrdal/Hirschman, Christaller/Granovetter, Lorenz/Gini/Theil/IP4, Redes Dini, Hoja Mecánica y Mapa Teórico + Lectura Viva.</div>
+            <div style="background-color:#0F172A;color:#FFFFFF;padding:14px 20px;border-radius:8px;margin-bottom:10px;border-left:4px solid #3B82F6;">
+                <div style="font-size:17px;font-weight:700;letter-spacing:0.2px;">Desarrollo y Gestión Territorial</div>
+                <div style="font-size:12.5px;color:#CBD5E1;margin-top:3px;">Ingeniería Comercial · Universidad de Los Lagos · 2026 &nbsp;|&nbsp; Economía Regional, Redes Empresariales y Ordenamiento Territorial</div>
             </div>
             """,
             unsafe_allow_html=True,
