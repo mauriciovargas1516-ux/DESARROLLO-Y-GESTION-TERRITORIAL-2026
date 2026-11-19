@@ -213,7 +213,7 @@ def main():
             """
             <div style="background-color:#0F172A;color:#FFFFFF;padding:14px 20px;border-radius:8px;margin-bottom:10px;border-left:4px solid #3B82F6;">
                 <div style="font-size:17px;font-weight:700;letter-spacing:0.2px;">Desarrollo y Gestión Territorial</div>
-                <div style="font-size:12.5px;color:#CBD5E1;margin-top:3px;">Ingeniería Comercial · Universidad de Los Lagos · 2026 &nbsp;|&nbsp; Economía Regional, Redes Empresariales y Ordenamiento Territorial</div>
+                <div style="font-size:12.5px;color:#CBD5E1;margin-top:3px;">Ingeniería Comercial · Universidad de Los Lagos · 2026 &nbsp;|&nbsp; Unidades I a VI: Crecimiento, Localización, Disparidades, SPL, OT e Indicadores</div>
             </div>
             """,
             unsafe_allow_html=True,
