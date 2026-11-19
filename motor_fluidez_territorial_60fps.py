@@ -210,6 +210,24 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
   .qz-btn.sel { background: #0F172A; color: #FFFFFF; border-color: #0F172A; }
   .qz-fb { font-size: 11.5px; color: #1E293B; margin-top: 7px; line-height: 1.42; display: none; border-top: 1px dashed #CBD5E1; padding-top: 6px; }
   .qz-card.answered .qz-fb { display: block; }
+  /* === CÁPSULAS PEDAGÓGICAS VIVAS DENTRO DE CADA INTERACTIVO === */
+  .ped-grid {
+    display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 10px;
+  }
+  @media (max-width: 860px) { .ped-grid { grid-template-columns: 1fr; } }
+  .ped-card {
+    background: #F8FAFC; border: 1px solid #CBD5E1; border-top: 3.5px solid #1D4ED8;
+    border-radius: 6px; padding: 9px 11px; font-size: 11.7px; line-height: 1.46; color: #1E293B;
+  }
+  .ped-card.p-cur { border-top-color: #7C3AED; background: #FAF5FF; }
+  .ped-card.p-def { border-top-color: #059669; background: #F0FDF4; }
+  .ped-hd {
+    font-size: 10.6px; font-weight: 800; letter-spacing: 0.3px; text-transform: uppercase;
+    margin-bottom: 5px; color: #1E3A8A;
+  }
+  .ped-card.p-cur .ped-hd { color: #6D28D9; }
+  .ped-card.p-def .ped-hd { color: #065F46; }
+  .ped-card b { color: #0F172A; }
 
   @media print {
     body { background: #FFFFFF !important; }
@@ -311,6 +329,7 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
 
     <div class="svg-box"><svg id="svg-thunen" viewBox="0 0 980 390"></svg></div>
     <div id="vt-sol" class="sol-box"></div>
+    <div id="ped-thunen" class="ped-grid"></div>
   </div>
 
   <!-- ====================================================================== -->
@@ -352,6 +371,7 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
 
     <div class="svg-box"><svg id="svg-weber" viewBox="0 0 980 400"></svg></div>
     <div id="wb-sol" class="sol-box"></div>
+    <div id="ped-weber" class="ped-grid"></div>
   </div>
 
   <!-- ====================================================================== -->
@@ -389,6 +409,7 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
     </div>
 
     <div class="svg-box"><svg id="svg-krugman" viewBox="0 0 980 385"></svg></div>
+    <div id="ped-krugman" class="ped-grid"></div>
   </div>
 
   <!-- ====================================================================== -->
@@ -429,6 +450,7 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
 
     <div class="svg-box"><svg id="svg-perroux" viewBox="0 0 980 370"></svg></div>
     <div id="px-sol" class="sol-box"></div>
+    <div id="ped-perroux" class="ped-grid"></div>
   </div>
 
   <!-- ====================================================================== -->
@@ -473,6 +495,7 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
     </div>
 
     <div class="svg-box"><svg id="svg-gran" viewBox="0 0 980 320"></svg></div>
+    <div id="ped-chrisgran" class="ped-grid"></div>
   </div>
 
   <!-- ====================================================================== -->
@@ -512,6 +535,7 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
     </div>
 
     <div class="svg-box"><svg id="svg-lorenz" viewBox="0 0 980 385"></svg></div>
+    <div id="ped-lorenz" class="ped-grid"></div>
   </div>
 
   <!-- ====================================================================== -->
@@ -557,6 +581,7 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
     </div>
 
     <div class="svg-box"><svg id="svg-dini" viewBox="0 0 980 390"></svg></div>
+    <div id="ped-dini" class="ped-grid"></div>
   </div>
 
   <!-- ====================================================================== -->
@@ -650,6 +675,24 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
 
 <script>
 const NS = "http://www.w3.org/2000/svg";
+function renderPedBox(id, lectura, paradoja, defensa) {
+  const box = document.getElementById(id);
+  if (!box) return;
+  box.innerHTML = `
+    <div class="ped-card">
+      <div class="ped-hd">Lectura Dinámica del Escenario</div>
+      <div>${lectura}</div>
+    </div>
+    <div class="ped-card p-cur">
+      <div class="ped-hd">Dato Curioso y Paradoja Teórica</div>
+      <div>${paradoja}</div>
+    </div>
+    <div class="ped-card p-def">
+      <div class="ped-hd">Aplicación Real y Defensa en Prueba</div>
+      <div>${defensa}</div>
+    </div>`;
+}
+
 function fmtInt(n) { return Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."); }
 function fmtDec(n, d=1) {
   const s = Number(n).toFixed(d).split(".");
@@ -923,6 +966,12 @@ function drawThunen() {
   el("circle", { cx, cy, r: 8, fill: "#0F172A" }, svg);
   const tCen = el("text", { x: cx, y: cy + 21, fill: "#0F172A", "font-size": "11", "font-weight": "800", "text-anchor": "middle" }, svg);
   tCen.textContent = "Mercado";
+
+  renderPedBox("ped-thunen",
+    `La actividad que puja más alto en el borde urbano gana el suelo: hoy <b>Lechería</b> domina hasta <b>${fmtDec(cur.r1,1)} km</b> (pendiente −${fmtDec(s.t1,1)}/km), luego cede paso a <b>Agroindustria</b> hasta <b>${fmtDec(cur.r2,1)} km</b> y finalmente a <b>Forestal</b> hasta el borde de cultivo en <b>${fmtDec(cur.r3,1)} km</b>.`,
+    `<b>¿Por qué la lechería no se instala lejos aunque la tierra sea barata?</b> Porque la leche fresca es perecible y pesada (flete t<sub>1</sub> alto): cada kilómetro extra devora su margen mucho más rápido que en la madera o los granos. Si cae t<sub>1</sub> (refrigeración o mejor ruta), el anillo interior se expande y desplaza a la agroindustria.`,
+    `En la Provincia de Osorno este mecanismo explica el cinturón lechero cercano a la Ruta 5 y centros de acopio, mientras predios más alejados hacia la precordillera o costa derivan a ganadería extensiva o uso forestal. En prueba: siempre despeja primero los cortes <b>LR<sub>1</sub>=LR<sub>2</sub></b> y <b>LR<sub>2</sub>=LR<sub>3</sub></b>.`
+  );
 }
 
 // ============================================================================
@@ -1055,6 +1104,12 @@ function drawWeber() {
   el("circle", { cx: opt.x, cy: opt.y, r: 8.5, fill: "#DC2626", stroke: "#FFFFFF", "stroke-width": "2" }, svg);
   const tP = el("text", { x: opt.x, y: opt.y + 22, fill: "#DC2626", "font-size": "12", "font-weight": "800", "text-anchor": "middle" }, svg);
   tP.textContent = "P* (Fábrica)";
+
+  renderPedBox("ped-weber",
+    `Con <b>IM = ${fmtDec(im,2)}</b>, los insumos localizados pesan ${im > 1.05 ? "más" : (im < 0.95 ? "menos" : "casi lo mismo")} que el producto final; por eso el punto óptimo de transporte <b>P*</b> se inclina hacia ${im > 1.05 ? "los vértices MP1 y MP2" : (im < 0.95 ? "el Mercado consumidor" : "el centro del triángulo")}. Hoy el desvío hacia el enclave L ${convieneL ? "<b>sí conviene</b> (L cae dentro de la isodápana)" : "<b>no conviene</b> (L queda fuera de la isodápana)"}.`,
+    `<b>Paradoja de las bebidas vs. aserraderos:</b> una embotelladora (ej. Coca-Cola) agrega agua (insumo ubicuo disponible en toda ciudad), por lo que su producto pesa mucho más que el jarabe concentrado (<b>IM &lt; 1</b>) y se instala pegada a la ciudad. En cambio, un aserradero o planta de leche en polvo elimina agua/corteza (<b>IM &gt; 1</b>) y se ubica junto al bosque o los predios.`,
+    `La <b>Isodápana Crítica</b> es el límite exacto donde el ahorro salarial en L iguala al sobrecosto de flete adicional. Regla de control (Duch Brown): solo se abandona P* si L queda estrictamente <b>dentro</b> de la curva cerrada.`
+  );
 }
 
 // ============================================================================
@@ -1158,6 +1213,12 @@ function drawKrugman() {
   } else {
     drawArrow(svg, xCen + rCen + 8, yMid, xPer - rPer - 8, yMid, "#15803D", "arr-green", "Equilibrio Disperso", 775, yMid - 20);
   }
+
+  renderPedBox("ped-krugman",
+    `El umbral de bifurcación está en <b>τ* = ${fmtDec(cur.ust,2)}</b>. Con transporte <b>τ = ${fmtDec(tau,1)}</b>, la economía se encuentra en régimen ${aglom ? `<b>Centro-Periferia</b> (${fmtDec(cur.cen,1)}% concentrado en la capital)` : `<b>disperso</b> (${fmtDec(cur.cen,1)}% vs. ${fmtDec(cur.per,1)}%)`}. Subir economías de escala o movilidad laboral empuja τ* hacia la derecha y vuelve más fácil que ocurra aglomeración.`,
+    `<b>La Paradoja de la Carretera:</b> intuimos que pavimentar una autopista hacia una comuna pequeña siempre la hará crecer. Krugman (Premio Nobel 2008) demostró lo contrario: si el flete cae bajo τ*, las fábricas ya no necesitan tener sucursal en la periferia; producen todo en la gran ciudad aprovechando escala y despachan barato hacia afuera, vaciando la periferia.`,
+    `Esta tensión entre <b>fuerzas centrípetas</b> (mercado local, encadenamientos, escala) y <b>centrífugas</b> (fletes altos, rentas del suelo, congestión) explica por qué Chile concentra PIB en la RM y por qué las políticas regionales necesitan acompañar infraestructura vial con fomento productivo local.`
+  );
 }
 
 // ============================================================================
@@ -1269,6 +1330,12 @@ function drawPerroux() {
     const tl = el("text", { x: x + bw2 / 2, y: 314, fill: "#1E293B", "font-size": "11", "font-weight": "700", "text-anchor": "middle" }, svg);
     tl.textContent = it.lbl;
   });
+
+  renderPedBox("ped-perroux",
+    `Cada $1 invertido en la industria motriz genera <b>$${fmtDec(mh,2)}</b> totales en el territorio gracias a una retención local <b>b + f = ${fmtDec(prop*100,0)}%</b>. Como el efecto difusión (<b>+$${fmtInt(spread)}M</b>) ${saldo >= 0 ? "supera" : "es menor que"} la absorción hacia el centro (<b>−$${fmtInt(backwash)}M</b>), el saldo neto sobre la periferia es <b>${saldo >= 0 ? "positivo" : "negativo"}</b>.`,
+    `<b>Un mega-proyecto NO siempre es un Polo de Desarrollo:</b> si una gran planta importa casi toda su maquinaria, contrata ingenieros fuera de la región y exporta materia prima sin procesar (b y f bajos), actúa como un <b>enclave extractivo</b> donde el <i>Backwash</i> (Myrdal) drena mano de obra joven y capital desde las comunas vecinas.`,
+    `Para transformar un enclave en un <b>Polo Integrador</b> (como PymeMad en Biobío o el complejo lácteo en Osorno), la política regional debe subir <b>b</b> (desarrollo de proveedores locales) y <b>f</b> (encadenamientos aguas abajo con mayor valor agregado).`
+  );
 }
 
 // ============================================================================
@@ -1358,6 +1425,12 @@ function drawChrisGran() {
   tl1.textContent = "Clúster Comunal (Vínculos Fuertes)";
   const tl2 = el("text", { x: 785, y: 24, fill: "#991B1B", "font-size": "12", "font-weight": "800", "text-anchor": "middle" }, svg);
   tl2.textContent = "Ecosistema Externo (Puentes Débiles)";
+
+  renderPedBox("ped-chrisgran",
+    `En <b>Christaller</b>, el servicio ${okU && okA ? "es viable porque supera umbral y alcance" : (!okU ? "carece de masa crítica suficiente" : "excede la distancia máxima que la población está dispuesta a viajar")}. En <b>Granovetter</b>, con <b>${f}/10</b> lazos fuertes y <b>${d}/10</b> puentes débiles, el riesgo de bloqueo cognitivo es <b>${fmtInt(lck)}%</b>.`,
+    `<b>La Fuerza de los Vínculos Débiles (Granovetter, 1973):</b> aunque suene contradictorio, las ideas nuevas y los nuevos clientes rara vez llegan desde tus amigos más cercanos (vínculos fuertes), porque todos leen y saben lo mismo. Quien rompe el <i>lock-in</i> es el "conocido lejano" (universidad, centro I+D, comprador externo) que conecta dos mundos separados.`,
+    `Conecta ambos autores en pruebas: <b>Christaller</b> explica por qué un hospital de alta complejidad o una universidad solo existen en ciudades de orden superior (Osorno / Puerto Montt), mientras <b>Granovetter</b> explica por qué un gremio local cerrado fracasa si no tiende puentes con ULagos, INIA o CORFO.`
+  );
 }
 
 // ============================================================================
@@ -1479,6 +1552,12 @@ function drawLorenz() {
     drawArrow(svg, sip(gIp4), by - 20, sip(ip4), by - 20, ip4 > gIp4 ? "#DC2626" : "#15803D", ip4 > gIp4 ? "arr-red" : "arr-green", `IP4: ${fmtDec(ip4, 2)}`, (sip(gIp4) + sip(ip4)) / 2, by - 30);
   }
   el("circle", { cx: sip(ip4), cy: by + bh / 2, r: 8, fill: "#0F172A", stroke: "#FFFFFF", "stroke-width": "2" }, svg);
+
+  renderPedBox("ped-lorenz",
+    `La ciudad líder concentra el <b>${fmtDec((desc[0]/cur.tot)*100,1)}%</b> de las 4 principales urbes, arrojando <b>IP<sub>4</sub> = ${fmtDec(ip4,3)}</b> (${catTxt}), un <b>Gini de ${fmtDec(cur.gini,3)}</b> y una <b>Entropía de Theil de ${fmtDec(cur.theil,3)}</b>. Mientras más se abomba la curva roja hacia la esquina inferior derecha, mayor es la concentración espacial.`,
+    `<b>¿Por qué usar Theil si ya existe el Gini?</b> Porque el Gini tiene un defecto oculto en política regional: NO se puede sumar limpiamente por subgrupos. La <b>Entropía de Theil</b> sí se descompone exactamente en desigualdad <i>entre regiones</i> + desigualdad <i>dentro de cada región</i>, permitiendo saber si la brecha está en Santiago o dentro de Los Lagos.`,
+    `Fíjate en el contraste real del Censo 2024: <b>Los Lagos</b> cae en <b>Valor 2 (Concentrada, IP<sub>4</sub> ≈ 1,01)</b> por el peso de Puerto Montt sobre Osorno, Puerto Varas y Castro, mientras <b>Biobío</b> es más policéntrica (<b>Valor 0, IP<sub>4</sub> ≈ 0,45</b>) gracias al contrapeso de Los Ángeles, San Pedro y Talcahuano.`
+  );
 }
 
 // ============================================================================
@@ -1631,6 +1710,46 @@ function drawDini() {
     tl.textContent = o.nm.slice(0, 7);
   });
   if (lPts.length > 1) el("polyline", { points: lPts.join(" "), fill: "none", stroke: "#DC2626", "stroke-width": "2.2", "stroke-dasharray": "4,3" }, svg);
+
+  const diniPed = {
+    simetrica: [
+      `Todos los nodos mantienen conectividad homogénea (<b>k̄ = ${fmtDec(kAvg,1)}</b>; <b>GC = ${fmtDec(gc,1)}%</b>). La información y el poder de negociación se reparten de forma horizontal sin dependencia de una sola empresa.`,
+      `<b>Ventaja oculta y límite práctico:</b> una red simétrica es extremadamente resiliente (si se retira una PyME la red sigue operando), pero tiene altos costos de coordinación porque toda decisión requiere consenso entre pares.`,
+      `Típica de <b>cooperativas de compras conjuntas o asociaciones de pequeños productores</b>. En el Control 4, si tu matriz UCINET arroja GC cercano a 0%, diagnostica gobernanza horizontal sin actor dominante.`
+    ],
+    liderazgo: [
+      `Estructura radial tipo estrella con <b>GC = ${fmtDec(gc,1)}%</b>: la <b>Empresa Líder</b> concentra todos los acuerdos (<b>k<sub>máx</sub> = ${kMax}</b>) mientras las PyMEs periféricas solo tienen <b>k = 1</b> y no conversan entre sí.`,
+      `<b>La Fragilidad del Nodo Ancla:</b> aunque esta red es muy rápida para tomar decisiones y estandarizar calidad, sufre riesgo sistémico extremo: si la empresa líder quiebra o cambia de proveedor, la densidad cae a cero instantáneamente.`,
+      `Clásico de grandes compradores agroindustriales o supermercados que articulan proveedores individuales. En examen (Dini, 2010): demuestra que <b>GC = 100%</b> siempre corresponde a la topología estrella.`
+    ],
+    jerarquica: [
+      `En esta pirámide (<b>D = ${fmtDec(den,1)}%</b>, <b>GC = ${fmtDec(gc,1)}%</b>), observa el detalle clave del gráfico derecho: los intermediarios (<b>Contratista 1A y 1B, k = 3</b>) tienen más vínculos directos que la propia <b>Matriz Ancla (k = 2)</b>, mientras los talleres base están desconectados entre sí (k = 1).`,
+      `<b>Paradoja del Cuello de Botella (Intermediarios):</b> aunque la Matriz manda estratégicamente desde la cúspide, son los Contratistas de nivel medio quienes actúan como <i>brokers</i> (puentes). Si un contratista filtra tecnología o precios, los talleres de la base jamás aprenden directamente del cliente final.`,
+      `Frecuente en subcontratación forestal, construcción y metalmecánica. En defensa oral: destaca que para hacer <b>Upgrading funcional</b> (Padilla y Oddone), los talleres deben crear vínculos horizontales entre sí para dejar de ser meros maquiladores.`
+    ],
+    red_redes: [
+      `Tres sub-redes locales cohesionadas (Osorno, Puerto Montt y Valdivia) se articulan a través de sus nodos líderes formando un triángulo interregional (<b>D = ${fmtDec(den,1)}%</b>, <b>GC = ${fmtDec(gc,1)}%</b>).`,
+      `<b>Mundo Pequeño (Small-World):</b> esta arquitectura combina lo mejor de dos mundos: alta confianza dentro de cada comuna (vínculos fuertes) y pocos saltos para transferir innovación entre ciudades distintas (puentes entre líderes).`,
+      `Corresponde al <b>Diagrama 3 de Dini (2010)</b> en <i>04 SPL.pdf</i>. Es el modelo objetivo de una política regional de articulación territorial cuando existen gremios locales ya consolidados.`
+    ],
+    aviones: [
+      `Una gran <b>Ensambladora</b> coordina líderes especializados por subsistema (Motores, Aviónica y Fuselaje), los cuales a su vez gestionan sus propios proveedores de nicho (<b>n = ${n}</b>, <b>GC = ${fmtDec(gc,1)}%</b>).`,
+      `<b>Modularidad Productiva:</b> la ensambladora no podría gestionar miles de talleres por sí sola (colapsaría en costos de transacción); por eso delega módulos complejos a líderes de primer nivel (<i>Tier-1</i>) que integran la innovación.`,
+      `Corresponde al <b>Diagrama 4 de Dini (2010)</b>. Permite explicar cadenas globales de valor (Airbus/Boeing o industria salmonera compleja) donde coexisten jerarquía tecnológica y cooperación especializada.`
+    ],
+    osorno: [
+      `La <b>Red Láctea-Quesera de Osorno</b> alcanza una alta densidad (<b>D = ${fmtDec(den,1)}%</b>) y concentración moderada (<b>GC = ${fmtDec(gc,1)}%</b>) porque <i>Aproleche</i> y <i>Cooprinsem</i> actúan como doble núcleo articulador entre productores, <i>INIA</i> y plantas industriales.`,
+      `<b>Por qué no colapsa ante un solo comprador:</b> a diferencia de una estrella pura (GC = 100%), contar con dos instituciones gremiales/técnicas más vinculación a <i>INIA Remehue</i> permite que las mejoras genéticas y sanitarias circulen por toda la cuenca.`,
+      `Caso directo del <b>Control 4 (Prof. Mancilla)</b>: sirve para ilustrar el paso de <b>Red Empresarial → Clúster → SPL</b> al sumar instituciones tecnológicas y gremiales al territorio.`
+    ],
+    pymemad: [
+      `En el <b>Clúster Forestal-Maderero PymeMad (Biobío)</b> (<b>D = ${fmtDec(den,1)}%</b>, <b>GC = ${fmtDec(gc,1)}%</b>), el gremio conecta aserraderos y plantas de remanufactura CLT con centros de I+D y logística, superando la escala individual.`,
+      `<b>Eficiencia Colectiva (Schmitz):</b> un aserradero PyME aislado no puede certificar madera estructural CLT ni exportar lotes grandes; al cooperar horizontalmente (acción conjunta), captura economías de escala reservadas a grandes forestales.`,
+      `Caso aplicado del <b>Control 4</b>: recuerda la regla de entrevista del Prof. Mancilla — validar el mapa de la cadena sin imponer la palabra "clúster" ni preguntar por "debilidades" (usar "desafíos").`
+    ]
+  };
+  const dp = diniPed[diniKey] || diniPed.simetrica;
+  renderPedBox("ped-dini", dp[0], dp[1], dp[2]);
 }
 
 // ============================================================================
@@ -2230,4 +2349,4 @@ renderQuizLectura();
 
 def renderizar_laboratorio_fluido_territorial():
     """Renderiza el Estudio Territorial Integral a 60 FPS (8 módulos) sin recarga de servidor."""
-    components.html(HTML_TERRITORIAL_60FPS, height=1180, scrolling=True)
+    components.html(HTML_TERRITORIAL_60FPS, height=1280, scrolling=True)
