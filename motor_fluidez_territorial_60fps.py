@@ -557,10 +557,12 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
   <!-- ====================================================================== -->
   <div id="panel-dini" class="panel">
     <div class="sec-title">
-      <span>Redes Empresariales (Dini, 2010): Topologías, Densidad de Red (D) y Gradiente de Concentración (GC)</span>
+      <span>Redes Empresariales (Dini, 2010): Variables Libres (n, L), Densidad (D) y Gradiente de Concentración (GC)</span>
       <div class="btn-bar">
-        <button class="act-btn primary" onclick="animarDini()">Play: Armar Vínculo a Vínculo</button>
-        <button class="act-btn" onclick="completarDini()">Ver Red Completa</button>
+        <button class="act-btn primary" onclick="animarDini()">Play: Armar Vínculos</button>
+        <button class="act-btn" onclick="saturarDini()">Saturar 100% (K_n)</button>
+        <button id="dn-btn-quiebra" class="act-btn" onclick="toggleQuiebraLiderDini()">Simular Quiebra del Líder</button>
+        <button class="act-btn" onclick="resetTopologiaDini()">Restaurar Topología</button>
       </div>
     </div>
 
@@ -576,28 +578,41 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
 
     <details class="enun-box" open>
       <summary>
-        <span>Tipología Dini (2010, CEPAL — 04 SPL.pdf pág. 14) y Diagnóstico Estructural</span>
-        <span class="enun-badge">Fórmulas: D = 2L/[n(n−1)] · GC = ∑(kmax−ki)/[(n−1)(n−2)]</span>
+        <span>Tipología Dini (2010, CEPAL — 04 SPL.pdf pág. 14) y Laboratorio Libre UCINET</span>
+        <span class="enun-badge">Haz clic en 2 nodos del grafo para crear o borrar vínculos</span>
       </summary>
       <div class="enun-body" id="dn-enunciado"></div>
     </details>
 
-    <div class="sl-card" style="margin-bottom:10px;">
-      <div class="sl-head"><span>Paso de Construcción (Vínculos Activos L)</span><span id="dn-step-v" class="sl-val">0 / 0</span></div>
-      <input id="dn-step" type="range" min="0" max="16" step="1" value="16" oninput="drawDini()" />
+    <div class="sliders-grid" style="grid-template-columns: 1fr 1.35fr 1fr;">
+      <div class="sl-card">
+        <div class="sl-head"><span>Actores en la Red (n)</span><span id="dn-n-v" class="sl-val">n = 8</span></div>
+        <input id="dn-n" type="range" min="4" max="15" step="1" value="8" oninput="onSliderNDini()" />
+      </div>
+      <div class="sl-card">
+        <div class="sl-head"><span>Vínculos Activos (L hasta L_máx)</span><span id="dn-step-v" class="sl-val">16 / 28</span></div>
+        <input id="dn-step" type="range" min="0" max="28" step="1" value="16" oninput="onSliderLDini()" />
+      </div>
+      <div class="sl-card">
+        <div class="sl-head"><span>Tipo de Matriz (UCINET)</span><span id="dn-dir-v" class="sl-val">No Dirigida (2L)</span></div>
+        <div class="btn-bar" style="margin-top:4px;">
+          <button id="dn-dir-no" class="act-btn primary" onclick="setDirigidaDini(false)">No Dirigida (2L)</button>
+          <button id="dn-dir-si" class="act-btn" onclick="setDirigidaDini(true)">Dirigida (L)</button>
+        </div>
+      </div>
     </div>
 
     <div class="kpis">
       <div class="kpi" style="border-left-color:#0F172A;"><div class="kpi-lbl">Actores (n) y Vínculos (L)</div><div id="dn-k-nl" class="kpi-val">n=8 | L=16</div><div id="dn-k-lmax" class="kpi-sub">Máx posible: 28</div></div>
-      <div class="kpi" style="border-left-color:#1D4ED8;"><div class="kpi-lbl">Densidad de la Red (D)</div><div id="dn-k-den" class="kpi-val">57,1%</div><div class="kpi-sub">D = 2L / [n(n−1)]</div></div>
-      <div class="kpi" style="border-left-color:#15803D;"><div class="kpi-lbl">Grado Máximo y Promedio</div><div id="dn-k-k" class="kpi-val">k_máx=4 | k̄=4,0</div><div class="kpi-sub">Conexiones por nodo</div></div>
+      <div class="kpi" style="border-left-color:#1D4ED8;"><div class="kpi-lbl">Densidad de la Red (D)</div><div id="dn-k-den" class="kpi-val">57,1%</div><div id="dn-k-denf" class="kpi-sub">D = 2L / [n(n−1)]</div></div>
+      <div class="kpi" style="border-left-color:#15803D;"><div class="kpi-lbl">Grado Máximo y Promedio</div><div id="dn-k-k" class="kpi-val">k_máx=4 | k̄=4,0</div><div id="dn-k-iso" class="kpi-sub">Aislados (k=0): 0</div></div>
       <div class="kpi" style="border-left-color:#DC2626;"><div class="kpi-lbl">Gradiente Concentración (GC)</div><div id="dn-k-gc" class="kpi-val">0,0%</div><div id="dn-k-gcd" class="kpi-sub">Simétrica (0%) ↔ Líder (100%)</div></div>
     </div>
 
-    <div class="svg-box"><svg id="svg-dini" viewBox="0 0 980 390"></svg></div>
+    <div class="svg-box"><svg id="svg-dini" viewBox="0 0 980 400"></svg></div>
+    <div id="dn-sol" class="sol-box"></div>
     <div id="ped-dini" class="ped-grid"></div>
   </div>
-
 
   <!-- ====================================================================== -->
   <!-- PANEL U.VI: INDICADORES DE DESARROLLO (MÍNIMO-MÁXIMO Y PONDERACIONES)  -->
@@ -1694,140 +1709,419 @@ function drawLorenz() {
 }
 
 // ============================================================================
-// 7. REDES EMPRESARIALES DE DINI (2010) A 60 FPS
+// 7. REDES EMPRESARIALES DE DINI (2010) — LABORATORIO INTERACTIVO (n, L, CLIC)
 // ============================================================================
 const TOPOS_DINI = {
   simetrica: {
-    desc: "<b>Red Simétrica (Dini, 2010 — Diagrama 2):</b> Cooperación horizontal entre pares con grado nodal homogéneo. <b>Gradiente GC = 0%</b>.",
-    nodes: Array.from({length: 8}, (_, i) => ({ nm: `PyME ${i+1}`, x: 265 + 145 * Math.cos(i * Math.PI / 4), y: 195 + 135 * Math.sin(i * Math.PI / 4) })),
+    parametric: true,
+    desc: "<b>Red Simétrica (Dini, 2010 — Diagrama 2):</b> Cooperación horizontal entre pares con grado nodal homogéneo. Mueve <b>n</b> o <b>L</b>, o haz clic en 2 nodos para editar la red.",
+    nodes: Array.from({length: 8}, (_, i) => ({ nm: `PyME ${i+1}`, x: 265 + 145 * Math.cos(i * Math.PI / 4), y: 200 + 132 * Math.sin(i * Math.PI / 4) })),
     edges: [[0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[6,7],[7,0],[0,2],[1,3],[2,4],[3,5],[4,6],[5,7],[6,0],[7,1]]
   },
   liderazgo: {
-    desc: "<b>Red con Liderazgo (Dini, 2010 — Diagrama 2):</b> Estructura radial tipo estrella. Un nodo ancla centraliza todos los acuerdos. <b>Gradiente GC = 100%</b>.",
-    nodes: [{ nm: "Empresa Líder", x: 265, y: 195 }, ...Array.from({length: 7}, (_, i) => ({ nm: `PyME ${i+1}`, x: 265 + 145 * Math.cos(i * 2 * Math.PI / 7), y: 195 + 135 * Math.sin(i * 2 * Math.PI / 7) }))],
+    parametric: true,
+    desc: "<b>Red con Liderazgo (Dini, 2010 — Diagrama 2):</b> Estructura radial tipo estrella. Un nodo ancla centraliza todos los acuerdos (<b>GC = 100%</b>). Prueba <b>Simular Quiebra del Líder</b>.",
+    nodes: [{ nm: "Empresa Líder", x: 265, y: 200 }, ...Array.from({length: 7}, (_, i) => ({ nm: `PyME ${i+1}`, x: 265 + 145 * Math.cos(i * 2 * Math.PI / 7), y: 200 + 132 * Math.sin(i * 2 * Math.PI / 7) }))],
     edges: [[0,1],[0,2],[0,3],[0,4],[0,5],[0,6],[0,7]]
   },
   jerarquica: {
+    parametric: true,
     desc: "<b>Red Jerárquica (Dini, 2010 — Diagrama 2):</b> Subcontratación escalonada por niveles (Matriz → Contratistas → Talleres) sin vínculos horizontales en la base.",
     nodes: [
-      { nm: "Matriz Ancla", x: 265, y: 55 }, { nm: "Contratista 1A", x: 160, y: 175 }, { nm: "Contratista 1B", x: 370, y: 175 },
-      { nm: "Taller 2A", x: 95, y: 310 }, { nm: "Taller 2B", x: 210, y: 310 }, { nm: "Taller 2C", x: 320, y: 310 }, { nm: "Proveedor 2D", x: 435, y: 310 }
+      { nm: "Matriz Ancla", x: 265, y: 58 }, { nm: "Contratista 1A", x: 160, y: 178 }, { nm: "Contratista 1B", x: 370, y: 178 },
+      { nm: "Taller 2A", x: 95, y: 315 }, { nm: "Taller 2B", x: 210, y: 315 }, { nm: "Taller 2C", x: 320, y: 315 }, { nm: "Proveedor 2D", x: 435, y: 315 }
     ],
     edges: [[0,1],[0,2],[1,3],[1,4],[2,5],[2,6]]
   },
   red_redes: {
+    parametric: false,
     desc: "<b>Red de Redes (Dini, 2010 — Diagrama 3):</b> Tres clústeres locales (Osorno, Pto. Montt, Valdivia) cohesionados cuyos nodos puente se articulan entre sí.",
     nodes: [
-      { nm: "Líder Osorno", x: 165, y: 135 }, { nm: "O1", x: 95, y: 70 }, { nm: "O2", x: 85, y: 175 }, { nm: "O3", x: 160, y: 215 },
-      { nm: "Líder P.Montt", x: 370, y: 135 }, { nm: "M1", x: 445, y: 75 }, { nm: "M2", x: 455, y: 175 }, { nm: "M3", x: 365, y: 215 },
-      { nm: "Líder Valdivia", x: 265, y: 285 }, { nm: "V1", x: 195, y: 345 }, { nm: "V2", x: 335, y: 345 }, { nm: "V3", x: 265, y: 225 }
+      { nm: "Líder Osorno", x: 165, y: 140 }, { nm: "O1", x: 95, y: 74 }, { nm: "O2", x: 85, y: 180 }, { nm: "O3", x: 160, y: 220 },
+      { nm: "Líder P.Montt", x: 370, y: 140 }, { nm: "M1", x: 445, y: 78 }, { nm: "M2", x: 455, y: 180 }, { nm: "M3", x: 365, y: 220 },
+      { nm: "Líder Valdivia", x: 265, y: 290 }, { nm: "V1", x: 195, y: 350 }, { nm: "V2", x: 335, y: 350 }, { nm: "V3", x: 265, y: 230 }
     ],
     edges: [[0,4],[4,8],[0,8],[0,1],[0,2],[0,3],[4,5],[4,6],[4,7],[6,7],[8,9],[8,10],[8,11]]
   },
   aviones: {
+    parametric: false,
     desc: "<b>Red de Redes en Producción de Aviones (Dini, 2010 — Diagrama 4):</b> Una gran ensambladora central coordina a los líderes de subsistemas (Motores, Aviónica, Fuselaje).",
     nodes: [
-      { nm: "ENSAMBLADORA", x: 265, y: 195 },
-      { nm: "Líder Motores", x: 135, y: 125 }, { nm: "Turb.A", x: 65, y: 68 }, { nm: "Turb.B", x: 60, y: 165 },
-      { nm: "Líder Aviónica", x: 395, y: 125 }, { nm: "Soft.A", x: 465, y: 68 }, { nm: "Radar", x: 470, y: 165 },
-      { nm: "Líder Fuselaje", x: 265, y: 305 }, { nm: "Aleac.", x: 185, y: 350 }, { nm: "Cabina", x: 345, y: 350 }
+      { nm: "ENSAMBLADORA", x: 265, y: 200 },
+      { nm: "Líder Motores", x: 135, y: 130 }, { nm: "Turb.A", x: 65, y: 72 }, { nm: "Turb.B", x: 60, y: 170 },
+      { nm: "Líder Aviónica", x: 395, y: 130 }, { nm: "Soft.A", x: 465, y: 72 }, { nm: "Radar", x: 470, y: 170 },
+      { nm: "Líder Fuselaje", x: 265, y: 310 }, { nm: "Aleac.", x: 185, y: 355 }, { nm: "Cabina", x: 345, y: 355 }
     ],
     edges: [[0,1],[0,4],[0,7],[1,2],[1,3],[4,5],[4,6],[7,8],[7,9],[8,9]]
   },
   osorno: {
+    parametric: false,
     desc: "<b>Caso Control 4 — Red Láctea-Quesera de Osorno:</b> Articulación multilateral liderada por <i>Aproleche</i> y <i>Cooprinsem</i> conectada a plantas ancla (<i>Nestlé, Watt's</i>) e <i>INIA Remehue</i>.",
     nodes: [
-      { nm: "Aproleche", x: 265, y: 155 }, { nm: "Cooprinsem", x: 225, y: 235 }, { nm: "INIA", x: 120, y: 90 }, { nm: "Lech.Matthei", x: 90, y: 215 },
-      { nm: "Q.Las Ánimas", x: 145, y: 325 }, { nm: "Láct.Osorno", x: 315, y: 330 }, { nm: "Nestlé", x: 425, y: 115 }, { nm: "Watt's", x: 440, y: 235 }, { nm: "DeLaval", x: 345, y: 65 }
+      { nm: "Aproleche", x: 265, y: 160 }, { nm: "Cooprinsem", x: 225, y: 240 }, { nm: "INIA", x: 120, y: 95 }, { nm: "Lech.Matthei", x: 90, y: 220 },
+      { nm: "Q.Las Ánimas", x: 145, y: 330 }, { nm: "Láct.Osorno", x: 315, y: 335 }, { nm: "Nestlé", x: 425, y: 120 }, { nm: "Watt's", x: 440, y: 240 }, { nm: "DeLaval", x: 345, y: 70 }
     ],
     edges: [[0,1],[0,2],[0,3],[0,4],[0,5],[0,6],[0,7],[1,2],[1,3],[1,4],[1,5],[1,6],[1,7],[1,8],[2,3],[3,6],[3,7],[4,5],[6,8],[7,8]]
   },
   pymemad: {
+    parametric: false,
     desc: "<b>Caso Control 4 — Clúster Forestal-Maderero PymeMad (Biobío):</b> El gremio <i>PymeMad</i> coordina aserraderos y plantas de remanufactura CLT para compras y certificación estructural.",
     nodes: [
-      { nm: "Gremio PymeMad", x: 265, y: 195 }, { nm: "Aserradero 1", x: 130, y: 105 }, { nm: "Aserradero 2", x: 115, y: 260 },
-      { nm: "Remanuf. CLT", x: 265, y: 335 }, { nm: "Prov. Forestal", x: 265, y: 55 }, { nm: "Logística", x: 410, y: 280 },
-      { nm: "Planta Ancla", x: 420, y: 130 }, { nm: "Centro I+D", x: 365, y: 65 }
+      { nm: "Gremio PymeMad", x: 265, y: 200 }, { nm: "Aserradero 1", x: 130, y: 110 }, { nm: "Aserradero 2", x: 115, y: 265 },
+      { nm: "Remanuf. CLT", x: 265, y: 340 }, { nm: "Prov. Forestal", x: 265, y: 60 }, { nm: "Logística", x: 410, y: 285 },
+      { nm: "Planta Ancla", x: 420, y: 135 }, { nm: "Centro I+D", x: 365, y: 70 }
     ],
     edges: [[0,1],[0,2],[0,3],[0,4],[0,6],[0,7],[1,2],[1,3],[1,4],[2,3],[3,5],[3,6],[3,7],[4,5],[4,6],[5,6],[6,7]]
   }
 };
+
 let diniKey = "simetrica";
+let diniNodes = [];
+let diniEdges = [];
+let diniDirected = false;
+let diniSelectedNode = null;
+let diniQuiebraIdx = null;
 let animDnId = null;
 
-function setTopologiaDini(key, btn) {
-  if (animDnId) cancelAnimationFrame(animDnId);
+function edgeKeyDini(u, v, dir) {
+  return dir ? `${u}>${v}` : (u < v ? `${u}-${v}` : `${v}-${u}`);
+}
+function buildAllPossibleEdges(n, dir) {
+  const out = [];
+  for (let i = 0; i < n; i++) {
+    for (let j = dir ? 0 : i + 1; j < n; j++) {
+      if (i !== j) out.push([i, j]);
+    }
+  }
+  return out;
+}
+function buildParametricGraph(key, n) {
+  const nodes = [], edges = [];
+  if (key === "liderazgo") {
+    nodes.push({ nm: "Empresa Líder", x: 265, y: 200 });
+    for (let i = 0; i < n - 1; i++) {
+      const ang = (i / (n - 1)) * Math.PI * 2 - Math.PI / 2;
+      nodes.push({ nm: `PyME ${i + 1}`, x: 265 + 148 * Math.cos(ang), y: 200 + 132 * Math.sin(ang) });
+      edges.push([0, i + 1]);
+    }
+  } else if (key === "jerarquica") {
+    nodes.push({ nm: "Matriz Ancla", x: 265, y: 58 });
+    const nMid = Math.max(1, Math.min(4, Math.floor((n - 1) / 3) + 1));
+    const nBot = Math.max(0, n - 1 - nMid);
+    for (let i = 0; i < nMid; i++) {
+      const x = nMid === 1 ? 265 : 120 + (i / (nMid - 1)) * 290;
+      nodes.push({ nm: `Contr. ${i + 1}`, x, y: 178 });
+      edges.push([0, 1 + i]);
+    }
+    for (let j = 0; j < nBot; j++) {
+      const x = nBot === 1 ? 265 : 68 + (j / (nBot - 1)) * 394;
+      nodes.push({ nm: `Taller ${j + 1}`, x, y: 318 });
+      const parentIdx = 1 + (j % nMid);
+      edges.push([parentIdx, 1 + nMid + j]);
+    }
+  } else {
+    // Simétrica (anillo + saltos de paso 2 si n >= 5)
+    for (let i = 0; i < n; i++) {
+      const ang = (i / n) * Math.PI * 2 - Math.PI / 2;
+      nodes.push({ nm: `PyME ${i + 1}`, x: 265 + 148 * Math.cos(ang), y: 200 + 132 * Math.sin(ang) });
+    }
+    for (let i = 0; i < n; i++) edges.push([i, (i + 1) % n]);
+    if (n >= 5) {
+      const seen = new Set(edges.map(([u, v]) => edgeKeyDini(u, v, false)));
+      for (let i = 0; i < n; i++) {
+        const u = i, v = (i + 2) % n;
+        const k = edgeKeyDini(u, v, false);
+        if (!seen.has(k)) { seen.add(k); edges.push([u, v]); }
+      }
+    }
+  }
+  return { nodes, edges };
+}
+function loadDiniTopology(key, customN = null) {
   diniKey = key;
-  btn.parentElement.querySelectorAll(".flt-btn").forEach(b => b.classList.remove("active"));
-  btn.classList.add("active");
-  const maxE = TOPOS_DINI[key].edges.length;
-  const sl = document.getElementById("dn-step");
-  sl.max = maxE; sl.value = maxE;
+  diniSelectedNode = null;
+  diniQuiebraIdx = null;
+  const btnQ = document.getElementById("dn-btn-quiebra");
+  if (btnQ) { btnQ.classList.remove("primary"); btnQ.textContent = "Simular Quiebra del Líder"; }
+
+  const topo = TOPOS_DINI[key];
+  if (customN !== null) {
+    if (topo.parametric) {
+      const g = buildParametricGraph(key, customN);
+      diniNodes = g.nodes;
+      diniEdges = g.edges.map(e => [...e]);
+    } else {
+      // Para casos reales, recorta o agrega nodos en el perímetro conservando el núcleo
+      const baseN = topo.nodes.length;
+      if (customN <= baseN) {
+        diniNodes = topo.nodes.slice(0, customN).map(nd => ({ ...nd }));
+        diniEdges = topo.edges.filter(([u, v]) => u < customN && v < customN).map(e => [...e]);
+      } else {
+        diniNodes = topo.nodes.map(nd => ({ ...nd }));
+        diniEdges = topo.edges.map(e => [...e]);
+        for (let i = baseN; i < customN; i++) {
+          const ang = ((i - baseN) / Math.max(1, customN - baseN)) * Math.PI * 2 - 0.5;
+          diniNodes.push({ nm: `Actor ${i + 1}`, x: Math.max(58, Math.min(472, 265 + 168 * Math.cos(ang))), y: Math.max(54, Math.min(358, 200 + 148 * Math.sin(ang))) });
+          diniEdges.push([0, i]);
+        }
+      }
+    }
+  } else {
+    diniNodes = topo.nodes.map(nd => ({ ...nd }));
+    diniEdges = topo.edges.map(e => [...e]);
+  }
+  syncDiniSliders();
   drawDini();
 }
-function completarDini() {
+function syncDiniSliders() {
+  const n = diniNodes.length;
+  const lMax = diniDirected ? n * (n - 1) : (n * (n - 1)) / 2;
+  const slN = document.getElementById("dn-n");
+  const slL = document.getElementById("dn-step");
+  if (slN) slN.value = n;
+  if (slL) {
+    slL.max = lMax;
+    slL.value = Math.min(lMax, diniEdges.length);
+  }
+}
+function setTopologiaDini(key, btn) {
   if (animDnId) cancelAnimationFrame(animDnId);
-  const sl = document.getElementById("dn-step");
-  sl.value = sl.max;
+  btn.parentElement.querySelectorAll(".flt-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  loadDiniTopology(key, null);
+}
+function resetTopologiaDini() {
+  if (animDnId) cancelAnimationFrame(animDnId);
+  loadDiniTopology(diniKey, null);
+}
+function onSliderNDini() {
+  if (animDnId) cancelAnimationFrame(animDnId);
+  const newN = +document.getElementById("dn-n").value;
+  loadDiniTopology(diniKey, newN);
+}
+function onSliderLDini() {
+  if (animDnId) cancelAnimationFrame(animDnId);
+  diniQuiebraIdx = null;
+  const btnQ = document.getElementById("dn-btn-quiebra");
+  if (btnQ) { btnQ.classList.remove("primary"); btnQ.textContent = "Simular Quiebra del Líder"; }
+
+  const targetL = +document.getElementById("dn-step").value;
+  const n = diniNodes.length;
+  if (targetL < diniEdges.length) {
+    diniEdges = diniEdges.slice(0, targetL);
+  } else if (targetL > diniEdges.length) {
+    // Primero reponer aristas base de la topología si faltan, luego completar hasta L_max
+    const seen = new Set(diniEdges.map(([u, v]) => edgeKeyDini(u, v, diniDirected)));
+    const topoBase = TOPOS_DINI[diniKey].parametric ? buildParametricGraph(diniKey, n).edges : TOPOS_DINI[diniKey].edges.filter(([u, v]) => u < n && v < n);
+    const pool = [...topoBase, ...buildAllPossibleEdges(n, diniDirected)];
+    for (const [u, v] of pool) {
+      if (diniEdges.length >= targetL) break;
+      const k = edgeKeyDini(u, v, diniDirected);
+      if (!seen.has(k)) {
+        seen.add(k);
+        diniEdges.push([u, v]);
+      }
+    }
+  }
+  drawDini();
+}
+function setDirigidaDini(isDir) {
+  if (animDnId) cancelAnimationFrame(animDnId);
+  diniDirected = isDir;
+  document.getElementById("dn-dir-no").classList.toggle("primary", !isDir);
+  document.getElementById("dn-dir-si").classList.toggle("primary", isDir);
+  document.getElementById("dn-dir-v").textContent = isDir ? "Dirigida (L)" : "No Dirigida (2L)";
+  if (!isDir) {
+    // Deduplicar pares (u,v) y (v,u) al volver a no dirigida
+    const seen = new Set();
+    diniEdges = diniEdges.filter(([u, v]) => {
+      const k = edgeKeyDini(u, v, false);
+      if (seen.has(k)) return false;
+      seen.add(k);
+      return true;
+    });
+  }
+  syncDiniSliders();
+  drawDini();
+}
+function saturarDini() {
+  if (animDnId) cancelAnimationFrame(animDnId);
+  diniQuiebraIdx = null;
+  const btnQ = document.getElementById("dn-btn-quiebra");
+  if (btnQ) { btnQ.classList.remove("primary"); btnQ.textContent = "Simular Quiebra del Líder"; }
+  const n = diniNodes.length;
+  const slL = document.getElementById("dn-step");
+  slL.value = diniDirected ? n * (n - 1) : (n * (n - 1)) / 2;
+  onSliderLDini();
+}
+function toggleQuiebraLiderDini() {
+  if (animDnId) cancelAnimationFrame(animDnId);
+  const btnQ = document.getElementById("dn-btn-quiebra");
+  if (diniQuiebraIdx !== null) {
+    diniQuiebraIdx = null;
+    btnQ.classList.remove("primary");
+    btnQ.textContent = "Simular Quiebra del Líder";
+  } else {
+    const n = diniNodes.length;
+    const deg = new Array(n).fill(0);
+    diniEdges.forEach(([u, v]) => { deg[u]++; deg[v]++; });
+    let best = 0;
+    for (let i = 1; i < n; i++) if (deg[i] > deg[best]) best = i;
+    diniQuiebraIdx = best;
+    btnQ.classList.add("primary");
+    btnQ.textContent = `Quiebra Activa (${diniNodes[best].nm}) — Restaurar`;
+  }
+  drawDini();
+}
+function clickNodeDini(idx) {
+  if (animDnId) cancelAnimationFrame(animDnId);
+  if (diniQuiebraIdx === idx) return;
+  if (diniSelectedNode === null) {
+    diniSelectedNode = idx;
+    drawDini();
+    return;
+  }
+  if (diniSelectedNode === idx) {
+    diniSelectedNode = null;
+    drawDini();
+    return;
+  }
+  const u = diniSelectedNode, v = idx;
+  const targetKey = edgeKeyDini(u, v, diniDirected);
+  const pos = diniEdges.findIndex(([a, b]) => edgeKeyDini(a, b, diniDirected) === targetKey);
+  if (pos >= 0) {
+    diniEdges.splice(pos, 1);
+  } else {
+    diniEdges.push([u, v]);
+  }
+  diniSelectedNode = null;
+  syncDiniSliders();
   drawDini();
 }
 function animarDini() {
   if (animDnId) cancelAnimationFrame(animDnId);
-  const maxE = TOPOS_DINI[diniKey].edges.length;
-  const t0 = performance.now(), dur = Math.max(1200, maxE * 130);
+  diniQuiebraIdx = null;
+  const btnQ = document.getElementById("dn-btn-quiebra");
+  if (btnQ) { btnQ.classList.remove("primary"); btnQ.textContent = "Simular Quiebra del Líder"; }
+  const targetL = Math.max(1, diniEdges.length);
+  const savedEdges = diniEdges.map(e => [...e]);
+  const t0 = performance.now(), dur = Math.max(1100, targetL * 115);
   function step(now) {
     const u = Math.min(1, (now - t0) / dur);
-    document.getElementById("dn-step").value = Math.round(u * maxE);
+    const k = Math.round(u * targetL);
+    diniEdges = savedEdges.slice(0, k);
+    document.getElementById("dn-step").value = k;
     drawDini();
     if (u < 1) animDnId = requestAnimationFrame(step);
   }
   animDnId = requestAnimationFrame(step);
 }
 function drawDini() {
-  const topo = TOPOS_DINI[diniKey];
-  const n = topo.nodes.length, maxE = topo.edges.length;
-  const kStep = Math.min(maxE, +document.getElementById("dn-step").value);
-  document.getElementById("dn-step-v").textContent = `${kStep} / ${maxE} vínculos`;
-  document.getElementById("dn-enunciado").innerHTML = topo.desc;
+  const n = diniNodes.length;
+  const lMax = diniDirected ? n * (n - 1) : (n * (n - 1)) / 2;
+  const actEdges = diniQuiebraIdx === null ? diniEdges : diniEdges.filter(([u, v]) => u !== diniQuiebraIdx && v !== diniQuiebraIdx);
+  const L = actEdges.length;
 
+  document.getElementById("dn-n-v").textContent = `n = ${n}`;
+  document.getElementById("dn-step-v").textContent = `${L} / ${lMax} vínculos`;
+  const selHint = diniSelectedNode !== null
+    ? `<br/><span style="color:#B45309;font-weight:800;">● Nodo seleccionado: ${diniNodes[diniSelectedNode].nm} — haz clic en otro actor para crear o eliminar su vínculo (o clic de nuevo para cancelar).</span>`
+    : `<br/><span style="color:#475569;">Modo edición directa activo: haz clic en cualquier actor del grafo y luego en otro para sumar/quitar vínculos, o mueve los sliders de <b>n</b> y <b>L</b>.</span>`;
+  document.getElementById("dn-enunciado").innerHTML = TOPOS_DINI[diniKey].desc + selHint;
+
+  // Grados nodales (para GC usamos vecinos únicos conectados para mantener GC siempre en [0%, 100%])
   const deg = new Array(n).fill(0);
-  const actEdges = topo.edges.slice(0, kStep);
-  actEdges.forEach(([u, v]) => { deg[u]++; deg[v]++; });
+  const uniqAdj = Array.from({ length: n }, () => new Set());
+  actEdges.forEach(([u, v]) => {
+    if (diniDirected) { deg[u]++; } else { deg[u]++; deg[v]++; }
+    uniqAdj[u].add(v);
+    uniqAdj[v].add(u);
+  });
+  const degGC = uniqAdj.map(s => s.size);
+  const den = lMax > 0 ? (L / lMax) * 100 : 0;
+  const kMax = Math.max(0, ...degGC);
+  const kAvg = degGC.reduce((s, v) => s + v, 0) / n;
+  const sumDiff = degGC.reduce((s, v) => s + (kMax - v), 0);
+  const denGC = (n - 1) * (n - 2);
+  const gc = n > 2 ? (sumDiff / denGC) * 100 : 0;
+  const aislados = degGC.filter((k, i) => k === 0 && i !== diniQuiebraIdx).length;
 
-  const lMax = (n * (n - 1)) / 2;
-  const den = lMax > 0 ? (kStep / lMax) * 100 : 0;
-  const kMax = Math.max(...deg);
-  const kAvg = deg.reduce((s, v) => s + v, 0) / n;
-  const gc = n > 2 ? (deg.reduce((s, v) => s + (kMax - v), 0) / ((n - 1) * (n - 2))) * 100 : 0;
-
-  document.getElementById("dn-k-nl").textContent = `n=${n} | L=${kStep}`;
+  document.getElementById("dn-k-nl").textContent = `n=${n} | L=${L}`;
   document.getElementById("dn-k-lmax").textContent = `Máx posible: ${lMax}`;
   document.getElementById("dn-k-den").textContent = fmtDec(den, 1) + "%";
+  document.getElementById("dn-k-denf").textContent = diniDirected ? "D = L / [n(n−1)]" : "D = 2L / [n(n−1)]";
   document.getElementById("dn-k-k").textContent = `k_máx=${kMax} | k̄=${fmtDec(kAvg, 1)}`;
+  document.getElementById("dn-k-iso").textContent = `Aislados (k=0): ${aislados}`;
   document.getElementById("dn-k-gc").textContent = fmtDec(gc, 1) + "%";
-  document.getElementById("dn-k-gcd").textContent = gc < 15 ? "Red Simétrica" : (gc > 68 ? "Red con Liderazgo Fuerte" : "Red Jerárquica / Policéntrica");
+  document.getElementById("dn-k-gcd").textContent = L === 0 ? "Red desconectada (Colapso)" : (gc < 15 ? "Red Simétrica / Horizontal" : (gc > 68 ? "Red con Liderazgo Fuerte" : "Red Jerárquica / Policéntrica"));
+
+  // Caja de fórmulas sustituidas en vivo (estilo cuaderno/examen)
+  const solEl = document.getElementById("dn-sol");
+  if (solEl) {
+    const numD = diniDirected ? `${L}` : `2·(${L}) = ${2 * L}`;
+    const denD = `${n}·(${n - 1}) = ${n * (n - 1)}`;
+    const qNote = diniQuiebraIdx !== null ? ` &nbsp;|&nbsp; <span style="color:#DC2626;"><b>SIMULACIÓN QUIEBRA (${diniNodes[diniQuiebraIdx].nm}):</b> ${aislados} actores quedaron aislados (k=0)</span>` : "";
+    solEl.innerHTML =
+      `<b>Cálculo en vivo:</b> D = ${numD} / [${denD}] = <b>${fmtDec(den, 1)}%</b> &nbsp;|&nbsp; ` +
+      `GC = ∑(${kMax} − k<sub>i</sub>) / [(${n - 1})·(${n - 2})] = ${sumDiff} / ${denGC} = <b>${fmtDec(gc, 1)}%</b>${qNote}`;
+  }
 
   const svg = document.getElementById("svg-dini");
   svg.innerHTML = "";
-  // Izquierda: Grafo SVG
+  addDefs(svg);
+
+  // Izquierda: Grafo SVG interactivo
+  const tG = el("text", { x: 265, y: 22, fill: "#0F172A", "font-size": "11.5", "font-weight": "700", "text-anchor": "middle" }, svg);
+  tG.textContent = diniDirected ? "Grafo Dirigido (Clic en 2 nodos = crear/borrar flecha)" : "Grafo No Dirigido (Clic en 2 nodos = crear/borrar vínculo)";
+
   actEdges.forEach(([u, v], idx) => {
-    const isLast = idx === kStep - 1;
-    el("line", { x1: topo.nodes[u].x, y1: topo.nodes[u].y, x2: topo.nodes[v].x, y2: topo.nodes[v].y, stroke: isLast ? "#DC2626" : "#64748B", "stroke-width": isLast ? "3.4" : "2.1" }, svg);
+    const isLast = idx === L - 1;
+    const x1 = diniNodes[u].x, y1 = diniNodes[u].y, x2 = diniNodes[v].x, y2 = diniNodes[v].y;
+    const dx = x2 - x1, dy = y2 - y1, dist = Math.hypot(dx, dy) || 1;
+    const rEnd = 11 + degGC[v] * 1.9 + 5;
+    const attrs = {
+      x1, y1,
+      x2: diniDirected ? x2 - (dx / dist) * rEnd : x2,
+      y2: diniDirected ? y2 - (dy / dist) * rEnd : y2,
+      stroke: isLast ? "#DC2626" : "#64748B",
+      "stroke-width": isLast ? "3.0" : "1.9",
+      opacity: "0.88"
+    };
+    if (diniDirected) attrs["marker-end"] = isLast ? "url(#arr-red)" : "url(#arr-dark)";
+    el("line", attrs, svg);
   });
-  topo.nodes.forEach((nd, i) => {
-    const r = 10 + deg[i] * 2.2;
-    const isHub = deg[i] === kMax && kMax > 0;
-    el("circle", { cx: nd.x, cy: nd.y, r, fill: isHub ? "#DC2626" : "#1D4ED8", stroke: "#FFFFFF", "stroke-width": "2" }, svg);
-    const t = el("text", { x: nd.x, y: nd.y - r - 4, fill: "#0F172A", "font-size": "10.5", "font-weight": "700", "text-anchor": "middle" }, svg);
-    t.textContent = `${nd.nm} (k=${deg[i]})`;
+
+  diniNodes.forEach((nd, i) => {
+    const isBroken = i === diniQuiebraIdx;
+    const isSel = i === diniSelectedNode;
+    const kVal = degGC[i];
+    const r = Math.min(24, 9.5 + kVal * 1.9);
+    const isHub = kVal === kMax && kMax > 0 && !isBroken;
+    const g = el("g", { style: isBroken ? "cursor:not-allowed;" : "cursor:pointer;", onclick: `clickNodeDini(${i})` }, svg);
+    if (isSel) {
+      el("circle", { cx: nd.x, cy: nd.y, r: r + 5.5, fill: "rgba(245,158,11,0.22)", stroke: "#D97706", "stroke-width": "2.4", "stroke-dasharray": "4,2" }, g);
+    }
+    el("circle", {
+      cx: nd.x, cy: nd.y, r,
+      fill: isBroken ? "#E2E8F0" : (isHub ? "#DC2626" : (kVal === 0 ? "#94A3B8" : "#1D4ED8")),
+      stroke: isBroken ? "#DC2626" : "#FFFFFF",
+      "stroke-width": "2",
+      "stroke-dasharray": isBroken ? "4,2" : ""
+    }, g);
+    if (isBroken) {
+      el("line", { x1: nd.x - 6, y1: nd.y - 6, x2: nd.x + 6, y2: nd.y + 6, stroke: "#DC2626", "stroke-width": "2.4" }, g);
+      el("line", { x1: nd.x + 6, y1: nd.y - 6, x2: nd.x - 6, y2: nd.y + 6, stroke: "#DC2626", "stroke-width": "2.4" }, g);
+    }
+    const t = el("text", { x: nd.x, y: nd.y - r - 4, fill: isBroken ? "#DC2626" : "#0F172A", "font-size": "10.2", "font-weight": "700", "text-anchor": "middle" }, g);
+    t.textContent = isBroken ? `${nd.nm} (FUERA)` : `${nd.nm} (k=${kVal})`;
   });
 
   // Derecha: Curva de Gradiente Nodal (k_i ordenado de mayor a menor)
-  const ord = topo.nodes.map((nd, i) => ({ nm: nd.nm, k: deg[i] })).sort((a, b) => b.k - a.k);
-  const bx = 545, bwTot = 410, by = 330, bhMax = 250;
+  const ord = diniNodes.map((nd, i) => ({ nm: nd.nm, k: degGC[i], broken: i === diniQuiebraIdx })).sort((a, b) => b.k - a.k);
+  const bx = 545, bwTot = 410, by = 335, bhMax = 250;
   const maxKPlot = Math.max(4, kMax);
   const slot = bwTot / n, bw = Math.min(34, slot * 0.65);
-  const tTit = el("text", { x: bx + bwTot / 2, y: 28, fill: "#0F172A", "font-size": "12", "font-weight": "700", "text-anchor": "middle" }, svg);
+  const tTit = el("text", { x: bx + bwTot / 2, y: 26, fill: "#0F172A", "font-size": "12", "font-weight": "700", "text-anchor": "middle" }, svg);
   tTit.textContent = "Gradiente de Concentración Nodal (k_i ordenado)";
   el("line", { x1: bx, y1: by, x2: bx + bwTot, y2: by, stroke: "#334155", "stroke-width": "1.5" }, svg);
 
@@ -1835,54 +2129,69 @@ function drawDini() {
   ord.forEach((o, i) => {
     const x0 = bx + i * slot + (slot - bw) / 2;
     const h = (o.k / maxKPlot) * bhMax;
-    el("rect", { x: x0, y: by - h, width: bw, height: Math.max(2, h), fill: i === 0 && o.k > 0 ? "#DC2626" : "#2563EB", rx: 3 }, svg);
+    el("rect", { x: x0, y: by - h, width: bw, height: Math.max(2, h), fill: o.broken ? "#CBD5E1" : (i === 0 && o.k > 0 ? "#DC2626" : "#2563EB"), rx: 3 }, svg);
     lPts.push(`${x0 + bw / 2},${by - h}`);
-    const tv = el("text", { x: x0 + bw / 2, y: by - h - 5, fill: "#0F172A", "font-size": "10.5", "font-weight": "800", "text-anchor": "middle" }, svg);
+    const tv = el("text", { x: x0 + bw / 2, y: by - h - 5, fill: "#0F172A", "font-size": "10.2", "font-weight": "800", "text-anchor": "middle" }, svg);
     tv.textContent = o.k;
-    const tl = el("text", { x: x0 + bw / 2, y: by + 14, fill: "#334155", "font-size": "9.2", "font-weight": "700", "text-anchor": "middle" }, svg);
-    tl.textContent = o.nm.slice(0, 7);
+    const tl = el("text", { x: x0 + bw / 2, y: by + 14, fill: "#334155", "font-size": n > 11 ? "8.0" : "9.1", "font-weight": "700", "text-anchor": "middle" }, svg);
+    tl.textContent = o.nm.slice(0, n > 11 ? 5 : 7);
   });
   if (lPts.length > 1) el("polyline", { points: lPts.join(" "), fill: "none", stroke: "#DC2626", "stroke-width": "2.2", "stroke-dasharray": "4,3" }, svg);
 
-  const diniPed = {
-    simetrica: [
-      `Todos los nodos mantienen conectividad homogénea (<b>k̄ = ${fmtDec(kAvg,1)}</b>; <b>GC = ${fmtDec(gc,1)}%</b>). La información y el poder de negociación se reparten de forma horizontal sin dependencia de una sola empresa.`,
-      `<b>Ventaja oculta y límite práctico:</b> una red simétrica es extremadamente resiliente (si se retira una PyME la red sigue operando), pero tiene altos costos de coordinación porque toda decisión requiere consenso entre pares.`,
-      `Típica de <b>cooperativas de compras conjuntas o asociaciones de pequeños productores</b>. En el Control 4, si tu matriz UCINET arroja GC cercano a 0%, diagnostica gobernanza horizontal sin actor dominante.`
-    ],
-    liderazgo: [
-      `Estructura radial tipo estrella con <b>GC = ${fmtDec(gc,1)}%</b>: la <b>Empresa Líder</b> concentra todos los acuerdos (<b>k<sub>máx</sub> = ${kMax}</b>) mientras las PyMEs periféricas solo tienen <b>k = 1</b> y no conversan entre sí.`,
-      `<b>La Fragilidad del Nodo Ancla:</b> aunque esta red es muy rápida para tomar decisiones y estandarizar calidad, sufre riesgo sistémico extremo: si la empresa líder quiebra o cambia de proveedor, la densidad cae a cero instantáneamente.`,
-      `Clásico de grandes compradores agroindustriales o supermercados que articulan proveedores individuales. En examen (Dini, 2010): demuestra que <b>GC = 100%</b> siempre corresponde a la topología estrella.`
-    ],
-    jerarquica: [
-      `En esta pirámide (<b>D = ${fmtDec(den,1)}%</b>, <b>GC = ${fmtDec(gc,1)}%</b>), observa el detalle clave del gráfico derecho: los intermediarios (<b>Contratista 1A y 1B, k = 3</b>) tienen más vínculos directos que la propia <b>Matriz Ancla (k = 2)</b>, mientras los talleres base están desconectados entre sí (k = 1).`,
-      `<b>Paradoja del Cuello de Botella (Intermediarios):</b> aunque la Matriz manda estratégicamente desde la cúspide, son los Contratistas de nivel medio quienes actúan como <i>brokers</i> (puentes). Si un contratista filtra tecnología o precios, los talleres de la base jamás aprenden directamente del cliente final.`,
-      `Frecuente en subcontratación forestal, construcción y metalmecánica. En defensa oral: destaca que para hacer <b>Upgrading funcional</b> (Padilla y Oddone), los talleres deben crear vínculos horizontales entre sí para dejar de ser meros maquiladores.`
-    ],
-    red_redes: [
-      `Tres sub-redes locales cohesionadas (Osorno, Puerto Montt y Valdivia) se articulan a través de sus nodos líderes formando un triángulo interregional (<b>D = ${fmtDec(den,1)}%</b>, <b>GC = ${fmtDec(gc,1)}%</b>).`,
-      `<b>Mundo Pequeño (Small-World):</b> esta arquitectura combina lo mejor de dos mundos: alta confianza dentro de cada comuna (vínculos fuertes) y pocos saltos para transferir innovación entre ciudades distintas (puentes entre líderes).`,
-      `Corresponde al <b>Diagrama 3 de Dini (2010)</b> en <i>04 SPL.pdf</i>. Es el modelo objetivo de una política regional de articulación territorial cuando existen gremios locales ya consolidados.`
-    ],
-    aviones: [
-      `Una gran <b>Ensambladora</b> coordina líderes especializados por subsistema (Motores, Aviónica y Fuselaje), los cuales a su vez gestionan sus propios proveedores de nicho (<b>n = ${n}</b>, <b>GC = ${fmtDec(gc,1)}%</b>).`,
-      `<b>Modularidad Productiva:</b> la ensambladora no podría gestionar miles de talleres por sí sola (colapsaría en costos de transacción); por eso delega módulos complejos a líderes de primer nivel (<i>Tier-1</i>) que integran la innovación.`,
-      `Corresponde al <b>Diagrama 4 de Dini (2010)</b>. Permite explicar cadenas globales de valor (Airbus/Boeing o industria salmonera compleja) donde coexisten jerarquía tecnológica y cooperación especializada.`
-    ],
-    osorno: [
-      `La <b>Red Láctea-Quesera de Osorno</b> alcanza una alta densidad (<b>D = ${fmtDec(den,1)}%</b>) y concentración moderada (<b>GC = ${fmtDec(gc,1)}%</b>) porque <i>Aproleche</i> y <i>Cooprinsem</i> actúan como doble núcleo articulador entre productores, <i>INIA</i> y plantas industriales.`,
-      `<b>Por qué no colapsa ante un solo comprador:</b> a diferencia de una estrella pura (GC = 100%), contar con dos instituciones gremiales/técnicas más vinculación a <i>INIA Remehue</i> permite que las mejoras genéticas y sanitarias circulen por toda la cuenca.`,
-      `Caso directo del <b>Control 4 (Prof. Mancilla)</b>: sirve para ilustrar el paso de <b>Red Empresarial → Clúster → SPL</b> al sumar instituciones tecnológicas y gremiales al territorio.`
-    ],
-    pymemad: [
-      `En el <b>Clúster Forestal-Maderero PymeMad (Biobío)</b> (<b>D = ${fmtDec(den,1)}%</b>, <b>GC = ${fmtDec(gc,1)}%</b>), el gremio conecta aserraderos y plantas de remanufactura CLT con centros de I+D y logística, superando la escala individual.`,
-      `<b>Eficiencia Colectiva (Schmitz):</b> un aserradero PyME aislado no puede certificar madera estructural CLT ni exportar lotes grandes; al cooperar horizontalmente (acción conjunta), captura economías de escala reservadas a grandes forestales.`,
-      `Caso aplicado del <b>Control 4</b>: recuerda la regla de entrevista del Prof. Mancilla — validar el mapa de la cadena sin imponer la palabra "clúster" ni preguntar por "debilidades" (usar "desafíos").`
-    ]
-  };
-  const dp = diniPed[diniKey] || diniPed.simetrica;
-  renderPedBox("ped-dini", dp[0], dp[1], dp[2]);
+  // Cápsulas pedagógicas dinámicas que reaccionan a quiebra, saturación, n y L
+  if (diniQuiebraIdx !== null) {
+    renderPedBox("ped-dini",
+      `Al retirar al nodo ancla <b>${diniNodes[diniQuiebraIdx].nm}</b>, la red cayó a <b>L = ${L} vínculos</b> (<b>D = ${fmtDec(den,1)}%</b>) dejando a <b>${aislados} de ${n - 1} actores restantes totalmente aislados (k = 0)</b>.`,
+      `<b>Prueba de Estrés de Resiliencia Territorial:</b> en una <b>Red con Liderazgo (estrella, GC = 100%)</b>, perder a la empresa líder derrumba la densidad a <b>0,0%</b> al instante. En cambio, en una <b>Red Simétrica</b> o en la <b>Red Láctea de Osorno</b>, el resto de los actores conserva sus vínculos horizontales y sobrevive.`,
+      `Argumento de oro para el <b>Control 4 (Dini, 2010)</b>: la política pública de fomento (CORFO / GORE) busca crear vínculos horizontales entre PyMEs precisamente para reducir la vulnerabilidad frente a la salida de un comprador único.`
+    );
+  } else if (den >= 99.5) {
+    renderPedBox("ped-dini",
+      `¡Red completamente saturada (<b>K<sub>${n}</sub></b>)! Existen los <b>${lMax} vínculos máximos posibles</b> (<b>D = 100%</b>), todos los actores tienen grado idéntico <b>k = ${n - 1}</b> y por eso el Gradiente de Concentración vuelve a <b>GC = 0,0%</b>.`,
+      `<b>Paradoja de la Densidad Máxima:</b> a medida que subes <b>n</b>, el número máximo de vínculos crece cuadráticamente como n(n−1)/2 (con n=5 son 10 vínculos, pero con n=15 son <b>105 vínculos</b>). En la realidad empresarial, mantener 100% de densidad con muchos actores es imposible por costos de transacción y reuniones.`,
+      `Por eso Dini (2010) propone el modelo de <b>Red de Redes</b> (Diagrama 3): clústeres pequeños con alta densidad interna unidos por pocos nodos puente.`
+    );
+  } else {
+    const diniPed = {
+      simetrica: [
+        `Con <b>n = ${n} actores</b> y <b>L = ${L} vínculos</b>, la densidad es <b>${fmtDec(den,1)}%</b> y el gradiente <b>GC = ${fmtDec(gc,1)}%</b>. Haz clic en dos nodos cualesquiera para romper la simetría y ver cómo sube GC al instante.`,
+        `<b>Ventaja oculta y límite práctico:</b> una red simétrica es extremadamente resiliente (prueba <i>Simular Quiebra del Líder</i>), pero tiene altos costos de coordinación porque toda decisión requiere consenso entre pares.`,
+        `Típica de <b>cooperativas de compras conjuntas o asociaciones de pequeños productores</b>. Recuerda el truco de examen: en matriz <b>dirigida</b> el mismo L da exactamente la <b>mitad</b> de densidad que en no dirigida.`
+      ],
+      liderazgo: [
+        `Estructura radial con <b>n = ${n}</b> y <b>L = ${L}</b> (<b>GC = ${fmtDec(gc,1)}%</b>): la <b>Empresa Líder</b> concentra los acuerdos (<b>k<sub>máx</sub> = ${kMax}</b>). Prueba subir <b>n</b> de 4 a 15: verás que en una estrella pura la densidad <b>baja</b> (2/n) mientras GC sigue clavado en <b>100%</b>.`,
+        `<b>La Fragilidad del Nodo Ancla:</b> aunque esta red es muy rápida para estandarizar calidad, sufre riesgo sistémico extremo: presiona <i>Simular Quiebra del Líder</i> arriba y mira cómo D cae a 0,0%.`,
+        `Clásico de grandes compradores agroindustriales que articulan proveedores individuales. En examen (Dini, 2010): demuestra que <b>GC = 100%</b> siempre corresponde a la topología estrella.`
+      ],
+      jerarquica: [
+        `En esta pirámide de <b>n = ${n} actores</b> (<b>D = ${fmtDec(den,1)}%</b>, <b>GC = ${fmtDec(gc,1)}%</b>), los contratistas intermedios actúan como <i>brokers</i> entre la Matriz Ancla y los talleres base (k = 1).`,
+        `<b>Paradoja del Cuello de Botella:</b> aunque la Matriz manda desde la cúspide, si un contratista filtra precios o tecnología, los talleres de la base no se enteran. Prueba hacer clic entre dos talleres de la base para crear cooperación horizontal y mira cómo baja GC.`,
+        `Frecuente en subcontratación forestal, construcción y metalmecánica. Para lograr <b>Upgrading funcional</b> (Padilla y Oddone), los talleres deben tejer vínculos horizontales entre sí.`
+      ],
+      red_redes: [
+        `Tres sub-redes locales cohesionadas (Osorno, Puerto Montt y Valdivia) se articulan a través de sus nodos líderes formando un triángulo interregional (<b>n = ${n}</b>, <b>D = ${fmtDec(den,1)}%</b>, <b>GC = ${fmtDec(gc,1)}%</b>).`,
+        `<b>Mundo Pequeño (Small-World):</b> combina alta confianza dentro de cada comuna (vínculos fuertes) con pocos saltos para transferir innovación entre ciudades distintas (puentes entre líderes).`,
+        `Corresponde al <b>Diagrama 3 de Dini (2010)</b> en <i>04 SPL.pdf</i>. Es el modelo objetivo de una política regional de articulación territorial cuando existen gremios locales ya consolidados.`
+      ],
+      aviones: [
+        `Una gran <b>Ensambladora</b> coordina líderes especializados por subsistema (Motores, Aviónica y Fuselaje), los cuales gestionan sus propios proveedores de nicho (<b>n = ${n}</b>, <b>GC = ${fmtDec(gc,1)}%</b>).`,
+        `<b>Modularidad Productiva:</b> la ensambladora no podría gestionar miles de talleres por sí sola (colapsaría en costos de transacción); por eso delega módulos complejos a líderes de primer nivel (<i>Tier-1</i>).`,
+        `Corresponde al <b>Diagrama 4 de Dini (2010)</b>. Explica cadenas globales de valor donde coexisten jerarquía tecnológica y cooperación especializada.`
+      ],
+      osorno: [
+        `La <b>Red Láctea-Quesera de Osorno</b> alcanza alta densidad (<b>D = ${fmtDec(den,1)}%</b>) y concentración moderada (<b>GC = ${fmtDec(gc,1)}%</b>) porque <i>Aproleche</i> y <i>Cooprinsem</i> actúan como doble núcleo articulador.`,
+        `<b>Por qué no colapsa ante un solo comprador:</b> prueba <i>Simular Quiebra del Líder</i> aquí y compáralo con la Estrella — al existir doble núcleo más <i>INIA Remehue</i>, la red sigue viva.`,
+        `Caso directo del <b>Control 4 (Prof. Mancilla)</b>: ilustra el paso de <b>Red Empresarial → Clúster → SPL</b> al sumar instituciones tecnológicas y gremiales al territorio.`
+      ],
+      pymemad: [
+        `En el <b>Clúster Forestal-Maderero PymeMad (Biobío)</b> (<b>D = ${fmtDec(den,1)}%</b>, <b>GC = ${fmtDec(gc,1)}%</b>), el gremio conecta aserraderos y plantas de remanufactura CLT con centros de I+D y logística.`,
+        `<b>Eficiencia Colectiva (Schmitz):</b> un aserradero PyME aislado no puede certificar madera estructural CLT ni exportar lotes grandes; al cooperar horizontalmente captura economías de escala.`,
+        `Caso aplicado del <b>Control 4</b>: recuerda validar el mapa de la cadena en entrevista sin imponer la palabra "clúster" ni preguntar por "debilidades" (usar "desafíos").`
+      ]
+    };
+    const dp = diniPed[diniKey] || diniPed.simetrica;
+    renderPedBox("ped-dini", dp[0], dp[1], dp[2]);
+  }
 }
 
 // ============================================================================
@@ -2667,7 +2976,7 @@ function drawIndicadoresU6() {
   );
 }
 
-drawDini();
+loadDiniTopology('simetrica', null);
 drawIndicadoresU6();
 renderMecanica();
 drawMapaTeoria();
