@@ -246,7 +246,7 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
   <!-- ====================================================================== -->
   <div id="panel-thunen" class="panel active">
     <div class="sec-title">
-      <span>VON THÜNEN A 60 FPS: RENTA LOCACIONAL LR(d) = Y(m − c) − Y·t·d, EDITOR DE ECUACIONES Y ANILLOS</span>
+      <span>Modelo de Von Thünen: Renta Locacional LR(d) = Y(m − c) − Y·t·d, Ecuaciones y Anillos</span>
       <div class="btn-bar">
         <button class="act-btn primary" onclick="animarThunen()">Reproducir Baja de Flete</button>
         <button class="act-btn" onclick="fijarGhostThunen()">Fijar Fantasma</button>
@@ -318,7 +318,7 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
   <!-- ====================================================================== -->
   <div id="panel-weber" class="panel">
     <div class="sec-title">
-      <span>WEBER A 60 FPS: TRIÁNGULO LOCACIONAL, ÍNDICE DE MATERIALES (IM) E ISODÁPANA CRÍTICA</span>
+      <span>Modelo de Weber: Triángulo Locacional, Índice de Materiales (IM) e Isodápana Crítica</span>
       <div class="btn-bar">
         <button class="act-btn primary" onclick="animarWeber()">Reproducir Aumento de IM</button>
         <button class="act-btn" onclick="presetWeber(45, 35, 35, 30)">IM &gt; 1 (Aserradero)</button>
@@ -359,7 +359,7 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
   <!-- ====================================================================== -->
   <div id="panel-krugman" class="panel">
     <div class="sec-title">
-      <span>KRUGMAN (1991) A 60 FPS: NUEVA ECONOMÍA GEOGRÁFICA, UMBRAL τ* Y MACROCEFALIA REGIONAL</span>
+      <span>Nueva Economía Geográfica (Krugman, 1991): Umbral de Transporte τ* y Centro-Periferia</span>
       <div class="btn-bar">
         <button class="act-btn primary" onclick="animarKrugman()">Reproducir Baja de Fletes (τ: 10 → 1)</button>
         <button class="act-btn" onclick="fijarGhostKrugman()">Fijar Fantasma</button>
@@ -396,7 +396,7 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
   <!-- ====================================================================== -->
   <div id="panel-perroux" class="panel">
     <div class="sec-title">
-      <span>PERROUX, MYRDAL Y HIRSCHMAN A 60 FPS: POLOS DE CRECIMIENTO, ENCADENAMIENTOS Y SPREAD VS. BACKWASH</span>
+      <span>Perroux, Myrdal y Hirschman: Polos de Crecimiento, Encadenamientos y Efectos Spread vs. Backwash</span>
       <div class="btn-bar">
         <button class="act-btn primary" onclick="presetPerroux('pymemad')">Clúster PymeMad Biobío</button>
         <button class="act-btn" onclick="presetPerroux('lacteo')">Complejo Lácteo Osorno</button>
@@ -436,7 +436,7 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
   <!-- ====================================================================== -->
   <div id="panel-christaller" class="panel">
     <div class="sec-title">
-      <span>CHRISTALLER (1933) A 60 FPS: UMBRAL DE DEMANDA Y ALCANCE ESPACIAL DE LUGARES CENTRALES</span>
+      <span>Teoría de los Lugares Centrales (Christaller, 1933): Umbral de Demanda y Alcance Espacial</span>
       <div class="btn-bar">
         <button class="act-btn primary" onclick="presetChris(120000, 90)">Orden Superior (Hospital/Univ.)</button>
         <button class="act-btn" onclick="presetChris(30000, 45)">Orden Intermedio (Banco/CFT)</button>
@@ -453,7 +453,7 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
     <div id="ch-diag" class="sol-box" style="margin-top:0;margin-bottom:10px;"></div>
 
     <div class="sec-title">
-      <span>GRANOVETTER (1973) A 60 FPS: VÍNCULOS FUERTES INTRALOCALES VS. PUENTES DÉBILES EXTRALOCALES (LOCK-IN)</span>
+      <span>Capital Social y Redes (Granovetter, 1973): Vínculos Fuertes Intralocales vs. Puentes Débiles</span>
       <div class="btn-bar">
         <button class="act-btn" onclick="presetGran(9, 1)">Red Endogámica (Lock-in)</button>
         <button class="act-btn primary" onclick="presetGran(8, 7)">SPL Innovador con Puentes I+D</button>
@@ -480,7 +480,7 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
   <!-- ====================================================================== -->
   <div id="panel-lorenz" class="panel">
     <div class="sec-title">
-      <span>DISPARIDADES REAT Y OT A 60 FPS: CURVA DE LORENZ, GINI, ENTROPÍA DE THEIL Y PRIMACÍA URBANA (IP4)</span>
+      <span>Disparidades Territoriales (REAT y OT): Curva de Lorenz, Gini, Entropía de Theil e Índice IP4</span>
       <div class="btn-bar">
         <button class="act-btn primary" onclick="presetLorenz('lagos')">Los Lagos (Censo 2024)</button>
         <button class="act-btn" onclick="presetLorenz('biobio')">Biobío (Censo 2024)</button>
@@ -519,7 +519,7 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
   <!-- ====================================================================== -->
   <div id="panel-dini" class="panel">
     <div class="sec-title">
-      <span>REDES EMPRESARIALES DE DINI (2010) A 60 FPS: ARMADO ANIMADO, DENSIDAD D Y GRADIENTE GC</span>
+      <span>Redes Empresariales (Dini, 2010): Topologías, Densidad de Red (D) y Gradiente de Concentración (GC)</span>
       <div class="btn-bar">
         <button class="act-btn primary" onclick="animarDini()">Play: Armar Vínculo a Vínculo</button>
         <button class="act-btn" onclick="completarDini()">Ver Red Completa</button>
@@ -564,7 +564,7 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
   <!-- ====================================================================== -->
   <div id="panel-mecanica" class="panel">
     <div class="sec-title">
-      <span>HOJA DE ENTRENAMIENTO MECÁNICO — DESARROLLO Y GESTIÓN TERRITORIAL (ULAGOS 2026)</span>
+      <span>Formulario y Entrenamiento Mecánico — Desarrollo y Gestión Territorial (ULagos 2026)</span>
       <div class="btn-bar">
         <button id="btn-modo-copia" class="act-btn primary" onclick="setModoMec(false)">Modo Copia (Todo Visible)</button>
         <button id="btn-modo-ciego" class="act-btn" onclick="setModoMec(true)">Modo Ciego (Autoevaluación)</button>
@@ -591,7 +591,7 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
     <div id="mec-container">
       <div class="mec-grid" id="mec-formulas-grid"></div>
       <div class="sec-title" style="margin-top:6px;">
-        <span>ESQUELETOS DE GRÁFICAS PARA COPIAR A MANO EN CUADERNO (6 DIAGRAMAS CLAVE DE EXAMEN)</span>
+        <span>Esqueletos de Gráficos Clave para Repaso en Cuaderno (6 diagramas)</span>
         <span style="font-size:11px;font-weight:600;color:#334155;">En Modo Ciego, haz clic en cada gráfico para revelar las etiquetas</span>
       </div>
       <div class="skel-grid" id="mec-skel-grid"></div>
@@ -603,7 +603,7 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
   <!-- ====================================================================== -->
   <div id="panel-lectura" class="panel">
     <div class="sec-title">
-      <span>MAPA CAUSAL INTERACTIVO (UNIDADES 1–5): CÓMO SE CONECTA TODA LA TEORÍA DEL RAMO</span>
+      <span>Mapa Conceptual Integrado — Desarrollo y Gestión Territorial (Unidades 1 a 5)</span>
       <div class="btn-bar">
         <button class="act-btn primary" onclick="activarEscenarioMapa('fletes')">Cadena A: Baja de Fletes (τ↓)</button>
         <button class="act-btn" onclick="activarEscenarioMapa('cluster')">Cadena B: Política Clúster / SPL</button>
@@ -616,7 +616,7 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
     <div id="mapa-detail-box" class="map-detail-card"></div>
 
     <div class="sec-title" style="margin-top:14px;">
-      <span>LECTURA GUIADA EN 3 CAPAS POR AUTOR Y BIBLIOGRAFÍA OFICIAL (SIN MUROS DE TEXTO)</span>
+      <span>Síntesis Teórica en 3 Capas por Autor y Bibliografía Oficial</span>
       <div class="btn-bar">
         <button id="cap-btn-core" class="act-btn primary" onclick="setCapaLectura('core')">Capa 1: Idea Central</button>
         <button id="cap-btn-bridge" class="act-btn" onclick="setCapaLectura('bridge')">Capa 2: Puentes Inter-Unidades</button>
@@ -637,7 +637,7 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
     <div class="lec-grid" id="lec-cards-grid"></div>
 
     <div class="sec-title" style="margin-top:14px;">
-      <span>ENTRENADOR DE CONTROL DE LECTURA CRUZADO (10 PREGUNTAS QUE RELACIONAN UNIDADES)</span>
+      <span>Control de Lectura y Aplicación Cruzada (10 preguntas integradas)</span>
       <div class="btn-bar">
         <span id="qz-score" class="pill-score">Aciertos: 0 / 10</span>
         <button class="act-btn" onclick="toggleSoloErradasQz(this)">Ver Solo Pendientes / Erradas</button>
