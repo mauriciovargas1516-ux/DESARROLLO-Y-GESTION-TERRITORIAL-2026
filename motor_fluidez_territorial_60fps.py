@@ -228,6 +228,19 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
   .ped-card.p-cur .ped-hd { color: #6D28D9; }
   .ped-card.p-def .ped-hd { color: #065F46; }
   .ped-card b { color: #0F172A; }
+  /* === UNIDAD VI: INDICADORES DE DESARROLLO (MÍN-MÁX) === */
+  .u6-grid { display: grid; grid-template-columns: 1.15fr 1fr; gap: 12px; align-items: start; margin-top: 8px; }
+  @media (max-width: 880px) { .u6-grid { grid-template-columns: 1fr; } }
+  .u6-tbl { width: 100%; border-collapse: collapse; font-size: 11.2px; }
+  .u6-tbl th { background: #1E293B; color: #FFFFFF; padding: 5px 6px; border: 1px solid #CBD5E1; text-align: center; font-weight: 700; }
+  .u6-tbl td { padding: 4px 6px; border: 1px solid #E2E8F0; text-align: right; font-family: Consolas, monospace; color: #0F172A; }
+  .u6-tbl td:first-child { text-align: left; font-family: inherit; font-weight: 700; background: #F8FAFC; }
+  .u6-tbl tr.u6-top td { background: #F0FDF4; }
+  .u6-tbl tr.u6-bot td { background: #FEF2F2; }
+  .u6-rk-up { color: #15803D; font-weight: 800; }
+  .u6-rk-dn { color: #DC2626; font-weight: 800; }
+  .u6-rk-eq { color: #64748B; }
+  .u6-pill-row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-bottom: 9px; }
 
   @media print {
     body { background: #FFFFFF !important; }
@@ -248,21 +261,22 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
 <body>
 <div class="wrap">
   <div class="top-tabs">
-    <button class="tab-btn active" onclick="openTab('thunen', this)">1. Von Thünen y Ecuaciones LR</button>
-    <button class="tab-btn" onclick="openTab('weber', this)">2. Weber (IM e Isodápana)</button>
-    <button class="tab-btn" onclick="openTab('krugman', this)">3. Krugman (Centro-Periferia)</button>
-    <button class="tab-btn" onclick="openTab('perroux', this)">4. Perroux, Myrdal y Hirschman</button>
-    <button class="tab-btn" onclick="openTab('christaller', this)">5. Christaller y Granovetter</button>
-    <button class="tab-btn" onclick="openTab('lorenz', this)">6. Lorenz, Gini, Theil e IP4</button>
-    <button class="tab-btn" onclick="openTab('dini', this)">7. Redes Dini 2010 (Animado)</button>
-    <button class="tab-btn" onclick="openTab('mecanica', this)">8. Hoja Mecánica (Modo Ciego)</button>
-    <button class="tab-btn" onclick="openTab('lectura', this)">9. Mapa Teórico y Lectura Viva</button>
+    <button class="tab-btn active" onclick="openTab('perroux', this)">U.I · Crecimiento y Polos (Perroux/Myrdal)</button>
+    <button class="tab-btn" onclick="openTab('thunen', this)">U.II · Von Thünen (Anillos LR)</button>
+    <button class="tab-btn" onclick="openTab('weber', this)">U.II · Weber (IM e Isodápana)</button>
+    <button class="tab-btn" onclick="openTab('krugman', this)">U.II · Krugman (Centro-Periferia)</button>
+    <button class="tab-btn" onclick="openTab('christaller', this)">U.II–IV · Christaller y Granovetter</button>
+    <button class="tab-btn" onclick="openTab('lorenz', this)">U.III–V · Lorenz, Gini, Theil e IP4</button>
+    <button class="tab-btn" onclick="openTab('dini', this)">U.IV · Redes Dini 2010 (SPL)</button>
+    <button class="tab-btn" onclick="openTab('indicadores', this)">U.VI · Indicadores Mín-Máx (Nuevo)</button>
+    <button class="tab-btn" onclick="openTab('mecanica', this)">Formulario (Modo Ciego)</button>
+    <button class="tab-btn" onclick="openTab('lectura', this)">Mapa Teórico (U.I–VI) y Lectura</button>
   </div>
 
   <!-- ====================================================================== -->
   <!-- PANEL 1: VON THÜNEN + EDITOR LIBRE DE ECUACIONES LR(d)                 -->
   <!-- ====================================================================== -->
-  <div id="panel-thunen" class="panel active">
+  <div id="panel-thunen" class="panel">
     <div class="sec-title">
       <span>Modelo de Von Thünen: Renta Locacional LR(d) = Y(m − c) − Y·t·d, Ecuaciones y Anillos</span>
       <div class="btn-bar">
@@ -415,7 +429,7 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
   <!-- ====================================================================== -->
   <!-- PANEL 4: PERROUX, MYRDAL Y HIRSCHMAN (MULTIPLICADOR 5 RONDAS 60 FPS)   -->
   <!-- ====================================================================== -->
-  <div id="panel-perroux" class="panel">
+  <div id="panel-perroux" class="panel active">
     <div class="sec-title">
       <span>Perroux, Myrdal y Hirschman: Polos de Crecimiento, Encadenamientos y Efectos Spread vs. Backwash</span>
       <div class="btn-bar">
@@ -584,6 +598,69 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
     <div id="ped-dini" class="ped-grid"></div>
   </div>
 
+
+  <!-- ====================================================================== -->
+  <!-- PANEL U.VI: INDICADORES DE DESARROLLO (MÍNIMO-MÁXIMO Y PONDERACIONES)  -->
+  <!-- ====================================================================== -->
+  <div id="panel-indicadores" class="panel">
+    <div class="sec-title">
+      <span>Unidad VI — Indicadores de Desarrollo: Normalización Mínimo-Máximo [0, 1], Sentido y Ponderaciones</span>
+      <div class="btn-bar">
+        <button class="act-btn primary" onclick="presetU6('base50')">Caso Clase 50 / 50</button>
+        <button class="act-btn" onclick="presetU6('base70')">Caso Clase 70 / 30</button>
+        <button class="act-btn" onclick="presetU6('inv_v2')">Invertir v2 (Desfavorable −)</button>
+        <button class="act-btn" onclick="presetU6('outlier3000')">Prueba Outlier (Escala 200 → 3.000)</button>
+      </div>
+    </div>
+
+    <details class="enun-box" open>
+      <summary>
+        <span>Ejercicio Oficial Unidad VI (ejemplo.xlsx — 15 Provincias: Arica a Marga Marga · Caso ACP)</span>
+        <span class="enun-badge">u+(x) = (x − mín)/(máx − mín) · u−(x) = (máx − x)/(máx − mín)</span>
+      </summary>
+      <div class="enun-body" id="u6-enunciado"></div>
+    </details>
+
+    <div class="sliders-grid">
+      <div class="sl-card">
+        <div class="sl-head"><span>Peso Variable v1 (w1) / v2 (w2)</span><span id="u6-w1-v" class="sl-val">50% / 50%</span></div>
+        <input id="u6-w1" type="range" min="0" max="100" step="5" value="50" oninput="drawIndicadoresU6()" />
+      </div>
+      <div class="sl-card">
+        <div class="sl-head"><span>Sentido de v1</span><span id="u6-s1-v" class="sl-val">Favorable (+)</span></div>
+        <div class="btn-bar" style="margin-top:4px;">
+          <button id="u6-s1-pos" class="act-btn primary" onclick="setSentidoU6(1, 1)">Favorable (+)</button>
+          <button id="u6-s1-neg" class="act-btn" onclick="setSentidoU6(1, -1)">Desfavorable (−)</button>
+        </div>
+      </div>
+      <div class="sl-card">
+        <div class="sl-head"><span>Sentido de v2</span><span id="u6-s2-v" class="sl-val">Favorable (+)</span></div>
+        <div class="btn-bar" style="margin-top:4px;">
+          <button id="u6-s2-pos" class="act-btn primary" onclick="setSentidoU6(2, 1)">Favorable (+)</button>
+          <button id="u6-s2-neg" class="act-btn" onclick="setSentidoU6(2, -1)">Desfavorable (−)</button>
+        </div>
+      </div>
+      <div class="sl-card">
+        <div class="sl-head"><span>Shock Outlier en Líder v1 (× mult)</span><span id="u6-out-v" class="sl-val">1,0x (Original)</span></div>
+        <input id="u6-out" type="range" min="1.0" max="5.0" step="0.25" value="1.0" oninput="drawIndicadoresU6()" />
+      </div>
+    </div>
+
+    <div class="kpis">
+      <div class="kpi" style="border-left-color:#15803D;"><div class="kpi-lbl">1° Lugar del Ranking (#1)</div><div id="u6-k-top" class="kpi-val">Antofagasta</div><div id="u6-k-topv" class="kpi-sub">Índice = 0,852</div></div>
+      <div class="kpi" style="border-left-color:#DC2626;"><div class="kpi-lbl">Último Lugar (#15)</div><div id="u6-k-bot" class="kpi-val">Petorca</div><div id="u6-k-botv" class="kpi-sub">Índice = 0,000</div></div>
+      <div class="kpi" style="border-left-color:#1D4ED8;"><div class="kpi-lbl">Promedio Normalizado (15 prov.)</div><div id="u6-k-avg" class="kpi-val">0,393</div><div id="u6-k-avg2" class="kpi-sub">Sensibilidad a outliers</div></div>
+      <div class="kpi" style="border-left-color:#7C3AED;"><div class="kpi-lbl">Cambios vs. Escenario 50/50</div><div id="u6-k-chg" class="kpi-val">0 provincias</div><div id="u6-k-chg2" class="kpi-sub">Estabilidad de ponderación</div></div>
+    </div>
+
+    <div class="u6-grid">
+      <div class="svg-box"><svg id="svg-u6" viewBox="0 0 560 440"></svg></div>
+      <div id="u6-tbl-box" style="max-height:445px;overflow-y:auto;"></div>
+    </div>
+    <div id="u6-sol" class="sol-box"></div>
+    <div id="ped-u6" class="ped-grid"></div>
+  </div>
+
   <!-- ====================================================================== -->
   <!-- PANEL 8: HOJA DE ENTRENAMIENTO MECÁNICO TERRITORIAL (MODO CIEGO)       -->
   <!-- ====================================================================== -->
@@ -602,15 +679,16 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
       <div style="font-size:12px;color:#334155;">
         <b>Método de cuaderno:</b> copia cada fórmula y esqueleto varias veces; luego activa <b>Modo Ciego</b>, escríbelos sin mirar y haz clic en cada recuadro para comprobar y marcar <b>✓</b>.
       </div>
-      <span id="mec-score" class="pill-score">Dominadas: 0 / 16</span>
+      <span id="mec-score" class="pill-score">Dominadas: 0 / 18</span>
     </div>
 
     <div class="mec-filters">
-      <button class="flt-btn active" onclick="filtrarMec('all', this)">Todas (16)</button>
-      <button class="flt-btn" onclick="filtrarMec('loc', this)">I. Localización y Polos (4)</button>
-      <button class="flt-btn" onclick="filtrarMec('ilpes', this)">II. Análisis Regional ILPES/MADE (5)</button>
-      <button class="flt-btn" onclick="filtrarMec('reat', this)">III. Disparidades REAT (4)</button>
-      <button class="flt-btn" onclick="filtrarMec('ot', this)">IV. Redes Dini y Ordenamiento OT (3)</button>
+      <button class="flt-btn active" onclick="filtrarMec('all', this)">Todas (18)</button>
+      <button class="flt-btn" onclick="filtrarMec('ilpes', this)">U.I · Crecimiento ILPES/MADE (5)</button>
+      <button class="flt-btn" onclick="filtrarMec('loc', this)">U.II · Localización y Polos (4)</button>
+      <button class="flt-btn" onclick="filtrarMec('reat', this)">U.III · Disparidades REAT (4)</button>
+      <button class="flt-btn" onclick="filtrarMec('ot', this)">U.IV–V · Redes Dini y OT (3)</button>
+      <button class="flt-btn" onclick="filtrarMec('ind', this)">U.VI · Indicadores Mín-Máx (2)</button>
     </div>
 
     <div id="mec-container">
@@ -628,11 +706,11 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
   <!-- ====================================================================== -->
   <div id="panel-lectura" class="panel">
     <div class="sec-title">
-      <span>Mapa Conceptual Integrado — Desarrollo y Gestión Territorial (Unidades 1 a 5)</span>
+      <span>Mapa Conceptual Integrado — Programa Oficial Desarrollo y Gestión Territorial (Unidades I a VI)</span>
       <div class="btn-bar">
         <button class="act-btn primary" onclick="activarEscenarioMapa('fletes')">Cadena A: Baja de Fletes (τ↓)</button>
         <button class="act-btn" onclick="activarEscenarioMapa('cluster')">Cadena B: Política Clúster / SPL</button>
-        <button class="act-btn" onclick="activarEscenarioMapa('prot')">Cadena C: Planificación PROT + OT</button>
+        <button class="act-btn" onclick="activarEscenarioMapa('prot')">Cadena C: OT + Índice Desarrollo</button>
         <button class="act-btn" onclick="selectUnidadMapa('U1')">Ver Todo Libre</button>
       </div>
     </div>
@@ -651,20 +729,21 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
     </div>
 
     <div class="mec-filters">
-      <button class="flt-btn active" onclick="filtrarLectura('all', this)">Todos los Autores (6)</button>
-      <button class="flt-btn" onclick="filtrarLectura('U1', this)">U1: Localización y Polos (2)</button>
-      <button class="flt-btn" onclick="filtrarLectura('U2', this)">U2: ILPES / Silva Lira (1)</button>
-      <button class="flt-btn" onclick="filtrarLectura('U3', this)">U3: REAT / Markov (1)</button>
-      <button class="flt-btn" onclick="filtrarLectura('U4', this)">U4: Dini / Cadenas / ELITE (1)</button>
-      <button class="flt-btn" onclick="filtrarLectura('U5', this)">U5: OT / Rondinelli / PROT (1)</button>
+      <button class="flt-btn active" onclick="filtrarLectura('all', this)">Todas las Unidades (7)</button>
+      <button class="flt-btn" onclick="filtrarLectura('U1', this)">U.I: Crecimiento e ILPES (2)</button>
+      <button class="flt-btn" onclick="filtrarLectura('U2', this)">U.II: Espacio y Localización (1)</button>
+      <button class="flt-btn" onclick="filtrarLectura('U3', this)">U.III: Disparidades y REAT (1)</button>
+      <button class="flt-btn" onclick="filtrarLectura('U4', this)">U.IV: SPL y Cadenas (1)</button>
+      <button class="flt-btn" onclick="filtrarLectura('U5', this)">U.V: Ordenamiento OT (1)</button>
+      <button class="flt-btn" onclick="filtrarLectura('U6', this)">U.VI: Indicadores Mín-Máx (1)</button>
     </div>
 
     <div class="lec-grid" id="lec-cards-grid"></div>
 
     <div class="sec-title" style="margin-top:14px;">
-      <span>Control de Lectura y Aplicación Cruzada (10 preguntas integradas)</span>
+      <span>Control de Lectura y Aplicación Cruzada (12 preguntas integradas)</span>
       <div class="btn-bar">
-        <span id="qz-score" class="pill-score">Aciertos: 0 / 10</span>
+        <span id="qz-score" class="pill-score">Aciertos: 0 / 12</span>
         <button class="act-btn" onclick="toggleSoloErradasQz(this)">Ver Solo Pendientes / Erradas</button>
         <button class="act-btn" onclick="resetQuizLectura()">Reiniciar Control</button>
       </div>
@@ -769,6 +848,7 @@ function openTab(name, btn) {
   if (name === "christaller") drawChrisGran();
   if (name === "lorenz") drawLorenz();
   if (name === "dini") drawDini();
+  if (name === "indicadores") drawIndicadoresU6();
   if (name === "mecanica") renderMecanica();
   if (name === "lectura") { drawMapaTeoria(); renderLecturaCards(); renderQuizLectura(); }
 }
@@ -1859,7 +1939,14 @@ const FORMULAS_TERR = [
     rule: "Escala Mancilla (0–3): <0,65 Muy Disp.(0) · 0,65–1,00 Disp.(1) · 1,00–1,50 Conc.(2) · ≥1,50 Macrocefalia(3)." },
   { id: 16, cat: "ot", tag: "Rondinelli", title: "16. Escalograma de Guttman y Centralidad Rondinelli",
     eq: `W<sub>k</sub> = <span class="frac"><span class="num">100</span><span class="den">f<sub>k</sub></span></span> &nbsp;|&nbsp; IC<sub>i</sub> = ∑<sub>k</sub> X<sub>ik</sub> · W<sub>k</sub>`,
-    rule: "X_ik ∈ {0,1}. Variables deben discriminar entre comunas (si todas tienen 1, reemplazar). Servicios más raros otorgan mayor peso Wk." }
+    rule: "X_ik ∈ {0,1}. Variables deben discriminar entre comunas (si todas tienen 1, reemplazar). Servicios más raros otorgan mayor peso Wk." },
+
+  { id: 17, cat: "ind", tag: "Unidad VI", title: "17. Normalización Mínimo–Máximo (Favorable vs. Desfavorable)",
+    eq: `u<sup>+</sup>(x<sub>i</sub>) = <span class="frac"><span class="num">x<sub>i</sub> − mín</span><span class="den">máx − mín</span></span> &nbsp;|&nbsp; u<sup>−</sup>(x<sub>i</sub>) = <span class="frac"><span class="num">máx − x<sub>i</sub></span><span class="den">máx − mín</span></span>`,
+    rule: "Lleva cualquier escala (ej. 200–3.000 o %) al intervalo [0, 1]. Favorable (+): el valor más alto da 1; Desfavorable (−): el valor más bajo da 1." },
+  { id: 18, cat: "ind", tag: "Unidad VI", title: "18. Índice Compuesto Ponderado y Ranking Territorial",
+    eq: `I<sub>i</sub> = ∑<sub>k</sub> w<sub>k</sub> · u<sub>k</sub>(x<sub>ik</sub>) &nbsp;&nbsp;(∑ w<sub>k</sub> = 1)`,
+    rule: "Un territorio solo alcanza I = 1,00 si es líder simultáneo en todas las variables. Cambiar pesos (ej. 50/50 → 70/30) altera el ranking." }
 ];
 
 const ESQUELETOS_TERR = [
@@ -2014,85 +2101,92 @@ drawLorenz();
 // ============================================================================
 const MAPA_UNIDADES = {
   U1: {
-    id: "U1", x: 130, y: 95, w: 205, h: 74, col: "#1D4ED8",
-    lbl: "U1. LOCALIZACIÓN Y POLOS",
-    sub: "Von Thünen · Weber · Krugman\nPerroux · Myrdal · Christaller",
-    explica: "Explica por qué las actividades económicas NO se distribuyen de forma homogénea en el espacio: costos de transporte (t, τ), economías de escala, pérdida de peso (IM) y polos motrices generan anillos productivos y concentración en núcleos.",
-    puentes: "<b>→ Hacia U2:</b> la localización de plantas crea especialización sectorial medible con Q<sub>ij</sub> &gt; 1 y Base Exportadora (X<sub>j</sub>). <b>→ Hacia U3:</b> cuando τ ≤ τ* (Krugman) o Backwash &gt; Spread (Myrdal), se amplían las disparidades (Gini/Theil). <b>→ Hacia U5:</b> el umbral y alcance de Christaller fundamentan la jerarquía de centros urbanos de Rondinelli.",
-    jumps: [["thunen", "Abrir Von Thünen"], ["weber", "Abrir Weber"], ["krugman", "Abrir Krugman"], ["perroux", "Abrir Perroux/Myrdal"], ["christaller", "Abrir Christaller"]]
+    id: "U1", x: 165, y: 86, w: 255, h: 74, col: "#0F766E",
+    lbl: "U.I · CRECIMIENTO TERRITORIAL",
+    sub: "Manual 59 ILPES · Silva Lira (2005)\nQij · Qr · MADE · Perroux/Hirschman",
+    explica: "Analiza la estructura productiva y el dinamismo de los territorios usando matrices Sector × Comuna (SII / BCCh): vocación exportadora (Q<sub>ij</sub> &gt; 1), diversificación (Q<sub>r</sub>), cambio estructural (CR<sub>r</sub>), polos motrices, Silva Lira (4 cuadrantes) y Shift &amp; Share (EE + ED).",
+    puentes: "<b>→ Hacia U.II:</b> la concentración sectorial observada se explica por los costos de transporte y economías de escala. <b>→ Hacia U.III:</b> las comunas Emergentes (Cuadrante II Silva Lira) son el motor empírico de la Convergencia β. <b>→ Hacia U.VI:</b> el PIB per cápita y dinamismo alimentan los índices sintéticos de desarrollo.",
+    jumps: [["perroux", "Abrir Polos (U.I)"], ["mecanica", "Ver Fórmulas ILPES/MADE"]]
   },
   U2: {
-    id: "U2", x: 490, y: 78, w: 215, h: 74, col: "#0F766E",
-    lbl: "U2. ANÁLISIS REGIONAL ILPES",
-    sub: "Manual 59 (Lira & Quiroga)\nQij · Qr · Xj/Mj · Silva Lira · MADE",
-    explica: "Traduce la geografía productiva en indicadores empíricos sobre matrices Sector × Comuna (SII 2014–2024): detecta rubros exportadores (Q<sub>ij</sub> &gt; 1), diversificación (Q<sub>r</sub>), cambio estructural (CR<sub>r</sub>) y descompone el crecimiento en Efecto Estructural (EE) y Competitividad Local (ED).",
-    puentes: "<b>← Desde U1:</b> un polo motriz (Perroux) eleva el multiplicador básico M<sub>j</sub>. <b>→ Hacia U3:</b> los Cuadrantes de Silva Lira (Emergentes vs. Estancadas) anticipan si habrá Convergencia β. <b>→ Hacia U4:</b> un Efecto Diferencial positivo (ED<sub>j</sub> &gt; 0) refleja competitividad local impulsada por redes y Upgrading.",
-    jumps: [["mecanica", "Ver Fórmulas ILPES/MADE"]]
+    id: "U2", x: 490, y: 86, w: 255, h: 74, col: "#1D4ED8",
+    lbl: "U.II · ESPACIO Y LOCALIZACIÓN",
+    sub: "Duch Brown (2005) · Von Thünen\nWeber · Christaller · Krugman (1991)",
+    explica: "Explica por qué la actividad económica se aglomera o se dispersa en el espacio: anillos de renta locacional LR(d), triangulación de costos de transporte e isodápana crítica (IM), umbral/alcance de ciudades y bifurcación Centro-Periferia cuando cae el transporte τ ≤ τ*.",
+    puentes: "<b>→ Hacia U.III:</b> si τ ≤ τ* (Krugman), se dispara la concentración regional (suben Gini, Theil y HHI). <b>→ Hacia U.V:</b> el umbral y alcance de Christaller fundamentan la jerarquía de servicios de Rondinelli/Guttman.",
+    jumps: [["thunen", "Abrir Von Thünen"], ["weber", "Abrir Weber"], ["krugman", "Abrir Krugman"]]
   },
   U3: {
-    id: "U3", x: 850, y: 95, w: 205, h: 74, col: "#B91C1C",
-    lbl: "U3. DISPARIDADES (REAT)",
-    sub: "Convergencia σ y β · Lorenz/Gini\nTheil · HHI / HKα · Markov",
-    explica: "Evalúa si las brechas entre territorios se cierran o se amplían en el tiempo: Convergencia Sigma (cae dispersión σ), Convergencia Beta (rezagados crecen más rápido, β &lt; 0), desigualdad (Gini y Theil descomponible), concentración (HHI, HK<sub>α</sub>) y transiciones de largo plazo (Markov).",
-    puentes: "<b>← Desde U1 y U2:</b> la macrocefalia de Krugman o el estancamiento estructural (Tipo IV Boisier) elevan el Gini y el HHI. <b>→ Hacia U5:</b> alta desigualdad territorial justifica políticas de descentralización y Ordenamiento Territorial (PROT).",
+    id: "U3", x: 815, y: 86, w: 255, h: 74, col: "#B91C1C",
+    lbl: "U.III · DISPARIDADES Y REAT",
+    sub: "Convergencia σ y β · Lorenz/Gini\nTheil · HHI/HKα · Figueroa · Riquelme",
+    explica: "Evalúa si las brechas entre territorios se cierran o amplían: Convergencia Sigma (dispersión σ), Convergencia Beta (β &lt; 0), desigualdad (Gini y Theil descomponible inter/intra-región), concentración espacial (HHI, HK<sub>α</sub>) y cadenas de Markov.",
+    puentes: "<b>← Desde U.I y U.II:</b> cuantifica las brechas que nacen de la aglomeración y los polos. <b>→ Hacia U.V y U.VI:</b> la desigualdad territorial sustenta el Ordenamiento Territorial (PROT) y exige indicadores multidimensionales comparables.",
     jumps: [["lorenz", "Abrir Lorenz, Gini y Theil"]]
   },
   U4: {
-    id: "U4", x: 300, y: 245, w: 235, h: 74, col: "#7C3AED",
-    lbl: "U4. SPL, REDES Y CADENAS",
-    sub: "Dini (2010) · Schmitz · Granovetter\nPadilla & Oddone · ELITE (Boisier)",
-    explica: "Aporta la palanca territorial para competir desde las PyMEs: pasar de empresas aisladas a Red Empresarial → Clúster → SPL, combinando vínculos fuertes (confianza) con vínculos débiles (innovación/I+D), escalamiento (Upgrading) y gobernanza interinstitucional (ELITE).",
-    puentes: "<b>→ Hacia U1 y U2:</b> la cooperación horizontal (Aproleche, PymeMad) eleva los encadenamientos locales (b + f) y mejora el Efecto Diferencial (ED<sub>j</sub>). <b>→ Hacia U3:</b> el Upgrading de comunas intermedias impulsa convergencia regional.",
+    id: "U4", x: 165, y: 235, w: 255, h: 74, col: "#7C3AED",
+    lbl: "U.IV · SPL, REDES Y CADENAS",
+    sub: "Dini (2010) · Granovetter · UCINET\nCadenas de Valor (CEPAL) · ELITE",
+    explica: "Aporta la palanca productiva e institucional para que las PyMEs compitan: cooperación horizontal (Red → Clúster → SPL), puentes débiles para innovación (evitar <i>lock-in</i>), escalamiento (Upgrading) y densidad/gradiente de concentración en UCINET.",
+    puentes: "<b>→ Hacia U.I y U.III:</b> las redes empresariales (Aproleche, PymeMad) elevan los encadenamientos (b+f) y la competitividad local (ED<sub>j</sub> &gt; 0), impulsando convergencia territorial.",
     jumps: [["dini", "Abrir Redes Dini 2010"], ["christaller", "Abrir Granovetter"]]
   },
   U5: {
-    id: "U5", x: 685, y: 245, w: 235, h: 74, col: "#B45309",
-    lbl: "U5. ORDENAMIENTO OT / PROT",
-    sub: "Primacía IP4 · Ley de Zipf\nGuttman/Rondinelli · Aislamiento · PROT",
-    explica: "Ordena el sistema de asentamientos humanos y resuelve conflictos de uso del suelo (Sistemas Costero, Urbano, Rural y Cuencas) mediante diagnóstico de macrocefalia (IP<sub>4</sub>), jerarquía de servicios (Guttman/Rondinelli) y conectividad vial (Matriz de Aislamiento 0/1).",
-    puentes: "<b>← Desde U1 y U3:</b> traduce la aglomeración de Krugman y el Gini en Primacía Urbana (IP<sub>4</sub> escala 0–3). <b>→ Hacia U1 y U4:</b> reducir el aislamiento vial y dotar equipamiento intermedio amplía el alcance (Christaller) y fortalece el entorno del SPL.",
-    jumps: [["lorenz", "Abrir Primacía IP4"], ["mecanica", "Abrir Hoja Mecánica"]]
+    id: "U5", x: 490, y: 235, w: 255, h: 74, col: "#B45309",
+    lbl: "U.V · ORDENAMIENTO OT / PROT",
+    sub: "06 OT 2026 · Primacía IP4 · Zipf\nGuttman/Rondinelli · Aislamiento · PROT",
+    explica: "Diagnostica la red de asentamientos humanos y resuelve conflictos de uso del suelo (Sistemas Costero, Urbano, Rural y Cuencas) usando Primacía Urbana (IP<sub>4</sub> escala 0–3), centralidad funcional (Rondinelli) y Matriz de Aislamiento vial.",
+    puentes: "<b>← Desde U.II y U.III:</b> traduce la aglomeración en IP<sub>4</sub> y jerarquías urbanas. <b>→ Hacia U.VI:</b> los indicadores de equipamiento y aislamiento se normalizan en [0,1] para construir índices sintéticos comunales.",
+    jumps: [["lorenz", "Abrir Primacía IP4"], ["mecanica", "Ver Fórmulas OT"]]
+  },
+  U6: {
+    id: "U6", x: 815, y: 235, w: 255, h: 74, col: "#15803D",
+    lbl: "U.VI · INDICADORES DESARROLLO",
+    sub: "Normalización Mín–Máx [0, 1]\nFavorable (+) / Desfavorable (−) · Pesos",
+    explica: "Integra múltiples variables en distintas unidades (pesos, %, tasas, distancias) en un único Índice Sintético entre 0 y 1 mediante estandarización Mínimo–Máximo, distinguiendo sentido favorable vs. desfavorable y evaluando la sensibilidad del ranking ante cambios de ponderación (50/50 vs. 70/30).",
+    puentes: "<b>← Desde U.I, U.III y U.V:</b> sintetiza indicadores de crecimiento, desigualdad, equipamiento y aislamiento en un ranking territorial comparable para priorizar inversión pública regional.",
+    jumps: [["indicadores", "Abrir Laboratorio Mín-Máx (U.VI)"]]
   }
 };
 
 const MAPA_EDGES = [
-  { a: "U1", b: "U2", lbl: "Especialización Qij" },
-  { a: "U2", b: "U3", lbl: "Silva Lira → β/σ" },
-  { a: "U1", b: "U3", lbl: "τ ≤ τ* → Gini↑" },
-  { a: "U4", b: "U2", lbl: "Upgrading → EDj+" },
-  { a: "U4", b: "U1", lbl: "Encadenam. b+f" },
+  { a: "U1", b: "U2", lbl: "Localización ↔ Qij" },
+  { a: "U2", b: "U3", lbl: "τ ≤ τ* → Gini↑" },
+  { a: "U1", b: "U4", lbl: "EDj+ ↔ Redes" },
+  { a: "U4", b: "U5", lbl: "SPL + Gobernanza" },
   { a: "U3", b: "U5", lbl: "Brecha → OT/PROT" },
-  { a: "U5", b: "U1", lbl: "Rondinelli/Umbral" },
-  { a: "U4", b: "U5", lbl: "SPL + Gobernanza" }
+  { a: "U3", b: "U6", lbl: "Variables → [0,1]" },
+  { a: "U5", b: "U6", lbl: "OT → Ranking U.VI" },
+  { a: "U2", b: "U5", lbl: "Umbral/Rondinelli" }
 ];
 
 const ESCENARIOS_MAPA = {
   fletes: {
     titulo: "Cadena A: Shock de Baja en Costos de Transporte (τ ↓)",
-    nodes: ["U1", "U3", "U5"],
-    edges: [["U1", "U3"], ["U3", "U5"], ["U5", "U1"]],
-    texto: "<b>1) En U1 (Krugman):</b> al caer τ por debajo del umbral crítico τ*, se disparan las fuerzas centrípetas y las empresas se aglomeran en la capital regional (<i>Backwash</i>). " +
-           "<b>2) En U3 (REAT):</b> aumenta la dispersión σ, la Curva de Lorenz se curva hacia abajo (suben Gini, Theil y HHI) y aparece divergencia. " +
-           "<b>3) En U5 (OT):</b> el Índice de Primacía IP<sub>4</sub> salta al tramo ≥ 1,50 (Valor 3: Macrocefalia), exigiendo políticas PROT de reequilibrio hacia ciudades intermedias.",
+    nodes: ["U2", "U3", "U5"],
+    edges: [["U2", "U3"], ["U3", "U5"], ["U2", "U5"]],
+    texto: "<b>1) En U.II (Krugman):</b> al caer τ bajo τ*, predominan las fuerzas centrípetas y las firmas se concentran en la capital regional. " +
+           "<b>2) En U.III (REAT):</b> sube la dispersión σ y la Curva de Lorenz se abomba (suben Gini, Theil y HHI). " +
+           "<b>3) En U.V (OT):</b> el Índice de Primacía IP<sub>4</sub> salta al tramo ≥ 1,50 (Macrocefalia), exigiendo políticas PROT de reequilibrio.",
     jumps: [["krugman", "Probar τ ↓ en Krugman"], ["lorenz", "Ver IP4 y Gini subir"]]
   },
   cluster: {
     titulo: "Cadena B: Política de Clúster, Puentes I+D y Upgrading (SPL)",
-    nodes: ["U4", "U2", "U3"],
-    edges: [["U4", "U2"], ["U2", "U3"]],
-    texto: "<b>1) En U4 (Dini + Granovetter + Padilla/Oddone):</b> un gremio articulador (ej. PymeMad o Aproleche) abre vínculos débiles con universidades/I+D, evita el <i>lock-in</i> y ejecuta Upgrading de proceso y producto. " +
-           "<b>2) En U2 (ILPES/MADE):</b> la comuna mejora su competitividad local (Efecto Diferencial ED<sub>j</sub> &gt; 0) y pasa a Cuadrante II (Emergente) o I (Dinámica) en Silva Lira. " +
-           "<b>3) En U3 (REAT):</b> el mayor crecimiento de comunas no capitales empuja la pendiente β &lt; 0 (Convergencia Beta).",
+    nodes: ["U4", "U1", "U3"],
+    edges: [["U1", "U4"], ["U1", "U2"], ["U2", "U3"]],
+    texto: "<b>1) En U.IV (Dini + Granovetter):</b> un gremio articulador (PymeMad o Aproleche) abre vínculos débiles con universidades/I+D, evita el <i>lock-in</i> y hace Upgrading. " +
+           "<b>2) En U.I (ILPES/MADE):</b> la comuna mejora su competitividad local (ED<sub>j</sub> &gt; 0) y salta a Cuadrante II (Emergente) o I (Dinámica) en Silva Lira. " +
+           "<b>3) En U.III (REAT):</b> el mayor dinamismo de comunas intermedias impulsa la Convergencia Beta (β &lt; 0).",
     jumps: [["dini", "Probar Red Dini"], ["christaller", "Probar Puentes Granovetter"]]
   },
   prot: {
-    titulo: "Cadena C: Planificación PROT + Reducción de Aislamiento Vial",
-    nodes: ["U5", "U1", "U4"],
-    edges: [["U5", "U1"], ["U4", "U5"], ["U4", "U1"]],
-    texto: "<b>1) En U5 (OT/PROT):</b> el diagnóstico de Rondinelli/Guttman y la Matriz de Aislamiento detectan comunas con déficit de servicios intermedios y baja conectividad (índice alto de 1s). " +
-           "<b>2) En U1 (Christaller + Von Thünen):</b> pavimentar rutas y dotar equipamiento intermedio amplía el alcance (km) y reduce el flete rural (t<sub>1</sub>), expandiendo los anillos productivos de mayor valor. " +
-           "<b>3) En U4 (SPL):</b> el territorio consolidado habilita encadenamientos locales sostenibles sin conflictos de uso del suelo.",
-    jumps: [["thunen", "Probar Baja Flete Von Thünen"], ["christaller", "Probar Umbral/Alcance"]]
+    titulo: "Cadena C: Del Diagnóstico Territorial (OT) al Índice Sintético de Desarrollo (U.VI)",
+    nodes: ["U3", "U5", "U6"],
+    edges: [["U3", "U5"], ["U5", "U6"], ["U3", "U6"]],
+    texto: "<b>1) En U.III y U.V:</b> se levantan indicadores heterogéneos por comuna o provincia (PIB per cápita en $, pobreza en %, centralidad de Rondinelli en puntos, aislamiento en %). " +
+           "<b>2) En U.VI (Indicadores Mín-Máx):</b> cada variable se normaliza a [0, 1] respetando su sentido favorable (+) o desfavorable (−), se pondera y se prueba la estabilidad del ranking (50/50 vs. 70/30) para focalizar presupuestos regionales.",
+    jumps: [["indicadores", "Abrir Laboratorio Mín-Máx (U.VI)"], ["lorenz", "Ver IP4 y Lorenz"]]
   }
 };
 
@@ -2192,7 +2286,7 @@ function drawMapaTeoria() {
 
 const FICHAS_LECTURA = [
   {
-    unit: "U1", src: "La_teoria_de_la_localizacion.pdf (Duch Brown)",
+    unit: "U2", src: "Duch (2005) La teoría de la localización · Atienza y Aroca (2012)",
     title: "1. Teoría Clásica y Nueva Economía Geográfica (Von Thünen, Weber, Christaller, Krugman)",
     core: "<b>Idea central:</b> La distancia cuesta dinero. Von Thünen ordena el uso del suelo rural en anillos según renta locacional LR(d); Weber minimiza el flete industrial con el Índice de Materiales (IM) y evalúa desvíos salariales con la Isodápana Crítica; Christaller define la jerarquía de ciudades por Umbral y Alcance; Krugman (1991) formaliza la competencia imperfecta y muestra que bajar τ bajo τ* dispara la aglomeración Centro-Periferia.",
     bridge: "<b>Puente inter-unidades:</b> Es la causa teórica de lo que luego mides empíricamente en U2 (especialización Q<sub>ij</sub>), U3 (concentración Gini/HHI) y U5 (macrocefalia IP<sub>4</sub> y centralidad de Rondinelli).",
@@ -2206,7 +2300,7 @@ const FICHAS_LECTURA = [
     trap: "<b>Trampas de control:</b> No confundir un proyecto grande con un polo integrador: si la industria importa sus insumos y se lleva los excedentes (Backwash &gt; Spread), profundiza la desigualdad intercomunal en lugar de generar convergencia."
   },
   {
-    unit: "U2", src: "Manual 59 ILPES (Lira & Quiroga) · Silva Lira (2005)",
+    unit: "U1", src: "Manual 59 ILPES (Lira & Quiroga) · Silva Lira (2005) · PIB/Pob",
     title: "3. Técnicas de Análisis Regional (Matrices SII, Qij, Base Exportadora y MADE)",
     core: "<b>Idea central:</b> A partir de matrices Sector × Comuna (t<sub>0</sub> y t<sub>f</sub>), Q<sub>ij</sub> &gt; 1 identifica vocación exportadora; Q<sub>r</sub> mide especialización y CR<sub>r</sub> reestructuración; Tiebout estima el excedente exportable X<sub>j</sub> y su multiplicador M<sub>j</sub> = V<sub>j</sub>/X<sub>j</sub>; Silva Lira clasifica territorios en 4 cuadrantes (Dinámica, Emergente, Estancada, En retroceso); y Shift &amp; Share separa Efecto Estructural (EE) de Efecto Diferencial (ED).",
     bridge: "<b>Puente inter-unidades:</b> Las comunas del Cuadrante II de Silva Lira (Emergentes: bajo nivel inicial y alto crecimiento) son el motor empírico de la Convergencia Beta (U3). El ED<sub>j</sub> &gt; 0 suele correlacionarse con clústeres activos (U4).",
@@ -2232,6 +2326,13 @@ const FICHAS_LECTURA = [
     core: "<b>Idea central:</b> El Ordenamiento Territorial diagnostica la red de asentamientos con Primacía Urbana (IP<sub>4</sub> = P<sub>1</sub>/[P<sub>2</sub>+P<sub>3</sub>+P<sub>4</sub>] en escala 0–3), jerarquía funcional con Escalograma de Guttman / Rondinelli (peso inverso W<sub>k</sub> = 100/f<sub>k</sub>) y conectividad vial con Matriz de Aislamiento (0 = asfalto directo, 1 = sin conexión directa). El PROT articula 4 sistemas: Costero, Urbano, Rural y Cuencas.",
     bridge: "<b>Puente inter-unidades:</b> Cierra el ciclo del ramo: conecta la densidad de servicios de Christaller (U1) y la concentración poblacional/económica (U3) con instrumentos públicos reales (PROT, PLADECO, LGUC, Ley 19.175 LOCGAR).",
     trap: "<b>Trampas de control (Control 5):</b> (1) En la Escala de Guttman (Top 10 comunas más pobladas y mínimo 7 variables), las variables DEBEN discriminar entre comunas: si todas tienen 1, debes reemplazar la variable. (2) En Rondinelli, mientras más escaso es un equipamiento (menor frecuencia f<sub>k</sub>), MAYOR peso de centralidad W<sub>k</sub> aporta. (3) En Matriz de Aislamiento, 0 es bueno (conectada directamente) y 1 indica aislamiento."
+  },
+  {
+    unit: "U6", src: "Unidad VI — Indicadores de Desarrollo (ejemplo.xlsx · 15 Provincias)",
+    title: "7. Indicadores Sintéticos de Desarrollo: Normalización Mínimo–Máximo y Ponderaciones",
+    core: "<b>Idea central:</b> Para combinar variables en distintas unidades (pesos, tasas, puntajes) se normaliza cada una al rango <b>[0, 1]</b>. Si la variable es <b>favorable (+)</b> (más es mejor, ej. ingresos, escolaridad), se usa <b>(x − mín)/(máx − mín)</b>; si es <b>desfavorable (−)</b> (menos es mejor, ej. pobreza, desempleo, aislamiento), se invierte con <b>(máx − x)/(máx − mín)</b>. Luego se pondera linealmente: I = ∑ w<sub>k</sub>·u<sub>k</sub>.",
+    bridge: "<b>Puente inter-unidades:</b> Cierra todo el curso integrando resultados de crecimiento (U.I), disparidades (U.III) y equipamiento/aislamiento (U.V) en un único ranking territorial comparable.",
+    trap: "<b>Trampas de prueba (Unidad VI):</b> (1) Aunque la mejor comuna siempre obtiene <b>1</b> en cada variable individual, en el <b>índice compuesto</b> solo obtiene 1,00 si es líder simultáneo en <i>todas</i> las variables. (2) <b>Efecto Outlier:</b> si una comuna extrema salta a 3.000, sigue sacando 1,00, pero <i>aplasta hacia 0</i> los puntajes de todas las comunas intermedias. (3) En Excel, <code>RANK(celda, rango, 0)</code> da lugar 1 al mayor valor (orden descendente); usar <code>1</code> invierte el ranking."
   }
 ];
 
@@ -2341,6 +2442,20 @@ const QUIZ_LECTURA_DATA = [
     opts: ["La primera está más aislada porque tiene menos unos", "Ambas tienen el mismo nivel de centralidad funcional", "La primera está mejor conectada (es un nodo más accesible en la red vial)"],
     ans: 2,
     why: "Como el valor 0 marca conexión directa y el 1 marca ausencia de conexión directa, un menor porcentaje de 1s refleja mayor accesibilidad y menor aislamiento territorial."
+  },
+  {
+    tag: "U.VI Mín-Máx",
+    q: "En la normalización Mínimo–Máximo [0, 1] de una variable de sentido DESFAVORABLE (ej. tasa de pobreza comunal o índice de aislamiento), ¿qué fórmula corresponde y qué valor obtiene la mejor comuna (la de menor pobreza)?",
+    opts: ["(x − mín)/(máx − mín) y la mejor comuna obtiene 0,00", "(máx − x)/(máx − mín) y la mejor comuna obtiene 1,00", "(x / máx) y la mejor comuna obtiene el promedio regional"],
+    ans: 1,
+    why: "Cuando una variable es desfavorable (menos es mejor), se invierte con u−(x) = (máx − x)/(máx − mín) para que la comuna con menor pobreza/aislamiento reciba el puntaje máximo 1,00 y la peor reciba 0,00."
+  },
+  {
+    tag: "U.VI Outlier",
+    q: "Si en una planilla de 15 provincias la mejor provincia en v1 aumenta repentinamente de 1.000 a 3.000 mientras las demás 14 no cambian, ¿qué ocurre con los valores normalizados Mín–Máx?",
+    opts: ["La líder sigue obteniendo 1,00 y la mínima 0,00, pero todas las provincias intermedias se comprimen (caen) hacia 0", "Todas las provincias mantienen exactamente el mismo valor normalizado entre 0 y 1", "La líder pasa a obtener 3,00 porque superó la escala original"],
+    ans: 0,
+    why: "La normalización Mín–Máx siempre acota los extremos a 0 y 1 sin importar la unidad, pero es muy sensible a valores atípicos (outliers): al agrandar el denominador (máx − mín), comprime hacia cero a todos los territorios intermedios."
   }
 ];
 
@@ -2389,7 +2504,171 @@ function renderQuizLectura() {
   document.getElementById("qz-score").textContent = `Aciertos: ${okCount} / ${QUIZ_LECTURA_DATA.length}`;
 }
 
+
+// ============================================================================
+// 7B. UNIDAD VI: INDICADORES DE DESARROLLO (MÍN-MÁX, SENTIDO, PESOS Y OUTLIER)
+// ============================================================================
+const U6_DATA_BASE = [
+  { prov: "Arica",       v1: 0.3043503653, v2: 0.4252707581 },
+  { prov: "Iquique",     v1: 0.8951429388, v2: 0.4328626035 },
+  { prov: "Antofagasta", v1: 1.0000000000, v2: 0.6211934593 },
+  { prov: "Copiapó",     v1: 0.6789344969, v2: 0.3804735613 },
+  { prov: "Huasco",      v1: 0.3755450406, v2: 0.4764599703 },
+  { prov: "Elqui",       v1: 0.4062766788, v2: 0.6139732427 },
+  { prov: "Choapa",      v1: 0.2302111177, v2: 0.4122106604 },
+  { prov: "Limarí",      v1: 0.2164904672, v2: 0.4434805691 },
+  { prov: "Valparaíso",  v1: 0.6833221403, v2: 0.8345083882 },
+  { prov: "Los Andes",   v1: 0.2465828124, v2: 0.2325865364 },
+  { prov: "Petorca",     v1: 0.0838059083, v2: 0.1162136335 },
+  { prov: "Quillota",    v1: 0.2825429064, v2: 0.1541834784 },
+  { prov: "San Antonio", v1: 0.2681639109, v2: 0.1978020811 },
+  { prov: "San Felipe",  v1: 0.1117198411, v2: 0.1905500106 },
+  { prov: "Marga_Marga", v1: 0.4764931727, v2: 0.6271182841 }
+];
+let u6Dir1 = 1, u6Dir2 = 1;
+
+function setSentidoU6(which, dir) {
+  if (which === 1) {
+    u6Dir1 = dir;
+    document.getElementById("u6-s1-pos").classList.toggle("primary", dir === 1);
+    document.getElementById("u6-s1-neg").classList.toggle("primary", dir === -1);
+  } else {
+    u6Dir2 = dir;
+    document.getElementById("u6-s2-pos").classList.toggle("primary", dir === 1);
+    document.getElementById("u6-s2-neg").classList.toggle("primary", dir === -1);
+  }
+  drawIndicadoresU6();
+}
+function presetU6(mode) {
+  if (mode === "base50") {
+    document.getElementById("u6-w1").value = 50;
+    document.getElementById("u6-out").value = 1.0;
+    setSentidoU6(1, 1); setSentidoU6(2, 1);
+  } else if (mode === "base70") {
+    document.getElementById("u6-w1").value = 70;
+    document.getElementById("u6-out").value = 1.0;
+    setSentidoU6(1, 1); setSentidoU6(2, 1);
+  } else if (mode === "inv_v2") {
+    document.getElementById("u6-w1").value = 50;
+    document.getElementById("u6-out").value = 1.0;
+    setSentidoU6(1, 1); setSentidoU6(2, -1);
+  } else if (mode === "outlier3000") {
+    document.getElementById("u6-w1").value = 50;
+    document.getElementById("u6-out").value = 4.0;
+    setSentidoU6(1, 1); setSentidoU6(2, 1);
+  }
+  drawIndicadoresU6();
+}
+function computeU6Rows(w1Frac, dir1, dir2, outMult) {
+  const raw = U6_DATA_BASE.map((d, i) => ({
+    prov: d.prov,
+    v1: i === 2 ? d.v1 * outMult : d.v1, // Antofagasta es el líder en v1 (idx 2)
+    v2: d.v2
+  }));
+  const v1s = raw.map(r => r.v1), v2s = raw.map(r => r.v2);
+  const min1 = Math.min(...v1s), max1 = Math.max(...v1s);
+  const min2 = Math.min(...v2s), max2 = Math.max(...v2s);
+  const rng1 = Math.max(1e-9, max1 - min1), rng2 = Math.max(1e-9, max2 - min2);
+  const w2Frac = 1 - w1Frac;
+  const rows = raw.map(r => {
+    const u1 = dir1 === 1 ? (r.v1 - min1) / rng1 : (max1 - r.v1) / rng1;
+    const u2 = dir2 === 1 ? (r.v2 - min2) / rng2 : (max2 - r.v2) / rng2;
+    return { ...r, u1, u2, idx: w1Frac * u1 + w2Frac * u2 };
+  });
+  const sorted = [...rows].sort((a, b) => b.idx - a.idx);
+  rows.forEach(r => { r.rank = sorted.findIndex(x => x.prov === r.prov) + 1; });
+  return { rows, min1, max1, min2, max2 };
+}
+function drawIndicadoresU6() {
+  const w1Pct = +document.getElementById("u6-w1").value;
+  const outMult = +document.getElementById("u6-out").value;
+  document.getElementById("u6-w1-v").textContent = `${w1Pct}% / ${100 - w1Pct}%`;
+  document.getElementById("u6-s1-v").textContent = u6Dir1 === 1 ? "Favorable (+)" : "Desfavorable (−)";
+  document.getElementById("u6-s2-v").textContent = u6Dir2 === 1 ? "Favorable (+)" : "Desfavorable (−)";
+  document.getElementById("u6-out-v").textContent = outMult <= 1.01 ? "1,0x (Original)" : `${fmtDec(outMult, 2)}x (Outlier)`;
+
+  const base = computeU6Rows(0.5, 1, 1, 1.0);
+  const cur = computeU6Rows(w1Pct / 100, u6Dir1, u6Dir2, outMult);
+  const baseRankMap = {};
+  base.rows.forEach(r => { baseRankMap[r.prov] = r.rank; });
+
+  const ordered = [...cur.rows].sort((a, b) => a.rank - b.rank);
+  const top = ordered[0], bot = ordered[ordered.length - 1];
+  const avgIdx = cur.rows.reduce((s, r) => s + r.idx, 0) / cur.rows.length;
+  const chgCount = cur.rows.filter(r => r.rank !== baseRankMap[r.prov]).length;
+
+  document.getElementById("u6-enunciado").innerHTML =
+    `Con las 15 provincias de <b>ejemplo.xlsx</b> (Arica a Marga Marga), cada variable se lleva a <b>[0, 1]</b> usando Mín–Máx ` +
+    `(v1: <b>${u6Dir1 === 1 ? "Favorable +" : "Desfavorable −"}</b>, rango [${fmtDec(cur.min1,3)}; ${fmtDec(cur.max1,3)}] | ` +
+    `v2: <b>${u6Dir2 === 1 ? "Favorable +" : "Desfavorable −"}</b>, rango [${fmtDec(cur.min2,3)}; ${fmtDec(cur.max2,3)}]) y se pondera <b>${w1Pct}% v1 + ${100 - w1Pct}% v2</b>. ` +
+    `<b>Nota de auditoría:</b> en el Excel original la columna <code>RANK</code> dejó fuera a Marga_Marga (rango <code>$F$11:$F$24</code> → <code>#N/A</code>) y ordenó ascendente (1); aquí se corrige sobre las <b>15 provincias en orden descendente (#1 = mejor)</b>.`;
+
+  document.getElementById("u6-k-top").textContent = top.prov.replace("_", " ");
+  document.getElementById("u6-k-topv").textContent = `Índice = ${fmtDec(top.idx, 3)} (u1=${fmtDec(top.u1,2)}, u2=${fmtDec(top.u2,2)})`;
+  document.getElementById("u6-k-bot").textContent = bot.prov.replace("_", " ");
+  document.getElementById("u6-k-botv").textContent = `Índice = ${fmtDec(bot.idx, 3)}`;
+  document.getElementById("u6-k-avg").textContent = fmtDec(avgIdx, 3);
+  document.getElementById("u6-k-avg2").textContent = outMult > 1.05 ? `Bajó desde 0,393 por compresión outlier` : `Promedio de las 15 provincias`;
+  document.getElementById("u6-k-chg").textContent = `${chgCount} provincias`;
+  document.getElementById("u6-k-chg2").textContent = chgCount === 0 ? "Idéntico al ranking 50/50" : "Cambiaron de puesto vs. 50/50";
+
+  // Gráfico horizontal estilo pizarra (Top #1 a #15)
+  const svg = document.getElementById("svg-u6");
+  if (svg) {
+    svg.innerHTML = "";
+    addDefs(svg);
+    const M = { l: 102, r: 44, t: 32, b: 36 }, W = 560, H = 440;
+    const sx = v => M.l + v * (W - M.l - M.r);
+    const rowH = (H - M.t - M.b) / ordered.length;
+    const tHd = el("text", { x: (M.l + W - M.r) / 2, y: 18, fill: "#0F172A", "font-size": "12", "font-weight": "800", "text-anchor": "middle" }, svg);
+    tHd.textContent = `Ranking Compuesto (${w1Pct}/${100 - w1Pct}) — Escala [0, 1]`;
+
+    for (const gx of [0, 0.25, 0.5, 0.75, 1.0]) {
+      el("line", { x1: sx(gx), y1: M.t, x2: sx(gx), y2: H - M.b, stroke: gx === 0 ? "#334155" : "#E2E8F0", "stroke-width": gx === 0 ? "1.5" : "1" }, svg);
+      const tx = el("text", { x: sx(gx), y: H - M.b + 16, fill: "#475569", "font-size": "10.5", "font-weight": "700", "text-anchor": "middle" }, svg);
+      tx.textContent = fmtDec(gx, 2);
+    }
+    ordered.forEach((r, i) => {
+      const y0 = M.t + i * rowH + 3, bh = Math.max(8, rowH - 6);
+      const col = i === 0 ? "#15803D" : (i === ordered.length - 1 ? "#DC2626" : "#1D4ED8");
+      const wBar = Math.max(2, sx(r.idx) - sx(0));
+      el("rect", { x: M.l, y: y0, width: wBar, height: bh, fill: col, rx: 3, opacity: "0.86" }, svg);
+      // Desglose interno del aporte w1*u1 (barra más oscura al inicio)
+      const wPart1 = sx((w1Pct / 100) * r.u1) - sx(0);
+      if (wPart1 > 2) el("rect", { x: M.l, y: y0, width: wPart1, height: bh, fill: "#0F172A", opacity: "0.20", rx: 2 }, svg);
+      const tl = el("text", { x: M.l - 6, y: y0 + bh * 0.72, fill: "#0F172A", "font-size": "10.3", "font-weight": "700", "text-anchor": "end" }, svg);
+      tl.textContent = `#${r.rank} ${r.prov.replace("_", " ")}`;
+      const tv = el("text", { x: M.l + wBar + 5, y: y0 + bh * 0.72, fill: col, "font-size": "10", "font-weight": "800", "text-anchor": "start" }, svg);
+      tv.textContent = fmtDec(r.idx, 3);
+    });
+  }
+
+  // Tabla comparada de las 15 provincias
+  let tbl = `<table class="u6-tbl"><thead><tr><th>Provincia</th><th>u(v1)</th><th>u(v2)</th><th>Índice</th><th>#Rk</th><th>Δ vs 50/50</th></tr></thead><tbody>`;
+  ordered.forEach(r => {
+    const diff = baseRankMap[r.prov] - r.rank;
+    const dCls = diff > 0 ? "u6-rk-up" : (diff < 0 ? "u6-rk-dn" : "u6-rk-eq");
+    const dTxt = diff > 0 ? `↑ +${diff}` : (diff < 0 ? `↓ ${diff}` : "—");
+    const rowCls = r.rank === 1 ? "u6-top" : (r.rank === 15 ? "u6-bot" : "");
+    tbl += `<tr class="${rowCls}"><td>${r.prov.replace("_"," ")}</td><td>${fmtDec(r.u1,3)}</td><td>${fmtDec(r.u2,3)}</td><td><b>${fmtDec(r.idx,3)}</b></td><td><b>#${r.rank}</b></td><td class="${dCls}">${dTxt}</td></tr>`;
+  });
+  tbl += `</tbody></table>`;
+  document.getElementById("u6-tbl-box").innerHTML = tbl;
+
+  document.getElementById("u6-sol").innerHTML =
+    `<b>Fórmulas aplicadas:</b> u(v1) = ${u6Dir1 === 1 ? "(v1 − mín)/(máx − mín)" : "(máx − v1)/(máx − mín)"} | ` +
+    `u(v2) = ${u6Dir2 === 1 ? "(v2 − mín)/(máx − mín)" : "(máx − v2)/(máx − mín)"} | ` +
+    `<b>Índice</b> = ${fmtDec(w1Pct/100,2)}·u(v1) + ${fmtDec((100-w1Pct)/100,2)}·u(v2) &nbsp;⇒&nbsp; Líder: <b>${top.prov.replace("_"," ")} (${fmtDec(top.idx,3)})</b>`;
+
+  renderPedBox("ped-u6",
+    `Con ponderación <b>${w1Pct}/${100-w1Pct}</b>, <b>${top.prov.replace("_"," ")}</b> ocupa el <b>#1 (${fmtDec(top.idx,3)})</b> y <b>${bot.prov.replace("_"," ")}</b> el <b>#15 (${fmtDec(bot.idx,3)})</b>. Nota que ${top.idx < 0.999 ? `la mejor provincia NO llega a 1,000 exacto porque no es líder en ambas variables a la vez` : `al ser líder en las dos dimensiones simultáneamente sí alcanza el 1,000 perfecto`}.`,
+    `<b>¿Da igual poner 200 y 3.000? (La Paradoja del Outlier):</b> sí, la transformación Mín–Máx siempre deja en <b>1,00</b> al mejor y en <b>0,00</b> al peor sin importar la escala. <b>Pero cuidado:</b> mueve el slider de <i>Shock Outlier</i> hacia 4,0x y verás cómo el promedio del país se desploma (de 0,393 hacia ~0,29) porque un extremo gigantesco aplasta hacia 0 a todas las comunas intermedias.`,
+    `En pruebas de Unidad VI (Indicadores de Desarrollo): (1) justifica siempre el <b>sentido (+) o (−)</b> de cada indicador antes de normalizar; (2) demuestra con dos ponderaciones (ej. 50/50 vs. 70/30) si el ranking es robusto o sensible (aquí <b>Copiapó, Elqui, Marga Marga, Los Andes y San Antonio</b> cambian de lugar); y (3) verifica en Excel que <code>RANK</code> use todo el rango y el argumento <code>0</code> (descendente).`
+  );
+}
+
 drawDini();
+drawIndicadoresU6();
 renderMecanica();
 drawMapaTeoria();
 renderLecturaCards();
