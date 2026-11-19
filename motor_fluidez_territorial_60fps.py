@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-motor_fluidez_territorial_60fps.py — ESTUDIO TERRITORIAL INTEGRAL A 60 FPS (8 MÓDULOS + HOJA MECÁNICA)
+motor_fluidez_territorial_60fps.py — ESTUDIO TERRITORIAL INTEGRAL A 60 FPS (9 MÓDULOS + LECTURA VIVA + HOJA MECÁNICA)
 Asignatura: Desarrollo y Gestión Territorial — Universidad de Los Lagos (Prof. Claudio Mancilla)
 Renderiza en el navegador (HTML5 SVG + JavaScript sin lag de servidor):
   1) Von Thünen: Editor libre de ecuaciones LR(d) + Gradiente 2D + Mapa de Anillos Concéntricos.
@@ -160,6 +160,57 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
   .blind-mode .s-card:not(.revealed) .sk-lbl { opacity: 0; }
   .blind-mode .s-card:not(.revealed) .s-sub { visibility: hidden; }
 
+  /* === MAPA TEÓRICO Y LECTURA VIVA (PESTAÑA 9) === */
+  .map-detail-card {
+    margin-top: 9px; background: #F8FAFC; border: 1px solid #CBD5E1; border-left: 4px solid #1D4ED8;
+    border-radius: 6px; padding: 10px 13px; font-size: 12.2px; line-height: 1.48; color: #0F172A;
+  }
+  .map-detail-head {
+    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;
+    margin-bottom: 6px; padding-bottom: 6px; border-bottom: 1px dashed #CBD5E1;
+  }
+  .map-detail-title { font-size: 13px; font-weight: 800; color: #1E3A8A; }
+  .jump-btn {
+    border: 1px solid #1D4ED8; background: #EFF6FF; color: #1E3A8A;
+    padding: 4px 9px; border-radius: 5px; font-size: 11px; font-weight: 700; cursor: pointer;
+  }
+  .jump-btn:hover { background: #1D4ED8; color: #FFFFFF; }
+  .lec-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-bottom: 12px; }
+  @media (max-width: 820px) { .lec-grid { grid-template-columns: 1fr; } }
+  .lec-card {
+    border: 1px solid #CBD5E1; border-top: 3.5px solid #1E3A8A; border-radius: 6px;
+    background: #FFFFFF; padding: 10px 12px; display: flex; flex-direction: column; gap: 6px;
+  }
+  .lec-meta { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 4px; }
+  .lec-unit { font-size: 10px; font-weight: 800; color: #FFFFFF; background: #1E293B; padding: 2px 7px; border-radius: 4px; }
+  .lec-src { font-size: 10.5px; font-weight: 600; color: #475569; font-family: Consolas, monospace; }
+  .lec-title { font-size: 12.6px; font-weight: 800; color: #0F172A; }
+  .lec-layer {
+    font-size: 11.8px; line-height: 1.44; color: #1E293B; padding: 6px 9px; border-radius: 5px;
+    background: #F8FAFC; border-left: 3px solid #94A3B8;
+  }
+  .lec-layer.l-core { border-left-color: #1D4ED8; background: #EFF6FF; }
+  .lec-layer.l-bridge { border-left-color: #059669; background: #ECFDF5; }
+  .lec-layer.l-trap { border-left-color: #DC2626; background: #FEF2F2; }
+  .lec-layer b { color: #0F172A; }
+  .qz-card {
+    border: 1px solid #CBD5E1; border-left: 4px solid #334155; border-radius: 6px;
+    background: #FFFFFF; padding: 9px 12px; margin-bottom: 8px;
+  }
+  .qz-card.ok { border-left-color: #15803D; background: #F0FDF4; }
+  .qz-card.bad { border-left-color: #DC2626; background: #FEF2F2; }
+  .qz-tag { font-size: 10px; font-weight: 800; color: #1E3A8A; background: #DBEAFE; padding: 2px 7px; border-radius: 4px; margin-right: 6px; }
+  .qz-q { font-size: 12.2px; font-weight: 700; color: #0F172A; margin: 4px 0 7px 0; line-height: 1.42; }
+  .qz-opts { display: flex; gap: 7px; flex-wrap: wrap; align-items: center; }
+  .qz-btn {
+    border: 1px solid #94A3B8; background: #FFFFFF; color: #0F172A;
+    padding: 4px 10px; border-radius: 5px; font-size: 11.4px; font-weight: 700; cursor: pointer;
+  }
+  .qz-btn:hover { background: #EFF6FF; border-color: #1D4ED8; }
+  .qz-btn.sel { background: #0F172A; color: #FFFFFF; border-color: #0F172A; }
+  .qz-fb { font-size: 11.5px; color: #1E293B; margin-top: 7px; line-height: 1.42; display: none; border-top: 1px dashed #CBD5E1; padding-top: 6px; }
+  .qz-card.answered .qz-fb { display: block; }
+
   @media print {
     body { background: #FFFFFF !important; }
     .top-tabs, .mec-toolbar, .mec-filters, .btn-bar, .chk-btn { display: none !important; }
@@ -187,6 +238,7 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
     <button class="tab-btn" onclick="openTab('lorenz', this)">6. Lorenz, Gini, Theil e IP4</button>
     <button class="tab-btn" onclick="openTab('dini', this)">7. Redes Dini 2010 (Animado)</button>
     <button class="tab-btn" onclick="openTab('mecanica', this)">8. Hoja Mecánica (Modo Ciego)</button>
+    <button class="tab-btn" onclick="openTab('lectura', this)">9. Mapa Teórico y Lectura Viva</button>
   </div>
 
   <!-- ====================================================================== -->
@@ -545,6 +597,55 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
       <div class="skel-grid" id="mec-skel-grid"></div>
     </div>
   </div>
+
+  <!-- ====================================================================== -->
+  <!-- PANEL 9: MAPA CAUSAL TEÓRICO, LECTURA EN 3 CAPAS Y QUIZ INTER-UNIDADES -->
+  <!-- ====================================================================== -->
+  <div id="panel-lectura" class="panel">
+    <div class="sec-title">
+      <span>MAPA CAUSAL INTERACTIVO (UNIDADES 1–5): CÓMO SE CONECTA TODA LA TEORÍA DEL RAMO</span>
+      <div class="btn-bar">
+        <button class="act-btn primary" onclick="activarEscenarioMapa('fletes')">Cadena A: Baja de Fletes (τ↓)</button>
+        <button class="act-btn" onclick="activarEscenarioMapa('cluster')">Cadena B: Política Clúster / SPL</button>
+        <button class="act-btn" onclick="activarEscenarioMapa('prot')">Cadena C: Planificación PROT + OT</button>
+        <button class="act-btn" onclick="selectUnidadMapa('U1')">Ver Todo Libre</button>
+      </div>
+    </div>
+
+    <div class="svg-box"><svg id="svg-mapa-teoria" viewBox="0 0 980 315"></svg></div>
+    <div id="mapa-detail-box" class="map-detail-card"></div>
+
+    <div class="sec-title" style="margin-top:14px;">
+      <span>LECTURA GUIADA EN 3 CAPAS POR AUTOR Y BIBLIOGRAFÍA OFICIAL (SIN MUROS DE TEXTO)</span>
+      <div class="btn-bar">
+        <button id="cap-btn-core" class="act-btn primary" onclick="setCapaLectura('core')">Capa 1: Idea Central</button>
+        <button id="cap-btn-bridge" class="act-btn" onclick="setCapaLectura('bridge')">Capa 2: Puentes Inter-Unidades</button>
+        <button id="cap-btn-trap" class="act-btn" onclick="setCapaLectura('trap')">Capa 3: Trampas de Control</button>
+        <button id="cap-btn-all" class="act-btn" onclick="setCapaLectura('all')">Ver las 3 Capas</button>
+      </div>
+    </div>
+
+    <div class="mec-filters">
+      <button class="flt-btn active" onclick="filtrarLectura('all', this)">Todos los Autores (6)</button>
+      <button class="flt-btn" onclick="filtrarLectura('U1', this)">U1: Localización y Polos (2)</button>
+      <button class="flt-btn" onclick="filtrarLectura('U2', this)">U2: ILPES / Silva Lira (1)</button>
+      <button class="flt-btn" onclick="filtrarLectura('U3', this)">U3: REAT / Markov (1)</button>
+      <button class="flt-btn" onclick="filtrarLectura('U4', this)">U4: Dini / Cadenas / ELITE (1)</button>
+      <button class="flt-btn" onclick="filtrarLectura('U5', this)">U5: OT / Rondinelli / PROT (1)</button>
+    </div>
+
+    <div class="lec-grid" id="lec-cards-grid"></div>
+
+    <div class="sec-title" style="margin-top:14px;">
+      <span>ENTRENADOR DE CONTROL DE LECTURA CRUZADO (10 PREGUNTAS QUE RELACIONAN UNIDADES)</span>
+      <div class="btn-bar">
+        <span id="qz-score" class="pill-score">Aciertos: 0 / 10</span>
+        <button class="act-btn" onclick="toggleSoloErradasQz(this)">Ver Solo Pendientes / Erradas</button>
+        <button class="act-btn" onclick="resetQuizLectura()">Reiniciar Control</button>
+      </div>
+    </div>
+    <div id="qz-list"></div>
+  </div>
 </div>
 
 <script>
@@ -600,6 +701,15 @@ function openTab(name, btn) {
   if (name === "lorenz") drawLorenz();
   if (name === "dini") drawDini();
   if (name === "mecanica") renderMecanica();
+  if (name === "lectura") { drawMapaTeoria(); renderLecturaCards(); renderQuizLectura(); }
+}
+function jumpToTab(name) {
+  const btns = Array.from(document.querySelectorAll(".top-tabs .tab-btn"));
+  const target = btns.find(b => (b.getAttribute("onclick") || "").includes("'" + name + "'"));
+  if (target) {
+    openTab(name, target);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
 }
 
 // ============================================================================
@@ -1726,8 +1836,392 @@ drawKrugman();
 drawPerroux();
 drawChrisGran();
 drawLorenz();
+
+// ============================================================================
+// 9. MAPA CAUSAL TEÓRICO, LECTURA EN 3 CAPAS Y QUIZ CRUZADO (60 FPS)
+// ============================================================================
+const MAPA_UNIDADES = {
+  U1: {
+    id: "U1", x: 130, y: 95, w: 205, h: 74, col: "#1D4ED8",
+    lbl: "U1. LOCALIZACIÓN Y POLOS",
+    sub: "Von Thünen · Weber · Krugman\nPerroux · Myrdal · Christaller",
+    explica: "Explica por qué las actividades económicas NO se distribuyen de forma homogénea en el espacio: costos de transporte (t, τ), economías de escala, pérdida de peso (IM) y polos motrices generan anillos productivos y concentración en núcleos.",
+    puentes: "<b>→ Hacia U2:</b> la localización de plantas crea especialización sectorial medible con Q<sub>ij</sub> &gt; 1 y Base Exportadora (X<sub>j</sub>). <b>→ Hacia U3:</b> cuando τ ≤ τ* (Krugman) o Backwash &gt; Spread (Myrdal), se amplían las disparidades (Gini/Theil). <b>→ Hacia U5:</b> el umbral y alcance de Christaller fundamentan la jerarquía de centros urbanos de Rondinelli.",
+    jumps: [["thunen", "Abrir Von Thünen"], ["weber", "Abrir Weber"], ["krugman", "Abrir Krugman"], ["perroux", "Abrir Perroux/Myrdal"], ["christaller", "Abrir Christaller"]]
+  },
+  U2: {
+    id: "U2", x: 490, y: 78, w: 215, h: 74, col: "#0F766E",
+    lbl: "U2. ANÁLISIS REGIONAL ILPES",
+    sub: "Manual 59 (Lira & Quiroga)\nQij · Qr · Xj/Mj · Silva Lira · MADE",
+    explica: "Traduce la geografía productiva en indicadores empíricos sobre matrices Sector × Comuna (SII 2014–2024): detecta rubros exportadores (Q<sub>ij</sub> &gt; 1), diversificación (Q<sub>r</sub>), cambio estructural (CR<sub>r</sub>) y descompone el crecimiento en Efecto Estructural (EE) y Competitividad Local (ED).",
+    puentes: "<b>← Desde U1:</b> un polo motriz (Perroux) eleva el multiplicador básico M<sub>j</sub>. <b>→ Hacia U3:</b> los Cuadrantes de Silva Lira (Emergentes vs. Estancadas) anticipan si habrá Convergencia β. <b>→ Hacia U4:</b> un Efecto Diferencial positivo (ED<sub>j</sub> &gt; 0) refleja competitividad local impulsada por redes y Upgrading.",
+    jumps: [["mecanica", "Ver Fórmulas ILPES/MADE"]]
+  },
+  U3: {
+    id: "U3", x: 850, y: 95, w: 205, h: 74, col: "#B91C1C",
+    lbl: "U3. DISPARIDADES (REAT)",
+    sub: "Convergencia σ y β · Lorenz/Gini\nTheil · HHI / HKα · Markov",
+    explica: "Evalúa si las brechas entre territorios se cierran o se amplían en el tiempo: Convergencia Sigma (cae dispersión σ), Convergencia Beta (rezagados crecen más rápido, β &lt; 0), desigualdad (Gini y Theil descomponible), concentración (HHI, HK<sub>α</sub>) y transiciones de largo plazo (Markov).",
+    puentes: "<b>← Desde U1 y U2:</b> la macrocefalia de Krugman o el estancamiento estructural (Tipo IV Boisier) elevan el Gini y el HHI. <b>→ Hacia U5:</b> alta desigualdad territorial justifica políticas de descentralización y Ordenamiento Territorial (PROT).",
+    jumps: [["lorenz", "Abrir Lorenz, Gini y Theil"]]
+  },
+  U4: {
+    id: "U4", x: 300, y: 245, w: 235, h: 74, col: "#7C3AED",
+    lbl: "U4. SPL, REDES Y CADENAS",
+    sub: "Dini (2010) · Schmitz · Granovetter\nPadilla & Oddone · ELITE (Boisier)",
+    explica: "Aporta la palanca territorial para competir desde las PyMEs: pasar de empresas aisladas a Red Empresarial → Clúster → SPL, combinando vínculos fuertes (confianza) con vínculos débiles (innovación/I+D), escalamiento (Upgrading) y gobernanza interinstitucional (ELITE).",
+    puentes: "<b>→ Hacia U1 y U2:</b> la cooperación horizontal (Aproleche, PymeMad) eleva los encadenamientos locales (b + f) y mejora el Efecto Diferencial (ED<sub>j</sub>). <b>→ Hacia U3:</b> el Upgrading de comunas intermedias impulsa convergencia regional.",
+    jumps: [["dini", "Abrir Redes Dini 2010"], ["christaller", "Abrir Granovetter"]]
+  },
+  U5: {
+    id: "U5", x: 685, y: 245, w: 235, h: 74, col: "#B45309",
+    lbl: "U5. ORDENAMIENTO OT / PROT",
+    sub: "Primacía IP4 · Ley de Zipf\nGuttman/Rondinelli · Aislamiento · PROT",
+    explica: "Ordena el sistema de asentamientos humanos y resuelve conflictos de uso del suelo (Sistemas Costero, Urbano, Rural y Cuencas) mediante diagnóstico de macrocefalia (IP<sub>4</sub>), jerarquía de servicios (Guttman/Rondinelli) y conectividad vial (Matriz de Aislamiento 0/1).",
+    puentes: "<b>← Desde U1 y U3:</b> traduce la aglomeración de Krugman y el Gini en Primacía Urbana (IP<sub>4</sub> escala 0–3). <b>→ Hacia U1 y U4:</b> reducir el aislamiento vial y dotar equipamiento intermedio amplía el alcance (Christaller) y fortalece el entorno del SPL.",
+    jumps: [["lorenz", "Abrir Primacía IP4"], ["mecanica", "Abrir Hoja Mecánica"]]
+  }
+};
+
+const MAPA_EDGES = [
+  { a: "U1", b: "U2", lbl: "Especialización Qij" },
+  { a: "U2", b: "U3", lbl: "Silva Lira → β/σ" },
+  { a: "U1", b: "U3", lbl: "τ ≤ τ* → Gini↑" },
+  { a: "U4", b: "U2", lbl: "Upgrading → EDj+" },
+  { a: "U4", b: "U1", lbl: "Encadenam. b+f" },
+  { a: "U3", b: "U5", lbl: "Brecha → OT/PROT" },
+  { a: "U5", b: "U1", lbl: "Rondinelli/Umbral" },
+  { a: "U4", b: "U5", lbl: "SPL + Gobernanza" }
+];
+
+const ESCENARIOS_MAPA = {
+  fletes: {
+    titulo: "Cadena A: Shock de Baja en Costos de Transporte (τ ↓)",
+    nodes: ["U1", "U3", "U5"],
+    edges: [["U1", "U3"], ["U3", "U5"], ["U5", "U1"]],
+    texto: "<b>1) En U1 (Krugman):</b> al caer τ por debajo del umbral crítico τ*, se disparan las fuerzas centrípetas y las empresas se aglomeran en la capital regional (<i>Backwash</i>). " +
+           "<b>2) En U3 (REAT):</b> aumenta la dispersión σ, la Curva de Lorenz se curva hacia abajo (suben Gini, Theil y HHI) y aparece divergencia. " +
+           "<b>3) En U5 (OT):</b> el Índice de Primacía IP<sub>4</sub> salta al tramo ≥ 1,50 (Valor 3: Macrocefalia), exigiendo políticas PROT de reequilibrio hacia ciudades intermedias.",
+    jumps: [["krugman", "Probar τ ↓ en Krugman"], ["lorenz", "Ver IP4 y Gini subir"]]
+  },
+  cluster: {
+    titulo: "Cadena B: Política de Clúster, Puentes I+D y Upgrading (SPL)",
+    nodes: ["U4", "U2", "U3"],
+    edges: [["U4", "U2"], ["U2", "U3"]],
+    texto: "<b>1) En U4 (Dini + Granovetter + Padilla/Oddone):</b> un gremio articulador (ej. PymeMad o Aproleche) abre vínculos débiles con universidades/I+D, evita el <i>lock-in</i> y ejecuta Upgrading de proceso y producto. " +
+           "<b>2) En U2 (ILPES/MADE):</b> la comuna mejora su competitividad local (Efecto Diferencial ED<sub>j</sub> &gt; 0) y pasa a Cuadrante II (Emergente) o I (Dinámica) en Silva Lira. " +
+           "<b>3) En U3 (REAT):</b> el mayor crecimiento de comunas no capitales empuja la pendiente β &lt; 0 (Convergencia Beta).",
+    jumps: [["dini", "Probar Red Dini"], ["christaller", "Probar Puentes Granovetter"]]
+  },
+  prot: {
+    titulo: "Cadena C: Planificación PROT + Reducción de Aislamiento Vial",
+    nodes: ["U5", "U1", "U4"],
+    edges: [["U5", "U1"], ["U4", "U5"], ["U4", "U1"]],
+    texto: "<b>1) En U5 (OT/PROT):</b> el diagnóstico de Rondinelli/Guttman y la Matriz de Aislamiento detectan comunas con déficit de servicios intermedios y baja conectividad (índice alto de 1s). " +
+           "<b>2) En U1 (Christaller + Von Thünen):</b> pavimentar rutas y dotar equipamiento intermedio amplía el alcance (km) y reduce el flete rural (t<sub>1</sub>), expandiendo los anillos productivos de mayor valor. " +
+           "<b>3) En U4 (SPL):</b> el territorio consolidado habilita encadenamientos locales sostenibles sin conflictos de uso del suelo.",
+    jumps: [["thunen", "Probar Baja Flete Von Thünen"], ["christaller", "Probar Umbral/Alcance"]]
+  }
+};
+
+let mapaActivoUnidad = "U1";
+let mapaEscenarioKey = null;
+
+function selectUnidadMapa(uKey) {
+  mapaEscenarioKey = null;
+  mapaActivoUnidad = uKey;
+  drawMapaTeoria();
+}
+function activarEscenarioMapa(escKey) {
+  mapaEscenarioKey = escKey;
+  drawMapaTeoria();
+}
+function drawMapaTeoria() {
+  const svg = document.getElementById("svg-mapa-teoria");
+  const box = document.getElementById("mapa-detail-box");
+  if (!svg || !box) return;
+  svg.innerHTML = "";
+  addDefs(svg);
+
+  const esc = mapaEscenarioKey ? ESCENARIOS_MAPA[mapaEscenarioKey] : null;
+  const activeNodes = new Set(esc ? esc.nodes : [mapaActivoUnidad]);
+
+  // Dibujar aristas causales
+  MAPA_EDGES.forEach(ed => {
+    const na = MAPA_UNIDADES[ed.a], nb = MAPA_UNIDADES[ed.b];
+    let isHot = false;
+    if (esc) {
+      isHot = esc.edges.some(([x, y]) => (x === ed.a && y === ed.b) || (x === ed.b && y === ed.a));
+    } else {
+      isHot = (ed.a === mapaActivoUnidad || ed.b === mapaActivoUnidad);
+    }
+    const dx = nb.x - na.x, dy = nb.y - na.y, dist = Math.hypot(dx, dy) || 1;
+    const x1 = na.x + (dx / dist) * 58, y1 = na.y + (dy / dist) * 32;
+    const x2 = nb.x - (dx / dist) * 62, y2 = nb.y - (dy / dist) * 34;
+
+    el("line", {
+      x1, y1, x2, y2,
+      stroke: isHot ? "#DC2626" : "#CBD5E1",
+      "stroke-width": isHot ? "2.8" : "1.5",
+      "stroke-dasharray": isHot ? "" : "4,3",
+      "marker-end": isHot ? "url(#arr-red)" : ""
+    }, svg);
+
+    const mx = (x1 + x2) / 2, my = (y1 + y2) / 2;
+    if (isHot) {
+      const bw = Math.max(76, ed.lbl.length * 6.2 + 10);
+      el("rect", { x: mx - bw / 2, y: my - 9, width: bw, height: 16, rx: 4, fill: "#FFFFFF", stroke: "#DC2626", "stroke-width": "1" }, svg);
+      const tl = el("text", { x: mx, y: my + 3, fill: "#991B1B", "font-size": "9.8", "font-weight": "700", "text-anchor": "middle" }, svg);
+      tl.textContent = ed.lbl;
+    }
+  });
+
+  // Dibujar nodos interactivos clicables
+  Object.values(MAPA_UNIDADES).forEach(nd => {
+    const isSel = activeNodes.has(nd.id);
+    const g = el("g", { style: "cursor:pointer;", onclick: `selectUnidadMapa('${nd.id}')` }, svg);
+    el("rect", {
+      x: nd.x - nd.w / 2, y: nd.y - nd.h / 2, width: nd.w, height: nd.h, rx: 9,
+      fill: isSel ? nd.col : "#FFFFFF",
+      stroke: isSel ? "#0F172A" : nd.col,
+      "stroke-width": isSel ? "2.6" : "1.8",
+      opacity: esc && !isSel ? "0.45" : "1"
+    }, g);
+
+    const t1 = el("text", { x: nd.x, y: nd.y - 12, fill: isSel ? "#FFFFFF" : nd.col, "font-size": "11.5", "font-weight": "800", "text-anchor": "middle" }, g);
+    t1.textContent = nd.lbl;
+    nd.sub.split("\n").forEach((ln, k) => {
+      const ts = el("text", { x: nd.x, y: nd.y + 6 + k * 14, fill: isSel ? "#F1F5F9" : "#334155", "font-size": "10", "font-weight": "600", "text-anchor": "middle" }, g);
+      ts.textContent = ln;
+    });
+  });
+
+  // Render detalle inferior
+  if (esc) {
+    const btnsHtml = esc.jumps.map(([tb, lbl]) => `<button class="jump-btn" onclick="jumpToTab('${tb}')">${lbl} →</button>`).join(" ");
+    box.innerHTML = `
+      <div class="map-detail-head">
+        <span class="map-detail-title">${esc.titulo}</span>
+        <div class="btn-bar">${btnsHtml}</div>
+      </div>
+      <div>${esc.texto}</div>`;
+  } else {
+    const u = MAPA_UNIDADES[mapaActivoUnidad];
+    const btnsHtml = u.jumps.map(([tb, lbl]) => `<button class="jump-btn" onclick="jumpToTab('${tb}')">${lbl} →</button>`).join(" ");
+    box.innerHTML = `
+      <div class="map-detail-head">
+        <span class="map-detail-title">${u.lbl} (Haz clic en cualquier otra unidad del diagrama para cambiar el foco)</span>
+        <div class="btn-bar">${btnsHtml}</div>
+      </div>
+      <div><b>Lógica central:</b> ${u.explica}</div>
+      <div style="margin-top:5px;"><b>Interrelación con el resto del ramo:</b> ${u.puentes}</div>`;
+  }
+}
+
+const FICHAS_LECTURA = [
+  {
+    unit: "U1", src: "La_teoria_de_la_localizacion.pdf (Duch Brown)",
+    title: "1. Teoría Clásica y Nueva Economía Geográfica (Von Thünen, Weber, Christaller, Krugman)",
+    core: "<b>Idea central:</b> La distancia cuesta dinero. Von Thünen ordena el uso del suelo rural en anillos según renta locacional LR(d); Weber minimiza el flete industrial con el Índice de Materiales (IM) y evalúa desvíos salariales con la Isodápana Crítica; Christaller define la jerarquía de ciudades por Umbral y Alcance; Krugman (1991) formaliza la competencia imperfecta y muestra que bajar τ bajo τ* dispara la aglomeración Centro-Periferia.",
+    bridge: "<b>Puente inter-unidades:</b> Es la causa teórica de lo que luego mides empíricamente en U2 (especialización Q<sub>ij</sub>), U3 (concentración Gini/HHI) y U5 (macrocefalia IP<sub>4</sub> y centralidad de Rondinelli).",
+    trap: "<b>Trampas de control:</b> (1) En Weber, si IM &gt; 1 (pierde peso al procesar, ej. madera/leche en polvo) se ubica cerca de insumos; si IM &lt; 1 (gana peso con insumos ubicuos, ej. bebidas) se ubica cerca del mercado. (2) Desviarse a un enclave laboral barato L solo conviene si L cae <i>dentro</i> de la isodápana crítica (ahorro salarial &gt; sobrecosto de flete)."
+  },
+  {
+    unit: "U1", src: "Perroux (1955) · Myrdal (1957) · Hirschman (1958)",
+    title: "2. Polos de Crecimiento, Causalidad Acumulativa y Encadenamientos",
+    core: "<b>Idea central:</b> El crecimiento no surge parejo en todos lados sino en <i>polos motrices</i> (Perroux). Su impacto regional depende de los encadenamientos hacia atrás (proveedores b) y hacia adelante (procesamiento f) de Hirschman, y del balance neto entre difusión hacia comunas vecinas (<i>Spread</i>) versus absorción de talento y capital (<i>Backwash</i>) de Myrdal.",
+    bridge: "<b>Puente inter-unidades:</b> Si un polo tiene bajo b + f opera como enclave y genera divergencia en U3; para volverlo polo integrador se requieren redes de proveedores y Upgrading de U4.",
+    trap: "<b>Trampas de control:</b> No confundir un proyecto grande con un polo integrador: si la industria importa sus insumos y se lleva los excedentes (Backwash &gt; Spread), profundiza la desigualdad intercomunal en lugar de generar convergencia."
+  },
+  {
+    unit: "U2", src: "Manual 59 ILPES (Lira & Quiroga) · Silva Lira (2005)",
+    title: "3. Técnicas de Análisis Regional (Matrices SII, Qij, Base Exportadora y MADE)",
+    core: "<b>Idea central:</b> A partir de matrices Sector × Comuna (t<sub>0</sub> y t<sub>f</sub>), Q<sub>ij</sub> &gt; 1 identifica vocación exportadora; Q<sub>r</sub> mide especialización y CR<sub>r</sub> reestructuración; Tiebout estima el excedente exportable X<sub>j</sub> y su multiplicador M<sub>j</sub> = V<sub>j</sub>/X<sub>j</sub>; Silva Lira clasifica territorios en 4 cuadrantes (Dinámica, Emergente, Estancada, En retroceso); y Shift &amp; Share separa Efecto Estructural (EE) de Efecto Diferencial (ED).",
+    bridge: "<b>Puente inter-unidades:</b> Las comunas del Cuadrante II de Silva Lira (Emergentes: bajo nivel inicial y alto crecimiento) son el motor empírico de la Convergencia Beta (U3). El ED<sub>j</sub> &gt; 0 suele correlacionarse con clústeres activos (U4).",
+    trap: "<b>Trampas de control:</b> (1) Q<sub>r</sub> y CR<sub>r</sub> siempre van entre 0 y 1 (multiplicando por 1/2 para no contar doble). (2) En MADE Clásico existen 6 tipologías de Boisier, mientras que en MADE Modificado (EM<sub>j</sub> = EI<sub>j</sub> − EE<sub>j</sub>; ERM<sub>j</sub> = ET<sub>j</sub> − EI<sub>j</sub>) existen 14 tipologías de Stilwell (1969)."
+  },
+  {
+    unit: "U3", src: "Motor REAT · Figueroa & Herrero (2003) · CASEN",
+    title: "4. Disparidades, Convergencia (σ y β), Desigualdad (Gini/Theil) y Markov",
+    core: "<b>Idea central:</b> Convergencia Beta ocurre cuando territorios pobres crecen más rápido (β &lt; 0 en OLS); Convergencia Sigma cuando cae la dispersión transversal (σ<sub>t</sub> &lt; σ<sub>0</sub>). Gini mide desigualdad global desde la Curva de Lorenz; Theil mide entropía y se descompone aditivamente; HHI y Hannah-Kay (HK<sub>α</sub>) miden concentración; Markov proyecta la distribución ergódica de largo plazo.",
+    bridge: "<b>Puente inter-unidades:</b> Responde si los polos (U1) y la reestructuración sectorial (U2) cerraron o abrieron las brechas territoriales, dando la línea base cuantitativa para justificar intervenciones OT (U5).",
+    trap: "<b>Trampas de control:</b> (1) La Convergencia Beta es condición <i>necesaria pero NO suficiente</i> para que exista Convergencia Sigma (choques aleatorios pueden mantener alta la dispersión σ). (2) Para analizar desigualdad 'entre regiones' vs. 'dentro de regiones' se usa Theil, no Gini. (3) En Base1 (n=7), β es negativo pero con p=0,420 no es estadísticamente significativo al 5%."
+  },
+  {
+    unit: "U4", src: "04 SPL.pdf (Dini 2010) · Granovetter · Padilla & Oddone · Boisier",
+    title: "5. Redes Empresariales, Clúster, SPL, Cadenas de Valor y Sistema ELITE",
+    core: "<b>Idea central:</b> Dini (2010) ordena la articulación en 3 círculos concéntricos: Red Empresarial (cooperación voluntaria entre pares) ⊂ Clúster (masa crítica sectorial localizada) ⊂ SPL (actores productivos + instituciones del territorio). Granovetter destaca los vínculos débiles para traer innovación; Padilla &amp; Oddone plantean Upgrading (proceso, producto, funcional); Boisier (ELITE) evalúa poder e interacción institucional.",
+    bridge: "<b>Puente inter-unidades:</b> Es la dimensión institucional y microeconómica que transforma una aglomeración pasiva (U1) en competitividad genuina (ED<sub>j</sub> &gt; 0 en U2), como los casos PymeMad Biobío y Red Láctea Osorno.",
+    trap: "<b>Trampas de control (Control 4):</b> (1) En matrices UCINET la diagonal principal es siempre 0 (A<sub>ii</sub> = 0); en red no dirigida D = 2L/[n(n−1)] y en dirigida D = L/[n(n−1)]. (2) Entrevista obligatoria a 3 personas de organizaciones distintas cubriendo mínimo 2 eslabones (1 gremio + 2 empresas). (3) Regla de oro del Prof. Mancilla: NO sugerir que debe existir un clúster ni usar la palabra 'debilidades' (preguntar por desafíos o aspectos por fortalecer)."
+  },
+  {
+    unit: "U5", src: "06 OT 2024.pdf · Unidad 5 OT · PROT SUBDERE-CEPAL (2011)",
+    title: "6. Ordenamiento Territorial: Primacía IP4, Guttman/Rondinelli, Aislamiento y PROT",
+    core: "<b>Idea central:</b> El Ordenamiento Territorial diagnostica la red de asentamientos con Primacía Urbana (IP<sub>4</sub> = P<sub>1</sub>/[P<sub>2</sub>+P<sub>3</sub>+P<sub>4</sub>] en escala 0–3), jerarquía funcional con Escalograma de Guttman / Rondinelli (peso inverso W<sub>k</sub> = 100/f<sub>k</sub>) y conectividad vial con Matriz de Aislamiento (0 = asfalto directo, 1 = sin conexión directa). El PROT articula 4 sistemas: Costero, Urbano, Rural y Cuencas.",
+    bridge: "<b>Puente inter-unidades:</b> Cierra el ciclo del ramo: conecta la densidad de servicios de Christaller (U1) y la concentración poblacional/económica (U3) con instrumentos públicos reales (PROT, PLADECO, LGUC, Ley 19.175 LOCGAR).",
+    trap: "<b>Trampas de control (Control 5):</b> (1) En la Escala de Guttman (Top 10 comunas más pobladas y mínimo 7 variables), las variables DEBEN discriminar entre comunas: si todas tienen 1, debes reemplazar la variable. (2) En Rondinelli, mientras más escaso es un equipamiento (menor frecuencia f<sub>k</sub>), MAYOR peso de centralidad W<sub>k</sub> aporta. (3) En Matriz de Aislamiento, 0 es bueno (conectada directamente) y 1 indica aislamiento."
+  }
+];
+
+let capaLecturaActiva = "core";
+let filtroLecturaUnit = "all";
+
+function setCapaLectura(capa) {
+  capaLecturaActiva = capa;
+  ["core", "bridge", "trap", "all"].forEach(k => {
+    const b = document.getElementById("cap-btn-" + k);
+    if (b) b.classList.toggle("primary", k === capa);
+  });
+  renderLecturaCards();
+}
+function filtrarLectura(unit, btn) {
+  filtroLecturaUnit = unit;
+  btn.parentElement.querySelectorAll(".flt-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  renderLecturaCards();
+}
+function renderLecturaCards() {
+  const grid = document.getElementById("lec-cards-grid");
+  if (!grid) return;
+  grid.innerHTML = "";
+  FICHAS_LECTURA.filter(f => filtroLecturaUnit === "all" || f.unit === filtroLecturaUnit).forEach(f => {
+    const card = document.createElement("div");
+    card.className = "lec-card";
+    let layersHtml = "";
+    if (capaLecturaActiva === "core" || capaLecturaActiva === "all") layersHtml += `<div class="lec-layer l-core">${f.core}</div>`;
+    if (capaLecturaActiva === "bridge" || capaLecturaActiva === "all") layersHtml += `<div class="lec-layer l-bridge">${f.bridge}</div>`;
+    if (capaLecturaActiva === "trap" || capaLecturaActiva === "all") layersHtml += `<div class="lec-layer l-trap">${f.trap}</div>`;
+    card.innerHTML = `
+      <div class="lec-meta"><span class="lec-unit">${f.unit}</span><span class="lec-src">${f.src}</span></div>
+      <div class="lec-title">${f.title}</div>
+      ${layersHtml}`;
+    grid.appendChild(card);
+  });
+}
+
+const QUIZ_LECTURA_DATA = [
+  {
+    tag: "U1 ↔ U5",
+    q: "Si una mejora vial reduce el costo de transporte τ por debajo del umbral crítico τ* en el modelo de Krugman (1991), ¿qué tendencia cabría esperar en el Índice de Primacía (IP4) y en la Curva de Lorenz?",
+    opts: ["Disminuyen IP4 y Gini (dispersión automática)", "Aumentan IP4 y Gini (mayor aglomeración en el centro)", "No cambia la distribución espacial"],
+    ans: 1,
+    why: "Al caer τ ≤ τ* predominan las fuerzas centrípetas (economías de escala + mercado local), concentrando producción y población en la capital regional, lo que eleva IP4 y aleja la Curva de Lorenz de la diagonal (Duch Brown / Krugman 1991)."
+  },
+  {
+    tag: "U1 Weber",
+    q: "Una planta procesadora de madera aserrada o leche en polvo tiene un Índice de Materiales IM = 1,85 y existe un enclave laboral barato L fuera de su Isodápana Crítica. ¿Dónde debe ubicarse?",
+    opts: ["Cerca de las materias primas en P* (no salta a L)", "En el enclave laboral L para ahorrar salarios", "Pegada al mercado consumidor porque IM > 1"],
+    ans: 0,
+    why: "Como IM > 1 (pérdida de peso en el proceso), P* se orienta a los insumos. Como L queda FUERA de la Isodápana Crítica, el sobrecosto de transporte hacia L supera el ahorro salarial, por lo que permanece en P* (Duch Brown, Sec. 1.2)."
+  },
+  {
+    tag: "U2 ↔ U3",
+    q: "Una comuna ubicada en el Cuadrante II de Silva Lira (Emergente: bajo PIB per cápita inicial y tasa de crecimiento superior al promedio regional) aporta evidencia en favor de:",
+    opts: ["Divergencia absoluta (β > 0)", "Macrocefalia urbana (IP4 ≥ 1,50)", "Convergencia Beta (β < 0)"],
+    ans: 2,
+    why: "La Convergencia Beta ocurre precisamente cuando las economías que parten rezagadas (bajo nivel inicial) crecen proporcionalmente más rápido que el promedio, cerrando la brecha (Silva Lira 2005 / Motor REAT)."
+  },
+  {
+    tag: "U3 REAT",
+    q: "Verdadero o Falso: Si en una regresión transversal regional encontramos Convergencia Beta estadísticamente significativa (β < 0), eso garantiza automáticamente que exista Convergencia Sigma (σ_t < σ_0).",
+    opts: ["Verdadero", "Falso"],
+    ans: 1,
+    why: "Falso: En econometría regional (REAT / Barro y Sala-i-Martin), la Convergencia Beta es condición necesaria pero NO suficiente para Convergencia Sigma, ya que choques aleatorios pueden sostener o ampliar la dispersión transversal."
+  },
+  {
+    tag: "U3 Desigualdad",
+    q: "Si el GORE necesita descomponer exactamente cuánto de la desigualdad total de ingresos se explica 'entre provincias' y cuánto 'dentro de cada provincia', ¿qué indicador debe elegir?",
+    opts: ["Índice de Gini estándar (G)", "Índice de Primacía IP2", "Índice de Entropía de Theil (T)"],
+    ans: 2,
+    why: "La principal ventaja analítica de la Entropía de Theil frente al Gini es su perfecta descomponibilidad aditiva en componente inter-grupal (entre territorios) e intra-grupal (dentro de cada territorio)."
+  },
+  {
+    tag: "U4 Dini / Granovetter",
+    q: "Un clúster local tiene 100% de vínculos fuertes internos entre sus 6 PyMEs, pero cero vínculos débiles con universidades, centros I+D o compradores externos. Según Granovetter (1973), ¿cuál es su principal riesgo?",
+    opts: ["Exceso de competencia desleal por baja cohesión", "Bloqueo cognitivo (lock-in) por información redundante", "Pérdida inmediata de densidad D = 0%"],
+    ans: 1,
+    why: "Sin vínculos débiles externos que operen como puentes hacia nueva tecnología y mercados, las redes altamente endogámicas caen en bloqueo cognitivo (lock-in) y repiten información redundante."
+  },
+  {
+    tag: "U4 Control 4",
+    q: "En el protocolo de entrevistas del Taller de Redes y Cadenas de Valor (Control 4, Prof. Mancilla), ¿cuál de estas prácticas es INCORRECTA?",
+    opts: ["Entrevistar a 3 actores de organizaciones distintas cubriendo mínimo 2 eslabones (1 gremio + 2 empresas)", "Preguntar por 'desafíos' o 'aspectos por fortalecer' y validar el esquema de la cadena", "Sugerir al entrevistado que debe existir un clúster y preguntarle por sus 'debilidades'"],
+    ans: 2,
+    why: "Regla explícita de cátedra ('Unidad 5. Redes y Cadena de Valor.dcx.pdf'): no se debe inducir la existencia de un clúster ni usar la palabra 'debilidades', sino consultar por desafíos o aspectos por fortalecer."
+  },
+  {
+    tag: "U4 Dini 2010",
+    q: "En una red no dirigida de n = 6 empresas con L = 5 vínculos todos conectados a una única empresa ancla (estrella), ¿qué valores toman la Densidad (D) y el Gradiente de Concentración (GC)?",
+    opts: ["D = 33,3% y GC = 100% (Red con Liderazgo)", "D = 100% y GC = 0% (Red Simétrica)", "D = 50,0% y GC = 50% (Red Jerárquica)"],
+    ans: 0,
+    why: "D = 2L/[n(n−1)] = 10/30 = 33,3%. Como el líder tiene k_max = 5 y las otras 5 empresas tienen k_i = 1, ∑(5−k_i) = 20 y (n−1)(n−2) = 5×4 = 20 ⇒ GC = 20/20 = 100% (04 SPL.pdf, pág. 14)."
+  },
+  {
+    tag: "U5 Guttman / Rondinelli",
+    q: "Al construir tu Escala de Guttman / Matriz de Rondinelli para las 10 comunas más pobladas, notas que la variable 'Escuela Básica' tiene valor 1 en las 10 comunas. ¿Qué debes hacer según la pauta de cátedra?",
+    opts: ["Mantenerla porque otorga el mayor peso Wk = 100/f_k", "Reemplazar esa variable por un equipamiento que sí discrimine entre comunas", "Asignarle peso 0 pero dejarla como indicador principal de jerarquía"],
+    ans: 1,
+    why: "En el Escalograma de Guttman ('06 OT 2024.pdf' / Control 5), las variables elegidas deben discriminar jerárquicamente entre comunas; si todas tienen valor 1 no aporta diferenciación y debe reemplazarse."
+  },
+  {
+    tag: "U5 Aislamiento",
+    q: "En la Matriz de Aislamiento Comunal del Control 5 (0 = conexión directa asfaltada; 1 = sin conexión directa), una comuna con Índice de Aislamiento = 22% frente a otra con 78% indica que:",
+    opts: ["La primera está más aislada porque tiene menos unos", "Ambas tienen el mismo nivel de centralidad funcional", "La primera está mejor conectada (es un nodo más accesible en la red vial)"],
+    ans: 2,
+    why: "Como el valor 0 marca conexión directa y el 1 marca ausencia de conexión directa, un menor porcentaje de 1s refleja mayor accesibilidad y menor aislamiento territorial."
+  }
+];
+
+let qzAnswers = {};
+let qzSoloPend = false;
+
+function toggleSoloErradasQz(btn) {
+  qzSoloPend = !qzSoloPend;
+  btn.classList.toggle("primary", qzSoloPend);
+  renderQuizLectura();
+}
+function responderQuizLectura(idx, optIdx) {
+  qzAnswers[idx] = optIdx;
+  renderQuizLectura();
+}
+function resetQuizLectura() {
+  qzAnswers = {};
+  qzSoloPend = false;
+  renderQuizLectura();
+}
+function renderQuizLectura() {
+  const wrap = document.getElementById("qz-list");
+  if (!wrap) return;
+  wrap.innerHTML = "";
+  let okCount = 0;
+  QUIZ_LECTURA_DATA.forEach((item, idx) => {
+    const uAns = qzAnswers[idx];
+    const isAns = uAns !== undefined;
+    const isOk = isAns && uAns === item.ans;
+    if (isOk) okCount++;
+    if (qzSoloPend && isOk) return;
+
+    const card = document.createElement("div");
+    card.className = "qz-card" + (isAns ? (" answered " + (isOk ? "ok" : "bad")) : "");
+    const btns = item.opts.map((op, oi) =>
+      `<button class="qz-btn ${uAns === oi ? "sel" : ""}" onclick="responderQuizLectura(${idx}, ${oi})">${op}</button>`
+    ).join("");
+    const badgeRes = isAns ? `<span style="font-size:11.5px;font-weight:800;color:${isOk ? "#15803D" : "#DC2626"};">${isOk ? "✓ Correcto" : "✗ Revisar"}</span>` : "";
+    card.innerHTML = `
+      <div><span class="qz-tag">${item.tag}</span> <span style="font-size:11px;color:#475569;font-weight:700;">Pregunta ${idx + 1}</span></div>
+      <div class="qz-q">${item.q}</div>
+      <div class="qz-opts">${btns}${badgeRes}</div>
+      <div class="qz-fb"><b>Fundamento teórico de cátedra:</b> ${item.why}</div>`;
+    wrap.appendChild(card);
+  });
+  document.getElementById("qz-score").textContent = `Aciertos: ${okCount} / ${QUIZ_LECTURA_DATA.length}`;
+}
+
 drawDini();
 renderMecanica();
+drawMapaTeoria();
+renderLecturaCards();
+renderQuizLectura();
 </script>
 </body>
 </html>
@@ -1736,4 +2230,4 @@ renderMecanica();
 
 def renderizar_laboratorio_fluido_territorial():
     """Renderiza el Estudio Territorial Integral a 60 FPS (8 módulos) sin recarga de servidor."""
-    components.html(HTML_TERRITORIAL_60FPS, height=1120, scrolling=True)
+    components.html(HTML_TERRITORIAL_60FPS, height=1180, scrolling=True)
