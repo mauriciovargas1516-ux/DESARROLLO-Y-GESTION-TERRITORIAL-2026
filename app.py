@@ -213,7 +213,7 @@ def main():
             """
             <div style="background-color:#0F172A;color:#FFFFFF;padding:12px 20px;border-radius:8px;margin-bottom:10px;">
                 <div style="font-size:15.5px;font-weight:700;">ESTUDIO INTERACTIVO A 60 FPS — DESARROLLO Y GESTIÓN TERRITORIAL (ULAGOS 2026)</div>
-                <div style="font-size:12px;color:#CBD5E1;margin-top:2px;">8 módulos sin lag: Von Thünen (editor ecuaciones), Weber (IM/Isodápana), Krugman, Perroux/Myrdal/Hirschman, Christaller/Granovetter, Lorenz/Gini/Theil/IP4, Redes Dini y Hoja Mecánica.</div>
+                <div style="font-size:12px;color:#CBD5E1;margin-top:2px;">9 módulos sin lag: Von Thünen (editor ecuaciones), Weber, Krugman, Perroux/Myrdal/Hirschman, Christaller/Granovetter, Lorenz/Gini/Theil/IP4, Redes Dini, Hoja Mecánica y Mapa Teórico + Lectura Viva.</div>
             </div>
             """,
             unsafe_allow_html=True,
