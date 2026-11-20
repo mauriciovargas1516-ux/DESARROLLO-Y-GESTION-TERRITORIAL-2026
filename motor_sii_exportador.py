@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Motor Econométrico y Exportador SII — ILPES / MADE / REAT
+Motor Econométrico y Exportador SII — ILPES, MADE, REAT, Ordenamiento Territorial e Índice Compuesto
 Asignatura: Desarrollo y Gestión Territorial — Universidad de Los Lagos
 Archivo: motor_sii_exportador.py
 """
@@ -16,7 +16,7 @@ import plotly.graph_objects as go
 import streamlit as st
 from scipy import stats
 from openpyxl import Workbook
-from openpyxl.chart import Reference, ScatterChart, Series
+from openpyxl.chart import BarChart, LineChart, Reference, ScatterChart, Series
 from openpyxl.chart.label import DataLabelList
 from openpyxl.formatting.rule import CellIsRule
 from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
@@ -767,6 +767,1115 @@ def _autoajustar_columnas_hoja(ws, max_width: int = 34, min_width: int = 13, col
         ws.column_dimensions[col_letter].width = max(min(max_len + 4, limite_sup), min_width)
 
 
+
+
+# ==============================================================================
+# MÓDULO INTEGRADO: ORDENAMIENTO TERRITORIAL (OT) E ÍNDICE COMPUESTO (MÍN–MÁX)
+# ==============================================================================
+
+DIMENSIONES_GUTTMAN_OT = [
+    "1. Servicios a la producción",
+    "2. Infraestructura, transporte y telecomunicaciones",
+    "3. Infraestructura de salud y educacional",
+    "4. Servicios recreacionales, deportivos y grandes centros comerciales",
+]
+
+
+def _mapear_region_a_control5(region_sel: str):
+    """Vincula el nombre de región del SII con las 4 regiones precargadas."""
+    r_norm = _normalizar_texto(region_sel)
+    if "biob" in r_norm:
+        return "Región del Biobío (33 comunas)"
+    if "lagos" in r_norm:
+        return "Región de Los Lagos (30 comunas)"
+    if "rios" in r_norm:
+        return "Región de Los Ríos (12 comunas)"
+    if "araucan" in r_norm:
+        return "Región de La Araucanía (32 comunas)"
+    return None
+
+
+def _matriz_guttman_discriminante_default(dimension: str, comunas_top10: list) -> pd.DataFrame:
+    """
+    Genera una matriz binaria (1/0) de 8 variables para el Top 10 comunal asegurando
+    que cada variable presente diferenciación entre comunas (ni todos 1 ni todos 0).
+    """
+    n_c = len(comunas_top10)
+    if "1. Servicios a la producción" in dimension:
+        cols = [
+            "OTEC / Capacitación",
+            "Más de 1 Banco comercial",
+            "Oficina Fomento Productivo Municipal",
+            "Asistencia Técnica (Sercotec / INDAP)",
+            "Empresa reclutamiento laboral",
+            "Centro de Negocios Sercotec",
+            "Laboratorio Certificación Industrial",
+            "Cámara de Comercio / Gremio Regional",
+        ]
+        mat_10 = [
+            [1, 1, 1, 1, 1, 1, 1, 1],
+            [1, 1, 1, 1, 1, 1, 1, 1],
+            [1, 1, 1, 1, 1, 1, 1, 0],
+            [1, 1, 1, 1, 0, 1, 1, 0],
+            [1, 1, 1, 1, 0, 0, 0, 0],
+            [1, 0, 1, 0, 0, 0, 1, 0],
+            [1, 1, 1, 0, 0, 0, 1, 0],
+            [1, 0, 1, 1, 0, 0, 0, 0],
+            [1, 1, 1, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 1, 0],
+        ]
+    elif "2. Infraestructura, transporte" in dimension:
+        cols = [
+            "Terminal de Buses Interurbano",
+            "Periódico / Medio Digital Local",
+            "Parque o Área Industrial",
+            "Puerto Marítimo / Fluvial Comercial",
+            "Señal de TV Local",
+            "Estación Operativa de Tren",
+            "Aeropuerto / Aeródromo Comercial",
+            "Centro Logístico / Puerto Seco",
+        ]
+        mat_10 = [
+            [1, 1, 1, 1, 1, 1, 1, 1],
+            [1, 1, 1, 0, 1, 0, 1, 1],
+            [1, 1, 1, 1, 1, 1, 0, 1],
+            [1, 1, 1, 1, 1, 0, 1, 0],
+            [1, 1, 1, 1, 1, 1, 0, 0],
+            [1, 0, 1, 1, 0, 1, 0, 0],
+            [1, 1, 1, 0, 0, 1, 0, 0],
+            [1, 1, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 1, 0, 0, 0, 0],
+            [0, 0, 1, 0, 0, 1, 0, 0],
+        ]
+    elif "3. Infraestructura de salud" in dimension:
+        cols = [
+            "Educación Media Técnico-Profesional",
+            "Centro Dental / Óptica",
+            "Hospital Baja/Media Complejidad",
+            "Clínica Privada / Centro Médico",
+            "CFT / Instituto Profesional",
+            "Universidad con Sede Presencial",
+            "Hospital Alta Complejidad (Tipo 1)",
+            "Postgrado / Centro de Investigación",
+        ]
+        mat_10 = [
+            [1, 1, 1, 1, 1, 1, 1, 1],
+            [1, 1, 1, 1, 1, 1, 1, 1],
+            [1, 1, 1, 1, 1, 1, 1, 0],
+            [1, 1, 1, 1, 1, 1, 0, 0],
+            [1, 1, 1, 0, 1, 0, 0, 0],
+            [1, 1, 1, 0, 0, 0, 0, 0],
+            [1, 1, 1, 0, 0, 0, 0, 0],
+            [1, 1, 0, 0, 0, 0, 0, 0],
+            [1, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+        ]
+    else:
+        cols = [
+            "Gimnasio de Gran Capacidad",
+            "Teatro / Centro Cultural",
+            "Pista de Atletismo",
+            "Piscina Pública / Temperada",
+            "Multitiendas Comerciales",
+            "Centro Comercial (Tipo Mall)",
+            "Salas de Cine",
+            "Hotel 4–5 Estrellas",
+        ]
+        mat_10 = [
+            [1, 1, 1, 1, 1, 1, 1, 1],
+            [1, 1, 1, 1, 1, 1, 1, 1],
+            [1, 1, 1, 1, 1, 1, 1, 1],
+            [1, 1, 0, 1, 1, 1, 1, 0],
+            [1, 1, 0, 0, 1, 1, 0, 0],
+            [1, 1, 0, 0, 0, 0, 0, 0],
+            [1, 0, 0, 0, 1, 0, 0, 0],
+            [1, 0, 0, 0, 0, 0, 0, 0],
+            [1, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+        ]
+
+    if n_c <= len(mat_10):
+        mat = [row[:] for row in mat_10[:n_c]]
+    else:
+        mat = [row[:] for row in mat_10] + [[0] * len(cols) for _ in range(n_c - len(mat_10))]
+
+    if n_c >= 2:
+        for j in range(len(cols)):
+            col_sum = sum(mat[i][j] for i in range(n_c))
+            if col_sum == n_c:
+                mat[-1][j] = 0
+            elif col_sum == 0:
+                mat[0][j] = 1
+
+    return pd.DataFrame(mat, index=comunas_top10, columns=cols)
+
+
+def construir_datos_ot_region(
+    region_sel: str,
+    resultados: dict,
+    dimension_ot: str = DIMENSIONES_GUTTMAN_OT[0],
+) -> dict:
+    """
+    Prepara los 3 insumos de Ordenamiento Territorial sincronizados con la región seleccionada:
+    - df_censo: Comunas ordenadas por población 2024 (Censos 2017 y 2024).
+    - df_guttman: Matriz binaria 1/0 (Top 10 comunas x 8 variables).
+    - df_aislamiento: Matriz simétrica 0/1 (0 = conexión directa; 1 = sin conexión directa).
+    """
+    reg_ot_key = _mapear_region_a_control5(region_sel)
+    df_censo = None
+    df_aislamiento = None
+    es_base_censo_oficial = False
+
+    if reg_ot_key is not None:
+        try:
+            from motor_redes_territorio_ot import (
+                obtener_poblacion_censos_control5,
+                obtener_matriz_aislamiento_control5,
+            )
+            df_censo = obtener_poblacion_censos_control5(reg_ot_key).copy()
+            df_aislamiento = obtener_matriz_aislamiento_control5(reg_ot_key).copy()
+            es_base_censo_oficial = True
+        except Exception:
+            df_censo = None
+            df_aislamiento = None
+
+    if df_censo is None or df_censo.empty:
+        V0 = resultados["V0"]
+        Vt = resultados["Vt"]
+        tot_0 = V0.sum(axis=0)
+        tot_t = Vt.sum(axis=0)
+        filas = []
+        for com in Vt.columns:
+            p24 = POBLACION_CENSO_2024.get(_normalizar_texto(com))
+            if p24 is None:
+                p24 = max(1000, int(round(float(tot_t.get(com, 1.0)))))
+                p17 = max(1000, int(round(float(tot_0.get(com, 1.0)))))
+            else:
+                p17 = max(500, int(round(p24 * 0.94)))
+            filas.append((str(com), str(region_sel), int(p17), int(p24)))
+        df_censo = pd.DataFrame(filas, columns=["Comuna", "Provincia", "Censo_2017", "Censo_2024"])
+        df_censo = df_censo.sort_values("Censo_2024", ascending=False).reset_index(drop=True)
+
+    df_censo = df_censo.sort_values("Censo_2024", ascending=False).reset_index(drop=True)
+    top10_comunas = df_censo["Comuna"].astype(str).tolist()[:10]
+    df_guttman = _matriz_guttman_discriminante_default(dimension_ot, top10_comunas)
+
+    if df_aislamiento is None or df_aislamiento.empty:
+        n_l = len(top10_comunas)
+        mat_a = np.ones((n_l, n_l), dtype=int)
+        np.fill_diagonal(mat_a, 0)
+        for i in range(1, min(n_l, 5)):
+            mat_a[0, i] = 0
+            mat_a[i, 0] = 0
+        for i in range(n_l - 1):
+            mat_a[i, i + 1] = 0
+            mat_a[i + 1, i] = 0
+        df_aislamiento = pd.DataFrame(mat_a, index=top10_comunas, columns=top10_comunas)
+
+    p_24 = df_censo["Censo_2024"].astype(float).values
+    p_17 = np.sort(df_censo["Censo_2017"].astype(float).values)[::-1]
+    ip4_24 = float(p_24[0] / np.sum(p_24[1:4])) if len(p_24) >= 4 and np.sum(p_24[1:4]) > 0 else (
+        float(p_24[0] / np.sum(p_24[1:])) if len(p_24) > 1 and np.sum(p_24[1:]) > 0 else 0.0
+    )
+    ip2_24 = float(p_24[0] / p_24[1]) if len(p_24) >= 2 and p_24[1] > 0 else 0.0
+    ip4_17 = float(p_17[0] / np.sum(p_17[1:4])) if len(p_17) >= 4 and np.sum(p_17[1:4]) > 0 else 0.0
+
+    if ip4_24 >= 1.50:
+        cat_ip4, cod_ip4 = "Altamente Concentrada", 3
+    elif ip4_24 >= 1.00:
+        cat_ip4, cod_ip4 = "Concentrada", 2
+    elif ip4_24 >= 0.65:
+        cat_ip4, cod_ip4 = "Dispersa", 1
+    else:
+        cat_ip4, cod_ip4 = "Muy Dispersa", 0
+
+    return {
+        "df_censo": df_censo,
+        "df_guttman": df_guttman,
+        "df_aislamiento": df_aislamiento,
+        "dimension_ot": dimension_ot,
+        "es_base_censo_oficial": es_base_censo_oficial,
+        "ip4_24": ip4_24,
+        "ip2_24": ip2_24,
+        "ip4_17": ip4_17,
+        "cat_ip4": cat_ip4,
+        "cod_ip4": cod_ip4,
+    }
+
+
+def calcular_rondinelli_df(df_guttman: pd.DataFrame, df_censo: pd.DataFrame):
+    """Calcula frecuencias fk, pesos Wk = 100/fk, índice de Rondinelli y columnas sin variación."""
+    mat = df_guttman.apply(pd.to_numeric, errors="coerce").fillna(0).clip(0, 1).astype(int)
+    n_com = len(mat)
+    frec = mat.sum(axis=0)
+    pesos = frec.apply(lambda f: (100.0 / float(f)) if f > 0 else 0.0)
+    mat_pond = mat.multiply(pesos, axis=1)
+    indice_ic = mat_pond.sum(axis=1)
+    total_func = mat.sum(axis=1)
+
+    mapa_pob = {
+        _normalizar_texto(r["Comuna"]): int(r["Censo_2024"])
+        for _, r in df_censo.iterrows()
+    }
+    pobs = [mapa_pob.get(_normalizar_texto(c), 0) for c in mat.index]
+    tot_pob = max(sum(pobs), 1)
+
+    df_res = pd.DataFrame({
+        "Comuna": list(mat.index),
+        "Poblacion_2024": pobs,
+        "Pct_Poblacion_%": [(p / tot_pob) * 100.0 for p in pobs],
+        "Total_Funciones": total_func.values,
+        "Indice_Rondinelli": indice_ic.values,
+    })
+    df_res["Ranking_Funcional"] = df_res["Indice_Rondinelli"].rank(ascending=False, method="min").astype(int)
+
+    cols_sin_discriminar = [
+        col for col in mat.columns
+        if int(frec[col]) == 0 or int(frec[col]) == n_com
+    ]
+    return df_res, mat_pond, frec, pesos, cols_sin_discriminar
+
+
+def calcular_aislamiento_df(df_aislamiento: pd.DataFrame) -> pd.DataFrame:
+    """Calcula suma de aislamiento (1), índice promedio (%) y conexiones directas (0) sin diagonal."""
+    mat = df_aislamiento.apply(pd.to_numeric, errors="coerce").fillna(1).clip(0, 1).astype(int)
+    n_l = len(mat)
+    filas = []
+    for i, loc in enumerate(mat.index):
+        vals = [int(mat.iloc[i, j]) for j in range(n_l) if j != i]
+        suma_1 = sum(vals)
+        ind_pct = (suma_1 / max(len(vals), 1)) * 100.0
+        conex_0 = sum(1 for v in vals if v == 0)
+        filas.append({
+            "Comuna_Localidad": str(loc),
+            "Suma_Aislamiento_1": suma_1,
+            "Indice_Aislamiento_%": ind_pct,
+            "Conexiones_Directas_0": conex_0,
+        })
+    df_out = pd.DataFrame(filas)
+    df_out["Ranking_Conectividad"] = df_out["Indice_Aislamiento_%"].rank(ascending=True, method="min").astype(int)
+    return df_out.sort_values("Indice_Aislamiento_%", ascending=True).reset_index(drop=True)
+
+
+def _agregar_hojas_ot_y_u6(
+    wb: Workbook,
+    resultados: dict,
+    region_sel: str,
+    variable_sel: str,
+    anio_0: int,
+    anio_t: int,
+    datos_ot: dict,
+    estilos: dict,
+    incluir_ot: bool = True,
+    incluir_u6: bool = False,
+):
+    """
+    Agrega al libro Excel las hojas de Ordenamiento Territorial (Primacía y Ranking,
+    Rondinelli, Aislamiento) y, de forma opcional, la hoja Índice Desarrollo (Mín–Máx),
+    manteniendo formato sobrio monocromático y fórmulas nativas de Excel.
+    """
+    if not incluir_ot and not incluir_u6:
+        return
+
+    fill_titulo = estilos["fill_titulo"]
+    fill_header = estilos["fill_header"]
+    fill_subbloque = estilos["fill_subbloque"]
+    fill_gris_total = estilos["fill_gris_total"]
+    fill_made_mod = estilos["fill_made_mod"]
+    fill_fila_blanca = estilos["fill_fila_blanca"]
+    fill_fila_cebra = estilos["fill_fila_cebra"]
+
+    font_titulo = estilos["font_titulo"]
+    font_sub = estilos["font_sub"]
+    font_header = estilos["font_header"]
+    font_subbloque = estilos["font_subbloque"]
+    font_bold = estilos["font_bold"]
+    font_celda = estilos["font_celda"]
+
+    borde_fino = estilos["borde_fino"]
+    borde_total = estilos["borde_total"]
+
+    df_censo = datos_ot["df_censo"].sort_values("Censo_2024", ascending=False).reset_index(drop=True)
+    df_guttman = datos_ot["df_guttman"].copy()
+    df_aislamiento = datos_ot["df_aislamiento"].copy()
+    dim_ot = datos_ot.get("dimension_ot", DIMENSIONES_GUTTMAN_OT[0])
+    dim_nombre = dim_ot.split(".", 1)[1].strip() if "." in dim_ot else dim_ot
+    fuente_censo = "Fuente: INE (Censos de Población 2017 y 2024)" if datos_ot.get("es_base_censo_oficial") else "Fuente: Estimación comunal referencial (2017 y 2024)"
+
+    def _banner_sheet(ws, n_cols: int, titulo: str, subtitulo: str):
+        ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=max(n_cols, 2))
+        ct = ws.cell(row=1, column=1, value=titulo)
+        ct.fill = fill_titulo
+        ct.font = font_titulo
+        ct.alignment = Alignment(horizontal="left", vertical="center")
+        ws.row_dimensions[1].height = 26
+
+        ws.merge_cells(start_row=2, start_column=1, end_row=2, end_column=max(n_cols, 2))
+        cs = ws.cell(row=2, column=1, value=subtitulo)
+        cs.font = font_sub
+        cs.alignment = Alignment(horizontal="left", vertical="center")
+        ws.row_dimensions[2].height = 19
+
+    # Datos base de Rondinelli compartidos si se activa U6
+    mat_g = df_guttman.apply(pd.to_numeric, errors="coerce").fillna(0).clip(0, 1).astype(int)
+    funcs_cols = list(mat_g.columns)
+    comunas_g = list(mat_g.index)
+    n_f = len(funcs_cols)
+    n_g = len(comunas_g)
+    mapa_pob_censo = {
+        _normalizar_texto(r["Comuna"]): int(r["Censo_2024"])
+        for _, r in df_censo.iterrows()
+    }
+    df_rond_calc, _, _, _, _ = calcular_rondinelli_df(mat_g, df_censo)
+    col_ic_rond_let = get_column_letter(5 + n_f)
+    f_ini_rond = 5
+
+    if incluir_ot:
+        # ======================================================================
+        # HOJA: PRIMACÍA Y RANKING (CON FLECHAS DE CAMBIO Y GRÁFICO DE CRUCE)
+        # ======================================================================
+        ws11 = wb.create_sheet("Primacía y Ranking")
+        headers_11 = [
+            "Comuna", "Provincia", "Censo 2017", "Censo 2024",
+            "Ranking 2017", "Ranking 2024", "Cambio", "Tendencia",
+            "Variación (%)", "Cuota Regional (%)", "Zipf Teórico (P1/Rango)",
+        ]
+        _banner_sheet(
+            ws11,
+            len(headers_11),
+            f"RANKING DE ASENTAMIENTOS E ÍNDICE DE PRIMACÍA — {region_sel.upper()}",
+            f"{fuente_censo} | Ordenamiento Territorial",
+        )
+
+        for c_i, h in enumerate(headers_11, start=1):
+            ch = ws11.cell(row=4, column=c_i, value=h)
+            ch.fill = fill_header
+            ch.font = font_header
+            ch.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+            ch.border = borde_fino
+        ws11.row_dimensions[4].height = 25
+
+        n_com = len(df_censo)
+        f_ini_11 = 5
+        f_fin_11 = f_ini_11 + n_com - 1
+        f_tot_11 = f_fin_11 + 1
+
+        # Pre-cálculo de rankings para columnas ocultas del gráfico de cruce (2017 -> 2024)
+        rk17_ser = df_censo["Censo_2017"].rank(ascending=False, method="min").astype(int).tolist()
+        rk24_ser = df_censo["Censo_2024"].rank(ascending=False, method="min").astype(int).tolist()
+
+        for idx_off, row in enumerate(df_censo.itertuples(index=False)):
+            idx_r = f_ini_11 + idx_off
+            fill_r = fill_fila_blanca if (idx_r % 2 == 1) else fill_fila_cebra
+            c_com = ws11.cell(row=idx_r, column=1, value=str(row.Comuna))
+            c_pro = ws11.cell(row=idx_r, column=2, value=str(row.Provincia))
+            for ct in (c_com, c_pro):
+                ct.font = font_celda
+                ct.fill = fill_r
+                ct.alignment = Alignment(horizontal="left", vertical="center")
+                ct.border = borde_fino
+
+            c17 = ws11.cell(row=idx_r, column=3, value=int(row.Censo_2017))
+            c24 = ws11.cell(row=idx_r, column=4, value=int(row.Censo_2024))
+            for cp in (c17, c24):
+                cp.fill = fill_r
+                cp.font = font_celda
+                cp.number_format = "#,##0"
+                cp.alignment = Alignment(horizontal="right", vertical="center")
+                cp.border = borde_fino
+
+            cr17 = ws11.cell(row=idx_r, column=5, value=f"=RANK(C{idx_r},$C${f_ini_11}:$C${f_fin_11},0)")
+            cr24 = ws11.cell(row=idx_r, column=6, value=f"=RANK(D{idx_r},$D${f_ini_11}:$D${f_fin_11},0)")
+            cchg = ws11.cell(row=idx_r, column=7, value=f"=E{idx_r}-F{idx_r}")
+            cten = ws11.cell(row=idx_r, column=8, value=f'=IF(E{idx_r}>F{idx_r},"↑ Sube",IF(E{idx_r}<F{idx_r},"↓ Baja","→ Igual"))')
+            cvar = ws11.cell(row=idx_r, column=9, value=f"=IF(C{idx_r}>0,(D{idx_r}/C{idx_r})-1,0)")
+            ccuo = ws11.cell(row=idx_r, column=10, value=f"=IF($D${f_tot_11}>0,D{idx_r}/$D${f_tot_11},0)")
+            czip = ws11.cell(row=idx_r, column=11, value=f"=IF(F{idx_r}>0,$D${f_ini_11}/F{idx_r},0)")
+
+            for cf, fmt, al in [
+                (cr17, "0", "right"),
+                (cr24, "0", "right"),
+                (cchg, "+#,##0;-#,##0;0", "right"),
+                (cten, "@", "center"),
+                (cvar, "0.00%", "right"),
+                (ccuo, "0.00%", "right"),
+                (czip, "#,##0", "right"),
+            ]:
+                cf.fill = fill_made_mod
+                cf.font = font_celda
+                cf.number_format = fmt
+                cf.alignment = Alignment(horizontal=al, vertical="center")
+                cf.border = borde_fino
+
+        ws11.cell(row=f_tot_11, column=1, value="Total regional")
+        ws11.cell(row=f_tot_11, column=3, value=f"=SUM(C{f_ini_11}:C{f_fin_11})").number_format = "#,##0"
+        ws11.cell(row=f_tot_11, column=4, value=f"=SUM(D{f_ini_11}:D{f_fin_11})").number_format = "#,##0"
+        ws11.cell(row=f_tot_11, column=9, value=f"=IF(C{f_tot_11}>0,(D{f_tot_11}/C{f_tot_11})-1,0)").number_format = "0.00%"
+        ws11.cell(row=f_tot_11, column=10, value=f"=SUM(J{f_ini_11}:J{f_fin_11})").number_format = "0.00%"
+        for c_i in range(1, len(headers_11) + 1):
+            ct = ws11.cell(row=f_tot_11, column=c_i)
+            ct.font = font_bold
+            ct.fill = fill_gris_total
+            ct.border = borde_total
+            if c_i >= 3:
+                ct.alignment = Alignment(horizontal="right", vertical="center")
+
+        # Bloque resumen de Índice de Primacía
+        f_ip_hd = f_tot_11 + 2
+        ws11.merge_cells(start_row=f_ip_hd, start_column=1, end_row=f_ip_hd, end_column=2)
+        ws11.cell(row=f_ip_hd, column=1, value="Índice de Primacía Urbana")
+        ws11.cell(row=f_ip_hd, column=3, value="Censo 2017")
+        ws11.cell(row=f_ip_hd, column=4, value="Censo 2024")
+        for c_i in range(1, 5):
+            ch = ws11.cell(row=f_ip_hd, column=c_i)
+            ch.fill = fill_header
+            ch.font = font_header
+            ch.alignment = Alignment(horizontal="center" if c_i >= 3 else "left", vertical="center")
+            ch.border = borde_fino
+
+        if n_com >= 2:
+            f_ip2_17 = f"=IF(LARGE($C${f_ini_11}:$C${f_fin_11},2)>0,LARGE($C${f_ini_11}:$C${f_fin_11},1)/LARGE($C${f_ini_11}:$C${f_fin_11},2),0)"
+            f_ip2_24 = f"=IF(LARGE($D${f_ini_11}:$D${f_fin_11},2)>0,LARGE($D${f_ini_11}:$D${f_fin_11},1)/LARGE($D${f_ini_11}:$D${f_fin_11},2),0)"
+        else:
+            f_ip2_17, f_ip2_24 = "=0", "=0"
+
+        if n_com >= 4:
+            den17 = f"(LARGE($C${f_ini_11}:$C${f_fin_11},2)+LARGE($C${f_ini_11}:$C${f_fin_11},3)+LARGE($C${f_ini_11}:$C${f_fin_11},4))"
+            den24 = f"(LARGE($D${f_ini_11}:$D${f_fin_11},2)+LARGE($D${f_ini_11}:$D${f_fin_11},3)+LARGE($D${f_ini_11}:$D${f_fin_11},4))"
+            f_ip4_17 = f"=IF({den17}>0,LARGE($C${f_ini_11}:$C${f_fin_11},1)/{den17},0)"
+            f_ip4_24 = f"=IF({den24}>0,LARGE($D${f_ini_11}:$D${f_fin_11},1)/{den24},0)"
+        else:
+            f_ip4_17, f_ip4_24 = f_ip2_17, f_ip2_24
+
+        r_ip2 = f_ip_hd + 1
+        r_ip4 = f_ip_hd + 2
+        r_val = f_ip_hd + 3
+        r_cat = f_ip_hd + 4
+
+        filas_ip = [
+            (r_ip2, "Primacía 2 ciudades (P1 / P2)", f_ip2_17, f_ip2_24, "0.000"),
+            (r_ip4, "Primacía 4 ciudades (P1 / (P2+P3+P4))", f_ip4_17, f_ip4_24, "0.000"),
+            (r_val, "Valor estandarizado (0 a 3)", f"=IF(C{r_ip4}>=1.5,3,IF(C{r_ip4}>=1,2,IF(C{r_ip4}>=0.65,1,0)))", f"=IF(D{r_ip4}>=1.5,3,IF(D{r_ip4}>=1,2,IF(D{r_ip4}>=0.65,1,0)))", "0"),
+            (r_cat, "Clasificación", f'=IF(C{r_ip4}>=1.5,"Altamente Concentrada",IF(C{r_ip4}>=1,"Concentrada",IF(C{r_ip4}>=0.65,"Dispersa","Muy Dispersa")))', f'=IF(D{r_ip4}>=1.5,"Altamente Concentrada",IF(D{r_ip4}>=1,"Concentrada",IF(D{r_ip4}>=0.65,"Dispersa","Muy Dispersa")))', "@"),
+        ]
+        for r_curr, etq_ip, form_c, form_d, fmt_ip in filas_ip:
+            ws11.merge_cells(start_row=r_curr, start_column=1, end_row=r_curr, end_column=2)
+            cl = ws11.cell(row=r_curr, column=1, value=etq_ip)
+            cl.font = font_bold
+            cl.fill = fill_subbloque
+            ws11.cell(row=r_curr, column=1).border = borde_fino
+            ws11.cell(row=r_curr, column=2).border = borde_fino
+            for col_p, form_p in [(3, form_c), (4, form_d)]:
+                cp = ws11.cell(row=r_curr, column=col_p, value=form_p)
+                cp.font = font_bold
+                cp.fill = fill_made_mod
+                cp.number_format = fmt_ip
+                cp.alignment = Alignment(horizontal="right" if fmt_ip != "@" else "center", vertical="center")
+                cp.border = borde_fino
+
+        # Tabla referencial de estandarización (Cols F:H)
+        for ci_e, txt_e in [(6, "Categoría"), (7, "Rango IP4"), (8, "Valor")]:
+            ce_h = ws11.cell(row=f_ip_hd, column=ci_e, value=txt_e)
+            ce_h.fill = fill_header
+            ce_h.font = font_header
+            ce_h.alignment = Alignment(horizontal="center", vertical="center")
+            ce_h.border = borde_fino
+
+        escala_ref = [
+            ("Altamente Concentrada", ">= 1,50", 3),
+            ("Concentrada", "1,00 a 1,49", 2),
+            ("Dispersa", "0,65 a 0,99", 1),
+            ("Muy Dispersa", "< 0,65", 0),
+        ]
+        for off_e, (etq_e, rng_e, val_e) in enumerate(escala_ref, start=1):
+            rr = f_ip_hd + off_e
+            for ci_e, vv_e, al_e in [(6, etq_e, "left"), (7, rng_e, "center"), (8, val_e, "center")]:
+                ce = ws11.cell(row=rr, column=ci_e, value=vv_e)
+                ce.font = font_celda
+                ce.fill = fill_fila_blanca if off_e % 2 == 1 else fill_fila_cebra
+                ce.alignment = Alignment(horizontal=al_e, vertical="center")
+                ce.border = borde_fino
+
+        # Gráfico nativo de cruce de ranking (Top 10 comunas: Censo 2017 -> Censo 2024)
+        top_n_rk = min(10, n_com)
+        if top_n_rk >= 2:
+            col_hid_cat = 27  # AA
+            ws11.cell(row=4, column=col_hid_cat, value="Periodo")
+            ws11.cell(row=5, column=col_hid_cat, value="Censo 2017")
+            ws11.cell(row=6, column=col_hid_cat, value="Censo 2024")
+            ws11.column_dimensions[get_column_letter(col_hid_cat)].hidden = True
+
+            max_rk_plot = top_n_rk
+            for k_rk in range(top_n_rk):
+                c_col = col_hid_cat + 1 + k_rk
+                ws11.cell(row=4, column=c_col, value=str(df_censo.loc[k_rk, "Comuna"]))
+                ws11.cell(row=5, column=c_col, value=int(rk17_ser[k_rk]))
+                ws11.cell(row=6, column=c_col, value=int(rk24_ser[k_rk]))
+                ws11.column_dimensions[get_column_letter(c_col)].hidden = True
+                max_rk_plot = max(max_rk_plot, int(rk17_ser[k_rk]), int(rk24_ser[k_rk]))
+
+            chart_rk = LineChart()
+            chart_rk.visible_cells_only = False
+            chart_rk.title = f"Cambio de Jerarquía Comunal (Top {top_n_rk}: 2017 → 2024)"
+            chart_rk.style = 2
+            chart_rk.y_axis.title = "Posición en Ranking (1 = Mayor población)"
+            chart_rk.y_axis.scaling.orientation = "maxMin"
+            chart_rk.y_axis.scaling.min = 1
+            chart_rk.y_axis.scaling.max = int(max_rk_plot)
+            chart_rk.y_axis.majorUnit = 1
+            chart_rk.y_axis.crosses = "max"
+            chart_rk.x_axis.tickLblPos = "low"
+            chart_rk.y_axis.tickLblPos = "low"
+            chart_rk.legend.position = "r"
+            chart_rk.width = 21
+            chart_rk.height = 14.5
+
+            data_rk = Reference(ws11, min_col=col_hid_cat + 1, max_col=col_hid_cat + top_n_rk, min_row=4, max_row=6)
+            cats_rk = Reference(ws11, min_col=col_hid_cat, min_row=5, max_row=6)
+            chart_rk.add_data(data_rk, titles_from_data=True)
+            chart_rk.set_categories(cats_rk)
+
+            paleta_rk = ["1F2937", "374151", "4B5563", "1E3A8A", "2563EB", "0F766E", "6B7280", "991B1B", "B45309", "52525B"]
+            for s_idx, ser in enumerate(chart_rk.series):
+                col_hex = paleta_rk[s_idx % len(paleta_rk)]
+                ser.graphicalProperties.line.solidFill = col_hex
+                ser.graphicalProperties.line.width = 22000
+                ser.marker.symbol = "circle"
+                ser.marker.size = 6
+                ser.marker.graphicalProperties.solidFill = col_hex
+                ser.marker.graphicalProperties.line.solidFill = col_hex
+
+            ws11.add_chart(chart_rk, "M4")
+
+        ws11.freeze_panes = "B5"
+        _autoajustar_columnas_hoja(ws11, max_width=24, min_width=12, col_a_max=28)
+
+        # ======================================================================
+        # HOJA: RONDINELLI (ESCALOGRAMA DE GUTTMAN + MATRIZ PONDERADA + GRÁFICO)
+        # ======================================================================
+        ws12 = wb.create_sheet("Rondinelli")
+        headers_12 = (
+            ["Comuna", "Población 2024", "% Población"]
+            + funcs_cols
+            + ["Total Servicios", "Índice Rondinelli", "Ranking Funcional"]
+        )
+        n_cols_12 = len(headers_12)
+        _banner_sheet(
+            ws12,
+            n_cols_12,
+            f"ESCALA DE GUTTMAN Y MATRIZ DE RONDINELLI — {dim_nombre.upper()} ({region_sel.upper()})",
+            "Presencia (1) o ausencia (0) de servicios y ponderación inversa Wk = 100 / fk",
+        )
+
+        ws12.merge_cells(start_row=3, start_column=1, end_row=3, end_column=n_cols_12)
+        c_b1_tit = ws12.cell(row=3, column=1, value="1. Presencia / Ausencia de servicios (1 = presente, 0 = ausente)")
+        c_b1_tit.fill = fill_subbloque
+        c_b1_tit.font = font_subbloque
+        ws12.row_dimensions[3].height = 20
+
+        for c_i, h in enumerate(headers_12, start=1):
+            ch = ws12.cell(row=4, column=c_i, value=h)
+            ch.fill = fill_header
+            ch.font = font_header
+            ch.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+            ch.border = borde_fino
+        ws12.row_dimensions[4].height = 28
+
+        f_ini_12 = 5
+        f_fin_12 = f_ini_12 + n_g - 1
+        f_frec_12 = f_fin_12 + 1
+        f_peso_12 = f_frec_12 + 1
+
+        col_ini_var = 4
+        col_fin_var = 3 + n_f
+        col_ini_var_let = get_column_letter(col_ini_var)
+        col_fin_var_let = get_column_letter(col_fin_var)
+        col_tot_serv = col_fin_var + 1
+        col_ic = col_fin_var + 2
+        col_rk_f = col_fin_var + 3
+        col_ic_let = get_column_letter(col_ic)
+
+        col_hid_x = n_cols_12 + 2
+        col_hid_y = n_cols_12 + 3
+
+        for idx_off, com_nom in enumerate(comunas_g):
+            r_i = f_ini_12 + idx_off
+            fill_r = fill_fila_blanca if (r_i % 2 == 1) else fill_fila_cebra
+            pob_c = mapa_pob_censo.get(_normalizar_texto(com_nom), 0)
+
+            c_com = ws12.cell(row=r_i, column=1, value=str(com_nom))
+            c_com.font = font_celda
+            c_com.fill = fill_r
+            c_com.border = borde_fino
+
+            c_pob = ws12.cell(row=r_i, column=2, value=int(pob_c))
+            c_pob.font = font_celda
+            c_pob.fill = fill_r
+            c_pob.number_format = "#,##0"
+            c_pob.alignment = Alignment(horizontal="right", vertical="center")
+            c_pob.border = borde_fino
+
+            c_pct = ws12.cell(row=r_i, column=3, value=f"=IF($B${f_frec_12}>0,B{r_i}/$B${f_frec_12},0)")
+            c_pct.font = font_celda
+            c_pct.fill = fill_made_mod
+            c_pct.number_format = "0.00%"
+            c_pct.alignment = Alignment(horizontal="right", vertical="center")
+            c_pct.border = borde_fino
+
+            for f_off, f_nom in enumerate(funcs_cols):
+                c_v = ws12.cell(row=r_i, column=col_ini_var + f_off, value=int(mat_g.loc[com_nom, f_nom]))
+                c_v.font = font_celda
+                c_v.fill = fill_r
+                c_v.alignment = Alignment(horizontal="center", vertical="center")
+                c_v.border = borde_fino
+
+            c_ts = ws12.cell(row=r_i, column=col_tot_serv, value=f"=SUM({col_ini_var_let}{r_i}:{col_fin_var_let}{r_i})")
+            c_ic_cell = ws12.cell(
+                row=r_i,
+                column=col_ic,
+                value=f"=SUMPRODUCT({col_ini_var_let}{r_i}:{col_fin_var_let}{r_i},${col_ini_var_let}${f_peso_12}:${col_fin_var_let}${f_peso_12})",
+            )
+            c_rk = ws12.cell(row=r_i, column=col_rk_f, value=f"=RANK({col_ic_let}{r_i},${col_ic_let}${f_ini_12}:${col_ic_let}${f_fin_12},0)")
+
+            for cf, fmt in [(c_ts, "0"), (c_ic_cell, "0.00"), (c_rk, "0")]:
+                cf.fill = fill_made_mod
+                cf.font = font_bold if cf is c_ic_cell else font_celda
+                cf.number_format = fmt
+                cf.alignment = Alignment(horizontal="right", vertical="center")
+                cf.border = borde_fino
+
+            ws12.cell(row=r_i, column=col_hid_x, value=float(pob_c))
+            ws12.cell(row=r_i, column=col_hid_y, value=float(df_rond_calc.loc[idx_off, "Indice_Rondinelli"]))
+
+        # Filas resumen Tabla 1: Suma (fk) y Ponderación (100/fk)
+        ws12.cell(row=f_frec_12, column=1, value="Suma (frecuencia)")
+        ws12.cell(row=f_frec_12, column=2, value=f"=SUM(B{f_ini_12}:B{f_fin_12})").number_format = "#,##0"
+        ws12.cell(row=f_frec_12, column=3, value=f"=SUM(C{f_ini_12}:C{f_fin_12})").number_format = "0.00%"
+        ws12.cell(row=f_frec_12, column=col_tot_serv, value=f"=SUM({get_column_letter(col_tot_serv)}{f_ini_12}:{get_column_letter(col_tot_serv)}{f_fin_12})").number_format = "0"
+        ws12.cell(row=f_frec_12, column=col_ic, value=f"=SUM({col_ic_let}{f_ini_12}:{col_ic_let}{f_fin_12})").number_format = "0.00"
+
+        ws12.cell(row=f_peso_12, column=1, value="Ponderación (100 / Suma)")
+        for c_i in range(col_ini_var, col_fin_var + 1):
+            cl = get_column_letter(c_i)
+            c_fr = ws12.cell(row=f_frec_12, column=c_i, value=f"=SUM({cl}{f_ini_12}:{cl}{f_fin_12})")
+            c_fr.alignment = Alignment(horizontal="center", vertical="center")
+            c_pe = ws12.cell(row=f_peso_12, column=c_i, value=f"=IF({cl}{f_frec_12}>0,100/{cl}{f_frec_12},0)")
+            c_pe.number_format = "0.00"
+            c_pe.alignment = Alignment(horizontal="right", vertical="center")
+
+        for c_i in range(1, n_cols_12 + 1):
+            c1 = ws12.cell(row=f_frec_12, column=c_i)
+            c1.font = font_bold
+            c1.fill = fill_gris_total
+            c1.border = borde_total
+            if c_i in (2, 3, col_tot_serv, col_ic):
+                c1.alignment = Alignment(horizontal="right", vertical="center")
+
+            c2 = ws12.cell(row=f_peso_12, column=c_i)
+            c2.font = font_bold
+            c2.fill = fill_subbloque
+            c2.border = borde_fino
+
+        # Tabla 2: Matriz Ponderada de Rondinelli
+        f_b2_tit = f_peso_12 + 2
+        ws12.merge_cells(start_row=f_b2_tit, start_column=1, end_row=f_b2_tit, end_column=col_tot_serv)
+        c_b2 = ws12.cell(row=f_b2_tit, column=1, value="2. Matriz ponderada (Rondinelli)")
+        c_b2.fill = fill_subbloque
+        c_b2.font = font_subbloque
+        ws12.row_dimensions[f_b2_tit].height = 20
+
+        f_b2_hd = f_b2_tit + 1
+        headers_b2 = ["Comuna", "Población 2024", "% Población"] + funcs_cols + ["Índice Funcional"]
+        for c_i, h in enumerate(headers_b2, start=1):
+            ch = ws12.cell(row=f_b2_hd, column=c_i, value=h)
+            ch.fill = fill_header
+            ch.font = font_header
+            ch.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+            ch.border = borde_fino
+        ws12.row_dimensions[f_b2_hd].height = 26
+
+        f_b2_ini = f_b2_hd + 1
+        f_b2_fin = f_b2_ini + n_g - 1
+        f_b2_tot = f_b2_fin + 1
+
+        for idx_off in range(n_g):
+            r_src = f_ini_12 + idx_off
+            r_dst = f_b2_ini + idx_off
+            fill_r = fill_fila_blanca if (r_dst % 2 == 1) else fill_fila_cebra
+
+            c_a = ws12.cell(row=r_dst, column=1, value=f"=A{r_src}")
+            c_a.font = font_celda
+            c_a.fill = fill_r
+            c_a.border = borde_fino
+
+            c_b = ws12.cell(row=r_dst, column=2, value=f"=B{r_src}")
+            c_b.font = font_celda
+            c_b.fill = fill_r
+            c_b.number_format = "#,##0"
+            c_b.alignment = Alignment(horizontal="right", vertical="center")
+            c_b.border = borde_fino
+
+            c_c = ws12.cell(row=r_dst, column=3, value=f"=C{r_src}")
+            c_c.font = font_celda
+            c_c.fill = fill_made_mod
+            c_c.number_format = "0.00%"
+            c_c.alignment = Alignment(horizontal="right", vertical="center")
+            c_c.border = borde_fino
+
+            for f_off in range(n_f):
+                c_idx = col_ini_var + f_off
+                cl = get_column_letter(c_idx)
+                cp = ws12.cell(row=r_dst, column=c_idx, value=f"=IF({cl}{r_src}=1,{cl}${f_peso_12},0)")
+                cp.font = font_celda
+                cp.fill = fill_r
+                cp.number_format = "0.00"
+                cp.alignment = Alignment(horizontal="right", vertical="center")
+                cp.border = borde_fino
+
+            c_sum_p = ws12.cell(row=r_dst, column=col_tot_serv, value=f"=SUM({col_ini_var_let}{r_dst}:{col_fin_var_let}{r_dst})")
+            c_sum_p.font = font_bold
+            c_sum_p.fill = fill_made_mod
+            c_sum_p.number_format = "0.00"
+            c_sum_p.alignment = Alignment(horizontal="right", vertical="center")
+            c_sum_p.border = borde_fino
+
+        ws12.cell(row=f_b2_tot, column=1, value="Total ponderado")
+        ws12.cell(row=f_b2_tot, column=2, value=f"=SUM(B{f_b2_ini}:B{f_b2_fin})").number_format = "#,##0"
+        ws12.cell(row=f_b2_tot, column=3, value=f"=SUM(C{f_b2_ini}:C{f_b2_fin})").number_format = "0.00%"
+        for c_i in range(col_ini_var, col_tot_serv + 1):
+            cl = get_column_letter(c_i)
+            cs = ws12.cell(row=f_b2_tot, column=c_i, value=f"=SUM({cl}{f_b2_ini}:{cl}{f_b2_fin})")
+            cs.number_format = "0.00"
+            cs.alignment = Alignment(horizontal="right", vertical="center")
+        for c_i in range(1, col_tot_serv + 1):
+            ct = ws12.cell(row=f_b2_tot, column=c_i)
+            ct.font = font_bold
+            ct.fill = fill_gris_total
+            ct.border = borde_total
+            if c_i >= 2:
+                ct.alignment = Alignment(horizontal="right", vertical="center")
+
+        ws12.column_dimensions[get_column_letter(col_hid_x)].hidden = True
+        ws12.column_dimensions[get_column_letter(col_hid_y)].hidden = True
+
+        chart_rond = ScatterChart()
+        chart_rond.visible_cells_only = False
+        chart_rond.title = f"Complejidad Funcional vs. Población — {region_sel}"
+        chart_rond.style = 2
+        chart_rond.legend = None
+        chart_rond.x_axis.title = "Población Comunal (Censo 2024)"
+        chart_rond.y_axis.title = "Índice de Centralidad Funcional (Rondinelli)"
+        chart_rond.x_axis.number_format = "#,##0"
+        chart_rond.y_axis.number_format = "0.0"
+        chart_rond.x_axis.tickLblPos = "low"
+        chart_rond.y_axis.tickLblPos = "low"
+        chart_rond.width = 24
+        chart_rond.height = 13.5
+
+        for idx_off in range(n_g):
+            r_i = f_ini_12 + idx_off
+            nom_c = str(comunas_g[idx_off])
+            x_ref = Reference(ws12, min_col=col_hid_x, min_row=r_i, max_row=r_i)
+            y_ref = Reference(ws12, min_col=col_hid_y, min_row=r_i, max_row=r_i)
+            s_pt = Series(y_ref, x_ref, title=nom_c)
+            s_pt.marker.symbol = "circle"
+            s_pt.marker.size = 7
+            s_pt.marker.graphicalProperties.solidFill = "262626"
+            s_pt.marker.graphicalProperties.line.solidFill = "111827"
+            s_pt.graphicalProperties.line.noFill = True
+            s_pt.dLbls = DataLabelList()
+            s_pt.dLbls.showSerName = True
+            s_pt.dLbls.showVal = False
+            s_pt.dLbls.showCatName = False
+            s_pt.dLbls.showLegendKey = False
+            chart_rond.series.append(s_pt)
+
+        ws12.add_chart(chart_rond, f"A{f_b2_tot + 3}")
+        ws12.freeze_panes = "B5"
+        _autoajustar_columnas_hoja(ws12, max_width=24, min_width=13, col_a_max=30)
+
+        # ======================================================================
+        # HOJA: AISLAMIENTO (MATRIZ 0/1 Y RANKING DE CONECTIVIDAD)
+        # ======================================================================
+        ws13 = wb.create_sheet("Aislamiento")
+        mat_a = df_aislamiento.apply(pd.to_numeric, errors="coerce").fillna(1).clip(0, 1).astype(int)
+        locs = list(mat_a.index)
+        n_l = len(locs)
+        headers_13 = (
+            ["Localidad / Comuna"]
+            + locs
+            + ["Suma Aislamiento", "Índice Aislamiento (%)", "Conexiones Directas", "Ranking Conectividad"]
+        )
+        _banner_sheet(
+            ws13,
+            len(headers_13),
+            f"MATRIZ DE AISLAMIENTO COMUNAL — {region_sel.upper()}",
+            "Matriz de conectividad vial (0 = conexión directa asfaltada, 1 = sin conexión directa)",
+        )
+
+        for c_i, h in enumerate(headers_13, start=1):
+            ch = ws13.cell(row=4, column=c_i, value=h)
+            ch.fill = fill_header
+            ch.font = font_header
+            ch.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+            ch.border = borde_fino
+        ws13.row_dimensions[4].height = 25
+
+        f_ini_13 = 5
+        f_fin_13 = f_ini_13 + n_l - 1
+        f_prom_13 = f_fin_13 + 1
+        col_fin_l_let = get_column_letter(1 + n_l)
+        col_sum1 = 2 + n_l
+        col_avg1 = 3 + n_l
+        col_con0 = 4 + n_l
+        col_rk_a = 5 + n_l
+        col_avg1_let = get_column_letter(col_avg1)
+
+        for idx_off, loc_nom in enumerate(locs):
+            r_i = f_ini_13 + idx_off
+            fill_r = fill_fila_blanca if (r_i % 2 == 1) else fill_fila_cebra
+            c_loc = ws13.cell(row=r_i, column=1, value=str(loc_nom))
+            c_loc.font = font_celda
+            c_loc.fill = fill_r
+            c_loc.border = borde_fino
+
+            for c_off, col_nom in enumerate(locs):
+                c_i = 2 + c_off
+                if idx_off == c_off:
+                    cd = ws13.cell(row=r_i, column=c_i, value=None)
+                    cd.fill = fill_subbloque
+                    cd.border = borde_fino
+                else:
+                    val_a = int(mat_a.loc[loc_nom, col_nom]) if col_nom in mat_a.columns else 1
+                    ca = ws13.cell(row=r_i, column=c_i, value=val_a)
+                    ca.fill = fill_r
+                    ca.font = font_celda
+                    ca.alignment = Alignment(horizontal="center", vertical="center")
+                    ca.border = borde_fino
+
+            csum1 = ws13.cell(row=r_i, column=col_sum1, value=f"=SUM(B{r_i}:{col_fin_l_let}{r_i})")
+            cavg1 = ws13.cell(row=r_i, column=col_avg1, value=f"=AVERAGE(B{r_i}:{col_fin_l_let}{r_i})")
+            ccon0 = ws13.cell(row=r_i, column=col_con0, value=f"=COUNTIF(B{r_i}:{col_fin_l_let}{r_i},0)")
+            crka = ws13.cell(row=r_i, column=col_rk_a, value=f"=RANK({col_avg1_let}{r_i},${col_avg1_let}${f_ini_13}:${col_avg1_let}${f_fin_13},1)")
+
+            for cf, fmt in [(csum1, "0"), (cavg1, "0.00%"), (ccon0, "0"), (crka, "0")]:
+                cf.fill = fill_made_mod
+                cf.font = font_bold if cf is cavg1 else font_celda
+                cf.number_format = fmt
+                cf.alignment = Alignment(horizontal="right", vertical="center")
+                cf.border = borde_fino
+
+        ws13.cell(row=f_prom_13, column=1, value="Promedio regional")
+        ws13.cell(row=f_prom_13, column=col_sum1, value=f"=AVERAGE({get_column_letter(col_sum1)}{f_ini_13}:{get_column_letter(col_sum1)}{f_fin_13})").number_format = "0.00"
+        ws13.cell(row=f_prom_13, column=col_avg1, value=f"=AVERAGE({col_avg1_let}{f_ini_13}:{col_avg1_let}{f_fin_13})").number_format = "0.00%"
+        ws13.cell(row=f_prom_13, column=col_con0, value=f"=AVERAGE({get_column_letter(col_con0)}{f_ini_13}:{get_column_letter(col_con0)}{f_fin_13})").number_format = "0.00"
+        for c_i in range(1, len(headers_13) + 1):
+            cp = ws13.cell(row=f_prom_13, column=c_i)
+            cp.font = font_bold
+            cp.fill = fill_gris_total
+            cp.border = borde_total
+            if c_i >= col_sum1:
+                cp.alignment = Alignment(horizontal="right", vertical="center")
+
+        ws13.freeze_panes = "B5"
+        _autoajustar_columnas_hoja(ws13, max_width=22, min_width=13, col_a_max=28)
+
+    if incluir_u6:
+        # ======================================================================
+        # HOJA OPCIONAL: ÍNDICE DESARROLLO (NORMALIZACIÓN MÍN–MÁX Y PESOS)
+        # ======================================================================
+        ws14 = wb.create_sheet("Índice Desarrollo")
+        _, lbl_vt_sii, lbl_pc_sii, fmt_tot_sii, fmt_pc_sii = _etiquetas_variable_sii(variable_sel, anio_0, anio_t)
+
+        Vt_tot = resultados["Vt"].sum(axis=0)
+        mapa_sii_norm = {_normalizar_texto(k): float(v) for k, v in Vt_tot.items()}
+
+        pobs_top = [mapa_pob_censo.get(_normalizar_texto(c), 0) for c in comunas_g]
+        usa_pc_u6 = all(p > 0 for p in pobs_top)
+        if usa_pc_u6:
+            lbl_v1 = lbl_pc_sii
+            fmt_v1 = fmt_pc_sii
+            v1_vals = [mapa_sii_norm.get(_normalizar_texto(c), 0.0) / float(p) for c, p in zip(comunas_g, pobs_top)]
+        else:
+            lbl_v1 = lbl_vt_sii
+            fmt_v1 = fmt_tot_sii
+            v1_vals = [mapa_sii_norm.get(_normalizar_texto(c), 0.0) for c in comunas_g]
+
+        headers_14 = [
+            "Comuna", lbl_v1, "Índice Rondinelli",
+            "u(v1)", "u(v2)",
+            "Índice 50 / 50", "Índice 70 / 30",
+            "Ranking 50 / 50", "Ranking 70 / 30", "Cambio",
+        ]
+        _banner_sheet(
+            ws14,
+            len(headers_14),
+            f"ÍNDICE COMPUESTO DE DESARROLLO TERRITORIAL — {region_sel.upper()}",
+            f"Normalización Mínimo–Máximo [0, 1] y análisis de ponderaciones (50/50 vs. 70/30) | {anio_t}",
+        )
+
+        for ci_p, txt_p in [(1, "Parámetro"), (2, "v1 (Económica)"), (3, "v2 (Funcional)"), (4, "Referencia")]:
+            ch = ws14.cell(row=5, column=ci_p, value=txt_p)
+            ch.fill = fill_header
+            ch.font = font_header
+            ch.alignment = Alignment(horizontal="center", vertical="center")
+            ch.border = borde_fino
+
+        for ci_w, txt_w in [(6, "Escenario"), (7, "Peso v1"), (8, "Peso v2")]:
+            ch = ws14.cell(row=5, column=ci_w, value=txt_w)
+            ch.fill = fill_header
+            ch.font = font_header
+            ch.alignment = Alignment(horizontal="center", vertical="center")
+            ch.border = borde_fino
+
+        f_ini_14 = 11
+        f_fin_14 = f_ini_14 + n_g - 1
+
+        ws14.cell(row=6, column=1, value="Mínimo").font = font_bold
+        ws14.cell(row=6, column=2, value=f"=MIN(B{f_ini_14}:B{f_fin_14})").number_format = fmt_v1
+        ws14.cell(row=6, column=3, value=f"=MIN(C{f_ini_14}:C{f_fin_14})").number_format = "0.00"
+        ws14.cell(row=6, column=4, value=f"Mínimo ({n_g} comunas)")
+
+        ws14.cell(row=7, column=1, value="Máximo").font = font_bold
+        ws14.cell(row=7, column=2, value=f"=MAX(B{f_ini_14}:B{f_fin_14})").number_format = fmt_v1
+        ws14.cell(row=7, column=3, value=f"=MAX(C{f_ini_14}:C{f_fin_14})").number_format = "0.00"
+        ws14.cell(row=7, column=4, value="Sentido positivo")
+
+        ws14.cell(row=6, column=6, value="50 / 50").font = font_bold
+        ws14.cell(row=6, column=7, value=0.50).number_format = "0%"
+        ws14.cell(row=6, column=8, value=0.50).number_format = "0%"
+
+        ws14.cell(row=7, column=6, value="70 / 30").font = font_bold
+        ws14.cell(row=7, column=7, value=0.70).number_format = "0%"
+        ws14.cell(row=7, column=8, value=0.30).number_format = "0%"
+
+        for rr in (6, 7):
+            for cc in (1, 2, 3, 4, 6, 7, 8):
+                cel = ws14.cell(row=rr, column=cc)
+                cel.border = borde_fino
+                if cc in (2, 3):
+                    cel.fill = fill_made_mod
+                    cel.font = font_bold
+                    cel.alignment = Alignment(horizontal="right", vertical="center")
+                elif cc in (7, 8):
+                    cel.fill = fill_fila_blanca
+                    cel.font = font_bold
+                    cel.alignment = Alignment(horizontal="right", vertical="center")
+                else:
+                    cel.fill = fill_subbloque if cc in (1, 6) else fill_fila_cebra
+                    if cc == 4:
+                        cel.font = font_celda
+
+        for c_i, h in enumerate(headers_14, start=1):
+            ch = ws14.cell(row=10, column=c_i, value=h)
+            ch.fill = fill_header
+            ch.font = font_header
+            ch.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+            ch.border = borde_fino
+        ws14.row_dimensions[10].height = 26
+
+        v2_vals = [float(df_rond_calc.loc[i, "Indice_Rondinelli"]) for i in range(n_g)]
+        min_v1, max_v1 = (min(v1_vals), max(v1_vals)) if v1_vals else (0.0, 1.0)
+        min_v2, max_v2 = (min(v2_vals), max(v2_vals)) if v2_vals else (0.0, 1.0)
+
+        ws14.cell(row=10, column=13, value="Comuna")
+        ws14.cell(row=10, column=14, value="Índice 50 / 50")
+        ws14.cell(row=10, column=15, value="Índice 70 / 30")
+
+        for idx_off in range(n_g):
+            r_i = f_ini_14 + idx_off
+            r_ot = f_ini_rond + idx_off
+            fill_r = fill_fila_blanca if (r_i % 2 == 1) else fill_fila_cebra
+
+            val_com = f"='Rondinelli'!A{r_ot}" if incluir_ot else str(comunas_g[idx_off])
+            val_v2 = f"='Rondinelli'!{col_ic_rond_let}{r_ot}" if incluir_ot else float(v2_vals[idx_off])
+
+            c_a = ws14.cell(row=r_i, column=1, value=val_com)
+            c_a.font = font_celda
+            c_a.fill = fill_r
+            c_a.border = borde_fino
+
+            c_b = ws14.cell(row=r_i, column=2, value=float(v1_vals[idx_off]))
+            c_b.font = font_celda
+            c_b.fill = fill_r
+            c_b.number_format = fmt_v1
+            c_b.alignment = Alignment(horizontal="right", vertical="center")
+            c_b.border = borde_fino
+
+            c_c = ws14.cell(row=r_i, column=3, value=val_v2)
+            c_c.font = font_celda
+            c_c.fill = fill_made_mod if incluir_ot else fill_r
+            c_c.number_format = "0.00"
+            c_c.alignment = Alignment(horizontal="right", vertical="center")
+            c_c.border = borde_fino
+
+            c_u1 = ws14.cell(row=r_i, column=4, value=f"=IF(($B$7-$B$6)>0,(B{r_i}-$B$6)/($B$7-$B$6),0)")
+            c_u2 = ws14.cell(row=r_i, column=5, value=f"=IF(($C$7-$C$6)>0,(C{r_i}-$C$6)/($C$7-$C$6),0)")
+            c_i50 = ws14.cell(row=r_i, column=6, value=f"=(D{r_i}*$G$6)+(E{r_i}*$H$6)")
+            c_i70 = ws14.cell(row=r_i, column=7, value=f"=(D{r_i}*$G$7)+(E{r_i}*$H$7)")
+            c_r50 = ws14.cell(row=r_i, column=8, value=f"=RANK(F{r_i},$F${f_ini_14}:$F${f_fin_14},0)")
+            c_r70 = ws14.cell(row=r_i, column=9, value=f"=RANK(G{r_i},$G${f_ini_14}:$G${f_fin_14},0)")
+            c_dif = ws14.cell(row=r_i, column=10, value=f"=H{r_i}-I{r_i}")
+
+            for cf, fmt in [
+                (c_u1, "0.000"), (c_u2, "0.000"),
+                (c_i50, "0.000"), (c_i70, "0.000"),
+                (c_r50, "0"), (c_r70, "0"), (c_dif, "+#,##0;-#,##0;0"),
+            ]:
+                cf.fill = fill_made_mod
+                cf.font = font_bold if cf in (c_i50, c_i70) else font_celda
+                cf.number_format = fmt
+                cf.alignment = Alignment(horizontal="right", vertical="center")
+                cf.border = borde_fino
+
+            u1_num = (v1_vals[idx_off] - min_v1) / (max_v1 - min_v1) if max_v1 > min_v1 else 0.0
+            u2_num = (v2_vals[idx_off] - min_v2) / (max_v2 - min_v2) if max_v2 > min_v2 else 0.0
+            ws14.cell(row=r_i, column=13, value=str(comunas_g[idx_off]))
+            ws14.cell(row=r_i, column=14, value=float(0.5 * u1_num + 0.5 * u2_num))
+            ws14.cell(row=r_i, column=15, value=float(0.7 * u1_num + 0.3 * u2_num))
+
+        f_avg_14 = f_fin_14 + 1
+        ws14.cell(row=f_avg_14, column=1, value="Promedio")
+        for ci_a, fmt_a in [(2, fmt_v1), (3, "0.00"), (4, "0.000"), (5, "0.000"), (6, "0.000"), (7, "0.000")]:
+            cl = get_column_letter(ci_a)
+            ca = ws14.cell(row=f_avg_14, column=ci_a, value=f"=AVERAGE({cl}{f_ini_14}:{cl}{f_fin_14})")
+            ca.number_format = fmt_a
+            ca.alignment = Alignment(horizontal="right", vertical="center")
+        for c_i in range(1, len(headers_14) + 1):
+            ct = ws14.cell(row=f_avg_14, column=c_i)
+            ct.font = font_bold
+            ct.fill = fill_gris_total
+            ct.border = borde_total
+
+        for col_hid_let in ("M", "N", "O"):
+            ws14.column_dimensions[col_hid_let].hidden = True
+
+        chart_u6 = BarChart()
+        chart_u6.type = "col"
+        chart_u6.grouping = "clustered"
+        chart_u6.visible_cells_only = False
+        chart_u6.title = f"Índice Compuesto (50/50 vs. 70/30) — {region_sel}"
+        chart_u6.style = 2
+        chart_u6.y_axis.title = "Puntaje Normalizado [0, 1]"
+        chart_u6.y_axis.number_format = "0.00"
+        chart_u6.y_axis.scaling.min = 0.0
+        chart_u6.y_axis.scaling.max = 1.0
+        chart_u6.width = 24
+        chart_u6.height = 12.5
+
+        data_ref = Reference(ws14, min_col=14, max_col=15, min_row=10, max_row=f_fin_14)
+        cats_ref = Reference(ws14, min_col=13, min_row=f_ini_14, max_row=f_fin_14)
+        chart_u6.add_data(data_ref, titles_from_data=True)
+        chart_u6.set_categories(cats_ref)
+        if len(chart_u6.series) >= 2:
+            chart_u6.series[0].graphicalProperties.solidFill = "262626"
+            chart_u6.series[1].graphicalProperties.solidFill = "737373"
+        ws14.add_chart(chart_u6, f"A{f_avg_14 + 3}")
+
+        ws14.freeze_panes = "B11"
+        _autoajustar_columnas_hoja(ws14, max_width=24, min_width=13, col_a_max=28)
+
+
 def compilar_excel_10_hojas(
     resultados: dict,
     region_sel: str,
@@ -774,6 +1883,9 @@ def compilar_excel_10_hojas(
     anio_0: int,
     anio_t: int,
     alpha_hk: float = 2.0,
+    incluir_ot: bool = True,
+    incluir_u6: bool = False,
+    datos_ot: dict = None,
 ) -> bytes:
     """
     Genera en memoria un libro Excel (.xlsx) de 10 hojas con nombres naturales,
@@ -858,6 +1970,25 @@ def compilar_excel_10_hojas(
             "Valor": float(mb["half_life"]) if np.isfinite(mb["half_life"]) else "No aplica (divergencia)",
         },
     ])
+
+    datos_ot_act = None
+    if incluir_ot or incluir_u6:
+        datos_ot_act = datos_ot if datos_ot is not None else construir_datos_ot_region(region_sel, resultados)
+
+    if incluir_ot and datos_ot_act is not None:
+        df_rond_res, _, _, _, _ = calcular_rondinelli_df(datos_ot_act["df_guttman"], datos_ot_act["df_censo"])
+        df_aisl_res = calcular_aislamiento_df(datos_ot_act["df_aislamiento"])
+        lider_rond = str(df_rond_res.sort_values("Indice_Rondinelli", ascending=False).iloc[0]["Comuna"]) if not df_rond_res.empty else "-"
+        score_rond = float(df_rond_res["Indice_Rondinelli"].max()) if not df_rond_res.empty else 0.0
+        mejor_con = str(df_aisl_res.iloc[0]["Comuna_Localidad"]) if not df_aisl_res.empty else "-"
+        pct_aisl_min = float(df_aisl_res.iloc[0]["Indice_Aislamiento_%"]) if not df_aisl_res.empty else 0.0
+        filas_ot_portada = pd.DataFrame([
+            {"Indicador": "Índice de primacía 4 ciudades (Censo 2024)", "Valor": round(datos_ot_act["ip4_24"], 4)},
+            {"Indicador": "Clasificación de primacía", "Valor": f"{datos_ot_act['cat_ip4']} ({datos_ot_act['cod_ip4']})"},
+            {"Indicador": "Mayor centralidad funcional (Rondinelli)", "Valor": f"{lider_rond} ({score_rond:.2f})"},
+            {"Indicador": "Menor índice de aislamiento", "Valor": f"{mejor_con} ({pct_aisl_min:.1f}%)"},
+        ])
+        df_portada = pd.concat([df_portada, filas_ot_portada], ignore_index=True)
     ws1 = wb.create_sheet("Resumen")
     _estilizar_hoja_excel(
         ws1,
@@ -1902,10 +3033,44 @@ def compilar_excel_10_hojas(
         df_reat_excel,
     )
 
+    if (incluir_ot or incluir_u6) and datos_ot_act is not None:
+        estilos_ot = {
+            "fill_titulo": fill_titulo,
+            "fill_header": fill_header,
+            "fill_subbloque": fill_subbloque,
+            "fill_gris_total": fill_gris_total,
+            "fill_made_mod": fill_made_mod,
+            "fill_fila_blanca": fill_fila_blanca,
+            "fill_fila_cebra": fill_fila_cebra,
+            "font_titulo": font_titulo,
+            "font_sub": font_sub,
+            "font_header": font_header,
+            "font_subbloque": font_subbloque,
+            "font_bold": font_bold,
+            "font_celda": font_celda,
+            "borde_fino": borde_fino,
+            "borde_total": borde_total,
+        }
+        _agregar_hojas_ot_y_u6(
+            wb=wb,
+            resultados=resultados,
+            region_sel=region_sel,
+            variable_sel=variable_sel,
+            anio_0=anio_0,
+            anio_t=anio_t,
+            datos_ot=datos_ot_act,
+            estilos=estilos_ot,
+            incluir_ot=incluir_ot,
+            incluir_u6=incluir_u6,
+        )
+
     buffer = io.BytesIO()
     wb.save(buffer)
     buffer.seek(0)
     return buffer.getvalue()
+
+
+compilar_excel_14_hojas = compilar_excel_10_hojas
 
 
 def _estilizar_qij_streamlit(df_q: pd.DataFrame):
@@ -2032,24 +3197,41 @@ def renderizar_exportador_sii(ruta_excel_default: str = ARCHIVO_DEFAULT_REPO):
     )
     k5.metric("Ajuste R² / p-valor", f"{mb['r2']:.3f} (p={mb['p_value']:.3f})")
 
-    bytes_excel = compilar_excel_10_hojas(
-        resultados=resultados,
-        region_sel=region_sel,
-        variable_sel=variable_sel,
-        anio_0=anio_0,
-        anio_t=anio_t,
-        alpha_hk=alpha_hk,
-    )
-    nombre_archivo_salida = (
-        f"Reporte_Territorial_SII_{_normalizar_texto(region_sel).replace(' ', '_')}_{anio_0}_{anio_t}.xlsx"
-    )
-    st.download_button(
-        label="Descargar Reporte Excel (10 Hojas — ILPES, Silva Lira, MADE y REAT)",
-        data=bytes_excel,
-        file_name=nombre_archivo_salida,
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        use_container_width=True,
-    )
+    c_ot_cfg1, c_ot_cfg2, c_ot_cfg3 = st.columns([1.25, 1.15, 1.8])
+    with c_ot_cfg1:
+        incluir_ot_excel = st.checkbox(
+            "Incluir Ordenamiento Territorial (+3 hojas)",
+            value=True,
+            key="chk_incluir_ot_sii",
+        )
+    with c_ot_cfg2:
+        incluir_u6_excel = st.checkbox(
+            "Incluir Índice Mín–Máx U6 (+1 hoja)",
+            value=False,
+            key="chk_incluir_u6_sii",
+        )
+    with c_ot_cfg3:
+        dim_ot_sel = st.selectbox(
+            "Dimensión Rondinelli / Guttman:",
+            options=DIMENSIONES_GUTTMAN_OT,
+            index=0,
+            disabled=not (incluir_ot_excel or incluir_u6_excel),
+            key="sel_dim_ot_sii",
+        )
+
+    datos_ot_base = construir_datos_ot_region(region_sel, resultados, dimension_ot=dim_ot_sel)
+    reg_slug = _normalizar_texto(region_sel).replace(" ", "_")
+    dim_slug = str(DIMENSIONES_GUTTMAN_OT.index(dim_ot_sel) + 1)
+    key_gutt_ss = f"ot_gutt_edit_{reg_slug}_{dim_slug}"
+    key_aisl_ss = f"ot_aisl_edit_{reg_slug}"
+
+    datos_ot_export = dict(datos_ot_base)
+    if key_gutt_ss in st.session_state:
+        datos_ot_export["df_guttman"] = st.session_state[key_gutt_ss]
+    if key_aisl_ss in st.session_state:
+        datos_ot_export["df_aislamiento"] = st.session_state[key_aisl_ss]
+
+    slot_descarga_superior = st.empty()
 
     tabs = st.tabs([
         "1. Matrices y Localización (Qij)",
@@ -2057,6 +3239,7 @@ def renderizar_exportador_sii(ruta_excel_default: str = ARCHIVO_DEFAULT_REPO):
         "3. Shift & Share (MADE Clásico y Mod.)",
         "4. Cuadrantes de Silva Lira",
         "5. Convergencia y Desigualdad (REAT)",
+        "6. Ordenamiento Territorial (OT) y U6",
     ])
 
     with tabs[0]:
@@ -2272,6 +3455,168 @@ def renderizar_exportador_sii(ruta_excel_default: str = ARCHIVO_DEFAULT_REPO):
                 yaxis_title=f"Proporción Acumulada de {variable_sel}",
             )
             st.plotly_chart(fig_lorenz, use_container_width=True)
+
+
+    with tabs[5]:
+        st.markdown(f"**Ordenamiento Territorial (OT) e Índice Compuesto — {region_sel}**")
+        if not datos_ot_base["es_base_censo_oficial"]:
+            st.caption(
+                "Región sin tabla censal precargada; se muestra una referencia editable desde las comunas activas del SII."
+            )
+
+        ot_m1, ot_m2, ot_m3, ot_m4 = st.columns(4)
+        ot_m1.metric("Índice Primacía IP4 (2024)", f"{datos_ot_base['ip4_24']:.3f}", f"IP2 = {datos_ot_base['ip2_24']:.3f}")
+        ot_m2.metric("Clasificación Primacía", datos_ot_base["cat_ip4"], f"Valor: {datos_ot_base['cod_ip4']}")
+        ot_m3.metric("Comunas en Ranking", f"{len(datos_ot_base['df_censo'])}", "Top 10 en Rondinelli")
+        ot_m4.metric("Dimensión Rondinelli", dim_ot_sel.split(".", 1)[1].strip()[:26], "8 variables (1/0)")
+
+        sub_ot1, sub_ot2, sub_ot3 = st.tabs([
+            "A. Primacía y Ranking con Flechas",
+            "B. Guttman / Rondinelli Editable + Gráfico",
+            "C. Aislamiento Editable e Índice Mín–Máx",
+        ])
+
+        with sub_ot1:
+            df_c_vis = datos_ot_base["df_censo"].copy()
+            df_c_vis["Ranking_2017"] = df_c_vis["Censo_2017"].rank(ascending=False, method="min").astype(int)
+            df_c_vis["Ranking_2024"] = df_c_vis["Censo_2024"].rank(ascending=False, method="min").astype(int)
+            df_c_vis["Cambio"] = df_c_vis["Ranking_2017"] - df_c_vis["Ranking_2024"]
+            df_c_vis["Tendencia"] = np.where(
+                df_c_vis["Cambio"] > 0, "↑ Sube",
+                np.where(df_c_vis["Cambio"] < 0, "↓ Baja", "→ Igual")
+            )
+            df_c_vis["Variacion_%"] = ((df_c_vis["Censo_2024"] / df_c_vis["Censo_2017"].replace(0, np.nan)) - 1.0).fillna(0.0) * 100.0
+
+            c_rk1, c_rk2 = st.columns([1.3, 1.0])
+            with c_rk1:
+                st.dataframe(df_c_vis.round(2), use_container_width=True, hide_index=True)
+            with c_rk2:
+                df_top_rk = df_c_vis.head(min(10, len(df_c_vis)))
+                fig_cruce = go.Figure()
+                for _, r_k in df_top_rk.iterrows():
+                    fig_cruce.add_trace(
+                        go.Scatter(
+                            x=["Censo 2017", "Censo 2024"],
+                            y=[int(r_k["Ranking_2017"]), int(r_k["Ranking_2024"])],
+                            mode="lines+markers+text",
+                            text=["", f" {r_k['Comuna']}"],
+                            textposition="middle right",
+                            name=str(r_k["Comuna"]),
+                            showlegend=False,
+                        )
+                    )
+                fig_cruce.update_yaxes(autorange="reversed", dtick=1, title="Posición Ranking")
+                fig_cruce.update_layout(
+                    title="Cruce de Ranking Top 10 (2017 → 2024)",
+                    height=430,
+                    margin=dict(l=20, r=120, t=40, b=20),
+                )
+                st.plotly_chart(fig_cruce, use_container_width=True)
+
+        with sub_ot2:
+            st.caption(
+                "Edita cualquier `1` (presente) o `0` (ausente) en el Top 10 comunal antes de exportar. "
+                "La alerta de discriminación solo aparece aquí en pantalla y no se imprime en el Excel final."
+            )
+            df_gutt_edit = st.data_editor(
+                datos_ot_export["df_guttman"],
+                use_container_width=True,
+                key=f"editor_gutt_sii_{reg_slug}_{dim_slug}",
+            )
+            st.session_state[key_gutt_ss] = df_gutt_edit
+            datos_ot_export["df_guttman"] = df_gutt_edit
+
+            df_rond_vis, _, _, _, cols_mal = calcular_rondinelli_df(df_gutt_edit, datos_ot_base["df_censo"])
+            if cols_mal:
+                st.warning(
+                    "Variables sin diferenciación (tienen puros 1 o puros 0; conviene ajustarlas antes de descargar): "
+                    f"**{', '.join(cols_mal)}**."
+                )
+            else:
+                st.success("Todas las variables discriminan correctamente entre las comunas.")
+
+            cg_r1, cg_r2 = st.columns([1.15, 1.35])
+            with cg_r1:
+                st.dataframe(df_rond_vis.round(2), use_container_width=True, hide_index=True)
+            with cg_r2:
+                fig_rond_st = px.scatter(
+                    df_rond_vis,
+                    x="Poblacion_2024",
+                    y="Indice_Rondinelli",
+                    text="Comuna",
+                    size="Total_Funciones",
+                    title=f"Complejidad Funcional vs. Población — {region_sel}",
+                    labels={
+                        "Poblacion_2024": "Población Comunal (Censo 2024)",
+                        "Indice_Rondinelli": "Índice de Centralidad Funcional (Rondinelli)",
+                    },
+                )
+                fig_rond_st.update_traces(textposition="top center")
+                st.plotly_chart(fig_rond_st, use_container_width=True)
+
+        with sub_ot3:
+            st.markdown("**Matriz de Aislamiento Comunal (0 = conexión directa asfaltada; 1 = sin conexión directa)**")
+            df_aisl_edit = st.data_editor(
+                datos_ot_export["df_aislamiento"],
+                use_container_width=True,
+                key=f"editor_aisl_sii_{reg_slug}",
+            )
+            st.session_state[key_aisl_ss] = df_aisl_edit
+            datos_ot_export["df_aislamiento"] = df_aisl_edit
+
+            df_aisl_vis = calcular_aislamiento_df(df_aisl_edit)
+            st.dataframe(df_aisl_vis.round(2), use_container_width=True, hide_index=True)
+
+            st.markdown("**Vista previa Índice Compuesto Mín–Máx (SII + Rondinelli: 50/50 vs. 70/30)**")
+            vt_map_st = {_normalizar_texto(k): float(v) for k, v in resultados["Vt"].sum(axis=0).items()}
+            pob_map_st = {_normalizar_texto(r["Comuna"]): int(r["Censo_2024"]) for _, r in datos_ot_base["df_censo"].iterrows()}
+            df_u6_prev = df_rond_vis[["Comuna", "Indice_Rondinelli"]].copy()
+            pobs_u6 = [pob_map_st.get(_normalizar_texto(c), 0) for c in df_u6_prev["Comuna"]]
+            if all(p > 0 for p in pobs_u6):
+                df_u6_prev["v1_SII"] = [vt_map_st.get(_normalizar_texto(c), 0.0) / float(p) for c, p in zip(df_u6_prev["Comuna"], pobs_u6)]
+            else:
+                df_u6_prev["v1_SII"] = [vt_map_st.get(_normalizar_texto(c), 0.0) for c in df_u6_prev["Comuna"]]
+
+            r1_rng = float(df_u6_prev["v1_SII"].max() - df_u6_prev["v1_SII"].min())
+            r2_rng = float(df_u6_prev["Indice_Rondinelli"].max() - df_u6_prev["Indice_Rondinelli"].min())
+            df_u6_prev["u_v1"] = (df_u6_prev["v1_SII"] - df_u6_prev["v1_SII"].min()) / r1_rng if r1_rng > 0 else 0.0
+            df_u6_prev["u_v2"] = (df_u6_prev["Indice_Rondinelli"] - df_u6_prev["Indice_Rondinelli"].min()) / r2_rng if r2_rng > 0 else 0.0
+            df_u6_prev["Indice_50_50"] = 0.5 * df_u6_prev["u_v1"] + 0.5 * df_u6_prev["u_v2"]
+            df_u6_prev["Indice_70_30"] = 0.7 * df_u6_prev["u_v1"] + 0.3 * df_u6_prev["u_v2"]
+            df_u6_prev["Rank_50_50"] = df_u6_prev["Indice_50_50"].rank(ascending=False, method="min").astype(int)
+            df_u6_prev["Rank_70_30"] = df_u6_prev["Indice_70_30"].rank(ascending=False, method="min").astype(int)
+            st.dataframe(df_u6_prev.sort_values("Rank_50_50").round(3), use_container_width=True, hide_index=True)
+
+    bytes_excel = compilar_excel_10_hojas(
+        resultados=resultados,
+        region_sel=region_sel,
+        variable_sel=variable_sel,
+        anio_0=anio_0,
+        anio_t=anio_t,
+        alpha_hk=alpha_hk,
+        incluir_ot=incluir_ot_excel,
+        incluir_u6=incluir_u6_excel,
+        datos_ot=datos_ot_export,
+    )
+    total_hojas = 10 + (3 if incluir_ot_excel else 0) + (1 if incluir_u6_excel else 0)
+    partes_desc = ["ILPES, Silva Lira, MADE y REAT"]
+    if incluir_ot_excel:
+        partes_desc.append("OT")
+    if incluir_u6_excel:
+        partes_desc.append("Índice U6")
+    suf_nom = ("_OT" if incluir_ot_excel else "") + ("_U6" if incluir_u6_excel else "")
+    nombre_archivo_salida = (
+        f"Reporte_Territorial_{reg_slug}_{anio_0}_{anio_t}{suf_nom}.xlsx"
+    )
+    with slot_descarga_superior.container():
+        st.download_button(
+            label=f"Descargar Reporte Excel ({total_hojas} Hojas — {' + '.join(partes_desc)})",
+            data=bytes_excel,
+            file_name=nombre_archivo_salida,
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            use_container_width=True,
+            key="dl_reporte_sii_ot_top",
+        )
 
 
 # Alias de compatibilidad para importación desde app.py
