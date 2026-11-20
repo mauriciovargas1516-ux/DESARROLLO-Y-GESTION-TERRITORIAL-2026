@@ -1364,7 +1364,7 @@ def _agregar_hojas_ot_y_u6(
             ws12,
             n_cols_12,
             f"ESCALA DE GUTTMAN Y MATRIZ DE RONDINELLI — {dim_nombre.upper()} ({region_sel.upper()})",
-            "Presencia (1) o ausencia (0) de servicios y ponderación inversa Wk = 100 / fk",
+            f"{region_sel} | Top {n_g} comunas por población (Censo 2024)",
         )
 
         ws12.merge_cells(start_row=3, start_column=1, end_row=3, end_column=n_cols_12)
@@ -1591,7 +1591,7 @@ def _agregar_hojas_ot_y_u6(
             chart_rond.series.append(s_pt)
 
         ws12.add_chart(chart_rond, f"A{f_b2_tot + 3}")
-        ws12.freeze_panes = "B5"
+        ws12.freeze_panes = "B1"
         _autoajustar_columnas_hoja(ws12, max_width=24, min_width=13, col_a_max=30)
 
         # ======================================================================
@@ -1711,7 +1711,7 @@ def _agregar_hojas_ot_y_u6(
             ws14,
             len(headers_14),
             f"ÍNDICE COMPUESTO DE DESARROLLO TERRITORIAL — {region_sel.upper()}",
-            f"Normalización Mínimo–Máximo [0, 1] y análisis de ponderaciones (50/50 vs. 70/30) | {anio_t}",
+            f"{region_sel} | Normalización Mín–Máx [0, 1] y ponderación 50/50 vs. 70/30 ({anio_t})",
         )
 
         for ci_p, txt_p in [(1, "Parámetro"), (2, "v1 (Económica)"), (3, "v2 (Funcional)"), (4, "Referencia")]:
@@ -1872,7 +1872,7 @@ def _agregar_hojas_ot_y_u6(
             chart_u6.series[1].graphicalProperties.solidFill = "737373"
         ws14.add_chart(chart_u6, f"A{f_avg_14 + 3}")
 
-        ws14.freeze_panes = "B11"
+        ws14.freeze_panes = "B1"
         _autoajustar_columnas_hoja(ws14, max_width=24, min_width=13, col_a_max=28)
 
 
