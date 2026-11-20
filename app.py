@@ -81,8 +81,8 @@ inyectar_estilos_burbujas()
 
 
 def _render_vista_sii_unificada():
-    st.markdown("<div class='sec-header'>MOTOR SII / ILPES / MADE / REAT Y EXPORTADOR EXCEL DE 10 HOJAS</div>", unsafe_allow_html=True)
-    b1, b2, b3, b4 = st.columns(4)
+    st.markdown("<div class='sec-header'>MOTOR SII / ILPES / MADE / REAT Y ORDENAMIENTO TERRITORIAL (EXPORTADOR EXCEL)</div>", unsafe_allow_html=True)
+    b1, b2, b3, b4, b5 = st.columns(5)
     with b1:
         renderizar_burbuja_tip(
             titulo_boton="Silva Lira (CEPAL)",
@@ -114,6 +114,14 @@ def _render_vista_sii_unificada():
             titulo_interno="Beta, Sigma, Gini, Theil y Hannah-Kay",
             formula_latex=r"\lambda = -\frac{\ln(1+\beta T)}{T} \quad ; \quad T = \sum s_i \ln(n \cdot s_i)",
             explicacion_md="- **$\\beta < 0$ ($p<0,05$):** Convergencia Beta.\n- **$\\sigma_t < \\sigma_0$:** Convergencia Sigma.",
+        )
+
+    with b5:
+        renderizar_burbuja_tip(
+            titulo_boton="OT y Mín–Máx",
+            titulo_interno="Primacía (IP4), Rondinelli, Aislamiento y U6",
+            formula_latex=r"IP_4 = \frac{P_1}{P_2+P_3+P_4} \quad ; \quad W_k = \frac{100}{f_k}",
+            explicacion_md="- **Ranking:** compara 2 censos con flechas de cambio.\n- **Rondinelli:** $1$=Presente, $0$=Ausente.\n- **Aislamiento:** $0$=Conectada, $1$=Aislada.",
         )
 
     msii.renderizar_exportador_sii(ARCHIVO_EXCEL_REPO)
@@ -181,7 +189,7 @@ def main():
         ]
         if not st.session_state.modo_catedra_terr:
             opciones_nav.extend([
-                "3. Motor SII / ILPES / REAT y Excel 10 Hojas",
+                "3. Motor SII / ILPES / REAT y OT (Excel)",
                 "4. Laboratorio Cátedra (PIB, TAREA, Markov)",
                 "5. Terreno, Redes y Controles 2, 4 y 5",
             ])
