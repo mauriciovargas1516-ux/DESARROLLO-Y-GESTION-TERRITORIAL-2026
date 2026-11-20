@@ -741,30 +741,127 @@ def _estilizar_hoja_excel(ws, titulo_hoja: str, subtitulo: str, df_tabla: pd.Dat
             else:
                 celda.alignment = Alignment(horizontal="left", vertical="center")
 
-    ws.freeze_panes = "B5"
-    for col_idx in range(1, len(df_tabla.columns) + 1):
-        col_letter = get_column_letter(col_idx)
-        max_len = max(
-            len(str(ws.cell(row=r, column=col_idx).value or ""))
-            for r in range(fila_header, min(fila_header + len(df_tabla) + 1, fila_header + 60))
-        )
-        ws.column_dimensions[col_letter].width = max(min(max_len + 4, 44), 14)
+    _autoajustar_columnas_hoja(ws, max_width=58, min_width=13, col_a_max=64)
 
 
-def _autoajustar_columnas_hoja(ws, max_width: int = 34, min_width: int = 13, col_a_max: int = 44):
+def _medir_ancho_celda_excel(cell, col_idx: int) -> float:
+    """Estima el ancho visual real de una celda en Excel (Calibri 10pt), evitando inflar por decimales crudos."""
+    val = cell.value
+    if val is None:
+        return 0.0
+
+    nf = str(cell.number_format or "")
+    es_negrita = bool(cell.font and cell.font.bold)
+    mult_bold = 1.07 if es_negrita else 1.0
+
+    if isinstance(val, bool):
+        return 7.0
+
+    if isinstance(val, (int, float, np.number)):
+        fval = float(val)
+        if not np.isfinite(fval):
+            return 8.0
+        if "%" in nf:
+            txt = f"{fval * 100:,.2f}%"
+        elif "0.0000" in nf:
+            txt = f"{fval:,.4f}"
+        elif "0.000" in nf:
+            txt = f"{fval:,.3f}"
+        elif "0.00" in nf:
+            txt = f"{fval:,.2f}"
+        elif "0.0" in nf:
+            txt = f"{fval:,.1f}"
+        elif nf in ("0", "#,##0", "+#,##0;-#,##0;0"):
+            txt = f"{fval:,.0f}"
+        else:
+            txt = f"{fval:,.2f}" if abs(fval) >= 1 else f"{fval:.4f}"
+        return len(txt) * mult_bold + 2.5
+
+    s_val = str(val)
+    if s_val.startswith("="):
+        s_up = s_val.upper()
+        if "ALTAMENTE CONCENTRADA" in s_up:
+            return 23.0
+        if "SUBE" in s_up or "BAJA" in s_up:
+            return 11.0
+        if "DINÁMICA" in s_up or "RETROCESO" in s_up or "ESTANCADA" in s_up:
+            return 19.0
+        if "%" in nf:
+            return 10.5
+        if "0.0000" in nf:
+            return 10.5
+        if "0.000" in nf:
+            return 9.5
+        if "0.00" in nf:
+            return 13.5
+        if "#,##0" in nf:
+            return 12.0
+        if nf == "0":
+            return 7.5
+        return 11.5
+
+    lineas = s_val.splitlines() or [s_val]
+    largo_max = max(len(ln) for ln in lineas)
+    wrap_activo = bool(cell.alignment and cell.alignment.wrap_text)
+
+    if col_idx > 1 and wrap_activo and largo_max > 20:
+        palabras = [p for ln in lineas for p in ln.split()]
+        pal_max = max((len(p) for p in palabras), default=12)
+        ancho_2_lineas = max(pal_max + 2, (largo_max / 2.0) + 3.0)
+        return ancho_2_lineas * mult_bold + 1.5
+
+    return largo_max * mult_bold + 2.8
+
+
+def _autoajustar_columnas_hoja(ws, max_width: int = 28, min_width: int = 11, col_a_max: int = 96):
+    """
+    Ajusta automáticamente el ancho de cada columna según su contenido visible real,
+    ignorando celdas combinadas (títulos/banners) y evitando cortar nombres largos en la columna A.
+    """
+    celdas_combinadas_horiz = set()
+    for rng in ws.merged_cells.ranges:
+        if rng.max_col > rng.min_col:
+            for r_m in range(rng.min_row, rng.max_row + 1):
+                for c_m in range(rng.min_col, rng.max_col + 1):
+                    celdas_combinadas_horiz.add((r_m, c_m))
+
     for col_idx in range(1, ws.max_column + 1):
         col_letter = get_column_letter(col_idx)
         if ws.column_dimensions[col_letter].hidden:
             continue
-        max_len = 0
-        for r_idx in range(3, min(ws.max_row + 1, 95)):
-            val = ws.cell(row=r_idx, column=col_idx).value
-            if val is not None:
-                s_val = str(val)
-                if not s_val.startswith("="):
-                    max_len = max(max_len, len(s_val))
+
+        ancho_est = 0.0
+        for r_idx in range(1, ws.max_row + 1):
+            if (r_idx, col_idx) in celdas_combinadas_horiz:
+                continue
+            celda = ws.cell(row=r_idx, column=col_idx)
+            if celda.value is None:
+                continue
+            w_c = _medir_ancho_celda_excel(celda, col_idx)
+            if w_c > ancho_est:
+                ancho_est = w_c
+
         limite_sup = col_a_max if col_idx == 1 else max_width
-        ws.column_dimensions[col_letter].width = max(min(max_len + 4, limite_sup), min_width)
+        min_col = max(min_width, 16) if col_idx == 1 else min_width
+        ws.column_dimensions[col_letter].width = round(max(min(ancho_est, limite_sup), min_col), 1)
+
+    # Asegurar altura cómoda en filas de cabecera con texto ajustado en 2 líneas
+    for r_idx in range(1, ws.max_row + 1):
+        necesita_alto = False
+        for c_idx in range(2, ws.max_column + 1):
+            if (r_idx, c_idx) in celdas_combinadas_horiz:
+                continue
+            celda = ws.cell(row=r_idx, column=c_idx)
+            if isinstance(celda.value, str) and not celda.value.startswith("="):
+                if celda.alignment and celda.alignment.wrap_text:
+                    col_w = ws.column_dimensions[get_column_letter(c_idx)].width or 14
+                    if len(celda.value) > col_w - 2:
+                        necesita_alto = True
+                        break
+        if necesita_alto:
+            h_act = ws.row_dimensions[r_idx].height or 18
+            if h_act < 30:
+                ws.row_dimensions[r_idx].height = 30
 
 
 
@@ -1347,8 +1444,7 @@ def _agregar_hojas_ot_y_u6(
 
             ws11.add_chart(chart_rk, "M4")
 
-        ws11.freeze_panes = "B5"
-        _autoajustar_columnas_hoja(ws11, max_width=24, min_width=12, col_a_max=28)
+        _autoajustar_columnas_hoja(ws11, max_width=22, min_width=11, col_a_max=34)
 
         # ======================================================================
         # HOJA: RONDINELLI (ESCALOGRAMA DE GUTTMAN + MATRIZ PONDERADA + GRÁFICO)
@@ -1591,8 +1687,7 @@ def _agregar_hojas_ot_y_u6(
             chart_rond.series.append(s_pt)
 
         ws12.add_chart(chart_rond, f"A{f_b2_tot + 3}")
-        ws12.freeze_panes = "B1"
-        _autoajustar_columnas_hoja(ws12, max_width=24, min_width=13, col_a_max=30)
+        _autoajustar_columnas_hoja(ws12, max_width=22, min_width=12, col_a_max=34)
 
         # ======================================================================
         # HOJA: AISLAMIENTO (MATRIZ 0/1 Y RANKING DE CONECTIVIDAD)
@@ -1677,8 +1772,7 @@ def _agregar_hojas_ot_y_u6(
             if c_i >= col_sum1:
                 cp.alignment = Alignment(horizontal="right", vertical="center")
 
-        ws13.freeze_panes = "B5"
-        _autoajustar_columnas_hoja(ws13, max_width=22, min_width=13, col_a_max=28)
+        _autoajustar_columnas_hoja(ws13, max_width=18, min_width=11, col_a_max=30)
 
     if incluir_u6:
         # ======================================================================
@@ -1872,8 +1966,9 @@ def _agregar_hojas_ot_y_u6(
             chart_u6.series[1].graphicalProperties.solidFill = "737373"
         ws14.add_chart(chart_u6, f"A{f_avg_14 + 3}")
 
-        ws14.freeze_panes = "B1"
-        _autoajustar_columnas_hoja(ws14, max_width=24, min_width=13, col_a_max=28)
+        _autoajustar_columnas_hoja(ws14, max_width=22, min_width=11, col_a_max=32)
+        ancho_com_u6 = max((len(str(c)) for c in comunas_g), default=14) + 4
+        ws14.column_dimensions["A"].width = round(max(ws14.column_dimensions["A"].width or 16, min(ancho_com_u6, 32)), 1)
 
 
 def compilar_excel_10_hojas(
@@ -2053,7 +2148,6 @@ def compilar_excel_10_hojas(
             c_sum.number_format = "#,##0.00"
             c_sum.border = borde_total
 
-        ws_m.freeze_panes = "B5"
         _autoajustar_columnas_hoja(ws_m)
 
     # HOJA 4: LOCALIZACIÓN Qij
@@ -2123,7 +2217,6 @@ def compilar_excel_10_hojas(
         ws4.conditional_formatting.add(rango_q, regla_q_mayor_1)
         fila_cursor += 2
 
-    ws4.freeze_panes = "B1"
     _autoajustar_columnas_hoja(ws4)
 
     # HOJA 5: ESPECIALIZACIÓN (Qr y CRr)
@@ -2247,7 +2340,6 @@ def compilar_excel_10_hojas(
                 cc.alignment = Alignment(horizontal="right", vertical="center")
         fila_cur_5 += 1
 
-    ws5.freeze_panes = "B1"
     _autoajustar_columnas_hoja(ws5)
 
     # HOJA 6: PROD. BÁSICA (Xij y Mj)
@@ -2384,7 +2476,6 @@ def compilar_excel_10_hojas(
 
         fila_cur_6 += 3
 
-    ws6.freeze_panes = "B1"
     _autoajustar_columnas_hoja(ws6)
 
     # HOJA 7: CUADRANTES SILVA (FORMATO ESTÁNDAR CON POBLACIÓN Y PER CÁPITA)
@@ -2744,8 +2835,7 @@ def compilar_excel_10_hojas(
         for c_box in range(9, 13):
             ws7.cell(row=r_box, column=c_box).border = borde_fino
 
-    ws7.freeze_panes = "B5"
-    _autoajustar_columnas_hoja(ws7, max_width=26, min_width=14, col_a_max=24)
+    _autoajustar_columnas_hoja(ws7, max_width=24, min_width=13, col_a_max=30)
     ws7.column_dimensions["G"].width = 20
     ws7.column_dimensions["H"].width = 3
     ws7.column_dimensions["I"].width = 23
@@ -2894,7 +2984,6 @@ def compilar_excel_10_hojas(
         cchk.number_format = "#,##0.00"
         cchk.border = borde_total
 
-    ws8.freeze_panes = "B1"
     _autoajustar_columnas_hoja(ws8)
 
     # HOJA 9: MADE MODIFICADO
@@ -3019,7 +3108,6 @@ def compilar_excel_10_hojas(
         cerm.number_format = "#,##0.00"
         cerm.border = borde_total
 
-    ws9.freeze_panes = "B1"
     _autoajustar_columnas_hoja(ws9)
 
     # HOJA 10: CONVERGENCIA
