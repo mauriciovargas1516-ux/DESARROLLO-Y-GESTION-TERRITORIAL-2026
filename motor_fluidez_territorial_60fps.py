@@ -241,6 +241,50 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
   .u6-rk-dn { color: #DC2626; font-weight: 800; }
   .u6-rk-eq { color: #64748B; }
   .u6-pill-row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-bottom: 9px; }
+  /* === TARJETAS DE FÓRMULAS VIVAS + MARCO TEÓRICO INTEGRADO === */
+  .fstrip-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(215px, 1fr));
+    gap: 8px; margin: 9px 0 10px 0;
+  }
+  .fstrip-card {
+    background: #F8FAFC; border: 1px solid #CBD5E1; border-left: 3.5px solid #1E3A8A;
+    border-radius: 6px; padding: 7px 10px;
+  }
+  .fstrip-lbl { font-size: 10.5px; font-weight: 800; color: #1E3A8A; text-transform: uppercase; margin-bottom: 3px; }
+  .fstrip-eq {
+    font-family: "Cambria Math", "Times New Roman", Georgia, serif;
+    font-size: 13.8px; font-weight: 700; color: #0F172A;
+    display: flex; align-items: center; flex-wrap: wrap; gap: 3px; min-height: 28px;
+  }
+  .fstrip-live {
+    font-family: Consolas, monospace; font-size: 11px; color: #0F172A;
+    margin-top: 4px; padding-top: 4px; border-top: 1px dashed #CBD5E1; line-height: 1.35;
+  }
+  .fstrip-live b { color: #15803D; }
+  .sl-num {
+    width: 78px; padding: 2px 5px; border: 1px solid #94A3B8; border-radius: 4px;
+    font-family: Consolas, monospace; font-size: 11.5px; font-weight: 700;
+    color: #1D4ED8; background: #FFFFFF; text-align: right;
+  }
+  .sl-num:focus { outline: 2px solid #1D4ED8; border-color: #1D4ED8; }
+  .teo-box {
+    margin-top: 10px; background: #FFFFFF; border: 1px solid #CBD5E1;
+    border-left: 4px solid #334155; border-radius: 6px; padding: 8px 12px;
+    font-size: 11.9px; line-height: 1.48; color: #1E293B;
+  }
+  .teo-box summary {
+    cursor: pointer; font-weight: 800; color: #0F172A; font-size: 12px; list-style: none;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .teo-box summary::-webkit-details-marker { display: none; }
+  .teo-body { margin-top: 7px; border-top: 1px dashed #CBD5E1; padding-top: 7px; }
+  .teo-body ul { margin: 4px 0 0 18px; padding: 0; }
+  .teo-body li { margin-bottom: 4px; }
+  .u6-edit-bar {
+    display: grid; grid-template-columns: 1.4fr 1fr 1fr auto; gap: 8px; align-items: end;
+    background: #F1F5F9; border: 1px solid #CBD5E1; border-radius: 6px; padding: 8px 10px; margin-bottom: 10px;
+  }
+  @media (max-width: 820px) { .u6-edit-bar { grid-template-columns: 1fr; } }
 
   @media print {
     body { background: #FFFFFF !important; }
@@ -261,16 +305,16 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
 <body>
 <div class="wrap">
   <div class="top-tabs">
-    <button class="tab-btn active" onclick="openTab('perroux', this)">U.I · Crecimiento y Polos (Perroux/Myrdal)</button>
-    <button class="tab-btn" onclick="openTab('thunen', this)">U.II · Von Thünen (Anillos LR)</button>
-    <button class="tab-btn" onclick="openTab('weber', this)">U.II · Weber (IM e Isodápana)</button>
-    <button class="tab-btn" onclick="openTab('krugman', this)">U.II · Krugman (Centro-Periferia)</button>
-    <button class="tab-btn" onclick="openTab('christaller', this)">U.II–IV · Christaller y Granovetter</button>
-    <button class="tab-btn" onclick="openTab('lorenz', this)">U.III–V · Lorenz, Gini, Theil e IP4</button>
-    <button class="tab-btn" onclick="openTab('dini', this)">U.IV · Redes Dini 2010 (SPL)</button>
-    <button class="tab-btn" onclick="openTab('indicadores', this)">U.VI · Indicadores Mín-Máx (Nuevo)</button>
-    <button class="tab-btn" onclick="openTab('mecanica', this)">Formulario (Modo Ciego)</button>
-    <button class="tab-btn" onclick="openTab('lectura', this)">Mapa Teórico (U.I–VI) y Lectura</button>
+    <button class="tab-btn active" onclick="openTab('perroux', this)">1. Crecimiento y Polos de Desarrollo (Unidad 1)</button>
+    <button class="tab-btn" onclick="openTab('thunen', this)">2. Localización Rural: Von Thünen (Unidad 2)</button>
+    <button class="tab-btn" onclick="openTab('weber', this)">3. Localización Industrial: Weber (Unidad 2)</button>
+    <button class="tab-btn" onclick="openTab('krugman', this)">4. Centro-Periferia: Krugman (Unidad 2)</button>
+    <button class="tab-btn" onclick="openTab('christaller', this)">5. Lugares Centrales y Capital Social (Unidades 2 y 4)</button>
+    <button class="tab-btn" onclick="openTab('lorenz', this)">6. Disparidades y Primacía: Lorenz, Gini, Theil e IP4 (Unidades 3 y 5)</button>
+    <button class="tab-btn" onclick="openTab('dini', this)">7. Redes Empresariales y UCINET: Dini 2010 (Unidad 4)</button>
+    <button class="tab-btn" onclick="openTab('indicadores', this)">8. Indicadores de Desarrollo Mín–Máx (Unidad 6)</button>
+    <button class="tab-btn" onclick="openTab('mecanica', this)">9. Formulario de Fórmulas y Gráficos (Modo Ciego)</button>
+    <button class="tab-btn" onclick="openTab('lectura', this)">10. Mapa Teórico Integrado y Control de Lectura</button>
   </div>
 
   <!-- ====================================================================== -->
@@ -341,6 +385,7 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
       <div class="kpi" style="border-left-color:#0F172A;"><div class="kpi-lbl">Movimiento vs. Fantasma</div><div id="vt-k-mov" class="kpi-val">Referencia base</div><div id="vt-k-mov2" class="kpi-sub">Mueve un margen o flete</div></div>
     </div>
 
+    <div id="vt-fstrip" class="fstrip-grid"></div>
     <div class="svg-box"><svg id="svg-thunen" viewBox="0 0 980 390"></svg></div>
     <div id="vt-sol" class="sol-box"></div>
     <div id="ped-thunen" class="ped-grid"></div>
@@ -383,6 +428,7 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
       <div class="kpi" style="border-left-color:#15803D;"><div class="kpi-lbl">Decisión Locacional Final</div><div id="wb-k-dec" class="kpi-val">Permanecer en P*</div><div id="wb-k-dec2" class="kpi-sub">L fuera de Isodápana</div></div>
     </div>
 
+    <div id="wb-fstrip" class="fstrip-grid"></div>
     <div class="svg-box"><svg id="svg-weber" viewBox="0 0 980 400"></svg></div>
     <div id="wb-sol" class="sol-box"></div>
     <div id="ped-weber" class="ped-grid"></div>
@@ -422,6 +468,7 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
       <div class="kpi" style="border-left-color:#DC2626;"><div class="kpi-lbl">Fuerza Predominante</div><div id="kr-k-fza" class="kpi-val">Centrípeta →</div><div id="kr-k-fza2" class="kpi-sub">τ ≤ τ*</div></div>
     </div>
 
+    <div id="kr-fstrip" class="fstrip-grid"></div>
     <div class="svg-box"><svg id="svg-krugman" viewBox="0 0 980 385"></svg></div>
     <div id="ped-krugman" class="ped-grid"></div>
   </div>
@@ -462,6 +509,7 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
       <div class="kpi" style="border-left-color:#DC2626;"><div class="kpi-lbl">Saldo Neto Periferia (Myrdal)</div><div id="px-k-sal" class="kpi-val">+$660 MM</div><div id="px-k-diag" class="kpi-sub">Polo Integrador</div></div>
     </div>
 
+    <div id="px-fstrip" class="fstrip-grid"></div>
     <div class="svg-box"><svg id="svg-perroux" viewBox="0 0 980 370"></svg></div>
     <div id="px-sol" class="sol-box"></div>
     <div id="ped-perroux" class="ped-grid"></div>
@@ -508,6 +556,7 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
       <div class="kpi" style="border-left-color:#0F172A;"><div class="kpi-lbl">Desempeño SPL Global</div><div id="gr-k-spl" class="kpi-val">80,4 pts</div><div class="kpi-sub">Balance cohesión + puentes</div></div>
     </div>
 
+    <div id="cg-fstrip" class="fstrip-grid"></div>
     <div class="svg-box"><svg id="svg-gran" viewBox="0 0 980 320"></svg></div>
     <div id="ped-chrisgran" class="ped-grid"></div>
   </div>
@@ -517,28 +566,45 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
   <!-- ====================================================================== -->
   <div id="panel-lorenz" class="panel">
     <div class="sec-title">
-      <span>Disparidades Territoriales (REAT y OT): Curva de Lorenz, Gini, Entropía de Theil e Índice IP4</span>
+      <span>6. Disparidades Territoriales y Primacía Urbana: Curva de Lorenz, Gini, Theil, HHI, Hannah-Kay e IP4</span>
       <div class="btn-bar">
         <button class="act-btn primary" onclick="presetLorenz('lagos')">Los Lagos (Censo 2024)</button>
         <button class="act-btn" onclick="presetLorenz('biobio')">Biobío (Censo 2024)</button>
         <button class="act-btn" onclick="presetLorenz('mancilla')">Ejemplo Mancilla (Lám. 12)</button>
+        <button class="act-btn" onclick="presetLorenz('equidad')">Equidad Perfecta (G=0)</button>
         <button class="act-btn" onclick="fijarGhostLorenz()">Fijar Fantasma</button>
       </div>
     </div>
 
     <details class="enun-box" open>
       <summary>
-        <span>Planteamiento Integrado Unidades 3 y 5 (Concentración Espacial, Desigualdad y Primacía Urbana)</span>
-        <span class="enun-badge">Fórmulas: IP4 = P1/(P2+P3+P4) · T = ∑ si·ln(n·si)</span>
+        <span>Planteamiento Integrado (Unidad 3: REAT / Desigualdad y Unidad 5: Ordenamiento Territorial)</span>
+        <span class="enun-badge">Edita cualquier población en los cuadros o mueve los sliders</span>
       </summary>
       <div class="enun-body" id="lz-enunciado"></div>
     </details>
 
-    <div class="sliders-grid">
-      <div class="sl-card"><div class="sl-head"><span id="lz-l1">P1: Puerto Montt</span><span id="lz-p1-v" class="sl-val">275.473</span></div><input id="lz-p1" type="range" min="1000" max="600000" step="1000" value="275473" oninput="drawLorenz()" /></div>
-      <div class="sl-card"><div class="sl-head"><span id="lz-l2">P2: Osorno</span><span id="lz-p2-v" class="sl-val">174.998</span></div><input id="lz-p2" type="range" min="500" max="350000" step="500" value="174998" oninput="drawLorenz()" /></div>
-      <div class="sl-card"><div class="sl-head"><span id="lz-l3">P3: Puerto Varas</span><span id="lz-p3-v" class="sl-val">50.010</span></div><input id="lz-p3" type="range" min="100" max="250000" step="500" value="50010" oninput="drawLorenz()" /></div>
-      <div class="sl-card"><div class="sl-head"><span id="lz-l4">P4: Castro</span><span id="lz-p4-v" class="sl-val">48.632</span></div><input id="lz-p4" type="range" min="50" max="200000" step="500" value="48632" oninput="drawLorenz()" /></div>
+    <div class="sliders-grid" style="grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));">
+      <div class="sl-card">
+        <div class="sl-head"><span id="lz-l1">P1: Puerto Montt</span><input id="lz-p1-in" class="sl-num" type="number" min="10" max="1500000" step="100" value="275473" oninput="syncLorenzFromInput(1)" /></div>
+        <input id="lz-p1" type="range" min="1000" max="600000" step="1000" value="275473" oninput="syncLorenzFromSlider(1)" />
+      </div>
+      <div class="sl-card">
+        <div class="sl-head"><span id="lz-l2">P2: Osorno</span><input id="lz-p2-in" class="sl-num" type="number" min="10" max="1500000" step="100" value="174998" oninput="syncLorenzFromInput(2)" /></div>
+        <input id="lz-p2" type="range" min="500" max="350000" step="500" value="174998" oninput="syncLorenzFromSlider(2)" />
+      </div>
+      <div class="sl-card">
+        <div class="sl-head"><span id="lz-l3">P3: Puerto Varas</span><input id="lz-p3-in" class="sl-num" type="number" min="10" max="1500000" step="100" value="50010" oninput="syncLorenzFromInput(3)" /></div>
+        <input id="lz-p3" type="range" min="100" max="250000" step="500" value="50010" oninput="syncLorenzFromSlider(3)" />
+      </div>
+      <div class="sl-card">
+        <div class="sl-head"><span id="lz-l4">P4: Castro</span><input id="lz-p4-in" class="sl-num" type="number" min="10" max="1500000" step="100" value="48632" oninput="syncLorenzFromInput(4)" /></div>
+        <input id="lz-p4" type="range" min="50" max="200000" step="500" value="48632" oninput="syncLorenzFromSlider(4)" />
+      </div>
+      <div class="sl-card">
+        <div class="sl-head"><span>Parámetro α (Hannah-Kay)</span><span id="lz-al-v" class="sl-val">α = 2,0</span></div>
+        <input id="lz-al" type="range" min="1.5" max="4.0" step="0.5" value="2.0" oninput="drawLorenz()" />
+      </div>
     </div>
 
     <div class="kpis">
@@ -546,10 +612,27 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
       <div class="kpi" style="border-left-color:#D97706;"><div class="kpi-lbl">Estandarización OT (0–3)</div><div id="lz-k-cat" class="kpi-val">Valor 2: Concentrada</div><div class="kpi-sub">06 OT 2024.pdf</div></div>
       <div class="kpi" style="border-left-color:#DC2626;"><div class="kpi-lbl">Índice de Gini (G)</div><div id="lz-k-gini" class="kpi-val">0,432</div><div id="lz-k-dgini" class="kpi-sub">ΔG vs Fantasma: 0,000</div></div>
       <div class="kpi" style="border-left-color:#7C3AED;"><div class="kpi-lbl">Entropía de Theil (T)</div><div id="lz-k-theil" class="kpi-val">0,312</div><div id="lz-k-cuota" class="kpi-sub">Cuota P1: 50,2%</div></div>
+      <div class="kpi" style="border-left-color:#0F766E;"><div class="kpi-lbl">Concentración HHI y HK_α</div><div id="lz-k-hhi" class="kpi-val">0,369</div><div id="lz-k-hk" class="kpi-sub">HK = 2,71 ciudades equiv.</div></div>
     </div>
 
-    <div class="svg-box"><svg id="svg-lorenz" viewBox="0 0 980 385"></svg></div>
+    <div id="lz-fstrip" class="fstrip-grid"></div>
+    <div class="svg-box"><svg id="svg-lorenz" viewBox="0 0 980 390"></svg></div>
     <div id="ped-lorenz" class="ped-grid"></div>
+
+    <details class="teo-box">
+      <summary>
+        <span>Marco Teórico y Claves de Interpretación (Unidad 3 REAT · Unidad 5 Ordenamiento Territorial)</span>
+        <span class="enun-badge">Desplegar teoría de apoyo</span>
+      </summary>
+      <div class="teo-body">
+        <ul>
+          <li><b>Curva de Lorenz e Índice de Gini (G):</b> ordena los territorios de menor a mayor y grafica población acumulada (<i>q<sub>i</sub></i>) frente a proporción acumulada de territorios (<i>p<sub>i</sub></i>). Si todos pesan igual, la curva coincide con la diagonal de 45° (<b>G = 0</b>). A mayor concentración, mayor área A entre la diagonal y la curva (<b>G → 1</b>).</li>
+          <li><b>Entropía de Theil (T):</b> varía entre <b>0</b> (equidad perfecta) y <b>ln(n)</b> (máxima concentración; con n = 4 el tope es ln(4) ≈ 1,386). Su gran ventaja frente al Gini es ser <b>perfectamente descomponible</b> en desigualdad <i>entre regiones</i> + desigualdad <i>dentro de cada región</i>.</li>
+          <li><b>Herfindahl-Hirschman (HHI) y Hannah-Kay (HK<sub>α</sub>):</b> HHI = ∑ s<sub>i</sub><sup>2</sup> varía entre 1/n (0,25 con 4 ciudades iguales) y 1. El número equivalente <b>HK<sub>α</sub> = (∑ s<sub>i</sub><sup>α</sup>)<sup>1/(1−α)</sup></b> indica cuántas ciudades de igual tamaño replicarían el mismo grado de concentración; al subir α se castiga más el peso de la ciudad líder.</li>
+          <li><b>Índice de Primacía (IP<sub>4</sub>) y Ley de Zipf (06 OT 2024.pdf):</b> compara la ciudad mayor con las tres siguientes: &lt;0,65 (Muy Dispersa = 0), 0,65–1,00 (Dispersa = 1), 1,00–1,50 (Concentrada = 2) y ≥1,50 (Macrocefalia = 3). La <b>Ley de Zipf</b> postula que una red urbana equilibrada sigue P<sub>r</sub> = P<sub>1</sub> / r (la 2ª ciudad debería medir ~50% de la 1ª, la 3ª ~33% y la 4ª ~25%).</li>
+        </ul>
+      </div>
+    </details>
   </div>
 
   <!-- ====================================================================== -->
@@ -586,11 +669,11 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
 
     <div class="sliders-grid" style="grid-template-columns: 1fr 1.35fr 1fr;">
       <div class="sl-card">
-        <div class="sl-head"><span>Actores en la Red (n)</span><span id="dn-n-v" class="sl-val">n = 8</span></div>
+        <div class="sl-head"><span>Actores en la Red (n)</span><span><input id="dn-n-in" class="sl-num" style="width:58px;" type="number" min="4" max="15" step="1" value="8" oninput="onInputNDini()" /></span></div>
         <input id="dn-n" type="range" min="4" max="15" step="1" value="8" oninput="onSliderNDini()" />
       </div>
       <div class="sl-card">
-        <div class="sl-head"><span>Vínculos Activos (L hasta L_máx)</span><span id="dn-step-v" class="sl-val">16 / 28</span></div>
+        <div class="sl-head"><span>Vínculos Activos (L)</span><span><input id="dn-l-in" class="sl-num" style="width:58px;" type="number" min="0" max="28" step="1" value="16" oninput="onInputLDini()" /> <span id="dn-step-v" class="sl-val" style="font-size:10.8px;">/ 28</span></span></div>
         <input id="dn-step" type="range" min="0" max="28" step="1" value="16" oninput="onSliderLDini()" />
       </div>
       <div class="sl-card">
@@ -609,9 +692,25 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
       <div class="kpi" style="border-left-color:#DC2626;"><div class="kpi-lbl">Gradiente Concentración (GC)</div><div id="dn-k-gc" class="kpi-val">0,0%</div><div id="dn-k-gcd" class="kpi-sub">Simétrica (0%) ↔ Líder (100%)</div></div>
     </div>
 
+    <div id="dn-fstrip" class="fstrip-grid"></div>
     <div class="svg-box"><svg id="svg-dini" viewBox="0 0 980 400"></svg></div>
     <div id="dn-sol" class="sol-box"></div>
     <div id="ped-dini" class="ped-grid"></div>
+
+    <details class="teo-box">
+      <summary>
+        <span>Marco Teórico de Redes, Clúster y SPL (Dini 2010 · Schmitz 1999 · Reglas UCINET Control 4)</span>
+        <span class="enun-badge">Desplegar teoría de apoyo</span>
+      </summary>
+      <div class="teo-body">
+        <ul>
+          <li><b>Los 3 círculos concéntricos de Dini (2010, CEPAL — 04 SPL.pdf):</b> (1) <b>Red Empresarial</b> (núcleo): empresas independientes que cooperan voluntariamente en compras, ventas o certificaciones; (2) <b>Clúster</b> (anillo medio): masa crítica de empresas especializadas y relacionadas en un área reducida; (3) <b>Sistema Productivo Local — SPL</b> (anillo exterior): empresas + universidades, centros I+D, gremios y gobierno local.</li>
+          <li><b>Tipología de Cooperación (Schmitz, 1999):</b> distingue relaciones <b>Horizontales</b> (empresas del mismo eslabón, ej. Aproleche o PymeMad) vs. <b>Verticales</b> (proveedor–comprador a lo largo de la cadena), y <b>Bilaterales</b> (2 firmas: Joint Venture / Subcontratación) vs. <b>Multilaterales</b> (asociaciones o redes).</li>
+          <li><b>Lectura de Densidad (D) y Gradiente de Concentración (GC):</b> <b>D &gt; 50%</b> revela alta cohesión y confianza; <b>GC ≈ 0%</b> indica gobernanza simétrica sin actor dominante, mientras <b>GC → 100%</b> señala una estrella controlada por un único líder (alta eficiencia coordinadora, pero frágil ante su salida).</li>
+          <li><b>Reglas prácticas UCINET y Control 4 (Prof. Mancilla):</b> la diagonal principal de la matriz de adyacencia siempre es <b>A<sub>ii</sub> = 0</b>. En entrevistas (3 actores de organizaciones distintas en ≥ 2 eslabones), nunca inducir la palabra "clúster" ni preguntar por "debilidades" (usar "desafíos" o "aspectos por fortalecer").</li>
+        </ul>
+      </div>
+    </details>
   </div>
 
   <!-- ====================================================================== -->
@@ -661,6 +760,22 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
       </div>
     </div>
 
+    <div class="u6-edit-bar">
+      <div class="eq-field">
+        <label>Editar valores reales de cualquier provincia (ej. prueba poner 3000 o 200):</label>
+        <select id="u6-prov-sel" class="eq-input" onchange="loadProvEditorU6()"></select>
+      </div>
+      <div class="eq-field">
+        <label>Valor original v1:</label>
+        <input id="u6-ed-v1" class="eq-input" type="number" step="0.01" oninput="applyProvEditU6()" />
+      </div>
+      <div class="eq-field">
+        <label>Valor original v2:</label>
+        <input id="u6-ed-v2" class="eq-input" type="number" step="0.01" oninput="applyProvEditU6()" />
+      </div>
+      <button class="act-btn" style="height:33px;" onclick="resetU6Data()">Restaurar Datos Originales</button>
+    </div>
+
     <div class="kpis">
       <div class="kpi" style="border-left-color:#15803D;"><div class="kpi-lbl">1° Lugar del Ranking (#1)</div><div id="u6-k-top" class="kpi-val">Antofagasta</div><div id="u6-k-topv" class="kpi-sub">Índice = 0,852</div></div>
       <div class="kpi" style="border-left-color:#DC2626;"><div class="kpi-lbl">Último Lugar (#15)</div><div id="u6-k-bot" class="kpi-val">Petorca</div><div id="u6-k-botv" class="kpi-sub">Índice = 0,000</div></div>
@@ -668,12 +783,28 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
       <div class="kpi" style="border-left-color:#7C3AED;"><div class="kpi-lbl">Cambios vs. Escenario 50/50</div><div id="u6-k-chg" class="kpi-val">0 provincias</div><div id="u6-k-chg2" class="kpi-sub">Estabilidad de ponderación</div></div>
     </div>
 
+    <div id="u6-fstrip" class="fstrip-grid"></div>
     <div class="u6-grid">
       <div class="svg-box"><svg id="svg-u6" viewBox="0 0 560 440"></svg></div>
       <div id="u6-tbl-box" style="max-height:445px;overflow-y:auto;"></div>
     </div>
     <div id="u6-sol" class="sol-box"></div>
     <div id="ped-u6" class="ped-grid"></div>
+
+    <details class="teo-box">
+      <summary>
+        <span>Marco Teórico de Indicadores Compuestos de Desarrollo (Unidad 6 · Normalización y Ponderación)</span>
+        <span class="enun-badge">Desplegar teoría de apoyo</span>
+      </summary>
+      <div class="teo-body">
+        <ul>
+          <li><b>¿Por qué normalizar?</b> Los indicadores territoriales vienen en unidades incompatibles (PIB en $, pobreza en %, escolaridad en años, distancia en km). La transformación Mín–Máx lleva toda variable al rango adimensional <b>[0, 1]</b> sin cambiar el orden relativo.</li>
+          <li><b>Sentido Favorable (+) vs. Desfavorable (−):</b> si un valor más alto significa mayor bienestar (ingresos, conectividad), usa <b>(x − mín)/(máx − mín)</b> para que el mayor reciba 1. Si un valor más alto significa peor desempeño (pobreza, desempleo, aislamiento), invierte con <b>(máx − x)/(máx − mín)</b> para que el menor reciba 1.</li>
+          <li><b>Ponderación y robustez del ranking:</b> un índice compuesto <b>I<sub>i</sub> = ∑ w<sub>k</sub>·u<sub>k</sub></b> refleja prioridades de política pública. Probar escenarios alternativos (ej. 50/50 vs. 70/30) permite verificar qué territorios son líderes robustos y cuáles son sensibles al peso asignado.</li>
+          <li><b>Límite clave (Sensibilidad a Outliers):</b> prueba escribir <code>3000</code> en <code>v1</code> de cualquier provincia arriba — esa provincia pasará a <code>1,000</code>, pero al agrandar el denominador <code>(máx − mín)</code> comprimirá hacia <code>0</code> los puntajes de las demás 14 provincias.</li>
+        </ul>
+      </div>
+    </details>
   </div>
 
   <!-- ====================================================================== -->
@@ -793,6 +924,17 @@ function drawAxisBreakX(svg, xPos, yBot) {
   el("rect", { x: xPos - 5, y: yBot - 5, width: 10, height: 10, fill: "#FFFFFF" }, svg);
   el("line", { x1: xPos - 4, y1: yBot + 5, x2: xPos, y2: yBot - 5, stroke: "#0F172A", "stroke-width": "1.5" }, svg);
   el("line", { x1: xPos + 1, y1: yBot + 5, x2: xPos + 5, y2: yBot - 5, stroke: "#0F172A", "stroke-width": "1.5" }, svg);
+}
+
+function renderFormulaStrip(id, cards) {
+  const box = document.getElementById(id);
+  if (!box) return;
+  box.innerHTML = cards.map(c => `
+    <div class="fstrip-card" style="border-left-color:${c.col || '#1E3A8A'};">
+      <div class="fstrip-lbl" style="color:${c.col || '#1E3A8A'};">${c.lbl}</div>
+      <div class="fstrip-eq">${c.eq}</div>
+      <div class="fstrip-live">${c.live}</div>
+    </div>`).join("");
 }
 
 function renderPedBox(id, lectura, paradoja, defensa) {
@@ -1103,6 +1245,11 @@ function drawThunen() {
   const tCen = el("text", { x: cx, y: cy + 21, fill: "#0F172A", "font-size": "11", "font-weight": "800", "text-anchor": "middle" }, svg);
   tCen.textContent = "Mercado";
 
+  renderFormulaStrip("vt-fstrip", [
+    { lbl: "Renta Locacional", col: "#DC2626", eq: `LR(d) = M − t · d`, live: `LR<sub>1</sub>=${fmtDec(s.m1,0)}−${fmtDec(s.t1,1)}d | LR<sub>2</sub>=${fmtDec(s.m2,0)}−${fmtDec(s.t2,1)}d` },
+    { lbl: "Corte Anillo 1 → 2", col: "#1D4ED8", eq: `d<sub>12</sub> = <span class="frac"><span class="num">M<sub>1</sub> − M<sub>2</sub></span><span class="den">t<sub>1</sub> − t<sub>2</sub></span></span>`, live: `(${fmtDec(s.m1,0)}−${fmtDec(s.m2,0)})/(${fmtDec(s.t1,1)}−${fmtDec(s.t2,1)}) = <b>${fmtDec(Math.max(0,d12),1)} km</b>` },
+    { lbl: "Frontera Agrícola (LR=0)", col: "#059669", eq: `d<sub>máx</sub> = <span class="frac"><span class="num">M<sub>3</sub></span><span class="den">t<sub>3</sub></span></span>`, live: `${fmtDec(s.m3,0)} / ${fmtDec(s.t3,2)} = <b>${fmtDec(d30,1)} km</b>` }
+  ]);
   renderPedBox("ped-thunen",
     `La actividad que puja más alto en el borde urbano gana el suelo: hoy <b>Lechería</b> domina hasta <b>${fmtDec(cur.r1,1)} km</b> (pendiente −${fmtDec(s.t1,1)}/km), luego cede paso a <b>Agroindustria</b> hasta <b>${fmtDec(cur.r2,1)} km</b> y finalmente a <b>Forestal</b> hasta el borde de cultivo en <b>${fmtDec(cur.r3,1)} km</b>.`,
     `<b>¿Por qué la lechería no se instala lejos aunque la tierra sea barata?</b> Porque la leche fresca es perecible y pesada (flete t<sub>1</sub> alto): cada kilómetro extra devora su margen mucho más rápido que en la madera o los granos. Si cae t<sub>1</sub> (refrigeración o mejor ruta), el anillo interior se expande y desplaza a la agroindustria.`,
@@ -1242,6 +1389,11 @@ function drawWeber() {
   const tP = el("text", { x: opt.x, y: opt.y + 22, fill: "#DC2626", "font-size": "12", "font-weight": "800", "text-anchor": "middle" }, svg);
   tP.textContent = "P* (Fábrica)";
 
+  renderFormulaStrip("wb-fstrip", [
+    { lbl: "Índice de Materiales (IM)", col: "#1D4ED8", eq: `IM = <span class="frac"><span class="num">W<sub>1</sub> + W<sub>2</sub></span><span class="den">W<sub>M</sub></span></span>`, live: `(${w1} + ${w2}) / ${wm} = <b>${fmtDec(im,2)}</b> (${im > 1.05 ? "Insumos" : (im < 0.95 ? "Mercado" : "Neutro")})` },
+    { lbl: "Regla Isodápana Crítica", col: "#EA580C", eq: `Ahorro<sub>L</sub> &gt; CT(L) − CT(P*)`, live: `$${ah} ${convieneL ? "&gt;" : "≤"} $${fmtDec(extraCostL,1)} ⇒ <b>${convieneL ? "Desviar a L" : "Seguir en P*"}</b>` },
+    { lbl: "Beneficio Neto del Desvío", col: "#15803D", eq: `Δ<sub>neto</sub> = Ahorro<sub>L</sub> − ΔFlete`, live: `$${ah} − $${fmtDec(extraCostL,1)} = <b>${ah - extraCostL >= 0 ? "+" : "-"}$${fmtDec(Math.abs(ah - extraCostL),1)}/unid</b>` }
+  ]);
   renderPedBox("ped-weber",
     `Con <b>IM = ${fmtDec(im,2)}</b>, los insumos localizados pesan ${im > 1.05 ? "más" : (im < 0.95 ? "menos" : "casi lo mismo")} que el producto final; por eso el punto óptimo de transporte <b>P*</b> se inclina hacia ${im > 1.05 ? "los vértices MP1 y MP2" : (im < 0.95 ? "el Mercado consumidor" : "el centro del triángulo")}. Hoy el desvío hacia el enclave L ${convieneL ? "<b>sí conviene</b> (L cae dentro de la isodápana)" : "<b>no conviene</b> (L queda fuera de la isodápana)"}.`,
     `<b>Paradoja de las bebidas vs. aserraderos:</b> una embotelladora (ej. Coca-Cola) agrega agua (insumo ubicuo disponible en toda ciudad), por lo que su producto pesa mucho más que el jarabe concentrado (<b>IM &lt; 1</b>) y se instala pegada a la ciudad. En cambio, un aserradero o planta de leche en polvo elimina agua/corteza (<b>IM &gt; 1</b>) y se ubica junto al bosque o los predios.`,
@@ -1361,6 +1513,11 @@ function drawKrugman() {
     drawArrow(svg, xCen + rCen + 8, yMid, xPer - rPer - 8, yMid, "#15803D", "arr-green", "Equilibrio Disperso", 775, yMid - 20);
   }
 
+  renderFormulaStrip("kr-fstrip", [
+    { lbl: "Precio Óptimo Monopolístico", col: "#1D4ED8", eq: `p*(x) = <span class="frac"><span class="num">a · W(x)</span><span class="den">ρ</span></span>`, live: `Con economías de escala = <b>${fmtDec(esc,1)}</b> y movilidad = <b>${fmtDec(mov,1)}</b>` },
+    { lbl: "Umbral de Bifurcación τ*", col: "#D97706", eq: `τ ≤ τ* ⇒ Aglomeración`, live: `τ = ${fmtDec(tau,1)} vs. τ* = <b>${fmtDec(cur.ust,2)}</b> ⇒ <b>${aglom ? "Centro-Periferia" : "Dispersión"}</b>` },
+    { lbl: "Participación Regional", col: "#DC2626", eq: `s<sub>Cen</sub> + s<sub>Per</sub> = 100%`, live: `Capital <b>${fmtDec(cur.cen,1)}%</b> | Periferia <b>${fmtDec(cur.per,1)}%</b>` }
+  ]);
   renderPedBox("ped-krugman",
     `El umbral de bifurcación está en <b>τ* = ${fmtDec(cur.ust,2)}</b>. Con transporte <b>τ = ${fmtDec(tau,1)}</b>, la economía se encuentra en régimen ${aglom ? `<b>Centro-Periferia</b> (${fmtDec(cur.cen,1)}% concentrado en la capital)` : `<b>disperso</b> (${fmtDec(cur.cen,1)}% vs. ${fmtDec(cur.per,1)}%)`}. Subir economías de escala o movilidad laboral empuja τ* hacia la derecha y vuelve más fácil que ocurra aglomeración.`,
     `<b>La Paradoja de la Carretera:</b> intuimos que pavimentar una autopista hacia una comuna pequeña siempre la hará crecer. Krugman (Premio Nobel 2008) demostró lo contrario: si el flete cae bajo τ*, las fábricas ya no necesitan tener sucursal en la periferia; producen todo en la gran ciudad aprovechando escala y despachan barato hacia afuera, vaciando la periferia.`,
@@ -1478,6 +1635,11 @@ function drawPerroux() {
     tl.textContent = it.lbl;
   });
 
+  renderFormulaStrip("px-fstrip", [
+    { lbl: "Multiplicador Hirschman", col: "#1D4ED8", eq: `M<sub>H</sub> = <span class="frac"><span class="num">1</span><span class="den">1 − (b + f)</span></span>`, live: `1 / [1 − (${fmtDec(b,2)}+${fmtDec(f,2)})] = <b>${fmtDec(mh,2)}x</b>` },
+    { lbl: "Producción Total Inducida", col: "#0F172A", eq: `Y<sub>tot</sub> = I<sub>0</sub> · M<sub>H</sub>`, live: `$${fmtInt(i0)}M × ${fmtDec(mh,2)} = <b>$${fmtInt(tot)} MM</b>` },
+    { lbl: "Balance Periferia (Myrdal)", col: saldo >= 0 ? "#15803D" : "#DC2626", eq: `Saldo = Spread − Backwash`, live: `$${fmtInt(spread)}M − $${fmtInt(backwash)}M = <b>${saldo >= 0 ? "+" : "-"}$${fmtInt(Math.abs(saldo))} MM</b>` }
+  ]);
   renderPedBox("ped-perroux",
     `Cada $1 invertido en la industria motriz genera <b>$${fmtDec(mh,2)}</b> totales en el territorio gracias a una retención local <b>b + f = ${fmtDec(prop*100,0)}%</b>. Como el efecto difusión (<b>+$${fmtInt(spread)}M</b>) ${saldo >= 0 ? "supera" : "es menor que"} la absorción hacia el centro (<b>−$${fmtInt(backwash)}M</b>), el saldo neto sobre la periferia es <b>${saldo >= 0 ? "positivo" : "negativo"}</b>.`,
     `<b>Un mega-proyecto NO siempre es un Polo de Desarrollo:</b> si una gran planta importa casi toda su maquinaria, contrata ingenieros fuera de la región y exporta materia prima sin procesar (b y f bajos), actúa como un <b>enclave extractivo</b> donde el <i>Backwash</i> (Myrdal) drena mano de obra joven y capital desde las comunas vecinas.`,
@@ -1573,6 +1735,11 @@ function drawChrisGran() {
   const tl2 = el("text", { x: 785, y: 24, fill: "#991B1B", "font-size": "12", "font-weight": "800", "text-anchor": "middle" }, svg);
   tl2.textContent = "Ecosistema Externo (Puentes Débiles)";
 
+  renderFormulaStrip("cg-fstrip", [
+    { lbl: "Viabilidad Christaller", col: "#1D4ED8", eq: `Pob ≥ Umbral ∧ Alcance ≥ Dist`, live: `${fmtInt(pob)} ${okU ? "≥" : "&lt;"} ${fmtInt(umb)} hab | ${alc} ${okA ? "≥" : "&lt;"} ${dst} km ⇒ <b>${okU && okA ? "Viable" : "No viable"}</b>` },
+    { lbl: "Riesgo Lock-in (Granovetter)", col: "#DC2626", eq: `Lock-in = máx(0, 10F − 12D)`, live: `10(${f}) − 12(${d}) = <b>${fmtInt(lck)}%</b>` },
+    { lbl: "Desempeño SPL Global", col: "#15803D", eq: `SPL = 0,45·Coh + 0,55·Inn − 0,30·Lock`, live: `0,45(${fmtInt(coh)})+0,55(${fmtInt(inn)})−0,30(${fmtInt(lck)}) = <b>${fmtDec(spl,1)} pts</b>` }
+  ]);
   renderPedBox("ped-chrisgran",
     `En <b>Christaller</b>, el servicio ${okU && okA ? "es viable porque supera umbral y alcance" : (!okU ? "carece de masa crítica suficiente" : "excede la distancia máxima que la población está dispuesta a viajar")}. En <b>Granovetter</b>, con <b>${f}/10</b> lazos fuertes y <b>${d}/10</b> puentes débiles, el riesgo de bloqueo cognitivo es <b>${fmtInt(lck)}%</b>.`,
     `<b>La Fuerza de los Vínculos Débiles (Granovetter, 1973):</b> aunque suene contradictorio, las ideas nuevas y los nuevos clientes rara vez llegan desde tus amigos más cercanos (vínculos fuertes), porque todos leen y saben lo mismo. Quien rompe el <i>lock-in</i> es el "conocido lejano" (universidad, centro I+D, comprador externo) que conecta dos mundos separados.`,
@@ -1584,59 +1751,84 @@ function drawChrisGran() {
 // 6. LORENZ, GINI, THEIL Y PRIMACÍA URBANA (IP4 ESCALA 0–3)
 // ============================================================================
 let ghostLz = [275473, 174998, 50010, 48632];
+function syncLorenzFromSlider(idx) {
+  const v = +document.getElementById("lz-p" + idx).value;
+  document.getElementById("lz-p" + idx + "-in").value = v;
+  drawLorenz();
+}
+function syncLorenzFromInput(idx) {
+  let v = parseFloat(document.getElementById("lz-p" + idx + "-in").value);
+  if (!Number.isFinite(v) || v < 1) return;
+  const sl = document.getElementById("lz-p" + idx);
+  if (v > +sl.max) sl.max = Math.ceil(v * 1.25);
+  if (v < +sl.min) sl.min = Math.max(1, Math.floor(v * 0.5));
+  sl.value = v;
+  drawLorenz();
+}
+function setLzValues(vals, labels, maxs) {
+  for (let i = 0; i < 4; i++) {
+    const sl = document.getElementById("lz-p" + (i + 1));
+    const inp = document.getElementById("lz-p" + (i + 1) + "-in");
+    sl.min = maxs[i] > 50000 ? 500 : 10;
+    sl.max = maxs[i];
+    sl.value = vals[i];
+    inp.value = vals[i];
+    document.getElementById("lz-l" + (i + 1)).textContent = labels[i];
+  }
+}
 function presetLorenz(caso) {
   fijarGhostLorenz();
-  const s1 = document.getElementById("lz-p1"), s2 = document.getElementById("lz-p2"), s3 = document.getElementById("lz-p3"), s4 = document.getElementById("lz-p4");
   if (caso === "lagos") {
-    s1.max = 600000; s2.max = 350000; s3.max = 250000; s4.max = 200000;
-    s1.value = 275473; s2.value = 174998; s3.value = 50010; s4.value = 48632;
-    document.getElementById("lz-l1").textContent = "P1: Puerto Montt"; document.getElementById("lz-l2").textContent = "P2: Osorno";
-    document.getElementById("lz-l3").textContent = "P3: Puerto Varas"; document.getElementById("lz-l4").textContent = "P4: Castro";
+    setLzValues([275473, 174998, 50010, 48632], ["P1: Puerto Montt", "P2: Osorno", "P3: Puerto Varas", "P4: Castro"], [600000, 350000, 250000, 200000]);
   } else if (caso === "biobio") {
-    s1.max = 600000; s2.max = 350000; s3.max = 250000; s4.max = 200000;
-    s1.value = 230375; s2.value = 219441; s3.value = 150992; s4.value = 147322;
-    document.getElementById("lz-l1").textContent = "P1: Concepción"; document.getElementById("lz-l2").textContent = "P2: Los Ángeles";
-    document.getElementById("lz-l3").textContent = "P3: San Pedro Paz"; document.getElementById("lz-l4").textContent = "P4: Talcahuano";
+    setLzValues([230375, 219441, 150992, 147322], ["P1: Concepción", "P2: Los Ángeles", "P3: San Pedro Paz", "P4: Talcahuano"], [600000, 350000, 250000, 200000]);
+  } else if (caso === "equidad") {
+    setLzValues([100000, 100000, 100000, 100000], ["P1: Ciudad 1", "P2: Ciudad 2", "P3: Ciudad 3", "P4: Ciudad 4"], [400000, 400000, 400000, 400000]);
   } else {
-    s1.max = 20000; s2.max = 10000; s3.max = 5000; s4.max = 5000;
-    s1.value = 5520; s2.value = 4541; s3.value = 122; s4.value = 50;
-    document.getElementById("lz-l1").textContent = "P1: Villa Esperanza"; document.getElementById("lz-l2").textContent = "P2: El Rincón";
-    document.getElementById("lz-l3").textContent = "P3: Pueblo Nuevo"; document.getElementById("lz-l4").textContent = "P4: El Quebradero";
+    setLzValues([5520, 4541, 122, 50], ["P1: Villa Esperanza", "P2: El Rincón", "P3: Pueblo Nuevo", "P4: El Quebradero"], [20000, 10000, 5000, 5000]);
   }
   drawLorenz();
 }
 function fijarGhostLorenz() {
-  ghostLz = [+document.getElementById("lz-p1").value, +document.getElementById("lz-p2").value, +document.getElementById("lz-p3").value, +document.getElementById("lz-p4").value];
+  ghostLz = [1, 2, 3, 4].map(i => Math.max(1, +document.getElementById("lz-p" + i + "-in").value || +document.getElementById("lz-p" + i).value));
   drawLorenz();
 }
-function calcLorenz(arr) {
+function calcLorenz(arr, alpha = 2.0) {
   const ord = [...arr].sort((a, b) => a - b);
   const tot = ord.reduce((s, v) => s + v, 0) || 1;
   const n = ord.length;
   const pts = [{ p: 0, q: 0 }];
-  let acc = 0, areaTrap = 0, theil = 0;
+  let acc = 0, areaTrap = 0, theil = 0, hhi = 0, sumAlpha = 0;
+  const traps = [], shares = [];
   for (let i = 0; i < n; i++) {
     const qPrev = acc / tot;
     acc += ord[i];
     const qCur = acc / tot;
     pts.push({ p: (i + 1) / n, q: qCur });
-    areaTrap += (1 / n) * (qPrev + qCur);
+    const tr = (1 / n) * (qPrev + qCur);
+    traps.push(tr);
+    areaTrap += tr;
     const si = ord[i] / tot;
-    if (si > 0) theil += si * Math.log(n * si);
+    shares.push(si);
+    if (si > 0) {
+      theil += si * Math.log(n * si);
+      hhi += si * si;
+      sumAlpha += Math.pow(si, alpha);
+    }
   }
-  return { pts, gini: Math.max(0, 1 - areaTrap), theil: Math.max(0, theil), tot };
+  const hk = Math.pow(Math.max(1e-12, sumAlpha), 1 / (1 - alpha));
+  return { pts, traps, shares, gini: Math.max(0, 1 - areaTrap), areaTrap, theil: Math.max(0, theil), hhi, hk, tot };
 }
 function drawLorenz() {
-  const arr = [+document.getElementById("lz-p1").value, +document.getElementById("lz-p2").value, +document.getElementById("lz-p3").value, +document.getElementById("lz-p4").value];
-  document.getElementById("lz-p1-v").textContent = fmtInt(arr[0]);
-  document.getElementById("lz-p2-v").textContent = fmtInt(arr[1]);
-  document.getElementById("lz-p3-v").textContent = fmtInt(arr[2]);
-  document.getElementById("lz-p4-v").textContent = fmtInt(arr[3]);
+  const arr = [1, 2, 3, 4].map(i => Math.max(1, +document.getElementById("lz-p" + i + "-in").value || +document.getElementById("lz-p" + i).value));
+  const alpha = +document.getElementById("lz-al").value;
+  document.getElementById("lz-al-v").textContent = "α = " + fmtDec(alpha, 1);
 
   const desc = [...arr].sort((a, b) => b - a);
-  const ip4 = desc[0] / Math.max(1, desc[1] + desc[2] + desc[3]);
+  const sum234 = desc[1] + desc[2] + desc[3];
+  const ip4 = desc[0] / Math.max(1, sum234);
   const ip2 = desc[0] / Math.max(1, desc[1]);
-  const cur = calcLorenz(arr), gho = calcLorenz(ghostLz);
+  const cur = calcLorenz(arr, alpha), gho = calcLorenz(ghostLz, alpha);
 
   let catTxt = "Valor 0: Muy Dispersa";
   if (ip4 >= 1.50) catTxt = "Valor 3: Alt. Concentrada";
@@ -1644,9 +1836,9 @@ function drawLorenz() {
   else if (ip4 >= 0.65) catTxt = "Valor 1: Dispersa";
 
   document.getElementById("lz-enunciado").innerHTML =
-    `Las cuatro mayores ciudades de la región concentran poblaciones de <b>P<sub>1</sub> = ${fmtInt(desc[0])}</b>, <b>P<sub>2</sub> = ${fmtInt(desc[1])}</b>, ` +
-    `<b>P<sub>3</sub> = ${fmtInt(desc[2])}</b> y <b>P<sub>4</sub> = ${fmtInt(desc[3])} hab.</b> Calcule el Índice de Primacía <b>IP<sub>4</sub> = ${fmtDec(ip4,3)}</b> (${catTxt}), ` +
-    `el Índice de Gini por trapecios (<b>G = ${fmtDec(cur.gini,3)}</b>) y la Entropía de Theil (<b>T = ${fmtDec(cur.theil,3)}</b>).`;
+    `Las cuatro mayores ciudades ordenadas de mayor a menor concentran <b>P<sub>1</sub> = ${fmtInt(desc[0])}</b>, <b>P<sub>2</sub> = ${fmtInt(desc[1])}</b>, ` +
+    `<b>P<sub>3</sub> = ${fmtInt(desc[2])}</b> y <b>P<sub>4</sub> = ${fmtInt(desc[3])} hab.</b> (Total = <b>${fmtInt(cur.tot)}</b>). ` +
+    `Según <b>Ley de Zipf (P<sub>1</sub>/r)</b>, un sistema equilibrado tendría 2ª=${fmtInt(desc[0]/2)}, 3ª=${fmtInt(desc[0]/3)} y 4ª=${fmtInt(desc[0]/4)} hab.`;
 
   document.getElementById("lz-k-ip4").textContent = fmtDec(ip4, 3);
   document.getElementById("lz-k-ip2").textContent = `IP2 (P1/P2) = ${fmtDec(ip2, 3)}`;
@@ -1656,11 +1848,36 @@ function drawLorenz() {
   document.getElementById("lz-k-dgini").textContent = `ΔG vs Fantasma: ${dg >= 0 ? "+" : "-"}${fmtDec(Math.abs(dg), 3)}`;
   document.getElementById("lz-k-theil").textContent = fmtDec(cur.theil, 3);
   document.getElementById("lz-k-cuota").textContent = `Cuota P1: ${fmtDec((desc[0] / cur.tot) * 100, 1)}%`;
+  document.getElementById("lz-k-hhi").textContent = fmtDec(cur.hhi, 3);
+  document.getElementById("lz-k-hk").textContent = `HK(${fmtDec(alpha,1)}) = ${fmtDec(cur.hk, 2)} ciud. equiv.`;
+
+  renderFormulaStrip("lz-fstrip", [
+    {
+      lbl: "Primacía Urbana (IP4)", col: "#1D4ED8",
+      eq: `IP<sub>4</sub> = <span class="frac"><span class="num">P<sub>1</sub></span><span class="den">P<sub>2</sub> + P<sub>3</sub> + P<sub>4</sub></span></span>`,
+      live: `${fmtInt(desc[0])} / (${fmtInt(sum234)}) = <b>${fmtDec(ip4, 3)}</b>`
+    },
+    {
+      lbl: "Gini por Trapecios (G)", col: "#DC2626",
+      eq: `G = 1 − ∑ (p<sub>i</sub>−p<sub>i−1</sub>)(q<sub>i</sub>+q<sub>i−1</sub>)`,
+      live: `1 − (${fmtDec(cur.areaTrap, 3)}) = <b>${fmtDec(cur.gini, 3)}</b>`
+    },
+    {
+      lbl: "Entropía de Theil (T)", col: "#7C3AED",
+      eq: `T = ∑ s<sub>i</sub> · ln(n · s<sub>i</sub>)`,
+      live: `s<sub>máx</sub>=${fmtDec(desc[0]/cur.tot,2)}, n=4 ⇒ T = <b>${fmtDec(cur.theil, 3)}</b> (tope 1,386)`
+    },
+    {
+      lbl: `HHI y Hannah-Kay (α=${fmtDec(alpha,1)})`, col: "#0F766E",
+      eq: `HHI = ∑ s<sub>i</sub><sup>2</sup> &nbsp;|&nbsp; HK<sub>α</sub> = (∑ s<sub>i</sub><sup>α</sup>)<sup>1/(1−α)</sup>`,
+      live: `HHI = <b>${fmtDec(cur.hhi, 3)}</b> | HK = <b>${fmtDec(cur.hk, 2)} ciud.</b>`
+    }
+  ]);
 
   const svg = document.getElementById("svg-lorenz");
   svg.innerHTML = "";
   addDefs(svg);
-  const M = { l: 64, r: 460, t: 28, b: 46 }, W = 980, H = 385;
+  const M = { l: 64, r: 460, t: 28, b: 48 }, W = 980, H = 390;
   const sx = p => M.l + p * (W - M.l - M.r);
   const sy = q => H - M.b - q * (H - M.t - M.b);
 
@@ -1674,20 +1891,20 @@ function drawLorenz() {
   }
   drawAxesPizarra(svg, M.l, M.t, W - M.r, H - M.b, "% Población Acum. (q_i)", "% Ciudades Acum. (p_i)");
   el("line", { x1: sx(0), y1: sy(0), x2: sx(1), y2: sy(1), stroke: "#64748B", "stroke-width": "1.9", "stroke-dasharray": "6,4" }, svg);
-  drawPill(svg, sx(0.42), sy(0.55), "45° Equidad Perfecta", "#475569", "#FFFFFF", "middle", "10");
+  drawPill(svg, sx(0.38), sy(0.56), "45° Equidad Perfecta", "#475569", "#FFFFFF", "middle", "10");
   el("polygon", { points: cur.pts.map(pt => `${sx(pt.p)},${sy(pt.q)}`).join(" ") + ` ${sx(0)},${sy(0)}`, fill: "rgba(220,38,38,0.16)" }, svg);
   if (Math.abs(dg) > 0.004) {
     el("polyline", { points: gho.pts.map(pt => `${sx(pt.p)},${sy(pt.q)}`).join(" "), fill: "none", stroke: "#94A3B8", "stroke-width": "2", "stroke-dasharray": "4,4" }, svg);
-    drawArrow(svg, sx(gho.pts[3].p), sy(gho.pts[3].q), sx(cur.pts[3].p), sy(cur.pts[3].q), dg > 0 ? "#DC2626" : "#15803D", dg > 0 ? "arr-red" : "arr-green", dg > 0 ? "↑ Mayor Gini" : "↓ Menor Gini", sx(cur.pts[3].p) - 46, (sy(gho.pts[3].q) + sy(cur.pts[3].q)) / 2);
+    drawArrow(svg, sx(gho.pts[3].p), sy(gho.pts[3].q), sx(cur.pts[3].p), sy(cur.pts[3].q), dg > 0 ? "#DC2626" : "#15803D", dg > 0 ? "arr-red" : "arr-green", dg > 0 ? "↑ Mayor Gini" : "↓ Menor Gini", sx(cur.pts[3].p) - 54, (sy(gho.pts[3].q) + sy(cur.pts[3].q)) / 2 - 4);
   }
   el("polyline", { points: cur.pts.map(pt => `${sx(pt.p)},${sy(pt.q)}`).join(" "), fill: "none", stroke: "#DC2626", "stroke-width": "2.8" }, svg);
   cur.pts.forEach(pt => el("circle", { cx: sx(pt.p), cy: sy(pt.q), r: 4.5, fill: "#DC2626" }, svg));
-  drawPill(svg, sx(0.66), sy(0.24), `Área A · G = ${fmtDec(cur.gini,3)}`, "#DC2626", "#FEF2F2", "middle", "10.3");
+  drawPill(svg, sx(0.76), sy(0.11), `Área A · G = ${fmtDec(cur.gini,3)}`, "#DC2626", "#FEF2F2", "middle", "10.3");
 
-  // Termómetro IP4 derecho
-  const bx = 575, bw = 370, by = 185, bh = 32, maxIP = 2.4;
+  // Termómetro IP4 derecho + comparador Zipf
+  const bx = 575, bw = 370, by = 148, bh = 32, maxIP = 2.4;
   const sip = v => bx + (Math.min(v, maxIP) / maxIP) * bw;
-  const tBar = el("text", { x: bx + bw / 2, y: 120, fill: "#0F172A", "font-size": "12.5", "font-weight": "700", "text-anchor": "middle" }, svg);
+  const tBar = el("text", { x: bx + bw / 2, y: 88, fill: "#0F172A", "font-size": "12.5", "font-weight": "700", "text-anchor": "middle" }, svg);
   tBar.textContent = "Escala Estandarizada de Primacía IP4 (06 OT 2024.pdf)";
   for (const [a, b, bg, fg, lbl] of [[0,0.65,"#DCFCE7","#166534","0: Muy Disp."],[0.65,1.00,"#DBEAFE","#1E40AF","1: Disp."],[1.00,1.50,"#FEF3C7","#92400E","2: Conc."],[1.50,maxIP,"#FEE2E2","#991B1B","3: Macrocefalia"]]) {
     el("rect", { x: sip(a), y: by, width: sip(b) - sip(a), height: bh, fill: bg, stroke: "#CBD5E1" }, svg);
@@ -1697,12 +1914,28 @@ function drawLorenz() {
   const gDesc = [...ghostLz].sort((a, b) => b - a);
   const gIp4 = gDesc[0] / Math.max(1, gDesc[1] + gDesc[2] + gDesc[3]);
   if (Math.abs(ip4 - gIp4) > 0.02) {
-    drawArrow(svg, sip(gIp4), by - 20, sip(ip4), by - 20, ip4 > gIp4 ? "#DC2626" : "#15803D", ip4 > gIp4 ? "arr-red" : "arr-green", `IP4: ${fmtDec(ip4, 2)}`, (sip(gIp4) + sip(ip4)) / 2, by - 30);
+    drawArrow(svg, sip(gIp4), by - 18, sip(ip4), by - 18, ip4 > gIp4 ? "#DC2626" : "#15803D", ip4 > gIp4 ? "arr-red" : "arr-green", `IP4: ${fmtDec(ip4, 2)}`, (sip(gIp4) + sip(ip4)) / 2, by - 28);
   }
   el("circle", { cx: sip(ip4), cy: by + bh / 2, r: 8, fill: "#0F172A", stroke: "#FFFFFF", "stroke-width": "2" }, svg);
 
+  // Mini barras Real vs. Zipf Teórico (P1/r) debajo del termómetro
+  const zyTop = 240, zyBot = 342, zSlot = bw / 4, zBw = 30;
+  const tZip = el("text", { x: bx + bw / 2, y: zyTop - 10, fill: "#0F172A", "font-size": "11.5", "font-weight": "700", "text-anchor": "middle" }, svg);
+  tZip.textContent = "Real (azul) vs. Ley de Zipf Teórica P1/r (gris)";
+  el("line", { x1: bx, y1: zyBot, x2: bx + bw, y2: zyBot, stroke: "#334155", "stroke-width": "1.3" }, svg);
+  const zMax = Math.max(1, desc[0]);
+  for (let r = 0; r < 4; r++) {
+    const cxZ = bx + r * zSlot + zSlot / 2;
+    const hReal = (desc[r] / zMax) * (zyBot - zyTop - 12);
+    const hZipf = ((desc[0] / (r + 1)) / zMax) * (zyBot - zyTop - 12);
+    el("rect", { x: cxZ - zBw - 2, y: zyBot - hReal, width: zBw, height: Math.max(2, hReal), fill: "#1D4ED8", rx: 2 }, svg);
+    el("rect", { x: cxZ + 2, y: zyBot - hZipf, width: zBw, height: Math.max(2, hZipf), fill: "#CBD5E1", stroke: "#64748B", "stroke-dasharray": "3,2", rx: 2 }, svg);
+    const tl = el("text", { x: cxZ, y: zyBot + 15, fill: "#334155", "font-size": "10.5", "font-weight": "700", "text-anchor": "middle" }, svg);
+    tl.textContent = `Rango ${r + 1}`;
+  }
+
   renderPedBox("ped-lorenz",
-    `La ciudad líder concentra el <b>${fmtDec((desc[0]/cur.tot)*100,1)}%</b> de las 4 principales urbes, arrojando <b>IP<sub>4</sub> = ${fmtDec(ip4,3)}</b> (${catTxt}), un <b>Gini de ${fmtDec(cur.gini,3)}</b> y una <b>Entropía de Theil de ${fmtDec(cur.theil,3)}</b>. Mientras más se abomba la curva roja hacia la esquina inferior derecha, mayor es la concentración espacial.`,
+    `La ciudad líder concentra el <b>${fmtDec((desc[0]/cur.tot)*100,1)}%</b> de las 4 principales urbes, arrojando <b>IP<sub>4</sub> = ${fmtDec(ip4,3)}</b> (${catTxt}), <b>Gini = ${fmtDec(cur.gini,3)}</b>, <b>Theil = ${fmtDec(cur.theil,3)}</b> y <b>HK(${fmtDec(alpha,1)}) = ${fmtDec(cur.hk,2)} ciudades equivalentes</b>.`,
     `<b>¿Por qué usar Theil si ya existe el Gini?</b> Porque el Gini tiene un defecto oculto en política regional: NO se puede sumar limpiamente por subgrupos. La <b>Entropía de Theil</b> sí se descompone exactamente en desigualdad <i>entre regiones</i> + desigualdad <i>dentro de cada región</i>, permitiendo saber si la brecha está en Santiago o dentro de Los Lagos.`,
     `Fíjate en el contraste real del Censo 2024: <b>Los Lagos</b> cae en <b>Valor 2 (Concentrada, IP<sub>4</sub> ≈ 1,01)</b> por el peso de Puerto Montt sobre Osorno, Puerto Varas y Castro, mientras <b>Biobío</b> es más policéntrica (<b>Valor 0, IP<sub>4</sub> ≈ 0,45</b>) gracias al contrapeso de Los Ángeles, San Pedro y Talcahuano.`
   );
@@ -1899,6 +2132,23 @@ function onSliderNDini() {
   const newN = +document.getElementById("dn-n").value;
   loadDiniTopology(diniKey, newN);
 }
+function onInputNDini() {
+  if (animDnId) cancelAnimationFrame(animDnId);
+  let newN = parseInt(document.getElementById("dn-n-in").value, 10);
+  if (!Number.isFinite(newN)) return;
+  newN = Math.max(4, Math.min(15, newN));
+  document.getElementById("dn-n").value = newN;
+  loadDiniTopology(diniKey, newN);
+}
+function onInputLDini() {
+  if (animDnId) cancelAnimationFrame(animDnId);
+  let newL = parseInt(document.getElementById("dn-l-in").value, 10);
+  if (!Number.isFinite(newL)) return;
+  const sl = document.getElementById("dn-step");
+  newL = Math.max(0, Math.min(+sl.max, newL));
+  sl.value = newL;
+  onSliderLDini();
+}
 function onSliderLDini() {
   if (animDnId) cancelAnimationFrame(animDnId);
   diniQuiebraIdx = null;
@@ -2022,8 +2272,10 @@ function drawDini() {
   const actEdges = diniQuiebraIdx === null ? diniEdges : diniEdges.filter(([u, v]) => u !== diniQuiebraIdx && v !== diniQuiebraIdx);
   const L = actEdges.length;
 
-  document.getElementById("dn-n-v").textContent = `n = ${n}`;
-  document.getElementById("dn-step-v").textContent = `${L} / ${lMax} vínculos`;
+  const inN = document.getElementById("dn-n-in"), inL = document.getElementById("dn-l-in");
+  if (inN && document.activeElement !== inN) inN.value = n;
+  if (inL) { inL.max = lMax; if (document.activeElement !== inL) inL.value = L; }
+  document.getElementById("dn-step-v").textContent = `/ ${lMax}`;
   const selHint = diniSelectedNode !== null
     ? `<br/><span style="color:#B45309;font-weight:800;">● Nodo seleccionado: ${diniNodes[diniSelectedNode].nm} — haz clic en otro actor para crear o eliminar su vínculo (o clic de nuevo para cancelar).</span>`
     : `<br/><span style="color:#475569;">Modo edición directa activo: haz clic en cualquier actor del grafo y luego en otro para sumar/quitar vínculos, o mueve los sliders de <b>n</b> y <b>L</b>.</span>`;
@@ -2054,6 +2306,29 @@ function drawDini() {
   document.getElementById("dn-k-iso").textContent = `Aislados (k=0): ${aislados}`;
   document.getElementById("dn-k-gc").textContent = fmtDec(gc, 1) + "%";
   document.getElementById("dn-k-gcd").textContent = L === 0 ? "Red desconectada (Colapso)" : (gc < 15 ? "Red Simétrica / Horizontal" : (gc > 68 ? "Red con Liderazgo Fuerte" : "Red Jerárquica / Policéntrica"));
+
+  renderFormulaStrip("dn-fstrip", [
+    {
+      lbl: "Vínculos Máximos (A_ii = 0)", col: "#0F172A",
+      eq: diniDirected ? `L<sub>máx</sub> = n(n − 1)` : `L<sub>máx</sub> = <span class="frac"><span class="num">n(n − 1)</span><span class="den">2</span></span>`,
+      live: `${n}·(${n-1})${diniDirected ? "" : " / 2"} = <b>${lMax} vínculos</b>`
+    },
+    {
+      lbl: "Densidad de la Red (D)", col: "#1D4ED8",
+      eq: diniDirected ? `D = <span class="frac"><span class="num">L</span><span class="den">n(n − 1)</span></span>` : `D = <span class="frac"><span class="num">2L</span><span class="den">n(n − 1)</span></span>`,
+      live: `${diniDirected ? L : "2·" + L} / ${n * (n - 1)} = <b>${fmtDec(den, 1)}%</b>`
+    },
+    {
+      lbl: "Grado y Centralidad Máx.", col: "#15803D",
+      eq: `k<sub>i</sub> = ∑ a<sub>ij</sub> &nbsp;|&nbsp; C<sub>máx</sub> = <span class="frac"><span class="num">k<sub>máx</sub></span><span class="den">n − 1</span></span>`,
+      live: `k<sub>máx</sub>=${kMax}, k̄=${fmtDec(kAvg,1)} ⇒ C<sub>máx</sub> = <b>${fmtDec((kMax/Math.max(1,n-1))*100,1)}%</b>`
+    },
+    {
+      lbl: "Gradiente Concentración (GC)", col: "#DC2626",
+      eq: `GC = <span class="frac"><span class="num">∑(k<sub>máx</sub> − k<sub>i</sub>)</span><span class="den">(n − 1)(n − 2)</span></span>`,
+      live: `${sumDiff} / (${n-1}·${n-2}) = ${sumDiff}/${denGC} = <b>${fmtDec(gc, 1)}%</b>`
+    }
+  ]);
 
   // Caja de fórmulas sustituidas en vivo (estilo cuaderno/examen)
   const solEl = document.getElementById("dn-sol");
@@ -2834,7 +3109,42 @@ const U6_DATA_BASE = [
   { prov: "San Felipe",  v1: 0.1117198411, v2: 0.1905500106 },
   { prov: "Marga_Marga", v1: 0.4764931727, v2: 0.6271182841 }
 ];
+let u6DataLive = U6_DATA_BASE.map(d => ({ ...d }));
 let u6Dir1 = 1, u6Dir2 = 1;
+let u6SelIdx = 2; // Antofagasta por defecto
+
+function initProvEditorU6() {
+  const sel = document.getElementById("u6-prov-sel");
+  if (!sel || sel.options.length > 0) return;
+  u6DataLive.forEach((d, i) => {
+    const opt = document.createElement("option");
+    opt.value = i;
+    opt.textContent = `${i + 1}. ${d.prov.replace("_", " ")}`;
+    sel.appendChild(opt);
+  });
+  sel.value = u6SelIdx;
+  loadProvEditorU6();
+}
+function loadProvEditorU6() {
+  const sel = document.getElementById("u6-prov-sel");
+  if (!sel) return;
+  u6SelIdx = parseInt(sel.value, 10) || 0;
+  document.getElementById("u6-ed-v1").value = Number(u6DataLive[u6SelIdx].v1.toFixed(4));
+  document.getElementById("u6-ed-v2").value = Number(u6DataLive[u6SelIdx].v2.toFixed(4));
+  drawIndicadoresU6();
+}
+function applyProvEditU6() {
+  const v1 = parseFloat(document.getElementById("u6-ed-v1").value);
+  const v2 = parseFloat(document.getElementById("u6-ed-v2").value);
+  if (Number.isFinite(v1)) u6DataLive[u6SelIdx].v1 = v1;
+  if (Number.isFinite(v2)) u6DataLive[u6SelIdx].v2 = v2;
+  drawIndicadoresU6();
+}
+function resetU6Data() {
+  u6DataLive = U6_DATA_BASE.map(d => ({ ...d }));
+  document.getElementById("u6-out").value = 1.0;
+  loadProvEditorU6();
+}
 
 function setSentidoU6(which, dir) {
   if (which === 1) {
@@ -2868,10 +3178,11 @@ function presetU6(mode) {
   }
   drawIndicadoresU6();
 }
-function computeU6Rows(w1Frac, dir1, dir2, outMult) {
-  const raw = U6_DATA_BASE.map((d, i) => ({
+function computeU6Rows(w1Frac, dir1, dir2, outMult, useBase = false) {
+  const srcArr = useBase ? U6_DATA_BASE : u6DataLive;
+  const raw = srcArr.map((d, i) => ({
     prov: d.prov,
-    v1: i === 2 ? d.v1 * outMult : d.v1, // Antofagasta es el líder en v1 (idx 2)
+    v1: i === 2 ? d.v1 * outMult : d.v1,
     v2: d.v2
   }));
   const v1s = raw.map(r => r.v1), v2s = raw.map(r => r.v2);
@@ -2896,8 +3207,9 @@ function drawIndicadoresU6() {
   document.getElementById("u6-s2-v").textContent = u6Dir2 === 1 ? "Favorable (+)" : "Desfavorable (−)";
   document.getElementById("u6-out-v").textContent = outMult <= 1.01 ? "1,0x (Original)" : `${fmtDec(outMult, 2)}x (Outlier)`;
 
-  const base = computeU6Rows(0.5, 1, 1, 1.0);
-  const cur = computeU6Rows(w1Pct / 100, u6Dir1, u6Dir2, outMult);
+  initProvEditorU6();
+  const base = computeU6Rows(0.5, 1, 1, 1.0, true);
+  const cur = computeU6Rows(w1Pct / 100, u6Dir1, u6Dir2, outMult, false);
   const baseRankMap = {};
   base.rows.forEach(r => { baseRankMap[r.prov] = r.rank; });
 
@@ -2963,6 +3275,25 @@ function drawIndicadoresU6() {
   });
   tbl += `</tbody></table>`;
   document.getElementById("u6-tbl-box").innerHTML = tbl;
+
+  const selRow = cur.rows[u6SelIdx] || top;
+  renderFormulaStrip("u6-fstrip", [
+    {
+      lbl: `Normalización v1 (${u6Dir1 === 1 ? "Favorable +" : "Desfavorable −"})`, col: "#1D4ED8",
+      eq: u6Dir1 === 1 ? `u<sub>1</sub> = <span class="frac"><span class="num">x<sub>i</sub> − mín</span><span class="den">máx − mín</span></span>` : `u<sub>1</sub> = <span class="frac"><span class="num">máx − x<sub>i</sub></span><span class="den">máx − mín</span></span>`,
+      live: `${selRow.prov.replace("_"," ")}: ${u6Dir1 === 1 ? `(${fmtDec(selRow.v1,2)}−${fmtDec(cur.min1,2)})` : `(${fmtDec(cur.max1,2)}−${fmtDec(selRow.v1,2)})`} / ${fmtDec(cur.max1-cur.min1,2)} = <b>${fmtDec(selRow.u1,3)}</b>`
+    },
+    {
+      lbl: `Normalización v2 (${u6Dir2 === 1 ? "Favorable +" : "Desfavorable −"})`, col: "#059669",
+      eq: u6Dir2 === 1 ? `u<sub>2</sub> = <span class="frac"><span class="num">x<sub>i</sub> − mín</span><span class="den">máx − mín</span></span>` : `u<sub>2</sub> = <span class="frac"><span class="num">máx − x<sub>i</sub></span><span class="den">máx − mín</span></span>`,
+      live: `${selRow.prov.replace("_"," ")}: ${u6Dir2 === 1 ? `(${fmtDec(selRow.v2,2)}−${fmtDec(cur.min2,2)})` : `(${fmtDec(cur.max2,2)}−${fmtDec(selRow.v2,2)})`} / ${fmtDec(cur.max2-cur.min2,2)} = <b>${fmtDec(selRow.u2,3)}</b>`
+    },
+    {
+      lbl: `Índice Compuesto (${w1Pct}/${100 - w1Pct})`, col: "#7C3AED",
+      eq: `I<sub>i</sub> = w<sub>1</sub>·u<sub>1</sub> + w<sub>2</sub>·u<sub>2</sub>`,
+      live: `${selRow.prov.replace("_"," ")}: ${fmtDec(w1Pct/100,2)}(${fmtDec(selRow.u1,3)})+${fmtDec((100-w1Pct)/100,2)}(${fmtDec(selRow.u2,3)}) = <b>${fmtDec(selRow.idx,3)} (#${selRow.rank})</b>`
+    }
+  ]);
 
   document.getElementById("u6-sol").innerHTML =
     `<b>Fórmulas aplicadas:</b> u(v1) = ${u6Dir1 === 1 ? "(v1 − mín)/(máx − mín)" : "(máx − v1)/(máx − mín)"} | ` +
