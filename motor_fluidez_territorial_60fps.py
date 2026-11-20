@@ -141,8 +141,10 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
   .f-eq {
     font-family: "Cambria Math", "Times New Roman", Georgia, serif;
     font-size: 14.5px; font-weight: 700; color: #0F172A; letter-spacing: 0.2px;
-    display: flex; align-items: center; flex-wrap: wrap; gap: 4px;
+    display: block; line-height: 1.65;
   }
+  .f-eq sup, .fstrip-eq sup, .fstrip-sub sup { font-size: 0.72em; vertical-align: super; line-height: 0; }
+  .f-eq sub, .fstrip-eq sub, .fstrip-sub sub { font-size: 0.72em; vertical-align: sub; line-height: 0; }
   .f-rule { font-size: 11px; color: #334155; margin-top: 5px; line-height: 1.32; }
   .frac { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; margin: 0 2px; font-size: 0.88em; line-height: 1.1; }
   .frac .num { border-bottom: 1.4px solid #0F172A; padding: 0 3px 1px 3px; text-align: center; }
@@ -241,26 +243,87 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
   .u6-rk-dn { color: #DC2626; font-weight: 800; }
   .u6-rk-eq { color: #64748B; }
   .u6-pill-row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-bottom: 9px; }
-  /* === TARJETAS DE FÓRMULAS VIVAS + MARCO TEÓRICO INTEGRADO === */
+  /* === TARJETAS DE FÓRMULAS VIVAS (REEMPLAZO VISUAL + MODO RAYOS X) === */
   .fstrip-grid {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(215px, 1fr));
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(225px, 1fr));
     gap: 8px; margin: 9px 0 10px 0;
   }
   .fstrip-card {
-    background: #F8FAFC; border: 1px solid #CBD5E1; border-left: 3.5px solid #1E3A8A;
-    border-radius: 6px; padding: 7px 10px;
+    background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%);
+    border: 1px solid #CBD5E1; border-left: 3.5px solid #1E3A8A;
+    border-radius: 7px; padding: 8px 10px; cursor: pointer;
+    transition: transform 0.14s ease, box-shadow 0.16s ease, border-color 0.16s ease;
+    position: relative;
   }
-  .fstrip-lbl { font-size: 10.5px; font-weight: 800; color: #1E3A8A; text-transform: uppercase; margin-bottom: 3px; }
+  .fstrip-card:hover {
+    border-color: #1D4ED8; box-shadow: 0 3px 10px rgba(29, 78, 216, 0.10);
+    transform: translateY(-1px);
+  }
+  .fstrip-card.xray-on {
+    background: linear-gradient(180deg, #F0F9FF 0%, #FFFFFF 100%);
+    box-shadow: 0 3px 12px rgba(29, 78, 216, 0.14);
+  }
+  .fstrip-head {
+    display: flex; justify-content: space-between; align-items: center; gap: 6px; margin-bottom: 5px;
+  }
+  .fstrip-lbl { font-size: 11px; font-weight: 800; color: #1E3A8A; letter-spacing: 0.1px; }
+  .xray-pill {
+    font-size: 9.8px; font-weight: 800; padding: 2px 6px; border-radius: 10px;
+    border: 1px solid #BFDBFE; background: #EFF6FF; color: #1D4ED8;
+    white-space: nowrap; transition: all 0.15s ease;
+  }
+  .fstrip-card.xray-on .xray-pill {
+    background: #0F172A; color: #FFFFFF; border-color: #0F172A;
+  }
   .fstrip-eq {
     font-family: "Cambria Math", "Times New Roman", Georgia, serif;
     font-size: 13.8px; font-weight: 700; color: #0F172A;
-    display: flex; align-items: center; flex-wrap: wrap; gap: 3px; min-height: 28px;
+    display: block; line-height: 1.65;
   }
-  .fstrip-live {
-    font-family: Consolas, monospace; font-size: 11px; color: #0F172A;
-    margin-top: 4px; padding-top: 4px; border-top: 1px dashed #CBD5E1; line-height: 1.35;
+  .fstrip-sub {
+    font-family: "Cambria Math", "Times New Roman", Georgia, serif;
+    font-size: 12.6px; font-weight: 700; color: #0F172A;
+    margin-top: 6px; padding-top: 6px; border-top: 1px dashed #CBD5E1;
+    display: block; line-height: 1.7;
   }
-  .fstrip-live b { color: #15803D; }
+  .fstrip-card.xray-on .fstrip-eq { display: none; }
+  .fstrip-card.xray-on .fstrip-sub {
+    margin-top: 2px; padding-top: 2px; border-top: none; font-size: 14.2px;
+  }
+  .fstrip-note {
+    font-size: 10.4px; color: #475569; margin-top: 4px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    display: flex; flex-wrap: wrap; gap: 5px; align-items: center;
+  }
+  .v-chip {
+    display: inline-block; padding: 0px 5px; border-radius: 4px;
+    font-family: Consolas, monospace; font-size: 0.90em; font-weight: 800;
+    border: 1px solid transparent; line-height: 1.32; vertical-align: baseline;
+    transition: transform 0.15s ease;
+  }
+  .v-chip:hover { transform: scale(1.07); }
+  .vc-b { background: #DBEAFE; color: #1E40AF; border-color: #93C5FD; }
+  .vc-t { background: #CCFBF1; color: #0F766E; border-color: #5EEAD4; }
+  .vc-p { background: #F3E8FF; color: #6B21A8; border-color: #D8B4FE; }
+  .vc-o { background: #FFEDD5; color: #9A3412; border-color: #FDBA74; }
+  .vc-r { background: #FEE2E2; color: #991B1B; border-color: #FCA5A5; }
+  .vc-g { background: #DCFCE7; color: #166534; border-color: #86EFAC; }
+  .vc-res {
+    background: #15803D; color: #FFFFFF; border-color: #166534;
+    padding: 1px 6px; border-radius: 5px; font-family: Consolas, monospace;
+    font-size: 0.92em; font-weight: 800; display: inline-block; line-height: 1.3;
+  }
+  .vc-res.neg { background: #DC2626; border-color: #991B1B; }
+  @keyframes chipPop {
+    0% { transform: scale(1); }
+    45% { transform: scale(1.10); filter: brightness(1.06); }
+    100% { transform: scale(1); }
+  }
+  .v-pop { animation: chipPop 0.24s ease-out; }
+  .sym-b { color: #1D4ED8; }
+  .sym-t { color: #0F766E; }
+  .sym-p { color: #7C3AED; }
+  .sym-o { color: #C2410C; }
+  .sym-r { color: #DC2626; }
   .sl-num {
     width: 78px; padding: 2px 5px; border: 1px solid #94A3B8; border-radius: 4px;
     font-family: Consolas, monospace; font-size: 11.5px; font-weight: 700;
@@ -926,15 +989,49 @@ function drawAxisBreakX(svg, xPos, yBot) {
   el("line", { x1: xPos + 1, y1: yBot + 5, x2: xPos + 5, y2: yBot - 5, stroke: "#0F172A", "stroke-width": "1.5" }, svg);
 }
 
+const fstripXrayState = {};
+const fstripPrevVals = {};
+
+function mFrac(num, den) {
+  return `<span class="frac"><span class="num">${num}</span><span class="den">${den}</span></span>`;
+}
+function vChip(val, cls="vc-b", tip="", trackKey="") {
+  let pop = "";
+  if (trackKey) {
+    if (fstripPrevVals[trackKey] !== undefined && fstripPrevVals[trackKey] !== String(val)) pop = " v-pop";
+    fstripPrevVals[trackKey] = String(val);
+  }
+  const tAttr = tip ? ` title="${tip.replace(/"/g, '&quot;')}"` : "";
+  return `<span class="v-chip ${cls}${pop}"${tAttr}>${val}</span>`;
+}
+function rChip(val, isNeg=false, tip="") {
+  const tAttr = tip ? ` title="${tip.replace(/"/g, '&quot;')}"` : "";
+  return `<span class="vc-res${isNeg ? ' neg' : ''}"${tAttr}>${val}</span>`;
+}
+function toggleXrayCard(cardKey, cardEl) {
+  fstripXrayState[cardKey] = !fstripXrayState[cardKey];
+  cardEl.classList.toggle("xray-on", !!fstripXrayState[cardKey]);
+  const pill = cardEl.querySelector(".xray-pill");
+  if (pill) pill.textContent = fstripXrayState[cardKey] ? "Rayos X: ON ⇄" : "f(x) → 123";
+}
 function renderFormulaStrip(id, cards) {
   const box = document.getElementById(id);
   if (!box) return;
-  box.innerHTML = cards.map(c => `
-    <div class="fstrip-card" style="border-left-color:${c.col || '#1E3A8A'};">
-      <div class="fstrip-lbl" style="color:${c.col || '#1E3A8A'};">${c.lbl}</div>
-      <div class="fstrip-eq">${c.eq}</div>
-      <div class="fstrip-live">${c.live}</div>
-    </div>`).join("");
+  box.innerHTML = cards.map((c, idx) => {
+    const k = `${id}_${idx}`;
+    const isOn = !!fstripXrayState[k];
+    const noteHtml = c.note ? `<div class="fstrip-note">${c.note}</div>` : "";
+    return `
+      <div class="fstrip-card${isOn ? ' xray-on' : ''}" style="border-left-color:${c.col || '#1E3A8A'};" onclick="toggleXrayCard('${k}', this)" title="Haz clic para alternar entre Fórmula + Reemplazo y Modo Rayos X ampliado">
+        <div class="fstrip-head">
+          <span class="fstrip-lbl" style="color:${c.col || '#1E3A8A'};">${c.lbl}</span>
+          <span class="xray-pill">${isOn ? "Rayos X: ON ⇄" : "f(x) → 123"}</span>
+        </div>
+        <div class="fstrip-eq">${c.eq}</div>
+        <div class="fstrip-sub">${c.sub || c.live || ""}</div>
+        ${noteHtml}
+      </div>`;
+  }).join("");
 }
 
 function renderPedBox(id, lectura, paradoja, defensa) {
@@ -1246,9 +1343,24 @@ function drawThunen() {
   tCen.textContent = "Mercado";
 
   renderFormulaStrip("vt-fstrip", [
-    { lbl: "Renta Locacional", col: "#DC2626", eq: `LR(d) = M − t · d`, live: `LR<sub>1</sub>=${fmtDec(s.m1,0)}−${fmtDec(s.t1,1)}d | LR<sub>2</sub>=${fmtDec(s.m2,0)}−${fmtDec(s.t2,1)}d` },
-    { lbl: "Corte Anillo 1 → 2", col: "#1D4ED8", eq: `d<sub>12</sub> = <span class="frac"><span class="num">M<sub>1</sub> − M<sub>2</sub></span><span class="den">t<sub>1</sub> − t<sub>2</sub></span></span>`, live: `(${fmtDec(s.m1,0)}−${fmtDec(s.m2,0)})/(${fmtDec(s.t1,1)}−${fmtDec(s.t2,1)}) = <b>${fmtDec(Math.max(0,d12),1)} km</b>` },
-    { lbl: "Frontera Agrícola (LR=0)", col: "#059669", eq: `d<sub>máx</sub> = <span class="frac"><span class="num">M<sub>3</sub></span><span class="den">t<sub>3</sub></span></span>`, live: `${fmtDec(s.m3,0)} / ${fmtDec(s.t3,2)} = <b>${fmtDec(d30,1)} km</b>` }
+    {
+      lbl: "Renta Locacional LR(d)", col: "#DC2626",
+      eq: `LR<sub>1</sub>(d) = <span class="sym-r">M<sub>1</sub></span> − <span class="sym-o">t<sub>1</sub></span>·d`,
+      sub: `LR<sub>1</sub>(d) = ${vChip(fmtDec(s.m1,0),"vc-r","Margen M1","vt_m1")} − ${vChip(fmtDec(s.t1,1),"vc-o","Flete t1","vt_t1")}·d`,
+      note: `Anillo 2: LR<sub>2</sub> = ${fmtDec(s.m2,0)} − ${fmtDec(s.t2,1)}·d`
+    },
+    {
+      lbl: "Corte Anillo 1 → 2 (LR1 = LR2)", col: "#1D4ED8",
+      eq: `d<sub>12</sub> = ${mFrac('<span class="sym-r">M<sub>1</sub></span> − <span class="sym-b">M<sub>2</sub></span>', '<span class="sym-o">t<sub>1</sub></span> − <span class="sym-t">t<sub>2</sub></span>')}`,
+      sub: `d<sub>12</sub> = ${mFrac(vChip(fmtDec(s.m1,0),"vc-r","M1") + " − " + vChip(fmtDec(s.m2,0),"vc-b","M2"), vChip(fmtDec(s.t1,1),"vc-o","t1") + " − " + vChip(fmtDec(s.t2,1),"vc-t","t2"))} = ${rChip(fmtDec(Math.max(0,d12),1) + " km")}`,
+      note: `Numerador: ${fmtDec(s.m1-s.m2,0)} | Dif. flete: ${fmtDec(s.t1-s.t2,1)}`
+    },
+    {
+      lbl: "Frontera Agrícola (LR3 = 0)", col: "#059669",
+      eq: `d<sub>máx</sub> = ${mFrac('<span class="sym-t">M<sub>3</sub></span>', '<span class="sym-p">t<sub>3</sub></span>')}`,
+      sub: `d<sub>máx</sub> = ${mFrac(vChip(fmtDec(s.m3,0),"vc-t","Margen M3"), vChip(fmtDec(s.t3,2),"vc-p","Flete t3","vt_t3"))} = ${rChip(fmtDec(d30,1) + " km")}`,
+      note: `Más allá de ${fmtDec(d30,1)} km la renta es negativa`
+    }
   ]);
   renderPedBox("ped-thunen",
     `La actividad que puja más alto en el borde urbano gana el suelo: hoy <b>Lechería</b> domina hasta <b>${fmtDec(cur.r1,1)} km</b> (pendiente −${fmtDec(s.t1,1)}/km), luego cede paso a <b>Agroindustria</b> hasta <b>${fmtDec(cur.r2,1)} km</b> y finalmente a <b>Forestal</b> hasta el borde de cultivo en <b>${fmtDec(cur.r3,1)} km</b>.`,
@@ -1390,9 +1502,24 @@ function drawWeber() {
   tP.textContent = "P* (Fábrica)";
 
   renderFormulaStrip("wb-fstrip", [
-    { lbl: "Índice de Materiales (IM)", col: "#1D4ED8", eq: `IM = <span class="frac"><span class="num">W<sub>1</sub> + W<sub>2</sub></span><span class="den">W<sub>M</sub></span></span>`, live: `(${w1} + ${w2}) / ${wm} = <b>${fmtDec(im,2)}</b> (${im > 1.05 ? "Insumos" : (im < 0.95 ? "Mercado" : "Neutro")})` },
-    { lbl: "Regla Isodápana Crítica", col: "#EA580C", eq: `Ahorro<sub>L</sub> &gt; CT(L) − CT(P*)`, live: `$${ah} ${convieneL ? "&gt;" : "≤"} $${fmtDec(extraCostL,1)} ⇒ <b>${convieneL ? "Desviar a L" : "Seguir en P*"}</b>` },
-    { lbl: "Beneficio Neto del Desvío", col: "#15803D", eq: `Δ<sub>neto</sub> = Ahorro<sub>L</sub> − ΔFlete`, live: `$${ah} − $${fmtDec(extraCostL,1)} = <b>${ah - extraCostL >= 0 ? "+" : "-"}$${fmtDec(Math.abs(ah - extraCostL),1)}/unid</b>` }
+    {
+      lbl: "Índice de Materiales (IM)", col: "#1D4ED8",
+      eq: `IM = ${mFrac('<span class="sym-b">W<sub>1</sub></span> + <span class="sym-t">W<sub>2</sub></span>', '<span class="sym-p">W<sub>M</sub></span>')}`,
+      sub: `IM = ${mFrac(vChip(w1+"t","vc-b","Peso MP1","wb_w1") + " + " + vChip(w2+"t","vc-t","Peso MP2","wb_w2"), vChip(wm+"t","vc-p","Peso Producto Final","wb_wm"))} = ${mFrac(w1+w2, wm)} = ${rChip(fmtDec(im,2))}`,
+      note: im > 1.05 ? "IM &gt; 1 → Pierde peso (atracción a insumos)" : (im < 0.95 ? "IM &lt; 1 → Gana peso (atracción a mercado)" : "IM ≈ 1 → Equilibrio")
+    },
+    {
+      lbl: "Prueba Isodápana Crítica", col: "#EA580C",
+      eq: `<span class="sym-t">Ahorro<sub>L</sub></span> &gt; <span class="sym-o">ΔFlete(P*→L)</span>`,
+      sub: `${vChip("$"+ah,"vc-t","Ahorro salarial en L","wb_ah")} ${convieneL ? "&gt;" : "≤"} ${vChip("$"+fmtDec(extraCostL,1),"vc-o","Sobrecosto flete hacia L")} ⇒ ${rChip(convieneL ? "Saltar a L" : "Quedar en P*", !convieneL)}`,
+      note: convieneL ? "L cae dentro de la curva isodápana" : "L queda fuera de la curva isodápana"
+    },
+    {
+      lbl: "Balance Neto por Unidad", col: "#15803D",
+      eq: `Δ<sub>neto</sub> = <span class="sym-t">Ahorro<sub>L</sub></span> − <span class="sym-o">ΔFlete</span>`,
+      sub: `Δ<sub>neto</sub> = ${vChip("$"+ah,"vc-t","Ahorro L")} − ${vChip("$"+fmtDec(extraCostL,1),"vc-o","ΔFlete")} = ${rChip((ah-extraCostL>=0?"+":"-")+"$"+fmtDec(Math.abs(ah-extraCostL),1), ah < extraCostL)}`,
+      note: `Costo mínimo de flete en P*: $${fmtDec(opt.costMin,1)}`
+    }
   ]);
   renderPedBox("ped-weber",
     `Con <b>IM = ${fmtDec(im,2)}</b>, los insumos localizados pesan ${im > 1.05 ? "más" : (im < 0.95 ? "menos" : "casi lo mismo")} que el producto final; por eso el punto óptimo de transporte <b>P*</b> se inclina hacia ${im > 1.05 ? "los vértices MP1 y MP2" : (im < 0.95 ? "el Mercado consumidor" : "el centro del triángulo")}. Hoy el desvío hacia el enclave L ${convieneL ? "<b>sí conviene</b> (L cae dentro de la isodápana)" : "<b>no conviene</b> (L queda fuera de la isodápana)"}.`,
@@ -1514,9 +1641,24 @@ function drawKrugman() {
   }
 
   renderFormulaStrip("kr-fstrip", [
-    { lbl: "Precio Óptimo Monopolístico", col: "#1D4ED8", eq: `p*(x) = <span class="frac"><span class="num">a · W(x)</span><span class="den">ρ</span></span>`, live: `Con economías de escala = <b>${fmtDec(esc,1)}</b> y movilidad = <b>${fmtDec(mov,1)}</b>` },
-    { lbl: "Umbral de Bifurcación τ*", col: "#D97706", eq: `τ ≤ τ* ⇒ Aglomeración`, live: `τ = ${fmtDec(tau,1)} vs. τ* = <b>${fmtDec(cur.ust,2)}</b> ⇒ <b>${aglom ? "Centro-Periferia" : "Dispersión"}</b>` },
-    { lbl: "Participación Regional", col: "#DC2626", eq: `s<sub>Cen</sub> + s<sub>Per</sub> = 100%`, live: `Capital <b>${fmtDec(cur.cen,1)}%</b> | Periferia <b>${fmtDec(cur.per,1)}%</b>` }
+    {
+      lbl: "Umbral Crítico de Bifurcación (τ*)", col: "#D97706",
+      eq: `τ* = 0,45·<span class="sym-b">Esc</span> + 0,35·<span class="sym-p">Mov</span>`,
+      sub: `τ* = 0,45·${vChip(fmtDec(esc,1),"vc-b","Economías de escala","kr_e")} + 0,35·${vChip(fmtDec(mov,1),"vc-p","Movilidad laboral","kr_m")} = ${rChip(fmtDec(cur.ust,2))}`,
+      note: `Fijación monopolística: p*(x) = a·W(x) / ρ`
+    },
+    {
+      lbl: "Condición de Régimen Espacial", col: "#1D4ED8",
+      eq: `<span class="sym-r">τ</span> ≤ <span class="sym-o">τ*</span> ⇒ Aglomeración`,
+      sub: `${vChip("τ="+fmtDec(tau,1),"vc-r","Costo transporte actual","kr_t")} ${aglom ? "≤" : "&gt;"} ${vChip("τ*="+fmtDec(cur.ust,2),"vc-o","Umbral crítico")} ⇒ ${rChip(aglom ? "Centro-Periferia" : "Dispersión", aglom)}`,
+      note: aglom ? "Fuerzas centrípetas dominan" : "Fuerzas centrífugas protegen la periferia"
+    },
+    {
+      lbl: "Reparto del Mercado (Centro vs. Periferia)", col: "#DC2626",
+      eq: `<span class="sym-b">s<sub>Centro</sub></span> + <span class="sym-t">s<sub>Periferia</sub></span> = 100%`,
+      sub: `${vChip(fmtDec(cur.cen,1)+"%","vc-b","Cuota Capital Regional","kr_c")} + ${vChip(fmtDec(cur.per,1)+"%","vc-t","Cuota Periferia")} = ${rChip("100%")}`,
+      note: `Brecha vs. simetría (50%): ${cur.cen >= 50 ? "+" : ""}${fmtDec(cur.cen-50,1)} pp`
+    }
   ]);
   renderPedBox("ped-krugman",
     `El umbral de bifurcación está en <b>τ* = ${fmtDec(cur.ust,2)}</b>. Con transporte <b>τ = ${fmtDec(tau,1)}</b>, la economía se encuentra en régimen ${aglom ? `<b>Centro-Periferia</b> (${fmtDec(cur.cen,1)}% concentrado en la capital)` : `<b>disperso</b> (${fmtDec(cur.cen,1)}% vs. ${fmtDec(cur.per,1)}%)`}. Subir economías de escala o movilidad laboral empuja τ* hacia la derecha y vuelve más fácil que ocurra aglomeración.`,
@@ -1636,9 +1778,24 @@ function drawPerroux() {
   });
 
   renderFormulaStrip("px-fstrip", [
-    { lbl: "Multiplicador Hirschman", col: "#1D4ED8", eq: `M<sub>H</sub> = <span class="frac"><span class="num">1</span><span class="den">1 − (b + f)</span></span>`, live: `1 / [1 − (${fmtDec(b,2)}+${fmtDec(f,2)})] = <b>${fmtDec(mh,2)}x</b>` },
-    { lbl: "Producción Total Inducida", col: "#0F172A", eq: `Y<sub>tot</sub> = I<sub>0</sub> · M<sub>H</sub>`, live: `$${fmtInt(i0)}M × ${fmtDec(mh,2)} = <b>$${fmtInt(tot)} MM</b>` },
-    { lbl: "Balance Periferia (Myrdal)", col: saldo >= 0 ? "#15803D" : "#DC2626", eq: `Saldo = Spread − Backwash`, live: `$${fmtInt(spread)}M − $${fmtInt(backwash)}M = <b>${saldo >= 0 ? "+" : "-"}$${fmtInt(Math.abs(saldo))} MM</b>` }
+    {
+      lbl: "Multiplicador de Hirschman (M_H)", col: "#1D4ED8",
+      eq: `M<sub>H</sub> = ${mFrac("1", '1 − (<span class="sym-b">b</span> + <span class="sym-p">f</span>)')}`,
+      sub: `M<sub>H</sub> = ${mFrac("1", "1 − (" + vChip(fmtDec(b,2),"vc-b","Atrás b","px_b") + " + " + vChip(fmtDec(f,2),"vc-p","Adelante f","px_f") + ")")} = ${mFrac("1", fmtDec(1-prop,2))} = ${rChip(fmtDec(mh,2)+"x")}`,
+      note: `Retención local (b + f) = ${fmtDec(prop*100,0)}%`
+    },
+    {
+      lbl: "Producción Total Inducida (Perroux)", col: "#0F172A",
+      eq: `Y<sub>tot</sub> = <span class="sym-t">I<sub>0</sub></span> · <span class="sym-b">M<sub>H</sub></span>`,
+      sub: `Y<sub>tot</sub> = ${vChip("$"+fmtInt(i0)+"M","vc-t","Inversión motriz I0","px_i0")} × ${vChip(fmtDec(mh,2),"vc-b","Multiplicador M_H")} = ${rChip("$"+fmtInt(tot)+"M")}`,
+      note: `Efecto indirecto puro: +$${fmtInt(ind)} MM`
+    },
+    {
+      lbl: "Balanza Periferia (Myrdal)", col: saldo >= 0 ? "#15803D" : "#DC2626",
+      eq: `Saldo = <span class="sym-t">Spread</span> − <span class="sym-r">Backwash</span>`,
+      sub: `Saldo = ${vChip("$"+fmtInt(spread)+"M","vc-t","Difusión Spread","px_sp")} − ${vChip("$"+fmtInt(backwash)+"M","vc-r","Absorción Backwash")} = ${rChip((saldo>=0?"+":"-")+"$"+fmtInt(Math.abs(saldo))+"M", saldo < 0)}`,
+      note: saldo >= 0 ? "Difusión supera absorción (Polo Integrador)" : "Absorción domina (Enclave Extractivo)"
+    }
   ]);
   renderPedBox("ped-perroux",
     `Cada $1 invertido en la industria motriz genera <b>$${fmtDec(mh,2)}</b> totales en el territorio gracias a una retención local <b>b + f = ${fmtDec(prop*100,0)}%</b>. Como el efecto difusión (<b>+$${fmtInt(spread)}M</b>) ${saldo >= 0 ? "supera" : "es menor que"} la absorción hacia el centro (<b>−$${fmtInt(backwash)}M</b>), el saldo neto sobre la periferia es <b>${saldo >= 0 ? "positivo" : "negativo"}</b>.`,
@@ -1736,9 +1893,24 @@ function drawChrisGran() {
   tl2.textContent = "Ecosistema Externo (Puentes Débiles)";
 
   renderFormulaStrip("cg-fstrip", [
-    { lbl: "Viabilidad Christaller", col: "#1D4ED8", eq: `Pob ≥ Umbral ∧ Alcance ≥ Dist`, live: `${fmtInt(pob)} ${okU ? "≥" : "&lt;"} ${fmtInt(umb)} hab | ${alc} ${okA ? "≥" : "&lt;"} ${dst} km ⇒ <b>${okU && okA ? "Viable" : "No viable"}</b>` },
-    { lbl: "Riesgo Lock-in (Granovetter)", col: "#DC2626", eq: `Lock-in = máx(0, 10F − 12D)`, live: `10(${f}) − 12(${d}) = <b>${fmtInt(lck)}%</b>` },
-    { lbl: "Desempeño SPL Global", col: "#15803D", eq: `SPL = 0,45·Coh + 0,55·Inn − 0,30·Lock`, live: `0,45(${fmtInt(coh)})+0,55(${fmtInt(inn)})−0,30(${fmtInt(lck)}) = <b>${fmtDec(spl,1)} pts</b>` }
+    {
+      lbl: "Cobertura de Umbral (Christaller)", col: "#1D4ED8",
+      eq: `Cob = ${mFrac('<span class="sym-b">Pob</span>', '<span class="sym-p">Umbral</span>')} × 100%`,
+      sub: `Cob = ${mFrac(vChip(fmtInt(pob),"vc-b","Población","ch_pob"), vChip(fmtInt(umb),"vc-p","Umbral mínimo","ch_umb"))} = ${rChip(fmtDec(cob,1)+"%", !okU)}`,
+      note: `Alcance ${vChip(alc+"km","vc-t","Alcance máximo")} ${okA ? "≥" : "&lt;"} Dist ${vChip(dst+"km","vc-o","Distancia vial")}`
+    },
+    {
+      lbl: "Riesgo de Lock-in (Granovetter)", col: "#DC2626",
+      eq: `Lock = máx(0, 10·<span class="sym-b">F</span> − 12·<span class="sym-r">D</span>)`,
+      sub: `Lock = máx(0, 10·${vChip(f,"vc-b","Vínculos fuertes F","gr_f")} − 12·${vChip(d,"vc-r","Vínculos débiles D","gr_d")}) = ${rChip(fmtInt(lck)+"%", lck > 40)}`,
+      note: lck > 40 ? "Peligro de información redundante" : "Puentes externos evitan el bloqueo"
+    },
+    {
+      lbl: "Desempeño Global del SPL", col: "#15803D",
+      eq: `SPL = 0,45<span class="sym-b">Coh</span> + 0,55<span class="sym-t">Inn</span> − 0,30<span class="sym-r">Lock</span>`,
+      sub: `SPL = 0,45·${vChip(fmtInt(coh),"vc-b","Cohesión")} + 0,55·${vChip(fmtInt(inn),"vc-t","Innovación")} − 0,30·${vChip(fmtInt(lck),"vc-r","Lock-in")} = ${rChip(fmtDec(spl,1))}`,
+      note: "Escala sintética 0–100 pts"
+    }
   ]);
   renderPedBox("ped-chrisgran",
     `En <b>Christaller</b>, el servicio ${okU && okA ? "es viable porque supera umbral y alcance" : (!okU ? "carece de masa crítica suficiente" : "excede la distancia máxima que la población está dispuesta a viajar")}. En <b>Granovetter</b>, con <b>${f}/10</b> lazos fuertes y <b>${d}/10</b> puentes débiles, el riesgo de bloqueo cognitivo es <b>${fmtInt(lck)}%</b>.`,
@@ -1851,26 +2023,35 @@ function drawLorenz() {
   document.getElementById("lz-k-hhi").textContent = fmtDec(cur.hhi, 3);
   document.getElementById("lz-k-hk").textContent = `HK(${fmtDec(alpha,1)}) = ${fmtDec(cur.hk, 2)} ciud. equiv.`;
 
+  const sDesc = desc.map(v => v / cur.tot);
+  const sChipsSq = sDesc.map((sv, i) => `${vChip(fmtDec(sv,2), ["vc-b","vc-t","vc-p","vc-o"][i], `Cuota ciudad #${i+1}: ${fmtDec(sv*100,1)}%`)}<sup>2</sup>`).join(" + ");
+  const tTerm1 = sDesc[0] * Math.log(4 * sDesc[0]);
+  const tTerm2 = sDesc[1] * Math.log(4 * sDesc[1]);
+  const q1L = cur.pts[1].q, q2L = cur.pts[2].q, q3L = cur.pts[3].q;
   renderFormulaStrip("lz-fstrip", [
     {
       lbl: "Primacía Urbana (IP4)", col: "#1D4ED8",
-      eq: `IP<sub>4</sub> = <span class="frac"><span class="num">P<sub>1</sub></span><span class="den">P<sub>2</sub> + P<sub>3</sub> + P<sub>4</sub></span></span>`,
-      live: `${fmtInt(desc[0])} / (${fmtInt(sum234)}) = <b>${fmtDec(ip4, 3)}</b>`
+      eq: `IP<sub>4</sub> = ${mFrac('<span class="sym-b">P<sub>1</sub></span>', '<span class="sym-t">P<sub>2</sub></span> + <span class="sym-p">P<sub>3</sub></span> + <span class="sym-o">P<sub>4</sub></span>')}`,
+      sub: `IP<sub>4</sub> = ${mFrac(vChip(fmtInt(desc[0]),"vc-b","P1 (Mayor ciudad)","lz_p1"), vChip(fmtInt(desc[1]),"vc-t","P2","lz_p2") + " + " + vChip(fmtInt(desc[2]),"vc-p","P3","lz_p3") + " + " + vChip(fmtInt(desc[3]),"vc-o","P4","lz_p4"))} = ${mFrac(fmtInt(desc[0]), fmtInt(sum234))} = ${rChip(fmtDec(ip4,3), ip4 >= 1.5)}`,
+      note: `Clasificación OT: ${catTxt}`
     },
     {
       lbl: "Gini por Trapecios (G)", col: "#DC2626",
-      eq: `G = 1 − ∑ (p<sub>i</sub>−p<sub>i−1</sub>)(q<sub>i</sub>+q<sub>i−1</sub>)`,
-      live: `1 − (${fmtDec(cur.areaTrap, 3)}) = <b>${fmtDec(cur.gini, 3)}</b>`
+      eq: `G = 1 − ∑ (p<sub>i</sub> − p<sub>i−1</sub>)(q<sub>i</sub> + q<sub>i−1</sub>)`,
+      sub: `G = 1 − ${mFrac("1","4")}·[(0+${vChip(fmtDec(q1L,2),"vc-o","q1")})+(${vChip(fmtDec(q1L,2),"vc-o")}+${vChip(fmtDec(q2L,2),"vc-p","q2")})+(${vChip(fmtDec(q2L,2),"vc-p")}+${vChip(fmtDec(q3L,2),"vc-t","q3")})+(${vChip(fmtDec(q3L,2),"vc-t")}+1)] = 1 − ${fmtDec(cur.areaTrap,3)} = ${rChip(fmtDec(cur.gini,3), cur.gini >= 0.45)}`,
+      note: `Área bajo Lorenz = ${fmtDec(cur.areaTrap/2,3)} | G = 2·Área A`
     },
     {
       lbl: "Entropía de Theil (T)", col: "#7C3AED",
-      eq: `T = ∑ s<sub>i</sub> · ln(n · s<sub>i</sub>)`,
-      live: `s<sub>máx</sub>=${fmtDec(desc[0]/cur.tot,2)}, n=4 ⇒ T = <b>${fmtDec(cur.theil, 3)}</b> (tope 1,386)`
+      eq: `T = ∑ <span class="sym-b">s<sub>i</sub></span> · ln(<span class="sym-p">n</span> · <span class="sym-b">s<sub>i</sub></span>)`,
+      sub: `T = ${vChip(fmtDec(sDesc[0],2),"vc-b","Cuota s1","lz_s1")}·ln(4·${fmtDec(sDesc[0],2)}) + ${vChip(fmtDec(sDesc[1],2),"vc-t","Cuota s2")}·ln(4·${fmtDec(sDesc[1],2)}) + … = ${rChip(fmtDec(cur.theil,3))}`,
+      note: `Aporte P1: ${tTerm1>=0?"+":""}${fmtDec(tTerm1,3)} | P2: ${tTerm2>=0?"+":""}${fmtDec(tTerm2,3)} | Tope ln(4)=1,386`
     },
     {
-      lbl: `HHI y Hannah-Kay (α=${fmtDec(alpha,1)})`, col: "#0F766E",
-      eq: `HHI = ∑ s<sub>i</sub><sup>2</sup> &nbsp;|&nbsp; HK<sub>α</sub> = (∑ s<sub>i</sub><sup>α</sup>)<sup>1/(1−α)</sup>`,
-      live: `HHI = <b>${fmtDec(cur.hhi, 3)}</b> | HK = <b>${fmtDec(cur.hk, 2)} ciud.</b>`
+      lbl: `HHI y Hannah-Kay (α = ${fmtDec(alpha,1)})`, col: "#0F766E",
+      eq: `HHI = ∑ s<sub>i</sub><sup>2</sup> &nbsp;|&nbsp; HK<sub><span class="sym-p">α</span></sub> = (∑ s<sub>i</sub><sup><span class="sym-p">α</span></sup>)<sup>1/(1−<span class="sym-p">α</span>)</sup>`,
+      sub: `HHI = ${sChipsSq} = ${rChip(fmtDec(cur.hhi,3))}<br/>HK<sub>${vChip(fmtDec(alpha,1),"vc-p","Parámetro α","lz_al")}</sub> = (${fmtDec(sDesc.reduce((a,s)=>a+Math.pow(s,alpha),0),3)})<sup>${fmtDec(1/(1-alpha),2)}</sup> = ${rChip(fmtDec(cur.hk,2)+" ciud.")}`,
+      note: `Con 4 ciudades iguales: HHI = 0,250 y HK = 4,00`
     }
   ]);
 
@@ -2307,26 +2488,35 @@ function drawDini() {
   document.getElementById("dn-k-gc").textContent = fmtDec(gc, 1) + "%";
   document.getElementById("dn-k-gcd").textContent = L === 0 ? "Red desconectada (Colapso)" : (gc < 15 ? "Red Simétrica / Horizontal" : (gc > 68 ? "Red con Liderazgo Fuerte" : "Red Jerárquica / Policéntrica"));
 
+  const cMaxPct = (kMax / Math.max(1, n - 1)) * 100;
   renderFormulaStrip("dn-fstrip", [
     {
-      lbl: "Vínculos Máximos (A_ii = 0)", col: "#0F172A",
-      eq: diniDirected ? `L<sub>máx</sub> = n(n − 1)` : `L<sub>máx</sub> = <span class="frac"><span class="num">n(n − 1)</span><span class="den">2</span></span>`,
-      live: `${n}·(${n-1})${diniDirected ? "" : " / 2"} = <b>${lMax} vínculos</b>`
+      lbl: "Vínculos Máximos (Diagonal A_ii = 0)", col: "#0F172A",
+      eq: diniDirected ? `L<sub>máx</sub> = <span class="sym-b">n</span>(<span class="sym-b">n</span> − 1)` : `L<sub>máx</sub> = ${mFrac('<span class="sym-b">n</span>(<span class="sym-b">n</span> − 1)', "2")}`,
+      sub: diniDirected
+        ? `L<sub>máx</sub> = ${vChip(n,"vc-b","Actores n","dn_n")}·(${n}−1) = ${rChip(lMax)}`
+        : `L<sub>máx</sub> = ${mFrac(vChip(n,"vc-b","Actores n","dn_n") + "·(" + n + "−1)", "2")} = ${mFrac(n*(n-1), "2")} = ${rChip(lMax)}`,
+      note: `Pares posibles sin auto-enlaces (A_ii = 0)`
     },
     {
       lbl: "Densidad de la Red (D)", col: "#1D4ED8",
-      eq: diniDirected ? `D = <span class="frac"><span class="num">L</span><span class="den">n(n − 1)</span></span>` : `D = <span class="frac"><span class="num">2L</span><span class="den">n(n − 1)</span></span>`,
-      live: `${diniDirected ? L : "2·" + L} / ${n * (n - 1)} = <b>${fmtDec(den, 1)}%</b>`
+      eq: diniDirected ? `D = ${mFrac('<span class="sym-t">L</span>', '<span class="sym-b">n</span>(<span class="sym-b">n</span> − 1)')}` : `D = ${mFrac('2·<span class="sym-t">L</span>', '<span class="sym-b">n</span>(<span class="sym-b">n</span> − 1)')}`,
+      sub: diniDirected
+        ? `D = ${mFrac(vChip(L,"vc-t","Vínculos L","dn_L"), vChip(n,"vc-b","n") + "·" + (n-1))} = ${mFrac(L, n*(n-1))} = ${rChip(fmtDec(den,1)+"%")}`
+        : `D = ${mFrac("2·" + vChip(L,"vc-t","Vínculos L","dn_L"), vChip(n,"vc-b","n") + "·" + (n-1))} = ${mFrac(2*L, n*(n-1))} = ${rChip(fmtDec(den,1)+"%")}`,
+      note: diniDirected ? "Matriz dirigida (flechas asimétricas)" : "Matriz simétrica (vínculos bilaterales)"
     },
     {
-      lbl: "Grado y Centralidad Máx.", col: "#15803D",
-      eq: `k<sub>i</sub> = ∑ a<sub>ij</sub> &nbsp;|&nbsp; C<sub>máx</sub> = <span class="frac"><span class="num">k<sub>máx</sub></span><span class="den">n − 1</span></span>`,
-      live: `k<sub>máx</sub>=${kMax}, k̄=${fmtDec(kAvg,1)} ⇒ C<sub>máx</sub> = <b>${fmtDec((kMax/Math.max(1,n-1))*100,1)}%</b>`
+      lbl: "Centralidad del Nodo Líder (C_máx)", col: "#15803D",
+      eq: `C<sub>máx</sub> = ${mFrac('<span class="sym-r">k<sub>máx</sub></span>', '<span class="sym-b">n</span> − 1')}`,
+      sub: `C<sub>máx</sub> = ${mFrac(vChip(kMax,"vc-r","Grado máximo k_máx","dn_km"), vChip(n,"vc-b","n") + " − 1")} = ${mFrac(kMax, n-1)} = ${rChip(fmtDec(cMaxPct,1)+"%")}`,
+      note: `Grado promedio k̄ = ${fmtDec(kAvg,1)} | Aislados = ${aislados}`
     },
     {
-      lbl: "Gradiente Concentración (GC)", col: "#DC2626",
-      eq: `GC = <span class="frac"><span class="num">∑(k<sub>máx</sub> − k<sub>i</sub>)</span><span class="den">(n − 1)(n − 2)</span></span>`,
-      live: `${sumDiff} / (${n-1}·${n-2}) = ${sumDiff}/${denGC} = <b>${fmtDec(gc, 1)}%</b>`
+      lbl: "Gradiente de Concentración (GC)", col: "#DC2626",
+      eq: `GC = ${mFrac('∑(<span class="sym-r">k<sub>máx</sub></span> − k<sub>i</sub>)', '(<span class="sym-b">n</span>−1)(<span class="sym-b">n</span>−2)')}`,
+      sub: `GC = ${mFrac(vChip(sumDiff,"vc-r","Suma brechas ∑(k_máx−k_i)","dn_sd"), "(" + vChip(n-1,"vc-b","n−1") + ")·(" + vChip(n-2,"vc-p","n−2") + ")")} = ${mFrac(sumDiff, denGC)} = ${rChip(fmtDec(gc,1)+"%", gc > 68)}`,
+      note: gc < 15 ? "≈ 0% Simétrica" : (gc > 68 ? "→ 100% Estrella / Líder único" : "Intermedia / Jerárquica")
     }
   ]);
 
@@ -3277,21 +3467,31 @@ function drawIndicadoresU6() {
   document.getElementById("u6-tbl-box").innerHTML = tbl;
 
   const selRow = cur.rows[u6SelIdx] || top;
+  const selNm = selRow.prov.replace("_", " ");
+  const num1Val = u6Dir1 === 1 ? (selRow.v1 - cur.min1) : (cur.max1 - selRow.v1);
+  const num2Val = u6Dir2 === 1 ? (selRow.v2 - cur.min2) : (cur.max2 - selRow.v2);
   renderFormulaStrip("u6-fstrip", [
     {
-      lbl: `Normalización v1 (${u6Dir1 === 1 ? "Favorable +" : "Desfavorable −"})`, col: "#1D4ED8",
-      eq: u6Dir1 === 1 ? `u<sub>1</sub> = <span class="frac"><span class="num">x<sub>i</sub> − mín</span><span class="den">máx − mín</span></span>` : `u<sub>1</sub> = <span class="frac"><span class="num">máx − x<sub>i</sub></span><span class="den">máx − mín</span></span>`,
-      live: `${selRow.prov.replace("_"," ")}: ${u6Dir1 === 1 ? `(${fmtDec(selRow.v1,2)}−${fmtDec(cur.min1,2)})` : `(${fmtDec(cur.max1,2)}−${fmtDec(selRow.v1,2)})`} / ${fmtDec(cur.max1-cur.min1,2)} = <b>${fmtDec(selRow.u1,3)}</b>`
+      lbl: `Normalización v1 — ${selNm} (${u6Dir1 === 1 ? "+" : "−"})`, col: "#1D4ED8",
+      eq: u6Dir1 === 1 ? `u<sub>1</sub> = ${mFrac('<span class="sym-b">x<sub>i</sub></span> − <span class="sym-o">mín</span>', '<span class="sym-t">máx</span> − <span class="sym-o">mín</span>')}` : `u<sub>1</sub> = ${mFrac('<span class="sym-t">máx</span> − <span class="sym-b">x<sub>i</sub></span>', '<span class="sym-t">máx</span> − <span class="sym-o">mín</span>')}`,
+      sub: u6Dir1 === 1
+        ? `u<sub>1</sub> = ${mFrac(vChip(fmtDec(selRow.v1,2),"vc-b","v1 de "+selNm,"u6_v1") + " − " + vChip(fmtDec(cur.min1,2),"vc-o","Mínimo v1"), vChip(fmtDec(cur.max1,2),"vc-t","Máximo v1") + " − " + vChip(fmtDec(cur.min1,2),"vc-o","Mínimo v1"))} = ${mFrac(fmtDec(num1Val,2), fmtDec(cur.max1-cur.min1,2))} = ${rChip(fmtDec(selRow.u1,3))}`
+        : `u<sub>1</sub> = ${mFrac(vChip(fmtDec(cur.max1,2),"vc-t","Máximo v1") + " − " + vChip(fmtDec(selRow.v1,2),"vc-b","v1 de "+selNm,"u6_v1"), vChip(fmtDec(cur.max1,2),"vc-t","Máximo v1") + " − " + vChip(fmtDec(cur.min1,2),"vc-o","Mínimo v1"))} = ${mFrac(fmtDec(num1Val,2), fmtDec(cur.max1-cur.min1,2))} = ${rChip(fmtDec(selRow.u1,3))}`,
+      note: `Sentido ${u6Dir1 === 1 ? "Favorable (+): mayor valor → 1" : "Desfavorable (−): menor valor → 1"}`
     },
     {
-      lbl: `Normalización v2 (${u6Dir2 === 1 ? "Favorable +" : "Desfavorable −"})`, col: "#059669",
-      eq: u6Dir2 === 1 ? `u<sub>2</sub> = <span class="frac"><span class="num">x<sub>i</sub> − mín</span><span class="den">máx − mín</span></span>` : `u<sub>2</sub> = <span class="frac"><span class="num">máx − x<sub>i</sub></span><span class="den">máx − mín</span></span>`,
-      live: `${selRow.prov.replace("_"," ")}: ${u6Dir2 === 1 ? `(${fmtDec(selRow.v2,2)}−${fmtDec(cur.min2,2)})` : `(${fmtDec(cur.max2,2)}−${fmtDec(selRow.v2,2)})`} / ${fmtDec(cur.max2-cur.min2,2)} = <b>${fmtDec(selRow.u2,3)}</b>`
+      lbl: `Normalización v2 — ${selNm} (${u6Dir2 === 1 ? "+" : "−"})`, col: "#059669",
+      eq: u6Dir2 === 1 ? `u<sub>2</sub> = ${mFrac('<span class="sym-b">x<sub>i</sub></span> − <span class="sym-o">mín</span>', '<span class="sym-t">máx</span> − <span class="sym-o">mín</span>')}` : `u<sub>2</sub> = ${mFrac('<span class="sym-t">máx</span> − <span class="sym-b">x<sub>i</sub></span>', '<span class="sym-t">máx</span> − <span class="sym-o">mín</span>')}`,
+      sub: u6Dir2 === 1
+        ? `u<sub>2</sub> = ${mFrac(vChip(fmtDec(selRow.v2,2),"vc-b","v2 de "+selNm,"u6_v2") + " − " + vChip(fmtDec(cur.min2,2),"vc-o","Mínimo v2"), vChip(fmtDec(cur.max2,2),"vc-t","Máximo v2") + " − " + vChip(fmtDec(cur.min2,2),"vc-o","Mínimo v2"))} = ${mFrac(fmtDec(num2Val,2), fmtDec(cur.max2-cur.min2,2))} = ${rChip(fmtDec(selRow.u2,3))}`
+        : `u<sub>2</sub> = ${mFrac(vChip(fmtDec(cur.max2,2),"vc-t","Máximo v2") + " − " + vChip(fmtDec(selRow.v2,2),"vc-b","v2 de "+selNm,"u6_v2"), vChip(fmtDec(cur.max2,2),"vc-t","Máximo v2") + " − " + vChip(fmtDec(cur.min2,2),"vc-o","Mínimo v2"))} = ${mFrac(fmtDec(num2Val,2), fmtDec(cur.max2-cur.min2,2))} = ${rChip(fmtDec(selRow.u2,3))}`,
+      note: `Sentido ${u6Dir2 === 1 ? "Favorable (+): mayor valor → 1" : "Desfavorable (−): menor valor → 1"}`
     },
     {
-      lbl: `Índice Compuesto (${w1Pct}/${100 - w1Pct})`, col: "#7C3AED",
-      eq: `I<sub>i</sub> = w<sub>1</sub>·u<sub>1</sub> + w<sub>2</sub>·u<sub>2</sub>`,
-      live: `${selRow.prov.replace("_"," ")}: ${fmtDec(w1Pct/100,2)}(${fmtDec(selRow.u1,3)})+${fmtDec((100-w1Pct)/100,2)}(${fmtDec(selRow.u2,3)}) = <b>${fmtDec(selRow.idx,3)} (#${selRow.rank})</b>`
+      lbl: `Índice Compuesto (${w1Pct}/${100 - w1Pct}) — ${selNm}`, col: "#7C3AED",
+      eq: `I<sub>i</sub> = <span class="sym-p">w<sub>1</sub></span>·<span class="sym-b">u<sub>1</sub></span> + <span class="sym-o">w<sub>2</sub></span>·<span class="sym-t">u<sub>2</sub></span>`,
+      sub: `I = ${vChip(fmtDec(w1Pct/100,2),"vc-p","Peso w1","u6_w1")}·${vChip(fmtDec(selRow.u1,3),"vc-b","u1")} + ${vChip(fmtDec((100-w1Pct)/100,2),"vc-o","Peso w2")}·${vChip(fmtDec(selRow.u2,3),"vc-t","u2")} = ${rChip(fmtDec(selRow.idx,3)+" (#"+selRow.rank+")")}`,
+      note: `Cambia la provincia en el selector de arriba para auditar otra`
     }
   ]);
 
