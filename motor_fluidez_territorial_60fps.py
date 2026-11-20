@@ -376,6 +376,98 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
   }
   @media (max-width: 820px) { .u6-edit-bar { grid-template-columns: 1fr; } }
 
+  /* === UNIDAD V: LABORATORIO ORDENAMIENTO TERRITORIAL (OT 60 FPS) === */
+  .ot-subtabs {
+    display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px;
+    background: #F1F5F9; border: 1px solid #CBD5E1; border-radius: 6px; padding: 6px;
+  }
+  .ot-sub-btn {
+    border: 1px solid #CBD5E1; background: #FFFFFF; color: #334155;
+    padding: 5px 12px; border-radius: 5px; font-size: 11.8px; font-weight: 700; cursor: pointer;
+    transition: all 0.14s ease;
+  }
+  .ot-sub-btn:hover { border-color: #1D4ED8; color: #1D4ED8; background: #EFF6FF; }
+  .ot-sub-btn.active { background: #1E3A8A; color: #FFFFFF; border-color: #1E3A8A; }
+  .ot-subpanel { display: none; }
+  .ot-subpanel.active { display: block; }
+  .ot-grid-2 { display: grid; grid-template-columns: 1fr 1.32fr; gap: 12px; align-items: start; margin-top: 8px; }
+  @media (max-width: 880px) { .ot-grid-2 { grid-template-columns: 1fr; } }
+  .ot-num-in {
+    width: 78px; padding: 3px 5px; border: 1px solid #94A3B8; border-radius: 4px;
+    font-family: Consolas, monospace; font-size: 11px; font-weight: 700;
+    color: #0F172A; background: #FFFFFF; text-align: right;
+  }
+  .ot-num-in:focus { outline: 2px solid #1D4ED8; border-color: #1D4ED8; }
+  .ot-mat-wrap { overflow-x: auto; border: 1px solid #CBD5E1; border-radius: 6px; background: #FFFFFF; }
+  .ot-mat-tbl { width: 100%; border-collapse: collapse; font-size: 11px; }
+  .ot-mat-tbl th {
+    background: #1E293B; color: #FFFFFF; padding: 5px 6px; border: 1px solid #CBD5E1;
+    text-align: center; font-weight: 700; line-height: 1.25;
+  }
+  .ot-mat-tbl td {
+    padding: 4px 5px; border: 1px solid #E2E8F0; text-align: center;
+    font-family: Consolas, monospace; color: #0F172A;
+  }
+  .ot-mat-tbl td:first-child {
+    text-align: left; font-family: inherit; font-weight: 700; background: #F8FAFC;
+    white-space: nowrap; padding-left: 7px; padding-right: 8px;
+  }
+  .ot-mat-tbl tr.ot-sum-row td { background: #E2E8F0; font-weight: 800; color: #0F172A; }
+  .ot-mat-tbl tr.ot-wt-row td { background: #EFF6FF; font-weight: 800; color: #1E3A8A; }
+  .ot-mat-tbl tr.ot-val-row td { background: #F8FAFC; font-weight: 800; font-size: 10.5px; }
+  .ot-cell-btn {
+    width: 30px; height: 22px; border-radius: 4px; font-family: Consolas, monospace;
+    font-size: 11px; font-weight: 800; cursor: pointer; border: 1px solid #CBD5E1;
+    transition: transform 0.1s ease;
+  }
+  .ot-cell-btn:hover { transform: scale(1.08); }
+  .ot-c1 { background: #DBEAFE; color: #1E40AF; border-color: #60A5FA; }
+  .ot-c0 { background: #F8FAFC; color: #94A3B8; border-color: #CBD5E1; }
+  .ot-ai0 { background: #DCFCE7; color: #166534; border-color: #4ADE80; }
+  .ot-ai1 { background: #FEE2E2; color: #991B1B; border-color: #FCA5A5; }
+  .ot-diag { background: #E2E8F0 !important; color: #64748B !important; }
+  .ot-badge-ok { color: #15803D; font-weight: 800; }
+  .ot-badge-bad { background: #FEE2E2 !important; color: #991B1B !important; font-weight: 800; }
+  .ot-banner-warn {
+    background: #FEF2F2; border: 1px solid #FCA5A5; border-left: 4px solid #DC2626;
+    color: #991B1B; border-radius: 5px; padding: 7px 11px; font-size: 11.6px; font-weight: 600; margin: 8px 0;
+  }
+  .ot-banner-ok {
+    background: #F0FDF4; border: 1px solid #86EFAC; border-left: 4px solid #15803D;
+    color: #166534; border-radius: 5px; padding: 7px 11px; font-size: 11.6px; font-weight: 600; margin: 8px 0;
+  }
+
+  .ot-teo-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-bottom: 11px; }
+  .ot-teo-grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-bottom: 11px; }
+  @media (max-width: 860px) { .ot-teo-grid, .ot-teo-grid-3 { grid-template-columns: 1fr; } }
+  .ot-tcard {
+    background: #FFFFFF; border: 1px solid #CBD5E1; border-top: 3.5px solid #1E3A8A;
+    border-radius: 6px; padding: 10px 12px; font-size: 11.7px; line-height: 1.46; color: #1E293B;
+  }
+  .ot-tcard.tc-dark { border-top-color: #0F172A; }
+  .ot-tcard.tc-green { border-top-color: #059669; }
+  .ot-tcard.tc-amber { border-top-color: #B45309; }
+  .ot-tcard.tc-red { border-top-color: #DC2626; }
+  .ot-tcard-hd { font-size: 12px; font-weight: 800; color: #0F172A; margin-bottom: 5px; display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+  .ot-tcard-tag { font-size: 9.8px; font-weight: 800; color: #1E3A8A; background: #DBEAFE; padding: 2px 6px; border-radius: 4px; white-space: nowrap; }
+  .ot-tcard ul { margin: 5px 0 0 16px; padding: 0; }
+  .ot-tcard li { margin-bottom: 3.5px; }
+  .ot-pills-wrap { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 2px 0; }
+  .ot-mini-pill {
+    background: #F1F5F9; border: 1px solid #CBD5E1; border-radius: 5px; padding: 4px 8px;
+    font-size: 11.1px; color: #0F172A; line-height: 1.32; flex: 1 1 200px;
+  }
+  .ot-mini-pill b { color: #1E3A8A; }
+  .ot-search-in {
+    width: 100%; padding: 6px 10px; border: 1px solid #94A3B8; border-radius: 5px;
+    font-size: 12px; color: #0F172A; background: #FFFFFF; margin-bottom: 8px;
+  }
+  .ot-search-in:focus { outline: 2px solid #1D4ED8; border-color: #1D4ED8; }
+  .ot-sys-detail {
+    background: #F8FAFC; border: 1px solid #CBD5E1; border-left: 4px solid #1D4ED8;
+    border-radius: 6px; padding: 9px 12px; font-size: 11.9px; line-height: 1.46; color: #1E293B; margin: 8px 0 11px 0;
+  }
+
   @media print {
     body { background: #FFFFFF !important; }
     .top-tabs, .mec-toolbar, .mec-filters, .btn-bar, .chk-btn { display: none !important; }
@@ -402,9 +494,10 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
     <button class="tab-btn" onclick="openTab('christaller', this)">5. Lugares Centrales y Capital Social (Unidades 2 y 4)</button>
     <button class="tab-btn" onclick="openTab('lorenz', this)">6. Disparidades y Primacía: Lorenz, Gini, Theil e IP4 (Unidades 3 y 5)</button>
     <button class="tab-btn" onclick="openTab('dini', this)">7. Redes Empresariales y UCINET: Dini 2010 (Unidad 4)</button>
-    <button class="tab-btn" onclick="openTab('indicadores', this)">8. Indicadores de Desarrollo Mín–Máx (Unidad 6)</button>
-    <button class="tab-btn" onclick="openTab('mecanica', this)">9. Formulario de Fórmulas y Gráficos (Modo Ciego)</button>
-    <button class="tab-btn" onclick="openTab('lectura', this)">10. Mapa Teórico Integrado y Control de Lectura</button>
+    <button class="tab-btn" onclick="openTab('ot', this)">8. Ordenamiento Territorial: Flechas, Primacía, Rondinelli y Aislamiento (Unidad 5)</button>
+    <button class="tab-btn" onclick="openTab('indicadores', this)">9. Indicadores de Desarrollo Mín–Máx (Unidad 6)</button>
+    <button class="tab-btn" onclick="openTab('mecanica', this)">10. Formulario de Fórmulas y Gráficos (Modo Ciego)</button>
+    <button class="tab-btn" onclick="openTab('lectura', this)">11. Mapa Teórico Integrado y Control de Lectura</button>
   </div>
 
   <!-- ====================================================================== -->
@@ -801,6 +894,324 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
         </ul>
       </div>
     </details>
+  </div>
+
+  <!-- ====================================================================== -->
+  <!-- PANEL 8 (U.V): ORDENAMIENTO TERRITORIAL (FLECHAS, RONDINELLI, AISLAM.) -->
+  <!-- ====================================================================== -->
+  <div id="panel-ot" class="panel">
+    <div class="sec-title">
+      <span>Unidad V — Ordenamiento Territorial (OT): Ranking con Flechas, Primacía, Guttman/Rondinelli y Aislamiento</span>
+      <span style="font-size:11px;font-weight:700;color:#1E3A8A;">Laboratorio interactivo 60 FPS · 4 indicadores de cátedra</span>
+    </div>
+
+    <div class="ot-subtabs">
+      <button id="ot-subbtn-rk" class="ot-sub-btn active" onclick="openOtSub('rk', this)">A. Ranking con Flechas y Primacía (2 Censos)</button>
+      <button id="ot-subbtn-rd" class="ot-sub-btn" onclick="openOtSub('rd', this)">B. Guttman / Rondinelli (1/0 + Gráfico)</button>
+      <button id="ot-subbtn-ai" class="ot-sub-btn" onclick="openOtSub('ai', this)">C. Aislamiento Comunal (0/1 + Red Vial)</button>
+      <button id="ot-subbtn-teo" class="ot-sub-btn" onclick="openOtSub('teo', this)">D. Base Teórica OT, Escalas, 6 Problemas y PLADECO/ERD</button>
+      <button id="ot-subbtn-prot" class="ot-sub-btn" onclick="openOtSub('prot', this)">E. Manual PROT (SUBDERE-CEPAL) + Control de Lectura (10)</button>
+    </div>
+
+    <!-- SUB-PANEL A: RANKING CON FLECHAS CRUZADAS Y PRIMACÍA ENTRE 2 CENSOS -->
+    <div id="ot-sub-rk" class="ot-subpanel active">
+      <div class="sec-title">
+        <span>1 y 2. Ranking de Asentamientos (Flechas Cruzadas) y Primacía IP4 entre Dos Censos</span>
+        <div class="btn-bar">
+          <button class="act-btn primary" onclick="animarOtRanking()">Play: Animar Cruce Censal</button>
+          <button class="act-btn" onclick="presetOtRanking('mancilla')">Ejemplo Mancilla (Lám. 10)</button>
+          <button class="act-btn" onclick="presetOtRanking('biobio')">Biobío (2017 → 2024)</button>
+          <button class="act-btn" onclick="presetOtRanking('lagos')">Los Lagos (2017 → 2024)</button>
+          <button class="act-btn" onclick="presetOtRanking('araucania')">Araucanía (2017 → 2024)</button>
+          <button class="act-btn" onclick="shockOtRanking()">Simular Migración</button>
+        </div>
+      </div>
+
+      <details class="enun-box" open>
+        <summary>
+          <span>Interpretación de Flechas Cruzadas y Evolución de Primacía (06 OT 2024, láminas 10–12)</span>
+          <span class="enun-badge">Edita cualquier población en la tabla para ver las flechas cruzarse en vivo</span>
+        </summary>
+        <div class="enun-body" id="ot-rk-enun"></div>
+      </details>
+
+      <div class="kpis">
+        <div class="kpi" style="border-left-color:#1D4ED8;"><div class="kpi-lbl">Primacía IP4 (Censo 1 → 2)</div><div id="ot-rk-k-ip4" class="kpi-val">1,17 → 1,17</div><div id="ot-rk-k-dip4" class="kpi-sub">ΔIP4: 0,000</div></div>
+        <div class="kpi" style="border-left-color:#D97706;"><div class="kpi-lbl">Escala OT Censo 2 (0–3)</div><div id="ot-rk-k-cat" class="kpi-val">Valor 2: Concentrada</div><div id="ot-rk-k-ip2" class="kpi-sub">IP2 = 1,22</div></div>
+        <div class="kpi" style="border-left-color:#15803D;"><div class="kpi-lbl">Movilidad Jerárquica</div><div id="ot-rk-k-mov" class="kpi-val">3 suben · 2 bajan</div><div id="ot-rk-k-eq" class="kpi-sub">3 mantienen posición</div></div>
+        <div class="kpi" style="border-left-color:#DC2626;"><div class="kpi-lbl">Mayor Cambio de Rango</div><div id="ot-rk-k-top" class="kpi-val">Valle Hermoso (-2)</div><div id="ot-rk-k-top2" class="kpi-sub">Cruce relevante en ranking</div></div>
+      </div>
+
+      <div id="ot-rk-fstrip" class="fstrip-grid"></div>
+
+      <div class="ot-grid-2">
+        <div id="ot-rk-tbl-box" class="ot-mat-wrap"></div>
+        <div class="svg-box"><svg id="svg-ot-flechas" viewBox="0 0 600 415"></svg></div>
+      </div>
+      <div id="ped-ot-rk" class="ped-grid"></div>
+    </div>
+
+    <!-- SUB-PANEL B: ESCALA DE GUTTMAN Y MATRIZ DE RONDINELLI -->
+    <div id="ot-sub-rd" class="ot-subpanel">
+      <div class="sec-title">
+        <span>3. Escala de Guttman y Matriz de Rondinelli (1/0 Clicable + Gráfico Complejidad vs. Población)</span>
+        <div class="btn-bar">
+          <button class="act-btn primary" onclick="presetOtRond('ejemplo')">Ejemplo Excel (Flores–Benque)</button>
+          <button class="act-btn" onclick="presetOtRond('lagos')">Los Lagos (Top 10)</button>
+          <button class="act-btn" onclick="presetOtRond('biobio')">Biobío (Top 10)</button>
+          <button id="ot-rd-btn-mode" class="act-btn" onclick="toggleOtRondMode()">Ver Matriz Ponderada (Wk)</button>
+          <button class="act-btn" onclick="testOtRondError()">Probar Error: Todo en 1</button>
+        </div>
+      </div>
+
+      <details class="enun-box" open>
+        <summary>
+          <span>Complejidad Funcional de Asentamientos Humanos (Guttman / Rondinelli — láminas 12–15)</span>
+          <span class="enun-badge">Haz clic en cualquier celda 1 / 0 para modificar la matriz en tiempo real</span>
+        </summary>
+        <div class="enun-body" id="ot-rd-enun"></div>
+      </details>
+
+      <div class="kpis">
+        <div class="kpi" style="border-left-color:#15803D;"><div class="kpi-lbl">Líder Funcional (IC máx)</div><div id="ot-rd-k-top" class="kpi-val">Flores (GT)</div><div id="ot-rd-k-topv" class="kpi-sub">225,00 pts (7/7)</div></div>
+        <div class="kpi" style="border-left-color:#1D4ED8;"><div class="kpi-lbl">Servicio Más Escaso (Mayor Wk)</div><div id="ot-rd-k-rar" class="kpi-val">Guarderías</div><div id="ot-rd-k-rarv" class="kpi-sub">fk=2 → Wk=50,00</div></div>
+        <div class="kpi" style="border-left-color:#D97706;"><div class="kpi-lbl">Validación Discriminación</div><div id="ot-rd-k-val" class="kpi-val">4 / 7 discriminan</div><div id="ot-rd-k-val2" class="kpi-sub">Regla: evitar puros 1 o 0</div></div>
+        <div class="kpi" style="border-left-color:#0F172A;"><div class="kpi-lbl">Verificación Suma Ponderada</div><div id="ot-rd-k-sum" class="kpi-val">700,00 pts</div><div id="ot-rd-k-sum2" class="kpi-sub">100 × 7 servicios activos</div></div>
+      </div>
+
+      <div id="ot-rd-fstrip" class="fstrip-grid"></div>
+      <div id="ot-rd-alert"></div>
+      <div id="ot-rd-tbl-box" class="ot-mat-wrap" style="margin-bottom:10px;"></div>
+      <div class="svg-box"><svg id="svg-ot-rond" viewBox="0 0 980 345"></svg></div>
+      <div id="ped-ot-rd" class="ped-grid"></div>
+    </div>
+
+    <!-- SUB-PANEL C: ÍNDICE DE AISLAMIENTO COMUNAL -->
+    <div id="ot-sub-ai" class="ot-subpanel">
+      <div class="sec-title">
+        <span>4. Índice de Aislamiento Comunal (Matriz Simétrica 0/1 Clicable y Red Vial)</span>
+        <div class="btn-bar">
+          <button class="act-btn primary" onclick="presetOtAisl('pauta')">Ejemplo Pauta (Osorno–Puaucho–Entre Lagos)</button>
+          <button class="act-btn" onclick="presetOtAisl('lagos')">Corredor Los Lagos (10)</button>
+          <button class="act-btn" onclick="presetOtAisl('biobio')">Corredor Biobío (10)</button>
+          <button class="act-btn" onclick="conectarRutaOtAisl()">Pavimentar Nueva Ruta (0)</button>
+        </div>
+      </div>
+
+      <details class="enun-box" open>
+        <summary>
+          <span>Conectividad y Aislamiento Territorial (0 = Conexión Directa / Asfalto · 1 = Sin Conexión Directa)</span>
+          <span class="enun-badge">Haz clic en cualquier celda 0/1 o en 2 comunas del mapa vial</span>
+        </summary>
+        <div class="enun-body" id="ot-ai-enun"></div>
+      </details>
+
+      <div class="kpis">
+        <div class="kpi" style="border-left-color:#15803D;"><div class="kpi-lbl">Mejor Conectada (Menor IA)</div><div id="ot-ai-k-best" class="kpi-val">Osorno</div><div id="ot-ai-k-bestv" class="kpi-sub">0,0% aislamiento</div></div>
+        <div class="kpi" style="border-left-color:#DC2626;"><div class="kpi-lbl">Mayor Aislamiento (Mayor IA)</div><div id="ot-ai-k-worst" class="kpi-val">Puaucho</div><div id="ot-ai-k-worstv" class="kpi-sub">50,0% aislamiento</div></div>
+        <div class="kpi" style="border-left-color:#1D4ED8;"><div class="kpi-lbl">Aislamiento Promedio Red</div><div id="ot-ai-k-avg" class="kpi-val">33,3%</div><div id="ot-ai-k-avg2" class="kpi-sub">Menor % = mejor acceso</div></div>
+        <div class="kpi" style="border-left-color:#0F172A;"><div class="kpi-lbl">Rutas Directas Activas (0)</div><div id="ot-ai-k-con" class="kpi-val">2 / 3 pares</div><div id="ot-ai-k-con2" class="kpi-sub">Matriz simétrica (diag. vacía)</div></div>
+      </div>
+
+      <div id="ot-ai-fstrip" class="fstrip-grid"></div>
+
+      <div class="ot-grid-2">
+        <div id="ot-ai-tbl-box" class="ot-mat-wrap"></div>
+        <div class="svg-box"><svg id="svg-ot-aisl" viewBox="0 0 560 405"></svg></div>
+      </div>
+      <div id="ped-ot-ai" class="ped-grid"></div>
+    </div>
+
+    <!-- SUB-PANEL D: BASE TEÓRICA COMPLETA OT (06 OT 2024 + PLADECO + ERD) -->
+    <div id="ot-sub-teo" class="ot-subpanel">
+      <div class="sec-title">
+        <span>Base Teórica de Ordenamiento Territorial (06 OT 2024 — Prof. Claudio Mancilla)</span>
+        <span style="font-size:11px;font-weight:700;color:#1E3A8A;">Definiciones · Estados · Enfoques · Escalas · 6 Problemas · PLADECO y ERD</span>
+      </div>
+
+      <div class="ot-teo-grid">
+        <div class="ot-tcard">
+          <div class="ot-tcard-hd"><span>1. Definiciones Fundamentales del OT</span><span class="ot-tcard-tag">Massiris 2002 · Carta Europea 1983</span></div>
+          <ul>
+            <li><b>Massiris (2002) [Lám. 2]:</b> proceso e instrumento de planificación, de carácter <b>técnico-político-administrativo</b>, para configurar en el <b>largo plazo</b> una organización del uso y ocupación del territorio acorde con: (a) sus <b>potencialidades y limitaciones</b>, (b) las <b>expectativas y aspiraciones de la población</b>, y (c) los <b>objetivos de desarrollo</b>.</li>
+            <li><b>Carta Europea de OT (1983) / Gómez Orea (1994):</b> expresión espacial de las políticas económicas, sociales, culturales y ecológicas de la sociedad; disciplina científica, técnica administrativa y política orientada al desarrollo equilibrado regional.</li>
+            <li><b>5 Puntos Centrales [Lám. 5]:</b> (1) Política de Estado, (2) Largo plazo, (3) Instrumento básico = planificación, (4) Concilia desarrollo económico con ocupación del territorio, (5) Fin último: elevar el nivel de vida de la población.</li>
+          </ul>
+        </div>
+
+        <div class="ot-tcard tc-dark">
+          <div class="ot-tcard-hd"><span>2. Dos Enfoques Mundiales y 4 Principios del OT</span><span class="ot-tcard-tag">Láms. 5–6</span></div>
+          <ul>
+            <li><b>Enfoque Planificación Física (Chile, Brasil):</b> énfasis a escala regional, subregional o local en la regulación del <b>uso y ocupación física</b> del territorio.</li>
+            <li><b>Enfoque Planificación Integral (Alemania, Francia, Reino Unido):</b> estrechamente vinculada a la <b>planificación económica y social</b> para garantizar equilibrio en el desarrollo regional.</li>
+          </ul>
+          <div class="ot-pills-wrap" style="margin-top:7px;">
+            <div class="ot-mini-pill"><b>1. Principio del orden:</b> la localización espacial juega un rol clave.</div>
+            <div class="ot-mini-pill"><b>2. Bien público:</b> interés general prima sobre el particular.</div>
+            <div class="ot-mini-pill"><b>3. Integralidad:</b> no solo lo físico; integrado a la planificación global.</div>
+            <div class="ot-mini-pill"><b>4. Normativo y orientador:</b> combina normas obligatorias y acuerdos.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ot-tcard tc-amber" style="margin-bottom:11px;">
+        <div class="ot-tcard-hd"><span>3. Contexto Político-Administrativo y Constitución de Chile</span><span class="ot-tcard-tag">Láms. 3–4 · Art. 3, 111 y 115 CPR</span></div>
+        <div class="ot-pills-wrap">
+          <div class="ot-mini-pill"><b>Estado Unitario:</b> un solo centro de impulsión política y monopolio en la creación de normas jurídicas aplicables en todo el territorio (caso de Chile).</div>
+          <div class="ot-mini-pill"><b>Estado Federal:</b> Constitución Federal + poder constituyente de estados miembros + cláusulas residuales + poder legislativo bicameral + tribunal federal.</div>
+          <div class="ot-mini-pill"><b>Confederación:</b> pacto internacional permanente; los estados miembros mantienen independencia soberana y priman relaciones de coordinación.</div>
+          <div class="ot-mini-pill"><b>Regional / Autonómico:</b> desde un Estado unitario se crean unidades subestatales con autonomía política propia, pero bajo una sola soberanía.</div>
+        </div>
+        <div style="margin-top:7px;padding:7px 9px;background:#FFFBEB;border-left:3px solid #D97706;border-radius:4px;">
+          <b>Artículo 3° Constitución de Chile:</b> <i>"El Estado de Chile es unitario. La administración del Estado será funcional y territorialmente descentralizada, o desconcentrada en su caso, de conformidad a la ley. Los órganos del Estado promoverán el fortalecimiento de la regionalización del país y el desarrollo equitativo y solidario entre las regiones, provincias y comunas."</i> (Art. 111 radica la administración regional en el GORE; Art. 115 fija el principio de desarrollo territorial armónico y equitativo).
+        </div>
+      </div>
+
+      <div class="ot-tcard" style="margin-bottom:11px;">
+        <div class="ot-tcard-hd"><span>4. Las 8 Características de un Plan de OT</span><span class="ot-tcard-tag">Lám. 5</span></div>
+        <div class="ot-pills-wrap">
+          <div class="ot-mini-pill"><b>1. Participativo:</b> considera intereses y opiniones de la comunidad.</div>
+          <div class="ot-mini-pill"><b>2. Integral:</b> ve el territorio como sistema (económico, social, ambiental).</div>
+          <div class="ot-mini-pill"><b>3. Flexible:</b> se ajusta a los cambios que ocurren en el tiempo.</div>
+          <div class="ot-mini-pill"><b>4. Prospectivo:</b> parte de una visión común de futuro.</div>
+          <div class="ot-mini-pill"><b>5. Conciliador:</b> concierta soluciones y resuelve conflictos de interés.</div>
+          <div class="ot-mini-pill"><b>6. Coordinado:</b> se articula con escalas mayores, vecinos y planes sectoriales.</div>
+          <div class="ot-mini-pill"><b>7. Transparente:</b> libre acceso a metodología, resultados, reglamentos y propuestas.</div>
+          <div class="ot-mini-pill"><b>8. Verificado:</b> su grado de cumplimiento se evalúa constantemente.</div>
+        </div>
+      </div>
+
+      <div class="ot-teo-grid">
+        <div class="ot-tcard tc-dark">
+          <div class="ot-tcard-hd"><span>5. Las 6 Escalas del Ordenamiento Territorial</span><span class="ot-tcard-tag">Lám. 6 · Arriba-Abajo vs. Abajo-Arriba</span></div>
+          <table class="ot-mat-tbl" style="margin-top:4px;">
+            <thead><tr><th>Escala</th><th>Dirección</th><th>Enfoque / Ejemplos</th></tr></thead>
+            <tbody>
+              <tr><td>Internacional</td><td>Coordinación</td><td style="text-align:left;font-family:inherit;">Ciudades transfronterizas, cuencas y áreas homogéneas internacionales.</td></tr>
+              <tr><td>Nacional</td><td>Arriba → Abajo</td><td style="text-align:left;font-family:inherit;">Política nacional de OT, redistribución regional, relación campo-ciudad.</td></tr>
+              <tr><td>Regional</td><td>Arriba → Abajo</td><td style="text-align:left;font-family:inherit;">Sustentabilidad, equilibrio regional y Sistema de Asentamientos Humanos (PROT).</td></tr>
+              <tr><td>Interlocal</td><td>Articulada</td><td style="text-align:left;font-family:inherit;">Conurbaciones, metrópolis y problemas comunes entre comunas vecinas.</td></tr>
+              <tr><td>Local</td><td>Abajo → Arriba</td><td style="text-align:left;font-family:inherit;">Planificación físico-espacial, densidades, zonificaciones y normas urbanas (PRC/PLADECO).</td></tr>
+              <tr><td>Vecinal</td><td>Abajo → Arriba</td><td style="text-align:left;font-family:inherit;">Planes específicos, barriales, patrimoniales e históricos.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="ot-tcard tc-red">
+          <div class="ot-tcard-hd"><span>6. ¿Por Qué Ordenar el Territorio? (6 Problemas Clave)</span><span class="ot-tcard-tag">Láms. 7–8</span></div>
+          <ul>
+            <li><b>1. Conflictos de delimitación (concurrencias territoriales):</b> límites y competencias poco claras entre espacios administrativos o naturales (ej. límite rural/urbano, cuencas, áreas protegidas).</li>
+            <li><b>2. Conflictos de uso de suelo:</b> intereses contrapuestos sobre un mismo terreno (ej. proteger un bosque nativo vs. instalar una empresa).</li>
+            <li><b>3. Subaprovechamiento de potencialidades:</b> el uso actual no es óptimo y otro uso generaría mayores beneficios sociales/económicos.</li>
+            <li><b>4. Territorio mal utilizado o sobreexplotado:</b> contaminación (ej. mala exploración minera), sobreexplotación de recursos o deforestación por expansión urbana.</li>
+            <li><b>5. Localización en zonas de alto riesgo:</b> asentamientos humanos o actividades expuestas a amenazas naturales (vulnerabilidad diferenciada según recursos).</li>
+            <li><b>6. Infraestructura estratégica mal localizada o dimensionada:</b> hospitales sobredimensionados, relaves mineros cerca de escuelas o disposición de residuos en zonas turísticas.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="ot-teo-grid">
+        <div class="ot-tcard tc-green">
+          <div class="ot-tcard-hd"><span>7. PLADECO — Caso Osorno (Escala Comunal)</span><span class="ot-tcard-tag">SUBDERE 2009 · Láms. 3, 16–17</span></div>
+          <p style="margin:0 0 6px 0;"><b>Definición (SUBDERE 2009, pág. 9):</b> principal instrumento de planificación y gestión municipal; representa la visión de futuro comunal fruto del trabajo conjunto entre <b>Municipio y Comunidad</b> como proceso continuo y dinámico.</p>
+          <ul>
+            <li><b>Tema 1:</b> Osorno con identidad fluvial e integrada con sus ríos (ej. actualización plano regulador, circuitos peatonales, Parque Hott, Parque Bellavista, parque habitacional Río Rahue, miradores).</li>
+            <li><b>Tema 2:</b> Osorno, ciudad de servicios turísticos (consolidar ubicación geográfica estratégica).</li>
+            <li><b>Tema 3:</b> Osorno, capital ganadera y ruralmente responsable / facilitador del emprendimiento local.</li>
+            <li><b>Tema 4:</b> Osorno equitativo, participativo y conectado (subvención pasajes adultos mayores, calles y aceras, Av. República, alarmas comunitarias, CESFAM, farmacia vecinal).</li>
+          </ul>
+        </div>
+
+        <div class="ot-tcard tc-green">
+          <div class="ot-tcard-hd"><span>8. ERD Los Lagos 2030 (Escala Regional)</span><span class="ot-tcard-tag">Láms. 18–20</span></div>
+          <ul>
+            <li><b>Bienestar Socioterritorial:</b> disminuir brechas de inequidad en acceso y calidad de bienes y servicios públicos entre asentamientos urbanos y rurales, con foco en grupos vulnerables o aislados.
+              <br/><i>— Medioambiente y Eficiencia Energética:</i> calidad del aire por calefacción (Osorno y Puerto Montt), contaminantes en cuerpos de agua, residuos domiciliarios y pobreza energética.
+              <br/><i>— Servicios Básicos:</i> alcantarillado, aguas servidas tratadas, frecuencia de transporte público en Chiloé y Palena, internet fija rural, agua potable rural y servicios bancarios/correos rurales.</li>
+            <li><b>Cohesión e Identidad Sociocultural:</b> pertinencia local en infraestructura, oficios tradicionales y currículos educativos.</li>
+            <li><b>Capital Humano Calificado:</b> formación, retención y atracción de profesionales y técnicos en alianza academia–empresas–sector público (cobertura técnico-profesional presencial y a distancia).</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUB-PANEL E: MANUAL PROT (SUBDERE-CEPAL 2011) + SISTEMAS SVG + BUSCADOR ANEXO 2 + QUIZ -->
+    <div id="ot-sub-prot" class="ot-subpanel">
+      <div class="sec-title">
+        <span>Manual PROT (SUBDERE–CEPAL, 2011): 4 Sistemas Territoriales, Marco Legal y Estructura</span>
+        <span style="font-size:11px;font-weight:700;color:#1E3A8A;">Haz clic en cada sistema del corte geográfico para ver su rol y normas legales</span>
+      </div>
+
+      <div class="svg-box"><svg id="svg-ot-sistemas" viewBox="0 0 980 215"></svg></div>
+      <div id="ot-sys-detail" class="ot-sys-detail"></div>
+
+      <div class="ot-teo-grid-3">
+        <div class="ot-tcard">
+          <div class="ot-tcard-hd"><span>Territorio, Fricción y Funciones</span><span class="ot-tcard-tag">Cap. 2 · Págs. 11–14</span></div>
+          <ul>
+            <li><b>3 Visiones de Territorio (Arenas, 2008):</b> (1) espacio de redes, flujos e identidad; (2) área de aplicación de una política pública (ej. Zonas Saturadas, ADI); (3) unidad político-administrativa con autoridad competente (la <b>Región</b> y el GORE).</li>
+            <li><b>Rugosidad y Fricción de la Distancia (Pujadas &amp; Font):</b> topografía difícil, malos caminos o combinación de transportes elevan el aislamiento y disparan un <b>círculo vicioso</b> (menos empleo → despoblamiento → baja el umbral → cierre de servicios). La fricción también sube artificialmente (ej. alzas de peajes).</li>
+            <li><b>5 Funciones Territoriales:</b> Identidad, Hábitat, Trabajo, Abastecimiento y Recreación.</li>
+            <li><b>Capital Territorial:</b> funciones ambientales, información, tecnología, RR.HH., gestión, base económica e identidad regional.</li>
+          </ul>
+        </div>
+
+        <div class="ot-tcard tc-green">
+          <div class="ot-tcard-hd"><span>Desarrollo Territorial Sustentable</span><span class="ot-tcard-tag">Folch 2003 · Págs. 21–22</span></div>
+          <ul>
+            <li><b>No es solo "higiene ambiental":</b> exige consumir renovables bajo tasa de renovación, no renovables bajo tasa de sustitución, verter residuos bajo capacidad de asimilación y conservar biodiversidad <i>in situ</i>.</li>
+            <li><b>3 Pilares Simultáneos:</b>
+              <br/>1) <b>Funcionalidad:</b> productividad, economías de aglomeración y valorización de infraestructura.
+              <br/>2) <b>Habitabilidad:</b> calidad de vida, servicios básicos, vivienda segura, gobernabilidad y equidad social.
+              <br/>3) <b>Competitividad (3 ópticas):</b> física (infraestructura/entorno), intangible (<b>"competir con la gente"</b>: educación y capacitación) y sustentable (rentabilidad económica, social y ambiental).</li>
+            <li><b>Justicia Socio-Espacial (Pág. 8):</b> igualdad de acceso a recursos y servicios sin importar la comuna donde se resida.</li>
+          </ul>
+        </div>
+
+        <div class="ot-tcard tc-amber">
+          <div class="ot-tcard-hd"><span>GORE, Ley 19.175 y el PROT</span><span class="ot-tcard-tag">Cap. 3 y 4 · Págs. 23–27</span></div>
+          <ul>
+            <li><b>Del PRDU al PROT (Pág. 9):</b> supera la mirada sectorial urbana del PRDU hacia una visión integral regional. El PROT <b>espacializa la ERD</b> con horizonte de <b>10 años</b> y carácter <b>orientador</b> (compatibiliza usos y da certeza a públicos y privados).</li>
+            <li><b>6 Funciones OT del GORE (Ley 19.175 LOCGAR, Arts. 17, 24 y 26):</b> (1) sistema de asentamientos humanos, (2) infraestructura y equipamiento, (3) protección ambiental, (4) servicios de transporte, (5) áreas rurales y localidades aisladas, (6) aprobar/promulgar planes reguladores (PRI/PRM/PRC).</li>
+            <li><b>Herencias Espaciales Pesadas (Pág. 25):</b> estructuras difíciles de mover (ubicación de ciudades, caminos, barrios) que el PROT debe ponderar.</li>
+            <li><b>Información Territorial:</b> UGIT regional homologada al <b>SNIT (DS 28/2006)</b>.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="ot-teo-grid">
+        <div class="ot-tcard tc-dark">
+          <div class="ot-tcard-hd"><span>Estructura del PROT (4 Capítulos y Escalas Cartográficas)</span><span class="ot-tcard-tag">Cap. 4.4 · Anexo 1 · Págs. 28–42</span></div>
+          <ul>
+            <li><b>1. Memoria Explicativa:</b> Introducción, Objetivos (generales desde ERD y específicos territorializados), Metodología, <b>Diagnóstico Analítico Territorial</b> (<i>selectivo, enfocado y participativo</i>; diferencia catastrar vs. analizar vs. diagnosticar; componentes físico-ambiental, económico y social) y <b>Análisis Prospectivo</b> (escenarios <i>deseable, probable y posible</i>).</li>
+            <li><b>2. Modelo de OT y Zonificación:</b> del modelo territorial actual al deseado; referentes de Andalucía (Sistemas, Articulación, Dominios y Unidades Territoriales); <b>zonificación por usos preferentes</b> cubriendo urbano y rural.</li>
+            <li><b>3. Normativa de Gestión y Seguimiento:</b> Plan de Acción (proyectos y financiamiento), Normativa vinculante (reglamentos regionales) e indicadores de seguimiento.</li>
+            <li><b>4. Cartografía:</b> Carta Base (<b>DATA CORE / SNIT</b>), Mapas temáticos (físico, social, económico), <b>Mapa Semáforo</b> (focos de conflictos de interés por uso del suelo), Zonificación de prioridades y Mapa orientador sectorial.</li>
+            <li><b>3 Escalas de Trabajo (Pág. 35):</b> <b>1:250.000</b> (operativa), hasta <b>1:750.000</b> (impresión en regiones extensas como XI y XII) y hasta <b>1:100.000</b> (zoom en conurbaciones o áreas especiales).</li>
+          </ul>
+        </div>
+
+        <div class="ot-tcard">
+          <div class="ot-tcard-hd"><span>Principios, Condiciones y Buscador Rápido Anexo 2</span><span class="ot-tcard-tag">Págs. 25–26 y 43–58</span></div>
+          <div style="font-size:11.3px;margin-bottom:7px;">
+            <b>Principios PROT:</b> Descentralización, Participación, Sustentabilidad, Integración social, Cohesión, Diferenciación, Gobernabilidad, Diversidad, Solidaridad territorial (compensación de externalidades), <b>Subsidiariedad</b> (traspaso al nivel inferior si tiene capacidad) y Complementariedad.<br/>
+            <b>6 Condiciones:</b> Modelo de OT · Inclusivo y estratégico · Participativo · Sintético · Económico (actualizable cada 10 años) · Flexible.
+          </div>
+          <input id="ot-anexo2-q" class="ot-search-in" type="text" placeholder="Buscar norma del Anexo 2 (ej. borde costero, aguas, bosques, 19.175, urbanismo, rústicos)..." oninput="renderOtAnexo2()" />
+          <div id="ot-anexo2-box" class="ot-mat-wrap" style="max-height:175px;overflow-y:auto;"></div>
+        </div>
+      </div>
+
+      <div class="sec-title" style="margin-top:6px;">
+        <span>Control de Lectura Interactivo — Ordenamiento Territorial y PROT (10 Preguntas Tipo Prueba)</span>
+        <div class="btn-bar">
+          <span id="ot-qz-score" class="pill-score">Aciertos OT: 0 / 10</span>
+          <button class="act-btn" onclick="toggleSoloErrOtQz(this)">Ver Solo Pendientes / Erradas</button>
+          <button class="act-btn" onclick="resetOtQuiz()">Reiniciar Control OT</button>
+        </div>
+      </div>
+      <div id="ot-qz-list"></div>
+    </div>
   </div>
 
   <!-- ====================================================================== -->
@@ -1293,6 +1704,7 @@ function openTab(name, btn) {
   if (name === "christaller") drawChrisGran();
   if (name === "lorenz") drawLorenz();
   if (name === "dini") drawDini();
+  if (name === "ot") drawOtActive();
   if (name === "indicadores") drawIndicadoresU6();
   if (name === "mecanica") renderMecanica();
   if (name === "lectura") { drawMapaTeoria(); renderLecturaCards(); renderQuizLectura(); }
@@ -3104,7 +3516,7 @@ const MAPA_UNIDADES = {
     sub: "06 OT 2026 · Primacía IP4 · Zipf\nGuttman/Rondinelli · Aislamiento · PROT",
     explica: "Diagnostica la red de asentamientos humanos y resuelve conflictos de uso del suelo (Sistemas Costero, Urbano, Rural y Cuencas) usando Primacía Urbana (IP<sub>4</sub> escala 0–3), centralidad funcional (Rondinelli) y Matriz de Aislamiento vial.",
     puentes: "<b>← Desde U.II y U.III:</b> traduce la aglomeración en IP<sub>4</sub> y jerarquías urbanas. <b>→ Hacia U.VI:</b> los indicadores de equipamiento y aislamiento se normalizan en [0,1] para construir índices sintéticos comunales.",
-    jumps: [["lorenz", "Abrir Primacía IP4"], ["mecanica", "Ver Fórmulas OT"]]
+    jumps: [["ot", "Abrir Laboratorio OT (U.V)"], ["mecanica", "Ver Fórmulas OT"]]
   },
   U6: {
     id: "U6", x: 815, y: 235, w: 255, h: 74, col: "#15803D",
@@ -3135,7 +3547,7 @@ const ESCENARIOS_MAPA = {
     texto: "<b>1) En U.II (Krugman):</b> al caer τ bajo τ*, predominan las fuerzas centrípetas y las firmas se concentran en la capital regional. " +
            "<b>2) En U.III (REAT):</b> sube la dispersión σ y la Curva de Lorenz se abomba (suben Gini, Theil y HHI). " +
            "<b>3) En U.V (OT):</b> el Índice de Primacía IP<sub>4</sub> salta al tramo ≥ 1,50 (Macrocefalia), exigiendo políticas PROT de reequilibrio.",
-    jumps: [["krugman", "Probar τ ↓ en Krugman"], ["lorenz", "Ver IP4 y Gini subir"]]
+    jumps: [["krugman", "Probar τ ↓ en Krugman"], ["ot", "Ver Flechas e IP4 (OT)"], ["lorenz", "Ver Gini y Lorenz"]]
   },
   cluster: {
     titulo: "Cadena B: Política de Clúster, Puentes I+D y Upgrading (SPL)",
@@ -3152,7 +3564,7 @@ const ESCENARIOS_MAPA = {
     edges: [["U3", "U5"], ["U5", "U6"], ["U3", "U6"]],
     texto: "<b>1) En U.III y U.V:</b> se levantan indicadores heterogéneos por comuna o provincia (PIB per cápita en $, pobreza en %, centralidad de Rondinelli en puntos, aislamiento en %). " +
            "<b>2) En U.VI (Indicadores Mín-Máx):</b> cada variable se normaliza a [0, 1] respetando su sentido favorable (+) o desfavorable (−), se pondera y se prueba la estabilidad del ranking (50/50 vs. 70/30) para focalizar presupuestos regionales.",
-    jumps: [["indicadores", "Abrir Laboratorio Mín-Máx (U.VI)"], ["lorenz", "Ver IP4 y Lorenz"]]
+    jumps: [["ot", "Abrir Laboratorio OT (U.V)"], ["indicadores", "Abrir Laboratorio Mín-Máx (U.VI)"]]
   }
 };
 
@@ -3699,7 +4111,1055 @@ function drawIndicadoresU6() {
   );
 }
 
+
+// ============================================================================
+// 7A. UNIDAD V: LABORATORIO ORDENAMIENTO TERRITORIAL A 60 FPS (FLECHAS, RONDINELLI, AISLAMIENTO)
+// ============================================================================
+let otSubActive = "rk";
+
+function openOtSub(subKey, btn) {
+  otSubActive = subKey;
+  document.querySelectorAll("#panel-ot .ot-subpanel").forEach(p => p.classList.remove("active"));
+  document.querySelectorAll("#panel-ot .ot-sub-btn").forEach(b => b.classList.remove("active"));
+  document.getElementById("ot-sub-" + subKey).classList.add("active");
+  if (btn) btn.classList.add("active");
+  drawOtActive();
+}
+function drawOtActive() {
+  if (otSubActive === "rk") drawOtRanking();
+  else if (otSubActive === "rd") drawOtRond();
+  else if (otSubActive === "ai") drawOtAisl();
+  else if (otSubActive === "prot") { drawOtSistemasSvg(); renderOtAnexo2(); renderOtQuiz(); }
+}
+
+// --- A. RANKING DE ASENTAMIENTOS (FLECHAS CRUZADAS) Y PRIMACÍA 2 CENSOS ---
+const OT_RK_PRESETS = {
+  mancilla: {
+    titulo: "Ejemplo Cátedra (Lám. 10: Censo 1990 → Censo 2000)",
+    c1Lbl: "Censo 1990",
+    c2Lbl: "Censo 2000",
+    rows: [
+      { nm: "La Esperanza",   p1: 5100, p2: 5520 },
+      { nm: "El Rincón",      p1: 4200, p2: 4541 },
+      { nm: "Pueblo Nuevo",   p1: 1850, p2: 1920 },
+      { nm: "El Quebradero",  p1: 1620, p2: 2180 },
+      { nm: "Valle Hermoso",  p1: 1380, p2: 1120 },
+      { nm: "Ipiales",        p1: 1190, p2: 1510 },
+      { nm: "El Trancón",     p1: 980,  p2: 1340 },
+      { nm: "Mojandas",       p1: 740,  p2: 810 }
+    ]
+  },
+  biobio: {
+    titulo: "Región del Biobío (Top 10 Comunas — Censos 2017 → 2024)",
+    c1Lbl: "Censo 2017",
+    c2Lbl: "Censo 2024",
+    rows: [
+      { nm: "Concepción",          p1: 223574, p2: 230375 },
+      { nm: "Los Ángeles",         p1: 202331, p2: 219441 },
+      { nm: "Talcahuano",          p1: 151749, p2: 147322 },
+      { nm: "San Pedro de la Paz", p1: 131808, p2: 150992 },
+      { nm: "Coronel",             p1: 116262, p2: 123648 },
+      { nm: "Hualpén",             p1: 91773,  p2: 87731  },
+      { nm: "Chiguayante",         p1: 85938,  p2: 85822  },
+      { nm: "Tomé",                p1: 54946,  p2: 56907  },
+      { nm: "Penco",               p1: 47367,  p2: 48971  },
+      { nm: "Lota",                p1: 43535,  p2: 39980  }
+    ]
+  },
+  lagos: {
+    titulo: "Región de Los Lagos (Top 10 Comunas — Censos 2017 → 2024)",
+    c1Lbl: "Censo 2017",
+    c2Lbl: "Censo 2024",
+    rows: [
+      { nm: "Puerto Montt", p1: 245902, p2: 275473 },
+      { nm: "Osorno",       p1: 161460, p2: 174998 },
+      { nm: "Puerto Varas", p1: 44578,  p2: 50010  },
+      { nm: "Castro",       p1: 43807,  p2: 48632  },
+      { nm: "Ancud",        p1: 38991,  p2: 42158  },
+      { nm: "Calbuco",      p1: 33985,  p2: 37620  },
+      { nm: "Quellón",      p1: 27192,  p2: 30910  },
+      { nm: "Purranque",    p1: 20369,  p2: 21475  },
+      { nm: "Frutillar",    p1: 18428,  p2: 21220  },
+      { nm: "Llanquihue",   p1: 17591,  p2: 19380  }
+    ]
+  },
+  araucania: {
+    titulo: "Región de La Araucanía (Top 10 Comunas — Censos 2017 → 2024)",
+    c1Lbl: "Censo 2017",
+    c2Lbl: "Censo 2024",
+    rows: [
+      { nm: "Temuco",          p1: 282415, p2: 304820 },
+      { nm: "Padre Las Casas", p1: 76126,  p2: 83540  },
+      { nm: "Villarrica",      p1: 55478,  p2: 63910  },
+      { nm: "Angol",           p1: 53262,  p2: 56840  },
+      { nm: "Lautaro",         p1: 38013,  p2: 40890  },
+      { nm: "Victoria",        p1: 34182,  p2: 36120  },
+      { nm: "Nueva Imperial",  p1: 32510,  p2: 34620  },
+      { nm: "Pucón",           p1: 28523,  p2: 34950  },
+      { nm: "Vilcún",          p1: 28151,  p2: 30480  },
+      { nm: "Pitrufquén",      p1: 24837,  p2: 26410  }
+    ]
+  }
+};
+
+let otRkKey = "mancilla";
+let otRkRows = OT_RK_PRESETS.mancilla.rows.map(r => ({ ...r }));
+let otRkC1Lbl = OT_RK_PRESETS.mancilla.c1Lbl;
+let otRkC2Lbl = OT_RK_PRESETS.mancilla.c2Lbl;
+let otRkAnimU = 1.0;
+let otRkAnimId = null;
+let otRkHoverIdx = -1;
+
+function presetOtRanking(key) {
+  if (otRkAnimId) cancelAnimationFrame(otRkAnimId);
+  const pr = OT_RK_PRESETS[key] || OT_RK_PRESETS.mancilla;
+  otRkKey = key;
+  otRkRows = pr.rows.map(r => ({ ...r }));
+  otRkC1Lbl = pr.c1Lbl;
+  otRkC2Lbl = pr.c2Lbl;
+  otRkAnimU = 1.0;
+  otRkHoverIdx = -1;
+  renderOtRkTable();
+  drawOtRanking();
+}
+function shockOtRanking() {
+  if (otRkAnimId) cancelAnimationFrame(otRkAnimId);
+  const idxMid = Math.min(otRkRows.length - 1, Math.max(2, Math.floor(otRkRows.length / 2)));
+  otRkRows[idxMid].p2 = Math.round(otRkRows[idxMid].p2 * 1.55);
+  otRkAnimU = 1.0;
+  renderOtRkTable();
+  drawOtRanking();
+}
+function animarOtRanking() {
+  if (otRkAnimId) cancelAnimationFrame(otRkAnimId);
+  const t0 = performance.now(), dur = 1650;
+  function step(now) {
+    const u = Math.min(1, (now - t0) / dur);
+    otRkAnimU = 1 - Math.pow(1 - u, 3);
+    drawOtRanking();
+    if (u < 1) otRkAnimId = requestAnimationFrame(step);
+  }
+  otRkAnimId = requestAnimationFrame(step);
+}
+function updateOtRkCell(idx, field, rawVal) {
+  const v = parseFloat(rawVal);
+  if (!Number.isFinite(v) || v < 1) return;
+  otRkRows[idx][field] = Math.round(v);
+  otRkAnimU = 1.0;
+  drawOtRanking();
+}
+function renderOtRkTable() {
+  const box = document.getElementById("ot-rk-tbl-box");
+  if (!box) return;
+  let html = `<table class="ot-mat-tbl"><thead><tr><th>Asentamiento</th><th>${otRkC1Lbl}</th><th>${otRkC2Lbl}</th><th>Orden</th></tr></thead><tbody>`;
+  otRkRows.forEach((r, i) => {
+    html += `<tr onmouseenter="otRkHoverIdx=${i};drawOtRanking();" onmouseleave="otRkHoverIdx=-1;drawOtRanking();">` +
+      `<td>${r.nm}</td>` +
+      `<td><input class="ot-num-in" type="number" min="1" step="100" value="${r.p1}" oninput="updateOtRkCell(${i},'p1',this.value)"/></td>` +
+      `<td><input class="ot-num-in" type="number" min="1" step="100" value="${r.p2}" oninput="updateOtRkCell(${i},'p2',this.value)"/></td>` +
+      `<td id="ot-rk-ord-${i}" style="font-weight:800;">—</td>` +
+      `</tr>`;
+  });
+  html += `</tbody></table>`;
+  box.innerHTML = html;
+}
+function calcOtPrimacia(vals) {
+  const d = [...vals].sort((a, b) => b - a);
+  const p1 = d[0] || 1;
+  const p2 = d[1] || 1;
+  const sum234 = (d[1] || 0) + (d[2] || 0) + (d[3] || 0);
+  const ip4 = sum234 > 0 ? p1 / sum234 : 0;
+  const ip2 = p2 > 0 ? p1 / p2 : 0;
+  let cat = "Muy Dispersa", cod = 0;
+  if (ip4 >= 1.50) { cat = "Altamente Concentrada"; cod = 3; }
+  else if (ip4 >= 1.00) { cat = "Concentrada"; cod = 2; }
+  else if (ip4 >= 0.65) { cat = "Dispersa"; cod = 1; }
+  return { d, ip4, ip2, sum234, cat, cod };
+}
+function drawOtRanking() {
+  if (!document.getElementById("ot-rk-tbl-box").innerHTML) renderOtRkTable();
+  const n = otRkRows.length;
+  const idx1 = otRkRows.map((r, i) => ({ i, v: r.p1 })).sort((a, b) => b.v - a.v);
+  const idx2 = otRkRows.map((r, i) => ({ i, v: r.p2 })).sort((a, b) => b.v - a.v);
+  const rank1 = new Array(n), rank2 = new Array(n);
+  idx1.forEach((o, pos) => { rank1[o.i] = pos + 1; });
+  idx2.forEach((o, pos) => { rank2[o.i] = pos + 1; });
+
+  let nUp = 0, nDn = 0, nEq = 0, maxMove = 0, topMoverNm = "Sin cambios", topMoveDelta = 0;
+  otRkRows.forEach((r, i) => {
+    const chg = rank1[i] - rank2[i];
+    if (chg > 0) nUp++;
+    else if (chg < 0) nDn++;
+    else nEq++;
+    if (Math.abs(chg) > maxMove) { maxMove = Math.abs(chg); topMoverNm = r.nm; topMoveDelta = chg; }
+    const td = document.getElementById("ot-rk-ord-" + i);
+    if (td) {
+      const col = chg > 0 ? "#15803D" : (chg < 0 ? "#DC2626" : "#64748B");
+      const sym = chg > 0 ? "↗" : (chg < 0 ? "↘" : "→");
+      td.innerHTML = `<span style="color:${col};">${rank1[i]} ${sym} ${rank2[i]}</span>`;
+    }
+  });
+
+  const pr1 = calcOtPrimacia(otRkRows.map(r => r.p1));
+  const pr2 = calcOtPrimacia(otRkRows.map(r => r.p2));
+  const dIp = pr2.ip4 - pr1.ip4;
+
+  document.getElementById("ot-rk-enun").innerHTML =
+    `<b>${OT_RK_PRESETS[otRkKey].titulo}:</b> el diagrama ordena las <b>${n} localidades</b> de mayor a menor población en <b>${otRkC1Lbl}</b> (izquierda) ` +
+    `y en <b>${otRkC2Lbl}</b> (derecha). Las flechas <b>verdes (↗)</b> marcan ascensos jerárquicos, las <b>rojas (↘)</b> descensos y las <b>grises (→)</b> estabilidad. ` +
+    `Simultáneamente se evalúa si la primacía urbana (<b>IP<sub>4</sub></b>) aumentó o se desconcentró entre ambos censos.`;
+
+  document.getElementById("ot-rk-k-ip4").textContent = `${fmtDec(pr1.ip4, 2)} → ${fmtDec(pr2.ip4, 2)}`;
+  document.getElementById("ot-rk-k-dip4").textContent = `ΔIP4: ${dIp >= 0 ? "+" : "-"}${fmtDec(Math.abs(dIp), 3)}`;
+  document.getElementById("ot-rk-k-cat").textContent = `Valor ${pr2.cod}: ${pr2.cat}`;
+  document.getElementById("ot-rk-k-ip2").textContent = `IP2 (P1/P2) = ${fmtDec(pr2.ip2, 2)}`;
+  document.getElementById("ot-rk-k-mov").textContent = `${nUp} suben · ${nDn} bajan`;
+  document.getElementById("ot-rk-k-eq").textContent = `${nEq} mantienen puesto`;
+  document.getElementById("ot-rk-k-top").textContent = maxMove > 0 ? `${topMoverNm} (${topMoveDelta > 0 ? "+" : ""}${topMoveDelta})` : "Sin cruces";
+  document.getElementById("ot-rk-k-top2").textContent = maxMove > 0 ? "Mayor salto en la jerarquía" : "Jerarquía idéntica entre censos";
+
+  renderFormulaStrip("ot-rk-fstrip", [
+    {
+      lbl: `Primacía IP4 — ${otRkC1Lbl}`, col: "#475569",
+      eq: `IP<sub>4</sub>(t<sub>0</sub>) = ${mFrac('<span class="sym-b">P<sub>1</sub></span>', '<span class="sym-t">P<sub>2</sub></span> + <span class="sym-p">P<sub>3</sub></span> + <span class="sym-o">P<sub>4</sub></span>')}`,
+      sub: `IP<sub>4</sub> = ${mFrac(vChip(fmtInt(pr1.d[0]),"vc-b"), vChip(fmtInt(pr1.d[1]),"vc-t") + " + " + vChip(fmtInt(pr1.d[2]),"vc-p") + " + " + vChip(fmtInt(pr1.d[3]),"vc-o"))} = ${rChip(fmtDec(pr1.ip4,3))}`,
+      note: `Clasificación ${otRkC1Lbl}: Valor ${pr1.cod} (${pr1.cat})`
+    },
+    {
+      lbl: `Primacía IP4 — ${otRkC2Lbl}`, col: "#1D4ED8",
+      eq: `IP<sub>4</sub>(t<sub>1</sub>) = ${mFrac('<span class="sym-b">P<sub>1</sub></span>', '<span class="sym-t">P<sub>2</sub></span> + <span class="sym-p">P<sub>3</sub></span> + <span class="sym-o">P<sub>4</sub></span>')}`,
+      sub: `IP<sub>4</sub> = ${mFrac(vChip(fmtInt(pr2.d[0]),"vc-b"), vChip(fmtInt(pr2.d[1]),"vc-t") + " + " + vChip(fmtInt(pr2.d[2]),"vc-p") + " + " + vChip(fmtInt(pr2.d[3]),"vc-o"))} = ${rChip(fmtDec(pr2.ip4,3), pr2.ip4 >= 1.5)}`,
+      note: `Clasificación ${otRkC2Lbl}: Valor ${pr2.cod} (${pr2.cat})`
+    },
+    {
+      lbl: "Dinámica Intercensal (ΔIP4 y Cruces)", col: dIp > 0.02 ? "#DC2626" : "#15803D",
+      eq: `ΔIP<sub>4</sub> = IP<sub>4</sub>(t<sub>1</sub>) − IP<sub>4</sub>(t<sub>0</sub>)`,
+      sub: `ΔIP<sub>4</sub> = ${vChip(fmtDec(pr2.ip4,3),"vc-b")} − ${vChip(fmtDec(pr1.ip4,3),"vc-o")} = ${rChip((dIp>=0?"+":"-")+fmtDec(Math.abs(dIp),3), dIp > 0.02)}`,
+      note: dIp > 0.02 ? "Tendencia a mayor concentración en la capital" : (dIp < -0.02 ? "Tendencia a desconcentración en ciudades intermedias" : "Estructura urbana estable entre censos")
+    }
+  ]);
+
+  // Dibujar Diagrama SVG de Flechas Cruzadas (estilo lámina 10)
+  const svg = document.getElementById("svg-ot-flechas");
+  if (!svg) return;
+  svg.innerHTML = "";
+  addDefs(svg);
+
+  const W = 600, H = 415;
+  const xLBox = 18, wBox = 178, xLNum = xLBox + wBox + 14;
+  const xRBox = W - 18 - wBox, xRNum = xRBox - 14;
+  const yTop = 52, yBot = H - 24;
+  const stepY = (yBot - yTop) / Math.max(1, n - 1);
+  const yOfRank = rk => yTop + (rk - 1) * stepY;
+
+  // Títulos de columnas
+  const hdL = el("text", { x: xLBox + wBox / 2, y: 24, fill: "#0F172A", "font-size": "12", "font-weight": "800", "text-anchor": "middle" }, svg);
+  hdL.textContent = `Orden ${otRkC1Lbl}`;
+  const hdM = el("text", { x: W / 2, y: 24, fill: "#1E3A8A", "font-size": "11.2", "font-weight": "800", "text-anchor": "middle" }, svg);
+  hdM.textContent = "Flechas de Cambio Jerárquico";
+  const hdR = el("text", { x: xRBox + wBox / 2, y: 24, fill: "#0F172A", "font-size": "12", "font-weight": "800", "text-anchor": "middle" }, svg);
+  hdR.textContent = `Orden ${otRkC2Lbl}`;
+
+  el("line", { x1: xLBox, y1: 33, x2: W - 18, y2: 33, stroke: "#CBD5E1", "stroke-width": "1.2" }, svg);
+
+  // Flechas cruzadas primero (debajo de badges)
+  otRkRows.forEach((r, i) => {
+    const r1 = rank1[i], r2 = rank2[i];
+    const chg = r1 - r2;
+    const y1 = yOfRank(r1);
+    const y2Target = yOfRank(r2);
+    const y2 = y1 + (y2Target - y1) * otRkAnimU;
+    const x1 = xLNum + 14;
+    const x2End = xRNum - 14;
+    const x2 = x1 + (x2End - x1) * Math.max(0.08, otRkAnimU);
+
+    const isHov = (otRkHoverIdx === i);
+    const dimOther = (otRkHoverIdx >= 0 && !isHov);
+    const col = chg > 0 ? "#15803D" : (chg < 0 ? "#DC2626" : "#64748B");
+    const mk = chg > 0 ? "arr-green" : (chg < 0 ? "arr-red" : "arr-dark");
+
+    el("line", {
+      x1, y1, x2, y2,
+      stroke: col,
+      "stroke-width": isHov ? "3.6" : (chg !== 0 ? "2.4" : "1.7"),
+      "stroke-dasharray": chg === 0 ? "4,3" : "",
+      opacity: dimOther ? "0.22" : "0.95",
+      "marker-end": `url(#${mk})`
+    }, svg);
+
+    if (chg !== 0 && otRkAnimU > 0.75) {
+      const xm = (x1 + x2End) / 2 + (chg > 0 ? -18 : 18);
+      const ym = (y1 + y2Target) / 2 - 4;
+      if (isHov || Math.abs(chg) >= 1) {
+        drawPill(svg, xm, ym, `${chg > 0 ? "↑+" : "↓"}${chg}`, col, "#FFFFFF", "middle", "9.3");
+      }
+    }
+  });
+
+  // Cajas izquierda (Censo 1) y derecha (Censo 2)
+  idx1.forEach((o, pos) => {
+    const i = o.i, r = otRkRows[i], rk = pos + 1;
+    const y = yOfRank(rk);
+    const chg = rank1[i] - rank2[i];
+    const isHov = (otRkHoverIdx === i);
+    const bg = isHov ? "#EFF6FF" : "#F8FAFC";
+    const strokeC = isHov ? "#1D4ED8" : "#CBD5E1";
+    const g = el("g", { style: "cursor:pointer;", onmouseenter: `otRkHoverIdx=${i};drawOtRanking();`, onmouseleave: `otRkHoverIdx=-1;drawOtRanking();` }, svg);
+    el("rect", { x: xLBox, y: y - 13, width: wBox, height: 26, rx: 5, fill: bg, stroke: strokeC, "stroke-width": isHov ? "1.8" : "1" }, g);
+    const tNm = el("text", { x: xLBox + 8, y: y + 4, fill: "#0F172A", "font-size": "10.6", "font-weight": "700" }, g);
+    tNm.textContent = r.nm.length > 18 ? r.nm.slice(0, 17) + "…" : r.nm;
+    const tPb = el("text", { x: xLBox + wBox - 6, y: y + 4, fill: "#475569", "font-size": "9.6", "font-weight": "600", "text-anchor": "end" }, g);
+    tPb.textContent = fmtInt(r.p1);
+    el("circle", { cx: xLNum, cy: y, r: 10.5, fill: chg > 0 ? "#15803D" : (chg < 0 ? "#DC2626" : "#334155") }, g);
+    const tR = el("text", { x: xLNum, y: y + 3.5, fill: "#FFFFFF", "font-size": "10.5", "font-weight": "800", "text-anchor": "middle" }, g);
+    tR.textContent = rk;
+  });
+
+  idx2.forEach((o, pos) => {
+    const i = o.i, r = otRkRows[i], rk = pos + 1;
+    const y = yOfRank(rk);
+    const chg = rank1[i] - rank2[i];
+    const isHov = (otRkHoverIdx === i);
+    const bg = isHov ? "#EFF6FF" : (chg > 0 ? "#F0FDF4" : (chg < 0 ? "#FEF2F2" : "#F8FAFC"));
+    const strokeC = isHov ? "#1D4ED8" : (chg > 0 ? "#86EFAC" : (chg < 0 ? "#FCA5A5" : "#CBD5E1"));
+    const g = el("g", { style: "cursor:pointer;", onmouseenter: `otRkHoverIdx=${i};drawOtRanking();`, onmouseleave: `otRkHoverIdx=-1;drawOtRanking();` }, svg);
+    el("circle", { cx: xRNum, cy: y, r: 10.5, fill: chg > 0 ? "#15803D" : (chg < 0 ? "#DC2626" : "#334155") }, g);
+    const tR = el("text", { x: xRNum, y: y + 3.5, fill: "#FFFFFF", "font-size": "10.5", "font-weight": "800", "text-anchor": "middle" }, g);
+    tR.textContent = rk;
+    el("rect", { x: xRBox, y: y - 13, width: wBox, height: 26, rx: 5, fill: bg, stroke: strokeC, "stroke-width": isHov ? "1.8" : "1" }, g);
+    const tNm = el("text", { x: xRBox + 8, y: y + 4, fill: "#0F172A", "font-size": "10.6", "font-weight": "700" }, g);
+    tNm.textContent = r.nm.length > 18 ? r.nm.slice(0, 17) + "…" : r.nm;
+    const tPb = el("text", { x: xRBox + wBox - 6, y: y + 4, fill: "#475569", "font-size": "9.6", "font-weight": "600", "text-anchor": "end" }, g);
+    tPb.textContent = fmtInt(r.p2);
+  });
+
+  renderPedBox("ped-ot-rk",
+    `Entre <b>${otRkC1Lbl}</b> y <b>${otRkC2Lbl}</b> se registran <b>${nUp} ascensos</b> y <b>${nDn} descensos</b> en el ordenamiento poblacional. El Índice de Primacía pasó de <b>${fmtDec(pr1.ip4,3)}</b> a <b>${fmtDec(pr2.ip4,3)}</b> (<b>Valor ${pr2.cod}: ${pr2.cat}</b>).`,
+    `<b>Por qué las flechas se cruzan aunque nadie pierda población:</b> una localidad puede crecer en habitantes y aun así bajar de puesto (flecha roja ↘) si su vecina creció mucho más rápido por migración residencial, turismo o nuevas fuentes laborales (como ocurrió en Biobío con San Pedro de la Paz superando a Talcahuano).`,
+    `En evaluación de OT (06 OT 2024, láms. 10–11): el <b>Ranking de Asentamientos</b> detecta migraciones y reordenamientos internos de la red urbana, mientras el <b>Índice de Primacía (IP<sub>4</sub>)</b> cuantifica si el sistema regional tiende a la macrocefalia o al equilibrio policéntrico.`
+  );
+}
+
+// --- B. ESCALA DE GUTTMAN Y MATRIZ DE RONDINELLI (1/0 CLICABLE + GRÁFICO) ---
+const OT_RD_PRESETS = {
+  ejemplo: {
+    titulo: "Ejemplo Excel de Cátedra (Flores, Melchor de Mencos, San Ignacio y Benque Viejo)",
+    cols: ["Educ. Divers.", "Universid.", "C. Médica", "Seg. Social", "Guarderías", "Vivienda", "At. Mujer"],
+    rows: [
+      { nm: "Flores (GT)",               pob: 51535, v: [1, 1, 1, 1, 1, 1, 1] },
+      { nm: "Melchor de Mencos (GT)",    pob: 19847, v: [1, 1, 1, 1, 1, 0, 1] },
+      { nm: "San Ignacio/Sta. Elena",    pob: 16977, v: [1, 1, 1, 1, 0, 1, 1] },
+      { nm: "Benque Viejo (BZE)",        pob: 5824,  v: [0, 0, 1, 1, 0, 1, 1] }
+    ]
+  },
+  lagos: {
+    titulo: "Región de Los Lagos (Top 10 — Servicios a la Producción)",
+    cols: ["OTEC", "+1 Banco", "Of. Fomento", "Asist. Téc.", "Reclutam.", "C. Negocios", "Lab. Cert.", "Gremio Reg."],
+    rows: [
+      { nm: "Puerto Montt", pob: 275473, v: [1, 1, 1, 1, 1, 1, 1, 1] },
+      { nm: "Osorno",       pob: 174998, v: [1, 1, 1, 1, 1, 1, 1, 1] },
+      { nm: "Puerto Varas", pob: 50010,  v: [1, 1, 1, 1, 1, 1, 1, 0] },
+      { nm: "Castro",       pob: 48632,  v: [1, 1, 1, 1, 0, 1, 1, 0] },
+      { nm: "Ancud",        pob: 42158,  v: [1, 1, 1, 1, 0, 0, 0, 0] },
+      { nm: "Calbuco",      pob: 37620,  v: [1, 0, 1, 0, 0, 0, 1, 0] },
+      { nm: "Quellón",      pob: 30910,  v: [1, 1, 1, 0, 0, 0, 1, 0] },
+      { nm: "Purranque",    pob: 21475,  v: [1, 0, 1, 1, 0, 0, 0, 0] },
+      { nm: "Frutillar",    pob: 21220,  v: [1, 1, 1, 0, 0, 0, 0, 0] },
+      { nm: "Llanquihue",   pob: 19380,  v: [0, 0, 0, 0, 0, 0, 1, 0] }
+    ]
+  },
+  biobio: {
+    titulo: "Región del Biobío (Top 10 — Servicios a la Producción)",
+    cols: ["OTEC", "+1 Banco", "Of. Fomento", "Asist. Téc.", "Reclutam.", "C. Negocios", "Lab. Cert.", "Gremio Reg."],
+    rows: [
+      { nm: "Concepción",          pob: 230375, v: [1, 1, 1, 1, 1, 1, 1, 1] },
+      { nm: "Los Ángeles",         pob: 219441, v: [1, 1, 1, 1, 1, 1, 1, 1] },
+      { nm: "San Pedro de la Paz", pob: 150992, v: [1, 1, 1, 1, 1, 1, 1, 0] },
+      { nm: "Talcahuano",          pob: 147322, v: [1, 1, 1, 1, 0, 1, 1, 0] },
+      { nm: "Coronel",             pob: 123648, v: [1, 1, 1, 1, 0, 0, 0, 0] },
+      { nm: "Hualpén",             pob: 87731,  v: [1, 0, 1, 0, 0, 0, 1, 0] },
+      { nm: "Chiguayante",         pob: 85822,  v: [1, 1, 1, 0, 0, 0, 1, 0] },
+      { nm: "Tomé",                pob: 56907,  v: [1, 0, 1, 1, 0, 0, 0, 0] },
+      { nm: "Penco",               pob: 48971,  v: [1, 1, 1, 0, 0, 0, 0, 0] },
+      { nm: "Lota",                pob: 39980,  v: [0, 0, 0, 0, 0, 0, 1, 0] }
+    ]
+  }
+};
+
+let otRdKey = "ejemplo";
+let otRdCols = [...OT_RD_PRESETS.ejemplo.cols];
+let otRdRows = OT_RD_PRESETS.ejemplo.rows.map(r => ({ nm: r.nm, pob: r.pob, v: [...r.v] }));
+let otRdShowWeights = false;
+
+function presetOtRond(key) {
+  const pr = OT_RD_PRESETS[key] || OT_RD_PRESETS.ejemplo;
+  otRdKey = key;
+  otRdCols = [...pr.cols];
+  otRdRows = pr.rows.map(r => ({ nm: r.nm, pob: r.pob, v: [...r.v] }));
+  drawOtRond();
+}
+function toggleOtRondCell(ri, ci) {
+  otRdRows[ri].v[ci] = otRdRows[ri].v[ci] === 1 ? 0 : 1;
+  drawOtRond();
+}
+function toggleOtRondMode() {
+  otRdShowWeights = !otRdShowWeights;
+  const btn = document.getElementById("ot-rd-btn-mode");
+  if (btn) {
+    btn.classList.toggle("primary", otRdShowWeights);
+    btn.textContent = otRdShowWeights ? "Ver Matriz Binaria (1 / 0)" : "Ver Matriz Ponderada (Wk)";
+  }
+  drawOtRond();
+}
+function testOtRondError() {
+  otRdRows.forEach(r => { r.v[0] = 1; });
+  drawOtRond();
+}
+function drawOtRond() {
+  const n = otRdRows.length, m = otRdCols.length;
+  const totPob = otRdRows.reduce((s, r) => s + r.pob, 0) || 1;
+  const fk = new Array(m).fill(0);
+  otRdRows.forEach(r => r.v.forEach((x, j) => { fk[j] += x; }));
+  const wk = fk.map(f => f > 0 ? 100 / f : 0);
+
+  const scores = otRdRows.map(r => {
+    let sumF = 0, ic = 0;
+    r.v.forEach((x, j) => { sumF += x; ic += x * wk[j]; });
+    return { nm: r.nm, pob: r.pob, sumF, ic };
+  });
+  const totIC = scores.reduce((s, o) => s + o.ic, 0);
+  const activeCols = fk.filter(f => f > 0).length;
+  const badCols = [];
+  for (let j = 0; j < m; j++) {
+    if (fk[j] === 0 || fk[j] === n) badCols.push(otRdCols[j]);
+  }
+  const best = [...scores].sort((a, b) => b.ic - a.ic)[0];
+  let rarIdx = 0, maxW = -1;
+  wk.forEach((w, j) => { if (w > maxW) { maxW = w; rarIdx = j; } });
+
+  // Detectar anomalías jerárquicas (ciudad menos poblada con mayor IC que una más poblada)
+  const anomalies = [];
+  for (let i = 1; i < n; i++) {
+    if (scores[i].ic > scores[i - 1].ic + 0.01) anomalies.push(scores[i].nm);
+  }
+
+  document.getElementById("ot-rd-enun").innerHTML =
+    `<b>${OT_RD_PRESETS[otRdKey].titulo}:</b> las localidades están ordenadas de mayor a menor población. ` +
+    `Cada servicio presente suma un peso inverso <b>W<sub>k</sub> = 100 / f<sub>k</sub></b>: mientras menos comunas tienen el servicio, mayor puntaje aporta. ` +
+    `Modo actual: <b>${otRdShowWeights ? "Matriz Ponderada (Wk)" : "Matriz Binaria (1 / 0)"}</b>.`;
+
+  document.getElementById("ot-rd-k-top").textContent = best.nm;
+  document.getElementById("ot-rd-k-topv").textContent = `${fmtDec(best.ic, 2)} pts (${best.sumF}/${m} servicios)`;
+  document.getElementById("ot-rd-k-rar").textContent = otRdCols[rarIdx];
+  document.getElementById("ot-rd-k-rarv").textContent = `fk = ${fk[rarIdx]} → Wk = ${fmtDec(wk[rarIdx], 2)}`;
+  document.getElementById("ot-rd-k-val").textContent = badCols.length === 0 ? `${m} / ${m} discriminan` : `${badCols.length} sin discriminar`;
+  document.getElementById("ot-rd-k-val2").textContent = badCols.length === 0 ? "Cumple regla de cátedra" : "Tienen puros 1 o puros 0";
+  document.getElementById("ot-rd-k-sum").textContent = `${fmtDec(totIC, 2)} pts`;
+  document.getElementById("ot-rd-k-sum2").textContent = `100 × ${activeCols} servicios activos`;
+
+  const alertBox = document.getElementById("ot-rd-alert");
+  if (badCols.length > 0) {
+    alertBox.innerHTML = `<div class="ot-banner-warn">Regla de cátedra (Unidad 5 OT): las columnas <b>${badCols.join(", ")}</b> tienen puros 1 o puros 0 y no diferencian entre comunas. Haz clic en alguna celda para discriminar o reemplaza esa variable.</div>`;
+  } else {
+    alertBox.innerHTML = `<div class="ot-banner-ok">Validación OK: las ${m} variables discriminan efectivamente entre las ${n} localidades.${anomalies.length ? " Anomalía jerárquica detectada en: <b>" + anomalies.join(", ") + "</b> (supera en servicios a una ciudad más poblada)." : ""}</div>`;
+  }
+
+  renderFormulaStrip("ot-rd-fstrip", [
+    {
+      lbl: `Peso Inverso — ${otRdCols[rarIdx]}`, col: "#1D4ED8",
+      eq: `W<sub>k</sub> = ${mFrac("100", '<span class="sym-r">f<sub>k</sub></span>')}`,
+      sub: `W<sub>${rarIdx + 1}</sub> = ${mFrac("100", vChip(fk[rarIdx], "vc-r", "Localidades con el servicio"))} = ${rChip(fmtDec(wk[rarIdx], 2) + " pts")}`,
+      note: "Servicio más escaso = mayor peso en el índice"
+    },
+    {
+      lbl: `Índice Funcional — ${best.nm}`, col: "#15803D",
+      eq: `IC<sub>i</sub> = ∑ <span class="sym-b">X<sub>ik</sub></span> · <span class="sym-p">W<sub>k</sub></span>`,
+      sub: `IC = ${vChip(best.sumF + " serv.", "vc-b")} ponderados = ${rChip(fmtDec(best.ic, 2) + " pts")}`,
+      note: `Cuota poblacional: ${fmtDec((best.pob / totPob) * 100, 1)}%`
+    },
+    {
+      lbl: "Propiedad de Verificación Total", col: "#0F172A",
+      eq: `∑ IC<sub>i</sub> = 100 · <span class="sym-t">m<sub>activos</sub></span>`,
+      sub: `∑ IC<sub>i</sub> = 100 · ${vChip(activeCols, "vc-t")} = ${rChip(fmtDec(totIC, 2))}`,
+      note: "Cada servicio activo reparte exactamente 100 puntos"
+    }
+  ]);
+
+  // Tabla interactiva clicable
+  let tbl = `<table class="ot-mat-tbl"><thead><tr><th>Localidad</th><th>Pob.</th><th>% Pob</th>`;
+  otRdCols.forEach(c => { tbl += `<th>${c}</th>`; });
+  tbl += `<th>Suma</th><th>Índice IC</th></tr></thead><tbody>`;
+
+  otRdRows.forEach((r, ri) => {
+    tbl += `<tr><td>${r.nm}</td><td style="text-align:right;">${fmtInt(r.pob)}</td><td style="text-align:right;">${fmtDec((r.pob / totPob) * 100, 1)}%</td>`;
+    r.v.forEach((x, ci) => {
+      const lbl = otRdShowWeights ? (x === 1 ? fmtDec(wk[ci], 1) : "0") : String(x);
+      const cls = x === 1 ? "ot-c1" : "ot-c0";
+      const wStyle = otRdShowWeights ? "width:42px;font-size:10px;" : "";
+      tbl += `<td><button class="ot-cell-btn ${cls}" style="${wStyle}" onclick="toggleOtRondCell(${ri},${ci})" title="Clic para alternar 1 / 0">${lbl}</button></td>`;
+    });
+    tbl += `<td style="font-weight:800;">${scores[ri].sumF}</td><td style="font-weight:800;color:#1E3A8A;text-align:right;">${fmtDec(scores[ri].ic, 2)}</td></tr>`;
+  });
+
+  tbl += `<tr class="ot-sum-row"><td>Frecuencia (fk)</td><td style="text-align:right;">${fmtInt(totPob)}</td><td style="text-align:right;">100%</td>`;
+  fk.forEach(f => { tbl += `<td>${f}</td>`; });
+  tbl += `<td>${scores.reduce((s, o) => s + o.sumF, 0)}</td><td style="text-align:right;">${fmtDec(totIC, 2)}</td></tr>`;
+
+  tbl += `<tr class="ot-wt-row"><td>Ponderación (100/fk)</td><td>—</td><td>—</td>`;
+  wk.forEach(w => { tbl += `<td>${fmtDec(w, 2)}</td>`; });
+  tbl += `<td>—</td><td>—</td></tr>`;
+
+  tbl += `<tr class="ot-val-row"><td>Discriminación</td><td>—</td><td>—</td>`;
+  fk.forEach(f => {
+    const ok = f > 0 && f < n;
+    tbl += `<td class="${ok ? "ot-badge-ok" : "ot-badge-bad"}">${ok ? "OK" : "Cambiar"}</td>`;
+  });
+  tbl += `<td>—</td><td>—</td></tr></tbody></table>`;
+  document.getElementById("ot-rd-tbl-box").innerHTML = tbl;
+
+  // SVG Gráfico Complejidad Funcional vs. Población (lámina 15)
+  const svg = document.getElementById("svg-ot-rond");
+  if (!svg) return;
+  svg.innerHTML = "";
+  addDefs(svg);
+  const M = { l: 64, r: 44, t: 30, b: 46 }, W = 980, H = 345;
+  const maxP = Math.max(...scores.map(s => s.pob), 1000) * 1.12;
+  const maxIC = Math.max(...scores.map(s => s.ic), 50) * 1.18;
+  const sx = p => M.l + (p / maxP) * (W - M.l - M.r);
+  const sy = ic => H - M.b - (ic / maxIC) * (H - M.t - M.b);
+
+  for (let k = 0; k <= 4; k++) {
+    const yv = (maxIC / 4) * k;
+    el("line", { x1: M.l, y1: sy(yv), x2: W - M.r, y2: sy(yv), stroke: "#E2E8F0" }, svg);
+    const ty = el("text", { x: M.l - 8, y: sy(yv) + 4, fill: "#475569", "font-size": "10.8", "text-anchor": "end" }, svg);
+    ty.textContent = fmtDec(yv, 0);
+  }
+  for (let k = 0; k <= 4; k++) {
+    const xv = (maxP / 4) * k;
+    el("line", { x1: sx(xv), y1: M.t, x2: sx(xv), y2: H - M.b, stroke: "#F1F5F9" }, svg);
+    const tx = el("text", { x: sx(xv), y: H - M.b + 16, fill: "#475569", "font-size": "10.8", "text-anchor": "middle" }, svg);
+    tx.textContent = fmtInt(xv);
+  }
+  drawAxesPizarra(svg, M.l, M.t, W - M.r, H - M.b, "Índice de Complejidad Funcional (Rondinelli)", "Población del Asentamiento (Habitantes)");
+
+  const ptsLine = scores.map(s => `${sx(s.pob).toFixed(1)},${sy(s.ic).toFixed(1)}`).join(" ");
+  el("polyline", { points: ptsLine, fill: "none", stroke: "#1D4ED8", "stroke-width": "2.2", "stroke-dasharray": "5,4" }, svg);
+
+  scores.forEach((s, i) => {
+    const isAnom = i > 0 && s.ic > scores[i - 1].ic + 0.01;
+    const cx = sx(s.pob), cy = sy(s.ic);
+    el("circle", { cx, cy, r: isAnom ? 7.5 : 6.2, fill: isAnom ? "#DC2626" : "#1E3A8A", stroke: "#FFFFFF", "stroke-width": "2" }, svg);
+    const dy = (i % 2 === 0) ? -12 : 16;
+    const t = el("text", { x: cx, y: Math.max(M.t + 10, Math.min(H - M.b - 6, cy + dy)), fill: isAnom ? "#991B1B" : "#0F172A", "font-size": "10.2", "font-weight": "700", "text-anchor": cx > W - 120 ? "end" : "middle" }, svg);
+    t.textContent = `${s.nm} (${fmtDec(s.ic, 1)})`;
+  });
+
+  renderPedBox("ped-ot-rd",
+    `<b>${best.nm}</b> encabeza la complejidad funcional con <b>${fmtDec(best.ic,2)} puntos</b>. El servicio más escaso es <b>${otRdCols[rarIdx]}</b> (presente en solo ${fk[rarIdx]} localidad(es)), entregando <b>${fmtDec(wk[rarIdx],2)} pts</b> a quien lo posee.`,
+    `<b>Por qué dos ciudades con igual cantidad de servicios pueden tener puntajes distintos:</b> en el ejemplo de cátedra, <i>Melchor de Mencos</i> y <i>San Ignacio</i> tienen <b>6 servicios cada una</b>, pero Melchor saca <b>191,67</b> y San Ignacio <b>175,00</b> porque Melchor posee <b>Guarderías</b> (el más escaso: 50 pts) mientras a San Ignacio le falta.`,
+    `En el Control 5 (Unidad 5 OT): el Escalograma de Guttman / Rondinelli se aplica a las <b>10 comunas más pobladas</b> con mínimo <b>7 variables</b>. Si una columna queda con puros <code>1</code> no aporta diferenciación y debes cambiarla; además siempre se acompaña del gráfico de <b>Complejidad vs. Población</b>.`
+  );
+}
+
+// --- C. ÍNDICE DE AISLAMIENTO COMUNAL (0/1 CLICABLE + RED VIAL SVG) ---
+const OT_AI_PRESETS = {
+  pauta: {
+    titulo: "Ejemplo Oficial Pauta Unidad 5 (Osorno, Puaucho y Entre Lagos)",
+    locs: ["Osorno", "Puaucho", "Entre Lagos"],
+    links0: [[0, 1], [0, 2]]
+  },
+  lagos: {
+    titulo: "Corredor Región de Los Lagos (10 localidades — Osorno a Puerto Montt)",
+    locs: ["Osorno", "Puaucho", "Entre Lagos", "San Pablo", "Río Negro", "Purranque", "Pto. Octay", "Frutillar", "Pto. Varas", "Pto. Montt"],
+    links0: [[0,1],[0,2],[0,3],[0,4],[0,6],[2,6],[4,5],[5,7],[6,7],[7,8],[8,9]]
+  },
+  biobio: {
+    titulo: "Corredor Región del Biobío (10 comunas — Concepción a Los Ángeles)",
+    locs: ["Concepción", "Talcahuano", "Hualpén", "San Pedro", "Chiguayante", "Coronel", "Lota", "Penco", "Tomé", "Los Ángeles"],
+    links0: [[0,1],[0,2],[0,3],[0,4],[0,7],[0,9],[1,2],[3,5],[5,6],[7,8]]
+  }
+};
+
+let otAiKey = "pauta";
+let otAiLocs = [];
+let otAiMat = [];
+let otAiSelNode = -1;
+
+function presetOtAisl(key) {
+  const pr = OT_AI_PRESETS[key] || OT_AI_PRESETS.pauta;
+  otAiKey = key;
+  otAiLocs = [...pr.locs];
+  const n = otAiLocs.length;
+  otAiMat = Array.from({ length: n }, (_, i) => Array.from({ length: n }, (_, j) => (i === j ? 0 : 1)));
+  pr.links0.forEach(([u, v]) => { otAiMat[u][v] = 0; otAiMat[v][u] = 0; });
+  otAiSelNode = -1;
+  drawOtAisl();
+}
+function toggleOtAislCell(i, j) {
+  if (i === j) return;
+  const nv = otAiMat[i][j] === 0 ? 1 : 0;
+  otAiMat[i][j] = nv;
+  otAiMat[j][i] = nv;
+  drawOtAisl();
+}
+function clickOtAislNode(idx) {
+  if (otAiSelNode < 0) { otAiSelNode = idx; drawOtAisl(); return; }
+  if (otAiSelNode === idx) { otAiSelNode = -1; drawOtAisl(); return; }
+  toggleOtAislCell(otAiSelNode, idx);
+  otAiSelNode = -1;
+  drawOtAisl();
+}
+function conectarRutaOtAisl() {
+  const n = otAiLocs.length;
+  for (let i = 0; i < n; i++) {
+    for (let j = i + 1; j < n; j++) {
+      if (otAiMat[i][j] === 1) {
+        otAiMat[i][j] = 0; otAiMat[j][i] = 0;
+        drawOtAisl();
+        return;
+      }
+    }
+  }
+}
+function drawOtAisl() {
+  if (otAiLocs.length === 0) { presetOtAisl("pauta"); return; }
+  const n = otAiLocs.length;
+  const totPairs = (n * (n - 1)) / 2;
+  let directPairs = 0;
+  for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) if (otAiMat[i][j] === 0) directPairs++;
+
+  const stats = otAiLocs.map((nm, i) => {
+    let sum1 = 0, con0 = 0;
+    for (let j = 0; j < n; j++) {
+      if (i === j) continue;
+      if (otAiMat[i][j] === 1) sum1++; else con0++;
+    }
+    const pct = (sum1 / Math.max(1, n - 1)) * 100;
+    return { i, nm, sum1, con0, pct };
+  });
+  const ordBest = [...stats].sort((a, b) => a.pct - b.pct);
+  const best = ordBest[0], worst = ordBest[ordBest.length - 1];
+  const avgPct = stats.reduce((s, o) => s + o.pct, 0) / n;
+
+  const selTxt = otAiSelNode >= 0
+    ? ` <span style="color:#B45309;font-weight:800;">● Nodo seleccionado: ${otAiLocs[otAiSelNode]} — haz clic en otra localidad del grafo para abrir/cerrar ruta directa.</span>`
+    : ` Recuerda la convención clave de examen: <b>0 = bueno (conectada directamente / asfaltada)</b> y <b>1 = malo (sin conexión directa / aislada)</b>.`;
+  document.getElementById("ot-ai-enun").innerHTML = `<b>${OT_AI_PRESETS[otAiKey].titulo}.</b>${selTxt}`;
+
+  document.getElementById("ot-ai-k-best").textContent = best.nm;
+  document.getElementById("ot-ai-k-bestv").textContent = `${fmtDec(best.pct, 1)}% aislamiento (${best.con0} rutas)`;
+  document.getElementById("ot-ai-k-worst").textContent = worst.nm;
+  document.getElementById("ot-ai-k-worstv").textContent = `${fmtDec(worst.pct, 1)}% aislamiento (${worst.con0} rutas)`;
+  document.getElementById("ot-ai-k-avg").textContent = `${fmtDec(avgPct, 1)}%`;
+  document.getElementById("ot-ai-k-avg2").textContent = "Promedio de las " + n + " localidades";
+  document.getElementById("ot-ai-k-con").textContent = `${directPairs} / ${totPairs} pares`;
+  document.getElementById("ot-ai-k-con2").textContent = `${fmtDec((directPairs / Math.max(1, totPairs)) * 100, 1)}% conectividad vial`;
+
+  renderFormulaStrip("ot-ai-fstrip", [
+    {
+      lbl: `Índice de Aislamiento — ${best.nm}`, col: "#15803D",
+      eq: `IA<sub>i</sub> = ${mFrac('∑ <span class="sym-r">a<sub>ij</sub></span> (unos)', '<span class="sym-b">n</span> − 1')} × 100%`,
+      sub: `IA = ${mFrac(vChip(best.sum1, "vc-r", "Pares sin conexión directa"), vChip(n - 1, "vc-b", "Otras localidades"))} × 100% = ${rChip(fmtDec(best.pct, 1) + "%")}`,
+      note: `Conexiones directas (ceros): ${best.con0} de ${n - 1}`
+    },
+    {
+      lbl: `Índice de Aislamiento — ${worst.nm}`, col: "#DC2626",
+      eq: `IA<sub>i</sub> = ${mFrac('∑ <span class="sym-r">a<sub>ij</sub></span> (unos)', '<span class="sym-b">n</span> − 1')} × 100%`,
+      sub: `IA = ${mFrac(vChip(worst.sum1, "vc-r"), vChip(n - 1, "vc-b"))} × 100% = ${rChip(fmtDec(worst.pct, 1) + "%", worst.pct > 50)}`,
+      note: `Conexiones directas (ceros): ${worst.con0} de ${n - 1}`
+    }
+  ]);
+
+  // Matriz simétrica clicable
+  let tbl = `<table class="ot-mat-tbl"><thead><tr><th>Localidad</th>`;
+  otAiLocs.forEach(l => { tbl += `<th>${l.length > 8 ? l.slice(0, 7) + "." : l}</th>`; });
+  tbl += `<th>Suma (1)</th><th>IA (%)</th></tr></thead><tbody>`;
+
+  otAiLocs.forEach((nm, i) => {
+    tbl += `<tr><td>${nm}</td>`;
+    for (let j = 0; j < n; j++) {
+      if (i === j) {
+        tbl += `<td class="ot-diag">—</td>`;
+      } else {
+        const v = otAiMat[i][j];
+        const cls = v === 0 ? "ot-ai0" : "ot-ai1";
+        tbl += `<td><button class="ot-cell-btn ${cls}" style="width:26px;" onclick="toggleOtAislCell(${i},${j})" title="${nm} ↔ ${otAiLocs[j]}: clic para alternar 0/1">${v}</button></td>`;
+      }
+    }
+    tbl += `<td style="font-weight:800;">${stats[i].sum1}</td><td style="font-weight:800;color:${stats[i].pct <= 50 ? "#15803D" : "#DC2626"};">${fmtDec(stats[i].pct, 1)}%</td></tr>`;
+  });
+  tbl += `</tbody></table>`;
+  document.getElementById("ot-ai-tbl-box").innerHTML = tbl;
+
+  // SVG Red Vial (arriba) + Barras de Aislamiento (abajo)
+  const svg = document.getElementById("svg-ot-aisl");
+  if (!svg) return;
+  svg.innerHTML = "";
+  const W = 560, H = 405;
+  const cx = W / 2, cy = 128, rx = n <= 4 ? 145 : 205, ry = n <= 4 ? 76 : 92;
+  const pts = otAiLocs.map((nm, i) => {
+    const a = (i / n) * Math.PI * 2 - Math.PI / 2;
+    return { x: cx + rx * Math.cos(a), y: cy + ry * Math.sin(a), nm };
+  });
+
+  const tHd = el("text", { x: W / 2, y: 18, fill: "#0F172A", "font-size": "11.5", "font-weight": "800", "text-anchor": "middle" }, svg);
+  tHd.textContent = "Red Vial Directa (Línea verde = 0 conectada · Clic en 2 nodos edita)";
+
+  for (let i = 0; i < n; i++) {
+    for (let j = i + 1; j < n; j++) {
+      if (otAiMat[i][j] === 0) {
+        el("line", { x1: pts[i].x, y1: pts[i].y, x2: pts[j].x, y2: pts[j].y, stroke: "#15803D", "stroke-width": "2.4", opacity: "0.85" }, svg);
+      }
+    }
+  }
+  pts.forEach((p, i) => {
+    const isSel = (otAiSelNode === i);
+    const col = stats[i].pct === best.pct ? "#15803D" : (stats[i].pct >= 75 ? "#DC2626" : "#1D4ED8");
+    const g = el("g", { style: "cursor:pointer;", onclick: `clickOtAislNode(${i})` }, svg);
+    if (isSel) el("circle", { cx: p.x, cy: p.y, r: 16, fill: "rgba(245,158,11,0.22)", stroke: "#D97706", "stroke-width": "2.2", "stroke-dasharray": "4,2" }, g);
+    el("circle", { cx: p.x, cy: p.y, r: 10.5, fill: col, stroke: "#FFFFFF", "stroke-width": "2" }, g);
+    const t = el("text", { x: p.x, y: p.y - 13, fill: "#0F172A", "font-size": "10", "font-weight": "700", "text-anchor": "middle" }, g);
+    t.textContent = p.nm;
+  });
+
+  // Mini ranking de barras horizontales abajo (y=252..392)
+  el("line", { x1: 16, y1: 242, x2: W - 16, y2: 242, stroke: "#CBD5E1" }, svg);
+  const tB = el("text", { x: W / 2, y: 258, fill: "#1E3A8A", "font-size": "11", "font-weight": "800", "text-anchor": "middle" }, svg);
+  tB.textContent = "Índice de Aislamiento (%) — Menor barra = Mejor Conectividad";
+
+  const showBars = ordBest.slice(0, Math.min(8, n));
+  const rowH = Math.min(18, 130 / Math.max(1, showBars.length));
+  showBars.forEach((stItem, k) => {
+    const y0 = 266 + k * rowH;
+    const xL = 112, maxBw = 370;
+    const bw = Math.max(3, (stItem.pct / 100) * maxBw);
+    const col = stItem.pct <= 45 ? "#15803D" : (stItem.pct <= 70 ? "#D97706" : "#DC2626");
+    const tl = el("text", { x: xL - 6, y: y0 + rowH * 0.72, fill: "#0F172A", "font-size": "9.8", "font-weight": "700", "text-anchor": "end" }, svg);
+    tl.textContent = stItem.nm;
+    el("rect", { x: xL, y: y0 + 2, width: bw, height: Math.max(6, rowH - 5), fill: col, rx: 3 }, svg);
+    const tv = el("text", { x: xL + bw + 5, y: y0 + rowH * 0.72, fill: col, "font-size": "9.6", "font-weight": "800" }, svg);
+    tv.textContent = `${fmtDec(stItem.pct, 1)}%`;
+  });
+
+  renderPedBox("ped-ot-ai",
+    `<b>${best.nm}</b> presenta el menor aislamiento (<b>${fmtDec(best.pct,1)}%</b> con ${best.con0} conexiones directas), mientras <b>${worst.nm}</b> registra el mayor aislamiento (<b>${fmtDec(worst.pct,1)}%</b>). El promedio de la red es <b>${fmtDec(avgPct,1)}%</b>.`,
+    `<b>La Trampa Clásica del 0 y el 1 en Pruebas:</b> en Rondinelli, <code>1</code> es positivo (tiene el servicio); pero en la Matriz de Aislamiento es exactamente al revés: <b><code>0</code> es positivo (conectada directamente por asfalto)</b> y <b><code>1</code> penaliza (sin conexión directa)</b>. Por eso quien suma MENOS unos está mejor conectado.`,
+    `Vincula este indicador con el <b>PROT (SUBDERE-CEPAL, 2011)</b>: el aislamiento aumenta por la <i>fricción de la distancia</i> y la <i>rugosidad topográfica</i> (pág. 12), generando círculos viciosos de baja población y escasez de servicios que el GORE debe corregir mediante inversión en conectividad.`
+  );
+}
+
+
 loadDiniTopology('simetrica', null);
+presetOtRanking('mancilla');
+presetOtRond('ejemplo');
+
+// --- D & E. MANUAL PROT (4 SISTEMAS SVG, ANEXO 2 Y CONTROL DE LECTURA OT DE 10 PREGUNTAS) ---
+const OT_SISTEMAS_DATA = {
+  costero: {
+    nm: "Sistema Costero",
+    col: "#0284C7",
+    bg: "#E0F2FE",
+    rol: "Define <b>usos preferentes del borde costero</b> considerando factores geográficos, recursos marinos, centros poblados aledaños y concesiones existentes para impulsar el desarrollo sustentable del litoral (SUBDERE, pág. 20).",
+    conflictos: "Superposición entre acuicultura/salmonicultura, pesca artesanal, turismo de playas, puertos comerciales y áreas marinas protegidas.",
+    normas: "DS 475/1994 (Política Nacional de Uso del Borde Costero · CNUBC / CRUBC), DFL 340 (Concesiones Marítimas · SSFFAA / DIRECTEMAR), Ley 18.892 (Pesca y Acuicultura · SUBPESCA / SERNAPESCA)."
+  },
+  urbano: {
+    nm: "Sistema Urbano",
+    col: "#1D4ED8",
+    bg: "#DBEAFE",
+    rol: "Planifica la <b>configuración, articulación y organización del sistema de ciudades y centros poblados</b> en perspectiva dinámico-temporal, integrando procesos <i>interurbanos</i> (redes entre ciudades) e <i>intraurbanos</i> (usos del suelo, densidades) (pág. 20).",
+    conflictos: "Expansión urbana descontrolada sobre suelo agrícola, segregación socioespacial, congestión vial y déficit de equipamiento/vivienda.",
+    normas: "DFL 458/1975 (Ley General de Urbanismo y Construcciones — LGUC), DS 47/1992 (OGUC · MINVU / DOM), Ley 18.695 (Municipalidades · PLADECO y PRC), Ley 19.525 (Aguas Lluvias)."
+  },
+  rural: {
+    nm: "Sistema Rural",
+    col: "#059669",
+    bg: "#DCFCE7",
+    rol: "Aborda los <b>desequilibrios territoriales rurales</b> para reducir externalidades negativas del crecimiento espontáneo y del deterioro ecológico, mejorando el bienestar rural en armonía con el patrimonio natural (pág. 20).",
+    conflictos: "Parcelaciones de agrado y fragmentación de suelo productivo (DL 3.516), despoblamiento juvenil, aislamiento vial/digital y falta de agua potable rural.",
+    normas: "DL 3.516 (División de Predios Rústicos · SAG / SEREMI MINVU), DL 3.557 (Protección Agrícola · SAG), DL 701 / DS 4.363 (Bosques y Fomento Forestal · CONAF), Ley 19.253 (Desarrollo Indígena · CONADI)."
+  },
+  cuenca: {
+    nm: "Sistema Cuenca Hidrográfica",
+    col: "#7C3AED",
+    bg: "#F3E8FF",
+    rol: "Orienta el <b>uso y manejo integrado de los recursos naturales de la cuenca</b> de forma ordenada, articulada e informada para optimizar impactos sociales, económicos y ambientales presentes y futuros (pág. 20).",
+    conflictos: "Competencia por derechos de agua (riego, hidroelectricidad, consumo humano), contaminación de cauces, erosión de laderas y riesgos de inundación o remoción en masa.",
+    normas: "DFL 1.122/1981 (Código de Aguas · DGA / MOP), Ley 19.300 (Bases Generales del Medio Ambiente y SEIA · MMA), Ley 18.362 (SNASPE · CONAF), DS 609/1978 (Deslindes de cauces de ríos y lagos · Bienes Nacionales)."
+  }
+};
+
+let otSysSel = "costero";
+
+function selectOtSistema(key) {
+  otSysSel = key;
+  drawOtSistemasSvg();
+}
+function drawOtSistemasSvg() {
+  const svg = document.getElementById("svg-ot-sistemas");
+  const det = document.getElementById("ot-sys-detail");
+  if (!svg || !det) return;
+  svg.innerHTML = "";
+
+  // Perfil topográfico estilo Figura 1 (pág. 20 SUBDERE-CEPAL)
+  // Fondo zonas clicables
+  const zonas = [
+    { key: "costero", x: 18,  w: 175, lbl: "1. Sistema Costero" },
+    { key: "urbano",  x: 193, w: 205, lbl: "2. Sistema Urbano" },
+    { key: "rural",   x: 398, w: 270, lbl: "3. Sistema Rural" },
+    { key: "cuenca",  x: 668, w: 294, lbl: "4. Sistema Cuenca Hidrográfica" }
+  ];
+
+  zonas.forEach(z => {
+    const info = OT_SISTEMAS_DATA[z.key];
+    const isAct = (otSysSel === z.key);
+    const g = el("g", { style: "cursor:pointer;", onclick: `selectOtSistema('${z.key}')` }, svg);
+    el("rect", {
+      x: z.x, y: 12, width: z.w, height: 192, rx: 4,
+      fill: isAct ? info.bg : "#FFFFFF",
+      stroke: isAct ? info.col : "#CBD5E1",
+      "stroke-width": isAct ? "2.4" : "1"
+    }, g);
+    const t = el("text", {
+      x: z.x + z.w / 2, y: 32,
+      fill: isAct ? info.col : "#334155",
+      "font-size": "11.5", "font-weight": "800", "text-anchor": "middle"
+    }, g);
+    t.textContent = z.lbl;
+    el("line", { x1: z.x + 12, y1: 41, x2: z.x + z.w - 12, y2: 41, stroke: info.col, "stroke-width": "1.6", "stroke-dasharray": isAct ? "" : "4,3" }, g);
+  });
+
+  // Silueta mar + costa + ciudad + campo + cordillera (continuo territorial)
+  el("rect", { x: 24, y: 158, width: 148, height: 38, fill: "rgba(2,132,199,0.22)" }, svg);
+  el("polyline", { points: "24,158 172,158 205,134 670,134 730,96 765,112 835,54 895,110 952,188", fill: "none", stroke: "#0F172A", "stroke-width": "2.4" }, svg);
+  el("line", { x1: 24, y1: 196, x2: 954, y2: 196, stroke: "#64748B", "stroke-width": "1.4" }, svg);
+
+  // Íconos geométricos limpios: mar (triángulo nivel agua), edificios (urbano), casas/árboles (rural), río descendiendo (cuenca)
+  el("polygon", { points: "95,146 111,146 103,157", fill: "none", stroke: "#0284C7", "stroke-width": "1.8" }, svg);
+  // Edificios urbanos
+  [[232,96,20,38],[260,82,22,52],[290,104,18,30],[316,74,24,60],[348,108,18,26]].forEach(([bx,by,bw,bh]) => {
+    el("rect", { x: bx, y: by, width: bw, height: bh, fill: "#93C5FD", stroke: "#1E3A8A", "stroke-width": "1.3" }, svg);
+  });
+  // Casas rurales y árboles
+  [[455,116],[555,116]].forEach(([hx,hy]) => {
+    el("rect", { x: hx, y: hy, width: 20, height: 18, fill: "#BBF7D0", stroke: "#065F46", "stroke-width": "1.3" }, svg);
+    el("polygon", { points: `${hx-3},${hy} ${hx+10},${hy-13} ${hx+23},${hy}`, fill: "#34D399", stroke: "#065F46", "stroke-width": "1.2" }, svg);
+  });
+  [[510,122],[615,122]].forEach(([tx,ty]) => {
+    el("line", { x1: tx, y1: ty, x2: tx, y2: 134, stroke: "#78350F", "stroke-width": "2.4" }, svg);
+    el("circle", { cx: tx, cy: ty - 6, r: 9, fill: "#10B981", stroke: "#065F46", "stroke-width": "1.2" }, svg);
+  });
+  // Flujo de cuenca hídrica
+  el("polyline", { points: "835,58 790,118 725,134 670,134", fill: "none", stroke: "#7C3AED", "stroke-width": "2.6", "stroke-dasharray": "5,3" }, svg);
+  const tNote = el("text", { x: 490, y: 184, fill: "#334155", "font-size": "10.3", "font-weight": "700", "text-anchor": "middle" }, svg);
+  tNote.textContent = "Continuo Territorial Regional (Figura 1, SUBDERE-CEPAL 2011, pág. 20) — Ningún sistema opera aislado de los demás";
+
+  const cur = OT_SISTEMAS_DATA[otSysSel];
+  det.style.borderLeftColor = cur.col;
+  det.innerHTML =
+    `<div style="font-size:12.6px;font-weight:800;color:${cur.col};margin-bottom:4px;">${cur.nm} (Componente de Análisis del PROT)</div>` +
+    `<div><b>Propósito en el PROT:</b> ${cur.rol}</div>` +
+    `<div style="margin-top:4px;"><b>Conflictos típicos de uso:</b> ${cur.conflictos}</div>` +
+    `<div style="margin-top:4px;"><b>Normativa e instituciones clave (Anexo 2):</b> ${cur.normas}</div>`;
+}
+
+const OT_ANEXO2_DATA = [
+  { mat: "Gobierno Regional (OT)", norma: "DFL 1/2005 (Ley 19.175 LOCGAR)", org: "GORE, CORE, SEREMI MINVU, Municipalidades" },
+  { mat: "Urbanismo y Construcciones", norma: "DFL 458/1975 (LGUC) y DS 47/1992 (OGUC)", org: "MINVU, DOM Municipal, Asesor Urbanista" },
+  { mat: "Municipalidades (PLADECO)", norma: "DFL 1/2006 (Ley 18.695 LOCM)", org: "Municipalidad, SECPLA, Alcalde y Concejo" },
+  { mat: "Borde Costero", norma: "DS 475/1994 (Política Borde Costero) y DFL 340", org: "CNUBC, CRUBC, GORE, DIRECTEMAR, SSFFAA" },
+  { mat: "Aguas y Cuencas", norma: "DFL 1.122/1981 (Código de Aguas) y Ley 19.525", org: "DGA, MOP, MMA, MINVU (aguas lluvias)" },
+  { mat: "Medio Ambiente y SEIA", norma: "Ley 19.300 y DS 95/2001 (Reglamento SEIA)", org: "Ministerio del Medio Ambiente, SEREMI MMA" },
+  { mat: "Predios Rústicos (Rural)", norma: "DL 3.516 (División de Predios Rústicos)", org: "SAG, SEREMI MINVU, Municipalidades" },
+  { mat: "Bosques y Fomento Forestal", norma: "DS 4.363/1931 (Ley Bosques) y DL 701 / 2.565", org: "CONAF, SAG, Min. Agricultura, Bienes Nacionales" },
+  { mat: "Áreas Silvestres Protegidas", norma: "Ley 18.362 (SNASPE)", org: "CONAF, Bienes Nacionales, Min. Agricultura" },
+  { mat: "Acuicultura y Pesca", norma: "DS 430/1991 (Ley 18.892) y DS 320/2001 (RAMA)", org: "SUBPESCA, SERNAPESCA, DIRECTEMAR" },
+  { mat: "Desarrollo Indígena", norma: "Ley 19.253 (Áreas de Desarrollo Indígena)", org: "CONADI, GORE, Municipalidades, MINVU" },
+  { mat: "Catástrofes y Riesgos", norma: "Ley 16.282 y DS 156/2002 (Protección Civil)", org: "Min. Interior, Protección Civil/SENAPRED, GORE" },
+  { mat: "Monumentos y Patrimonio", norma: "Ley 17.288 (Monumentos Nacionales)", org: "Consejo de Monumentos Nacionales, Municipalidades" },
+  { mat: "Información Territorial", norma: "DS 28/2006 (Homologación SNIT / UGIT)", org: "Ministerio de Bienes Nacionales, GORE" }
+];
+
+function renderOtAnexo2() {
+  const box = document.getElementById("ot-anexo2-box");
+  if (!box) return;
+  const q = (document.getElementById("ot-anexo2-q")?.value || "").trim().toLowerCase();
+  const rows = OT_ANEXO2_DATA.filter(r => !q || (r.mat + " " + r.norma + " " + r.org).toLowerCase().includes(q));
+  let h = `<table class="ot-mat-tbl"><thead><tr><th>Materia</th><th>Norma Legal</th><th>Organismos</th></tr></thead><tbody>`;
+  if (rows.length === 0) {
+    h += `<tr><td colspan="3" style="text-align:center;color:#64748B;">Sin coincidencias para "${q}".</td></tr>`;
+  } else {
+    rows.forEach(r => {
+      h += `<tr><td>${r.mat}</td><td style="text-align:left;font-family:inherit;"><b>${r.norma}</b></td><td style="text-align:left;font-family:inherit;">${r.org}</td></tr>`;
+    });
+  }
+  h += `</tbody></table>`;
+  box.innerHTML = h;
+}
+
+const OT_QUIZ_DATA = [
+  {
+    tag: "06 OT · Lám. 2 y 5",
+    q: "Según Massiris (2002) y las láminas de cátedra, ¿cómo se diferencia el enfoque predominante del Ordenamiento Territorial en Chile/Brasil frente a Alemania, Francia y Reino Unido?",
+    opts: [
+      "Chile y Brasil lo conciben como planificación física (uso y ocupación del suelo), mientras Europa lo integra a la planificación económica y social",
+      "Chile y Brasil aplican un modelo federal descentralizado, mientras Europa utiliza solo planes reguladores comunales",
+      "Ambos bloques lo entienden exclusivamente como zonificación urbana municipal sin vínculos económicos"
+    ],
+    ans: 0,
+    why: "Lámina 5 de '06 OT 2024': Chile y Brasil han puesto el énfasis en la planificación física del uso y ocupación del territorio, mientras Alemania, Francia y Reino Unido lo entienden como planificación integral estrechamente ligada a la planificación económica y social."
+  },
+  {
+    tag: "06 OT · Lám. 4 / PROT p.23",
+    q: "De acuerdo con el Artículo 3° de la Constitución Política de Chile, ¿cuál es el contexto político-administrativo del país para el Ordenamiento Territorial?",
+    opts: [
+      "Estado Federal con constituciones regionales y tribunal federal",
+      "Estado Unitario con administración funcional y territorialmente descentralizada o desconcentrada",
+      "Confederación de regiones soberanas regidas solo por coordinación voluntaria"
+    ],
+    ans: 1,
+    why: "Art. 3° CPR (Lám. 4 y SUBDERE pág. 7 y 23): Chile es un Estado unitario cuya administración será funcional y territorialmente descentralizada o desconcentrada, promoviendo la regionalización y el desarrollo equitativo y solidario."
+  },
+  {
+    tag: "06 OT · Lám. 6",
+    q: "Al comparar las escalas del Ordenamiento Territorial, ¿qué dirección predominante tienen las políticas de nivel Nacional y Regional frente al nivel Local?",
+    opts: [
+      "Nacional y Regional son de abajo hacia arriba; Local es de arriba hacia abajo",
+      "Todas las escalas son estrictamente de arriba hacia abajo",
+      "Nacional y Regional son de arriba hacia abajo; Local es de abajo hacia arriba (regulaciones y dinámicas urbanas)"
+    ],
+    ans: 2,
+    why: "Lámina 6 de '06 OT 2024': Nacional y Regional operan con políticas de arriba hacia abajo (redistribución, sustentabilidad, sistema de asentamientos), mientras el nivel Local opera de abajo hacia arriba (planificación físico-espacial, densidades y zonificaciones)."
+  },
+  {
+    tag: "PROT · Págs. 5, 9 y 26",
+    q: "¿Cuál es la relación exacta entre la Estrategia Regional de Desarrollo (ERD) y el Plan Regional de Ordenamiento Territorial (PROT), y cuál es su horizonte temporal?",
+    opts: [
+      "El PROT reemplaza a la ERD cada 4 años como norma restrictiva urbana",
+      "El PROT espacializa los objetivos de la ERD con un horizonte de 10 años y carácter orientador",
+      "La ERD es un anexo cartográfico del PROT elaborado por cada municipalidad"
+    ],
+    ans: 1,
+    why: "SUBDERE-CEPAL (2011, págs. 5, 25 y 26): el PROT es un complemento que posibilita la espacialización de los objetivos de la ERD en un horizonte de mediano plazo de 10 años, con carácter orientador más que meramente restrictivo."
+  },
+  {
+    tag: "PROT · Pág. 12",
+    q: "En el manual SUBDERE-CEPAL (pág. 12), ¿qué ocurre cuando aumenta la 'rugosidad de la superficie' o sube el peaje de fin de semana?",
+    opts: [
+      "Disminuye la fricción de la distancia y mejora el índice de centralidad",
+      "Aumenta la fricción de la distancia, agravando el aislamiento y pudiendo activar un círculo vicioso de menos empleo, despoblamiento y pérdida de servicios",
+      "Solo afecta a la distancia en kilómetros pero no tiene efecto territorial"
+    ],
+    ans: 1,
+    why: "SUBDERE-CEPAL (pág. 12): la accesibilidad depende de la rugosidad física (relieve, malas rutas, transbordos) y la fricción de la distancia, que incluso puede elevarse artificialmente por costos de peaje, cerrando círculos viciosos de enclave y reducción de umbrales poblacionales."
+  },
+  {
+    tag: "PROT · Págs. 19–20",
+    q: "¿Cuáles son los 4 componentes de análisis territorial (sistemas) que el PROT debe integrar de forma continua en la región?",
+    opts: [
+      "Urbano, Industrial, Minero y Turístico",
+      "Rural, Urbano, Costero y de Cuencas Hidrográficas",
+      "Comunal, Provincial, Regional y Nacional"
+    ],
+    ans: 1,
+    why: "SUBDERE-CEPAL (Figura 1, págs. 19–20): el PROT integra los sistemas Costero, Urbano, Rural y de Cuencas Hidrográficas como un continuo territorial."
+  },
+  {
+    tag: "PROT · Págs. 21–22",
+    q: "Según el enfoque de Desarrollo Territorial Sustentable (Folch 2003 / SUBDERE págs. 21–22), ¿cuáles son los 3 objetivos territoriales simultáneos y qué significa 'competir con la gente'?",
+    opts: [
+      "Funcionalidad, Habitabilidad y Competitividad; 'competir con la gente' alude a variables intangibles como educación, capacitación laboral y educación ciudadana",
+      "Higiene ambiental, Crecimiento del PIB y Densificación; 'competir con la gente' significa bajar salarios locales",
+      "Primacía, Aislamiento y Zonificación; 'competir con la gente' implica aumentar la población urbana"
+    ],
+    ans: 0,
+    why: "SUBDERE-CEPAL (págs. 21–22): el desarrollo sustentable busca simultáneamente Funcionalidad, Habitabilidad y Competitividad, incorporando en esta última variables intangibles ('competir con la gente')."
+  },
+  {
+    tag: "PROT · Págs. 25, 32 y 35",
+    q: "Dentro de la estructura del PROT (Cap. 4), ¿qué función cumple el 'Mapa Semáforo' y qué son los escenarios 'deseable, probable y posible'?",
+    opts: [
+      "El Mapa Semáforo mide la congestión vehicular urbana y los escenarios se usan en el Plan de Acción financiero",
+      "El Mapa Semáforo permite observar rápidamente los focos de conflictos de intereses por uso del territorio, y los escenarios forman parte del Análisis Prospectivo",
+      "Ambos pertenecen exclusivamente al PLADECO comunal a escala 1:100.000"
+    ],
+    ans: 1,
+    why: "SUBDERE-CEPAL (págs. 31–32 y 35): el Análisis Prospectivo construye escenarios (deseable, probable y posible) para pasar del modelo actual al deseado; en Cartografía, el Mapa Semáforo visibiliza focos de conflictos de interés sobre usos del territorio."
+  },
+  {
+    tag: "06 OT · Lám. 10–15",
+    q: "En la Escala de Guttman / Matriz de Rondinelli (Control 5), ¿por qué dos comunas con el mismo número total de servicios pueden obtener distinto puntaje de centralidad funcional?",
+    opts: [
+      "Porque el peso Wk = 100 / fk premia con mayor puntaje a los servicios más escasos (menor frecuencia fk), no valen todos lo mismo",
+      "Porque el puntaje de Rondinelli se divide por la población de cada comuna",
+      "Porque los servicios presentes en todas las comunas (fk = n) reciben peso 100"
+    ],
+    ans: 0,
+    why: "En Rondinelli (06 OT 2024, láms. 14–15), un equipamiento raro presente en solo 2 ciudades entrega Wk = 100/2 = 50 pts, mientras uno común presente en 4 entrega 25 pts. Además, las variables donde todas tienen 1 no discriminan y deben reemplazarse."
+  },
+  {
+    tag: "Unidad 5 OT · Pauta",
+    q: "Al comparar la Matriz de Rondinelli con la Matriz de Aislamiento Comunal, ¿qué representa el valor 0 en cada instrumento?",
+    opts: [
+      "En ambos instrumentos 0 indica ausencia de problemas (buen desempeño)",
+      "En Rondinelli 0 significa ausencia del servicio (desfavorable), mientras en Aislamiento 0 significa conexión directa asfaltada (favorable)",
+      "En Rondinelli 0 significa presencia y en Aislamiento 0 significa localidad aislada"
+    ],
+    ans: 1,
+    why: "Pauta 'Unidad 5. Ordenamiento Territorial': en Guttman/Rondinelli 1 = Presente y 0 = Ausente; en Aislamiento 0 = Conectada directamente (o asfaltada) y 1 = No conectada directamente (ripio/tierra o sin ruta directa)."
+  }
+];
+
+let otQzAns = {};
+let otQzSoloPend = false;
+
+function toggleSoloErrOtQz(btn) {
+  otQzSoloPend = !otQzSoloPend;
+  btn.classList.toggle("primary", otQzSoloPend);
+  renderOtQuiz();
+}
+function responderOtQuiz(idx, optIdx) {
+  otQzAns[idx] = optIdx;
+  renderOtQuiz();
+}
+function resetOtQuiz() {
+  otQzAns = {};
+  otQzSoloPend = false;
+  renderOtQuiz();
+}
+function renderOtQuiz() {
+  const wrap = document.getElementById("ot-qz-list");
+  if (!wrap) return;
+  wrap.innerHTML = "";
+  let okCount = 0;
+  OT_QUIZ_DATA.forEach((item, idx) => {
+    const uAns = otQzAns[idx];
+    const isAns = uAns !== undefined;
+    const isOk = isAns && uAns === item.ans;
+    if (isOk) okCount++;
+    if (otQzSoloPend && isOk) return;
+
+    const card = document.createElement("div");
+    card.className = "qz-card" + (isAns ? (" answered " + (isOk ? "ok" : "bad")) : "");
+    const btns = item.opts.map((op, oi) =>
+      `<button class="qz-btn ${uAns === oi ? "sel" : ""}" onclick="responderOtQuiz(${idx}, ${oi})">${op}</button>`
+    ).join("");
+    const badgeRes = isAns ? `<span style="font-size:11.5px;font-weight:800;color:${isOk ? "#15803D" : "#DC2626"};">${isOk ? "✓ Correcto" : "✗ Revisar"}</span>` : "";
+    card.innerHTML = `
+      <div><span class="qz-tag">${item.tag}</span> <span style="font-size:11px;color:#475569;font-weight:700;">Pregunta OT ${idx + 1}</span></div>
+      <div class="qz-q">${item.q}</div>
+      <div class="qz-opts">${btns}${badgeRes}</div>
+      <div class="qz-fb"><b>Respaldo oficial:</b> ${item.why}</div>`;
+    wrap.appendChild(card);
+  });
+  const sc = document.getElementById("ot-qz-score");
+  if (sc) sc.textContent = `Aciertos OT: ${okCount} / ${OT_QUIZ_DATA.length}`;
+}
+
+presetOtAisl('pauta');
+drawOtSistemasSvg();
+renderOtAnexo2();
+renderOtQuiz();
 drawIndicadoresU6();
 renderMecanica();
 drawMapaTeoria();
@@ -3712,5 +5172,5 @@ renderQuizLectura();
 
 
 def renderizar_laboratorio_fluido_territorial():
-    """Renderiza el Estudio Territorial Integral a 60 FPS (8 módulos) sin recarga de servidor."""
+    """Renderiza el Estudio Territorial Integral a 60 FPS (11 pestañas, incluyendo Laboratorio OT Unidad V) sin recarga de servidor."""
     components.html(HTML_TERRITORIAL_60FPS, height=1280, scrolling=True)
