@@ -468,6 +468,24 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
     border-radius: 6px; padding: 9px 12px; font-size: 11.9px; line-height: 1.46; color: #1E293B; margin: 8px 0 11px 0;
   }
 
+  .ot-sem-bar { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+  .ot-sem-btn {
+    border: 1px solid #CBD5E1; background: #FFFFFF; color: #334155;
+    padding: 5px 10px; border-radius: 5px; font-size: 11.4px; font-weight: 700; cursor: pointer;
+    transition: all 0.14s ease;
+  }
+  .ot-sem-btn:hover { border-color: #1D4ED8; color: #1D4ED8; background: #EFF6FF; }
+  .ot-sem-btn.active { background: #0F172A; color: #FFFFFF; border-color: #0F172A; }
+  .ot-sem-card {
+    background: #FFFFFF; border: 1px solid #CBD5E1; border-left: 5px solid #DC2626;
+    border-radius: 6px; padding: 10px 13px; margin-bottom: 11px; font-size: 11.8px; line-height: 1.46; color: #1E293B;
+  }
+  .ot-sem-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 7px; }
+  @media (max-width: 820px) { .ot-sem-grid { grid-template-columns: 1fr; } }
+  .ot-sem-cell { background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 5px; padding: 6px 8px; font-size: 11.2px; }
+  .ot-sem-cell b { color: #0F172A; display: block; margin-bottom: 2px; font-size: 10.6px; text-transform: uppercase; letter-spacing: 0.2px; }
+  .sem-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+
   @media print {
     body { background: #FFFFFF !important; }
     .top-tabs, .mec-toolbar, .mec-filters, .btn-bar, .chk-btn { display: none !important; }
@@ -494,7 +512,7 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
     <button class="tab-btn" onclick="openTab('christaller', this)">5. Lugares Centrales y Capital Social (Unidades 2 y 4)</button>
     <button class="tab-btn" onclick="openTab('lorenz', this)">6. Disparidades y Primacía: Lorenz, Gini, Theil e IP4 (Unidades 3 y 5)</button>
     <button class="tab-btn" onclick="openTab('dini', this)">7. Redes Empresariales y UCINET: Dini 2010 (Unidad 4)</button>
-    <button class="tab-btn" onclick="openTab('ot', this)">8. Ordenamiento Territorial: Flechas, Primacía, Rondinelli y Aislamiento (Unidad 5)</button>
+    <button class="tab-btn" onclick="openTab('ot', this)">8. Ordenamiento Territorial — Control 5 (Unidad 5)</button>
     <button class="tab-btn" onclick="openTab('indicadores', this)">9. Indicadores de Desarrollo Mín–Máx (Unidad 6)</button>
     <button class="tab-btn" onclick="openTab('mecanica', this)">10. Formulario de Fórmulas y Gráficos (Modo Ciego)</button>
     <button class="tab-btn" onclick="openTab('lectura', this)">11. Mapa Teórico Integrado y Control de Lectura</button>
@@ -901,8 +919,8 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
   <!-- ====================================================================== -->
   <div id="panel-ot" class="panel">
     <div class="sec-title">
-      <span>Unidad V — Ordenamiento Territorial (OT): Ranking con Flechas, Primacía, Guttman/Rondinelli y Aislamiento</span>
-      <span style="font-size:11px;font-weight:700;color:#1E3A8A;">Laboratorio interactivo 60 FPS · 4 indicadores de cátedra</span>
+      <span>Unidad V — Ordenamiento Territorial (Control 5 y Control de Lectura 5)</span>
+      <span style="font-size:11px;font-weight:700;color:#1E3A8A;">4 Indicadores Interactivos 60 FPS · Base Teórica OT + Manual PROT</span>
     </div>
 
     <div class="ot-subtabs">
@@ -910,7 +928,7 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
       <button id="ot-subbtn-rd" class="ot-sub-btn" onclick="openOtSub('rd', this)">B. Guttman / Rondinelli (1/0 + Gráfico)</button>
       <button id="ot-subbtn-ai" class="ot-sub-btn" onclick="openOtSub('ai', this)">C. Aislamiento Comunal (0/1 + Red Vial)</button>
       <button id="ot-subbtn-teo" class="ot-sub-btn" onclick="openOtSub('teo', this)">D. Base Teórica OT, Escalas, 6 Problemas y PLADECO/ERD</button>
-      <button id="ot-subbtn-prot" class="ot-sub-btn" onclick="openOtSub('prot', this)">E. Manual PROT (SUBDERE-CEPAL) + Control de Lectura (10)</button>
+      <button id="ot-subbtn-prot" class="ot-sub-btn" onclick="openOtSub('prot', this)">E. Manual PROT + Mapa Semáforo + Control de Lectura 5 (10)</button>
     </div>
 
     <!-- SUB-PANEL A: RANKING CON FLECHAS CRUZADAS Y PRIMACÍA ENTRE 2 CENSOS -->
@@ -948,7 +966,21 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
         <div id="ot-rk-tbl-box" class="ot-mat-wrap"></div>
         <div class="svg-box"><svg id="svg-ot-flechas" viewBox="0 0 600 415"></svg></div>
       </div>
-      <div id="ped-ot-rk" class="ped-grid"></div>
+            <div id="ped-ot-rk" class="ped-grid"></div>
+      <details class="teo-box" open>
+        <summary>
+          <span>Base Teórica en Simple — Ranking de Asentamientos y Primacía Urbana (Control 5 · Láms. 9–12)</span>
+          <span class="enun-badge">Desplegar / ocultar teoría de apoyo</span>
+        </summary>
+        <div class="teo-body">
+          <ul>
+            <li><b>¿Para qué sirve un indicador de OT? (Láms. 9–10):</b> todo Ordenamiento Territorial nace de analizar la relación <i>espacio–sociedad</i>. Un indicador es una herramienta técnica para detectar tendencias, reconocer la situación actual y medir cuánto cambió un territorio en forma cualitativa y cuantitativa.</li>
+            <li><b>1. Ranking de Asentamientos (Lám. 10):</b> ordena las localidades de mayor a menor población (1, 2, 3… n) comparando los <b>dos últimos censos</b>. Las flechas cruzadas revelan migraciones internas, expansión de comunas dormitorio o pérdida de dinamismo económico. <b>Requisito Control 5:</b> calcular para <b>todas las comunas</b> de la región (Censos 2017 y 2024).</li>
+            <li><b>2. Índice de Primacía IP<sub>4</sub> (Láms. 11–12):</b> mide el peso de la ciudad principal frente a la suma de las tres siguientes: <b>P<sub>1</sub> / (P<sub>2</sub> + P<sub>3</sub> + P<sub>4</sub>)</b>. Su objetivo es evaluar si la red de ciudades es suficientemente <i>equilibrada</i> para proveer bienes y servicios de manera eficiente y equitativa.</li>
+            <li><b>¿Por qué hay que estandarizarlo de 0 a 3?</b> Porque IP<sub>4</sub> <b>no tiene cota superior</b> (puede valer 0,4 o 12,0), aunque mientras más se acerca a 0 menor primacía existe. Por eso se traduce a una escala orientadora: <b>3</b> = Altamente Concentrada (macrocefalia), <b>2</b> = Concentrada, <b>1</b> = Dispersa y <b>0</b> = Muy Dispersa.</li>
+          </ul>
+        </div>
+      </details>
     </div>
 
     <!-- SUB-PANEL B: ESCALA DE GUTTMAN Y MATRIZ DE RONDINELLI -->
@@ -983,7 +1015,24 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
       <div id="ot-rd-alert"></div>
       <div id="ot-rd-tbl-box" class="ot-mat-wrap" style="margin-bottom:10px;"></div>
       <div class="svg-box"><svg id="svg-ot-rond" viewBox="0 0 980 345"></svg></div>
-      <div id="ped-ot-rd" class="ped-grid"></div>
+            <div id="ped-ot-rd" class="ped-grid"></div>
+      <details class="teo-box" open>
+        <summary>
+          <span>Base Teórica en Simple — Escala de Guttman y Matriz de Rondinelli (Control 5 · Láms. 12–15)</span>
+          <span class="enun-badge">3 propiedades clave que entran en pruebas</span>
+        </summary>
+        <div class="teo-body">
+          <ul>
+            <li><b>¿Qué mide? (Lám. 12):</b> la <b>complejidad funcional</b> de los asentamientos humanos registrando presencia (<code>1</code>) o ausencia (<code>0</code>) de servicios, infraestructura, organizaciones o actividades económicas.</li>
+            <li><b>Las 3 propiedades obligatorias de la Escala de Guttman (Lám. 12):</b>
+              <br/>1) <b>Unidimensional:</b> todos los ítems miden alrededor de un solo objetivo o dimensión (ej. solo apoyo productivo, o solo salud/educación).
+              <br/>2) <b>Ordinal:</b> los ítems se clasifican en presente–ausente (sí–no; <code>1</code> o <code>0</code>).
+              <br/>3) <b>Acumulativa:</b> los ítems se ordenan por grado de complejidad, de modo que una ciudad con ítems complejos (ej. hospital tipo 1 o universidad) normalmente ya posee los ítems básicos de orden menor (ej. posta o escuela).</li>
+            <li><b>Procedimiento de Rondinelli en 4 pasos (Láms. 13–15):</b> (1) inspección preliminar de servicios por dimensión (públicos, transporte, comercio, salud, recreación, educación, profesionales); (2) ordenar localidades de <b>mayor a menor población</b>; (3) llenar matriz <code>1/0</code> y ponderar cada servicio con <b>W<sub>k</sub> = 100 / f<sub>k</sub></b> (lo más escaso vale más); (4) graficar <b>Complejidad vs. Población</b> (en una red ordenada la jerarquía funcional debiera ser decreciente con la población).</li>
+            <li><b>Regla del Control 5 (Pauta Unidad 5):</b> aplicar a las <b>10 comunas con más población</b> con <b>mínimo 7 variables</b>. Las variables deben marcar <b>diferencias</b> entre comunas: si todas tienen <code>1</code> en una columna, debes reemplazar esa variable.</li>
+          </ul>
+        </div>
+      </details>
     </div>
 
     <!-- SUB-PANEL C: ÍNDICE DE AISLAMIENTO COMUNAL -->
@@ -1019,7 +1068,21 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
         <div id="ot-ai-tbl-box" class="ot-mat-wrap"></div>
         <div class="svg-box"><svg id="svg-ot-aisl" viewBox="0 0 560 405"></svg></div>
       </div>
-      <div id="ped-ot-ai" class="ped-grid"></div>
+            <div id="ped-ot-ai" class="ped-grid"></div>
+      <details class="teo-box" open>
+        <summary>
+          <span>Base Teórica en Simple — Índice de Aislamiento, Rugosidad y Fricción (Control 5 · Lám. 15 y PROT pág. 12)</span>
+          <span class="enun-badge">Vínculo directo con el Manual PROT</span>
+        </summary>
+        <div class="teo-body">
+          <ul>
+            <li><b>Origen institucional (Lám. 15):</b> es una versión simplificada del <b>Índice de Aislamiento Territorial</b> usado por la <b>Dirección de Obras Portuarias (MOP)</b> de Chile, que originalmente evalúa el acceso de una localidad <i>i</i> a 7 servicios clave: (1) capital regional, (2) capital comunal, (3) asistencia poblacional, (4) servicios de emergencia, (5) educación, (6) salud y (7) servicios financieros.</li>
+            <li><b>Cómo se construye en el Control 5 (Pauta Unidad 5):</b> se arma una matriz simétrica para <b>todas las comunas</b> usando cualquiera de dos criterios: <b>(a)</b> <code>0</code> si está conectada directamente, <code>1</code> si no lo está; o <b>(b)</b> <code>0</code> si la ruta está asfaltada/pavimentada, <code>1</code> si es ripio/tierra. <b>Ojo:</b> aquí <code>0</code> es positivo (accesible) y <code>1</code> indica aislamiento.</li>
+            <li><b>Conexión teórica con el Manual PROT (SUBDERE-CEPAL, pág. 12):</b> la accesibilidad depende de la <b>rugosidad de la superficie</b> (relieve difícil, rutas malas, necesidad de combinar transbordadores o buses) y de la <b>fricción de la distancia</b> (que incluso aumenta artificialmente cuando suben los peajes).</li>
+            <li><b>El Círculo Vicioso del Aislamiento (PROT, pág. 12):</b> menor acceso a empleo → caída demográfica → baja el umbral de población → cierre o recorte de servicios públicos y privados → el territorio se vuelve un "enclave repulsivo", perpetuando el rezago.</li>
+          </ul>
+        </div>
+      </details>
     </div>
 
     <!-- SUB-PANEL D: BASE TEÓRICA COMPLETA OT (06 OT 2024 + PLADECO + ERD) -->
@@ -1133,6 +1196,43 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
           </ul>
         </div>
       </div>
+      <div class="ot-tcard tc-dark" style="margin-top:11px;">
+        <div class="ot-tcard-hd"><span>9. Comparador Rápido en 1 Mirada: PLADECO vs. ERD vs. PROT (Clave para Control 5)</span><span class="ot-tcard-tag">Escala · Responsable · Horizonte · Rol</span></div>
+        <table class="ot-mat-tbl" style="margin-top:4px;">
+          <thead>
+            <tr>
+              <th>Instrumento</th>
+              <th>Escala</th>
+              <th>Quién lo lidera</th>
+              <th>Horizonte / Carácter</th>
+              <th>Función Principal en el Territorio</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>PLADECO</td>
+              <td>Comunal</td>
+              <td style="text-align:left;font-family:inherit;">Municipalidad (SECPLA + Alcalde/Concejo + Comunidad)</td>
+              <td style="text-align:left;font-family:inherit;">Mediano plazo · Estratégico participativo</td>
+              <td style="text-align:left;font-family:inherit;">Fija la visión de futuro, temas estratégicos y proyectos concretos de la comuna (ej. parques fluviales y CESFAM en Osorno).</td>
+            </tr>
+            <tr>
+              <td>ERD</td>
+              <td>Regional</td>
+              <td style="text-align:left;font-family:inherit;">Gobierno Regional (GORE y CORE)</td>
+              <td style="text-align:left;font-family:inherit;">Largo plazo (ej. Los Lagos 2030) · Estratégico</td>
+              <td style="text-align:left;font-family:inherit;">Define las grandes metas económicas, sociales, culturales y ambientales de la región, pero aún sin bajarlas al mapa.</td>
+            </tr>
+            <tr>
+              <td>PROT</td>
+              <td>Regional</td>
+              <td style="text-align:left;font-family:inherit;">GORE (Ley 19.175 LOCGAR) coordinando SEREMIs y privados</td>
+              <td style="text-align:left;font-family:inherit;">10 años · Orientador e integrador (supera al PRDU)</td>
+              <td style="text-align:left;font-family:inherit;"><b>Espacializa la ERD</b> en el mapa integrando 4 sistemas (Costero, Urbano, Rural y Cuencas) para compatibilizar usos y resolver conflictos.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
 
     <!-- SUB-PANEL E: MANUAL PROT (SUBDERE-CEPAL 2011) + SISTEMAS SVG + BUSCADOR ANEXO 2 + QUIZ -->
@@ -1203,11 +1303,24 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
       </div>
 
       <div class="sec-title" style="margin-top:6px;">
-        <span>Control de Lectura Interactivo — Ordenamiento Territorial y PROT (10 Preguntas Tipo Prueba)</span>
+        <span>Simulador Pedagógico: Mapa Semáforo y Resolución de Conflictos Territoriales (Láms. 7–8 + PROT)</span>
+        <span style="font-size:11px;font-weight:700;color:#1E3A8A;">Elige un caso real para conectar Problema OT + Principio + Sistema PROT + Ley</span>
+      </div>
+      <div class="ot-sem-bar">
+        <button id="ot-sem-b0" class="ot-sem-btn active" onclick="selectOtSemaforo(0, this)">1. Bosque Nativo vs. Empresa</button>
+        <button id="ot-sem-b1" class="ot-sem-btn" onclick="selectOtSemaforo(1, this)">2. Relave Minero cerca de Escuela</button>
+        <button id="ot-sem-b2" class="ot-sem-btn" onclick="selectOtSemaforo(2, this)">3. Viviendas en Zona de Riesgo</button>
+        <button id="ot-sem-b3" class="ot-sem-btn" onclick="selectOtSemaforo(3, this)">4. Límite Difuso Urbano / Rural</button>
+        <button id="ot-sem-b4" class="ot-sem-btn" onclick="selectOtSemaforo(4, this)">5. Alza de Peajes / Aislamiento Rural</button>
+      </div>
+      <div id="ot-sem-box" class="ot-sem-card"></div>
+
+      <div class="sec-title" style="margin-top:6px;">
+        <span>Control de Lectura 5 Interactivo — Ordenamiento Territorial y PROT (10 Preguntas Tipo Prueba)</span>
         <div class="btn-bar">
-          <span id="ot-qz-score" class="pill-score">Aciertos OT: 0 / 10</span>
+          <span id="ot-qz-score" class="pill-score">Control 5: 0 / 10</span>
           <button class="act-btn" onclick="toggleSoloErrOtQz(this)">Ver Solo Pendientes / Erradas</button>
-          <button class="act-btn" onclick="resetOtQuiz()">Reiniciar Control OT</button>
+          <button class="act-btn" onclick="resetOtQuiz()">Reiniciar Control 5</button>
         </div>
       </div>
       <div id="ot-qz-list"></div>
@@ -4129,7 +4242,7 @@ function drawOtActive() {
   if (otSubActive === "rk") drawOtRanking();
   else if (otSubActive === "rd") drawOtRond();
   else if (otSubActive === "ai") drawOtAisl();
-  else if (otSubActive === "prot") { drawOtSistemasSvg(); renderOtAnexo2(); renderOtQuiz(); }
+  else if (otSubActive === "prot") { drawOtSistemasSvg(); renderOtAnexo2(); renderOtSemaforo(); renderOtQuiz(); }
 }
 
 // --- A. RANKING DE ASENTAMIENTOS (FLECHAS CRUZADAS) Y PRIMACÍA 2 CENSOS ---
@@ -4388,10 +4501,11 @@ function drawOtRanking() {
     }, svg);
 
     if (chg !== 0 && otRkAnimU > 0.75) {
-      const xm = (x1 + x2End) / 2 + (chg > 0 ? -18 : 18);
-      const ym = (y1 + y2Target) / 2 - 4;
+      const tPos = chg > 0 ? 0.30 : 0.70;
+      const xm = x1 + (x2End - x1) * tPos;
+      const ym = y1 + (y2Target - y1) * tPos + (chg > 0 ? -10 : 12);
       if (isHov || Math.abs(chg) >= 1) {
-        drawPill(svg, xm, ym, `${chg > 0 ? "↑+" : "↓"}${chg}`, col, "#FFFFFF", "middle", "9.3");
+        drawPill(svg, xm, ym, `${chg > 0 ? "↑+" : "↓"}${chg}`, col, "#FFFFFF", "middle", "9.2");
       }
     }
   });
@@ -4951,7 +5065,8 @@ function drawOtSistemasSvg() {
   });
   // Flujo de cuenca hídrica
   el("polyline", { points: "835,58 790,118 725,134 670,134", fill: "none", stroke: "#7C3AED", "stroke-width": "2.6", "stroke-dasharray": "5,3" }, svg);
-  const tNote = el("text", { x: 490, y: 184, fill: "#334155", "font-size": "10.3", "font-weight": "700", "text-anchor": "middle" }, svg);
+  el("rect", { x: 145, y: 171, width: 690, height: 18, rx: 4, fill: "rgba(255,255,255,0.94)", stroke: "#CBD5E1", "stroke-width": "0.9" }, svg);
+  const tNote = el("text", { x: 490, y: 183.5, fill: "#1E293B", "font-size": "10.2", "font-weight": "700", "text-anchor": "middle" }, svg);
   tNote.textContent = "Continuo Territorial Regional (Figura 1, SUBDERE-CEPAL 2011, pág. 20) — Ningún sistema opera aislado de los demás";
 
   const cur = OT_SISTEMAS_DATA[otSysSel];
@@ -5153,12 +5268,97 @@ function renderOtQuiz() {
     wrap.appendChild(card);
   });
   const sc = document.getElementById("ot-qz-score");
-  if (sc) sc.textContent = `Aciertos OT: ${okCount} / ${OT_QUIZ_DATA.length}`;
+  if (sc) sc.textContent = `Control 5: ${okCount} / ${OT_QUIZ_DATA.length}`;
 }
 
 presetOtAisl('pauta');
+
+const OT_SEMAFORO_CASOS = [
+  {
+    titulo: "Conflicto de Uso de Suelo: Proteger Bosque Nativo vs. Instalar Planta Industrial",
+    nivel: "ROJO — Conflicto Crítico de Incompatibilidad",
+    col: "#DC2626",
+    motivo: "Problema #2 (Lám. 7): Conflicto de uso de suelo / territorio entre conservación ecológica y actividad económica privada.",
+    principio: "Bien público sobre el particular + Conciliador + Sustentabilidad ambiental (compatibilizar demandas económicas con capacidades del medio).",
+    sistema: "Sistema Rural y Sistema Cuenca Hidrográfica (zonificación por usos preferentes y áreas protegidas).",
+    escala: "Regional (PROT: zonificación orientadora) + Local (Plan Regulador / uso de suelo).",
+    normas: "DS 4.363 (Ley de Bosques · CONAF), Ley 19.300 (SEIA · MMA) y Ley 18.362 (SNASPE)."
+  },
+  {
+    titulo: "Infraestructura Mal Localizada: Relave Minero cerca de Escuela o Basural en Zona Turística",
+    nivel: "ROJO — Riesgo Sanitario y Externalidad Negativa Grave",
+    col: "#DC2626",
+    motivo: "Problema #6 y #4 (Lám. 8): Infraestructura estratégica mal localizada o dimensionada + contaminación territorial.",
+    principio: "Solidaridad territorial (prever/compensar externalidades negativas) + Principio del orden (la localización sí importa).",
+    sistema: "Sistema Rural / Cuenca Hidrográfica y Sistema Urbano (habitabilidad y salud ambiental).",
+    escala: "Regional (PROT + SEIA) y Nacional (normas de calidad ambiental y emisión).",
+    normas: "Ley 18.248 (Código Minería · SERNAGEOMIN), DS 148/2003 (Residuos Peligrosos · Salud) y Ley 19.300 (MMA)."
+  },
+  {
+    titulo: "Vulnerabilidad Socioespacial: Población o Actividades en Zonas de Alto Riesgo Natural",
+    nivel: "ROJO — Alerta de Amenaza Natural y Desigualdad",
+    col: "#B91C1C",
+    motivo: "Problema #5 (Lám. 8): Localización de población (frecuentemente de menores recursos) en laderas, bordes fluviales o zonas inundables.",
+    principio: "Habitabilidad y Justicia socio-espacial (PROT pág. 8 y 22) + Enfoque preventivo de riesgos.",
+    sistema: "Sistema Urbano y Sistema Cuenca Hidrográfica / Costero (Zonificación regional de zonas de riesgos naturales).",
+    escala: "Local (PRC: áreas de riesgo) articulado con Regional (PROT: mapas físicos de amenazas).",
+    normas: "DFL 458 (LGUC · MINVU / DOM), Ley 16.282 (Catástrofes) y DS 156/2002 (Protección Civil)."
+  },
+  {
+    titulo: "Concurrencia Territorial: Límites Difusos entre Área Urbana, Rural o Cuencas",
+    nivel: "ÁMBAR — Fricción Institucional y Superposición de Competencias",
+    col: "#D97706",
+    motivo: "Problema #1 (Lám. 7): Conflictos de delimitación y competencias (ej. parcelaciones rurales en el borde de la ciudad sin servicios).",
+    principio: "Coordinación + Complementariedad + Subsidiariedad (superar mirada sectorial y perfeccionar la geografía institucional, PROT pág. 16).",
+    sistema: "Interfaz Sistema Urbano ↔ Sistema Rural (conurbaciones y expansión periurbana).",
+    escala: "Interlocal (Planes Intercomunales PRI/PRM) y Regional (GORE bajo Ley 19.175).",
+    normas: "DL 3.516 (División de Predios Rústicos · SAG/MINVU), DFL 458 (LGUC) y Ley 19.175 (LOCGAR)."
+  },
+  {
+    titulo: "Aislamiento Territorial: Topografía Difícil, Caminos de Ripio o Alza Artificial de Peajes",
+    nivel: "ÁMBAR — Fricción de la Distancia y Círculo Vicioso de Enclave",
+    col: "#D97706",
+    motivo: "PROT pág. 12 + Indicador 4 (Aislamiento): mayor rugosidad o costo de viaje reduce empleo, baja umbrales poblacionales y provoca cierre de servicios.",
+    principio: "Equidad territorial (justicia socio-espacial) + Cohesión socio-territorial + Funcionalidad.",
+    sistema: "Sistema Rural y localidades aisladas (conectividad, transporte público e infraestructura).",
+    escala: "Regional (función del GORE: desarrollo de áreas rurales y localidades aisladas) + Nacional (MOP).",
+    normas: "Ley 19.175 Art. 17 (GORE: conectividad y áreas aisladas) y DFL 850/1997 (Ley Orgánica MOP y caminos)."
+  }
+];
+
+let otSemIdx = 0;
+
+function selectOtSemaforo(idx, btn) {
+  otSemIdx = idx;
+  if (btn) {
+    btn.parentElement.querySelectorAll(".ot-sem-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+  }
+  renderOtSemaforo();
+}
+function renderOtSemaforo() {
+  const box = document.getElementById("ot-sem-box");
+  if (!box) return;
+  const c = OT_SEMAFORO_CASOS[otSemIdx] || OT_SEMAFORO_CASOS[0];
+  box.style.borderLeftColor = c.col;
+  box.innerHTML = `
+    <div style="font-size:12.4px;font-weight:800;color:#0F172A;margin-bottom:4px;">
+      <span class="sem-dot" style="background:${c.col};"></span>${c.titulo}
+    </div>
+    <div style="font-size:11.2px;font-weight:800;color:${c.col};margin-bottom:6px;">Nivel Mapa Semáforo: ${c.nivel}</div>
+    <div class="ot-sem-grid">
+      <div class="ot-sem-cell"><b>1. Diagnóstico (6 Problemas OT)</b>${c.motivo}</div>
+      <div class="ot-sem-cell"><b>2. Principio de OT que Aplica</b>${c.principio}</div>
+      <div class="ot-sem-cell"><b>3. Sistema PROT y Escala</b>${c.sistema}<br/><i>Escala:</i> ${c.escala}</div>
+    </div>
+    <div style="margin-top:7px;padding:6px 8px;background:#F1F5F9;border-radius:4px;font-size:11.2px;">
+      <b>Marco Regulatorio (Anexo 2 PROT):</b> ${c.normas}
+    </div>`;
+}
+
 drawOtSistemasSvg();
 renderOtAnexo2();
+renderOtSemaforo();
 renderOtQuiz();
 drawIndicadoresU6();
 renderMecanica();
