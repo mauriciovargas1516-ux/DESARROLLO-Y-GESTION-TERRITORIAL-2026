@@ -243,82 +243,109 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
   .u6-rk-dn { color: #DC2626; font-weight: 800; }
   .u6-rk-eq { color: #64748B; }
   .u6-pill-row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-bottom: 9px; }
-  /* === TARJETAS DE FÓRMULAS VIVAS (REEMPLAZO VISUAL + MODO RAYOS X) === */
+  /* === TARJETAS DE FÓRMULAS VIVAS (GRANDE + EDITABLE IN-PLACE + RAYOS X) === */
   .fstrip-grid {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(225px, 1fr));
-    gap: 8px; margin: 9px 0 10px 0;
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+    gap: 10px; margin: 10px 0 12px 0;
   }
   .fstrip-card {
     background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%);
-    border: 1px solid #CBD5E1; border-left: 3.5px solid #1E3A8A;
-    border-radius: 7px; padding: 8px 10px; cursor: pointer;
-    transition: transform 0.14s ease, box-shadow 0.16s ease, border-color 0.16s ease;
+    border: 1px solid #CBD5E1; border-left: 4px solid #1E3A8A;
+    border-radius: 8px; padding: 11px 14px;
+    transition: box-shadow 0.16s ease, border-color 0.16s ease;
     position: relative;
   }
   .fstrip-card:hover {
-    border-color: #1D4ED8; box-shadow: 0 3px 10px rgba(29, 78, 216, 0.10);
-    transform: translateY(-1px);
+    border-color: #93C5FD; box-shadow: 0 3px 12px rgba(29, 78, 216, 0.09);
   }
   .fstrip-card.xray-on {
     background: linear-gradient(180deg, #F0F9FF 0%, #FFFFFF 100%);
-    box-shadow: 0 3px 12px rgba(29, 78, 216, 0.14);
+    border-color: #3B82F6;
+    box-shadow: 0 4px 14px rgba(29, 78, 216, 0.14);
   }
   .fstrip-head {
-    display: flex; justify-content: space-between; align-items: center; gap: 6px; margin-bottom: 5px;
+    display: flex; justify-content: space-between; align-items: center; gap: 8px;
+    margin-bottom: 7px; cursor: pointer;
   }
-  .fstrip-lbl { font-size: 11px; font-weight: 800; color: #1E3A8A; letter-spacing: 0.1px; }
+  .fstrip-lbl { font-size: 12px; font-weight: 800; color: #1E3A8A; letter-spacing: 0.1px; }
   .xray-pill {
-    font-size: 9.8px; font-weight: 800; padding: 2px 6px; border-radius: 10px;
+    font-size: 10.5px; font-weight: 800; padding: 3px 8px; border-radius: 12px;
     border: 1px solid #BFDBFE; background: #EFF6FF; color: #1D4ED8;
-    white-space: nowrap; transition: all 0.15s ease;
+    white-space: nowrap; transition: all 0.15s ease; cursor: pointer;
   }
+  .xray-pill:hover { background: #DBEAFE; }
   .fstrip-card.xray-on .xray-pill {
     background: #0F172A; color: #FFFFFF; border-color: #0F172A;
   }
   .fstrip-eq {
     font-family: "Cambria Math", "Times New Roman", Georgia, serif;
-    font-size: 13.8px; font-weight: 700; color: #0F172A;
-    display: block; line-height: 1.65;
+    font-size: 16.5px; font-weight: 700; color: #0F172A;
+    display: block; line-height: 1.75;
   }
   .fstrip-sub {
     font-family: "Cambria Math", "Times New Roman", Georgia, serif;
-    font-size: 12.6px; font-weight: 700; color: #0F172A;
-    margin-top: 6px; padding-top: 6px; border-top: 1px dashed #CBD5E1;
-    display: block; line-height: 1.7;
+    font-size: 15.2px; font-weight: 700; color: #0F172A;
+    margin-top: 8px; padding-top: 8px; border-top: 1px dashed #CBD5E1;
+    display: block; line-height: 1.95;
   }
   .fstrip-card.xray-on .fstrip-eq { display: none; }
   .fstrip-card.xray-on .fstrip-sub {
-    margin-top: 2px; padding-top: 2px; border-top: none; font-size: 14.2px;
+    margin-top: 4px; padding-top: 2px; border-top: none; font-size: 17.5px; line-height: 2.05;
+  }
+  .fstrip-card .frac {
+    font-size: 0.96em; margin: 0 3px; line-height: 1.25;
+  }
+  .fstrip-card .frac .num {
+    border-bottom: 1.7px solid #0F172A; padding: 0 5px 2px 5px;
+  }
+  .fstrip-card .frac .den {
+    padding: 2px 5px 0 5px;
   }
   .fstrip-note {
-    font-size: 10.4px; color: #475569; margin-top: 4px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-    display: flex; flex-wrap: wrap; gap: 5px; align-items: center;
+    font-size: 11.4px; color: #475569; margin-top: 6px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    display: flex; flex-wrap: wrap; gap: 5px; align-items: center; line-height: 1.4;
   }
   .v-chip {
-    display: inline-block; padding: 0px 5px; border-radius: 4px;
-    font-family: Consolas, monospace; font-size: 0.90em; font-weight: 800;
-    border: 1px solid transparent; line-height: 1.32; vertical-align: baseline;
-    transition: transform 0.15s ease;
+    display: inline-block; padding: 1px 7px; border-radius: 5px;
+    font-family: Consolas, monospace; font-size: 0.94em; font-weight: 800;
+    border: 1.3px solid transparent; line-height: 1.35; vertical-align: baseline;
+    transition: transform 0.14s ease, box-shadow 0.14s ease;
   }
-  .v-chip:hover { transform: scale(1.07); }
-  .vc-b { background: #DBEAFE; color: #1E40AF; border-color: #93C5FD; }
-  .vc-t { background: #CCFBF1; color: #0F766E; border-color: #5EEAD4; }
-  .vc-p { background: #F3E8FF; color: #6B21A8; border-color: #D8B4FE; }
-  .vc-o { background: #FFEDD5; color: #9A3412; border-color: #FDBA74; }
-  .vc-r { background: #FEE2E2; color: #991B1B; border-color: #FCA5A5; }
-  .vc-g { background: #DCFCE7; color: #166534; border-color: #86EFAC; }
+  .v-chip.editable {
+    cursor: text; border-style: dashed;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+  }
+  .v-chip.editable:hover {
+    transform: translateY(-1px) scale(1.04);
+    border-style: solid;
+    box-shadow: 0 0 0 2.5px rgba(29, 78, 216, 0.22);
+  }
+  .chip-inline-in {
+    font-family: Consolas, monospace; font-size: 0.96em; font-weight: 800;
+    color: #0F172A; background: #FFFFFF; border: 2px solid #1D4ED8;
+    border-radius: 5px; padding: 1px 5px; text-align: center;
+    outline: none; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.20);
+    vertical-align: baseline;
+  }
+  .vc-b { background: #DBEAFE; color: #1E40AF; border-color: #60A5FA; }
+  .vc-t { background: #CCFBF1; color: #0F766E; border-color: #2DD4BF; }
+  .vc-p { background: #F3E8FF; color: #6B21A8; border-color: #C084FC; }
+  .vc-o { background: #FFEDD5; color: #9A3412; border-color: #FB923C; }
+  .vc-r { background: #FEE2E2; color: #991B1B; border-color: #F87171; }
+  .vc-g { background: #DCFCE7; color: #166534; border-color: #4ADE80; }
   .vc-res {
     background: #15803D; color: #FFFFFF; border-color: #166534;
-    padding: 1px 6px; border-radius: 5px; font-family: Consolas, monospace;
-    font-size: 0.92em; font-weight: 800; display: inline-block; line-height: 1.3;
+    padding: 2px 8px; border-radius: 6px; font-family: Consolas, monospace;
+    font-size: 0.98em; font-weight: 800; display: inline-block; line-height: 1.35;
   }
   .vc-res.neg { background: #DC2626; border-color: #991B1B; }
   @keyframes chipPop {
     0% { transform: scale(1); }
-    45% { transform: scale(1.10); filter: brightness(1.06); }
+    45% { transform: scale(1.09); filter: brightness(1.05); }
     100% { transform: scale(1); }
   }
-  .v-pop { animation: chipPop 0.24s ease-out; }
+  .v-pop { animation: chipPop 0.25s ease-out; }
   .sym-b { color: #1D4ED8; }
   .sym-t { color: #0F766E; }
   .sym-p { color: #7C3AED; }
@@ -1004,15 +1031,179 @@ function vChip(val, cls="vc-b", tip="", trackKey="") {
   const tAttr = tip ? ` title="${tip.replace(/"/g, '&quot;')}"` : "";
   return `<span class="v-chip ${cls}${pop}"${tAttr}>${val}</span>`;
 }
+function eChip(displayVal, rawNum, bindKey, step="any", cls="vc-b", tip="") {
+  let pop = "";
+  if (bindKey) {
+    if (fstripPrevVals[bindKey] !== undefined && fstripPrevVals[bindKey] !== String(displayVal)) pop = " v-pop";
+    fstripPrevVals[bindKey] = String(displayVal);
+  }
+  const fullTip = (tip ? tip + " · " : "") + "Clic para editar directo en la fórmula (Enter aplica)";
+  const tAttr = ` title="${fullTip.replace(/"/g, '&quot;')}"`;
+  return `<span class="v-chip editable ${cls}${pop}"${tAttr} data-bind="${bindKey}" data-raw="${rawNum}" data-step="${step}" onclick="openChipEditor(event, this)">${displayVal}</span>`;
+}
 function rChip(val, isNeg=false, tip="") {
   const tAttr = tip ? ` title="${tip.replace(/"/g, '&quot;')}"` : "";
   return `<span class="vc-res${isNeg ? ' neg' : ''}"${tAttr}>${val}</span>`;
 }
-function toggleXrayCard(cardKey, cardEl) {
+function toggleXrayCard(cardKey, headEl) {
+  const cardEl = headEl.closest(".fstrip-card");
+  if (!cardEl) return;
   fstripXrayState[cardKey] = !fstripXrayState[cardKey];
   cardEl.classList.toggle("xray-on", !!fstripXrayState[cardKey]);
   const pill = cardEl.querySelector(".xray-pill");
   if (pill) pill.textContent = fstripXrayState[cardKey] ? "Rayos X: ON ⇄" : "f(x) → 123";
+}
+function setSliderSmart(id, val, hardMin=null, hardMax=null) {
+  const sl = document.getElementById(id);
+  if (!sl) return val;
+  let v = val;
+  if (hardMin !== null) v = Math.max(hardMin, v);
+  if (hardMax !== null) v = Math.min(hardMax, v);
+  if (v > parseFloat(sl.max) && (hardMax === null || v <= hardMax)) sl.max = Math.ceil(v * 1.25);
+  if (v < parseFloat(sl.min) && (hardMin === null || v >= hardMin)) sl.min = Math.floor(v * 0.5);
+  sl.value = v;
+  return v;
+}
+function applyChipEdit(bindKey, rawStr) {
+  const clean = String(rawStr || "").replace(/,/g, ".").trim();
+  const val = parseFloat(clean);
+  if (!Number.isFinite(val)) return false;
+
+  // 1. Perroux / Hirschman / Myrdal
+  if (bindKey === "px_i0") { setSliderSmart("px-i0", Math.max(50, Math.round(val)), 50, null); drawPerroux(); return true; }
+  if (bindKey === "px_b")  { setSliderSmart("px-b", val, 0.01, 0.45); drawPerroux(); return true; }
+  if (bindKey === "px_f")  { setSliderSmart("px-f", val, 0.01, 0.45); drawPerroux(); return true; }
+  if (bindKey === "px_sp") { setSliderSmart("px-sp", Math.round(val), 5, 95); drawPerroux(); return true; }
+
+  // 2. Von Thünen
+  if (bindKey === "vt_m1") { stateVt.m1 = Math.max(10, val); setSliderSmart("vt-m1", stateVt.m1, 10, null); syncEqInputsVt(); drawThunen(); return true; }
+  if (bindKey === "vt_t1") { stateVt.t1 = Math.max(0.2, val); setSliderSmart("vt-t1", stateVt.t1, 0.2, null); syncEqInputsVt(); drawThunen(); return true; }
+  if (bindKey === "vt_m2") { stateVt.m2 = Math.max(10, val); setSliderSmart("vt-m2", stateVt.m2, 10, null); syncEqInputsVt(); drawThunen(); return true; }
+  if (bindKey === "vt_t2") { stateVt.t2 = Math.max(0.2, val); setSliderSmart("vt-t2", stateVt.t2, 0.2, null); syncEqInputsVt(); drawThunen(); return true; }
+  if (bindKey === "vt_m3") { stateVt.m3 = Math.max(5, val); syncEqInputsVt(); drawThunen(); return true; }
+  if (bindKey === "vt_t3") { stateVt.t3 = Math.max(0.1, val); setSliderSmart("vt-t3", stateVt.t3, 0.1, null); syncEqInputsVt(); drawThunen(); return true; }
+
+  // 3. Weber
+  if (bindKey === "wb_w1") { setSliderSmart("wb-w1", Math.round(val), 1, null); drawWeber(); return true; }
+  if (bindKey === "wb_w2") { setSliderSmart("wb-w2", Math.round(val), 1, null); drawWeber(); return true; }
+  if (bindKey === "wb_wm") { setSliderSmart("wb-wm", Math.round(val), 1, null); drawWeber(); return true; }
+  if (bindKey === "wb_ah") { setSliderSmart("wb-ah", Math.round(val), 0, null); drawWeber(); return true; }
+
+  // 4. Krugman
+  if (bindKey === "kr_t") { setSliderSmart("kr-tau", val, 1.0, 10.0); drawKrugman(); return true; }
+  if (bindKey === "kr_e") { setSliderSmart("kr-esc", val, 1.0, 10.0); drawKrugman(); return true; }
+  if (bindKey === "kr_m") { setSliderSmart("kr-mov", val, 1.0, 10.0); drawKrugman(); return true; }
+
+  // 5. Christaller & Granovetter
+  if (bindKey === "ch_pob") { setSliderSmart("ch-pob", Math.round(val), 500, null); drawChrisGran(); return true; }
+  if (bindKey === "ch_umb") { setSliderSmart("ch-umb", Math.round(val), 500, null); drawChrisGran(); return true; }
+  if (bindKey === "ch_alc") { setSliderSmart("ch-alc", Math.round(val), 2, null); drawChrisGran(); return true; }
+  if (bindKey === "ch_dst") { setSliderSmart("ch-dst", Math.round(val), 1, null); drawChrisGran(); return true; }
+  if (bindKey === "gr_f")   { setSliderSmart("gr-f", Math.round(val), 1, 10); drawChrisGran(); return true; }
+  if (bindKey === "gr_d")   { setSliderSmart("gr-d", Math.round(val), 0, 10); drawChrisGran(); return true; }
+
+  // 6. Lorenz / Gini / Theil / HHI / Hannah-Kay / IP4
+  if (bindKey.startsWith("lz_p")) {
+    const idx = parseInt(bindKey.slice(4), 10);
+    if (idx >= 1 && idx <= 4) {
+      const vPos = Math.max(10, Math.round(val));
+      document.getElementById("lz-p" + idx + "-in").value = vPos;
+      syncLorenzFromInput(idx);
+      return true;
+    }
+  }
+  if (bindKey === "lz_al") { setSliderSmart("lz-al", val, 1.5, 4.0); drawLorenz(); return true; }
+
+  // 7. Redes Dini
+  if (bindKey === "dn_n") {
+    const newN = Math.max(4, Math.min(15, Math.round(val)));
+    document.getElementById("dn-n").value = newN;
+    const inN = document.getElementById("dn-n-in");
+    if (inN) inN.value = newN;
+    loadDiniTopology(diniKey, newN);
+    return true;
+  }
+  if (bindKey === "dn_L") {
+    const sl = document.getElementById("dn-step");
+    const newL = Math.max(0, Math.min(+sl.max, Math.round(val)));
+    sl.value = newL;
+    const inL = document.getElementById("dn-l-in");
+    if (inL) inL.value = newL;
+    onSliderLDini();
+    return true;
+  }
+
+  // 8. Indicadores Mín-Máx (Unidad 6)
+  if (bindKey === "u6_v1") {
+    u6DataLive[u6SelIdx].v1 = val;
+    document.getElementById("u6-ed-v1").value = val;
+    drawIndicadoresU6();
+    return true;
+  }
+  if (bindKey === "u6_v2") {
+    u6DataLive[u6SelIdx].v2 = val;
+    document.getElementById("u6-ed-v2").value = val;
+    drawIndicadoresU6();
+    return true;
+  }
+  if (bindKey === "u6_w1") {
+    const pct = val <= 1.0001 ? Math.round(val * 100) : Math.round(val);
+    document.getElementById("u6-w1").value = Math.max(0, Math.min(100, pct));
+    drawIndicadoresU6();
+    return true;
+  }
+  if (bindKey === "u6_w2") {
+    const pct2 = val <= 1.0001 ? Math.round(val * 100) : Math.round(val);
+    document.getElementById("u6-w1").value = Math.max(0, Math.min(100, 100 - pct2));
+    drawIndicadoresU6();
+    return true;
+  }
+  return false;
+}
+function openChipEditor(ev, chipEl) {
+  ev.stopPropagation();
+  if (chipEl.dataset.editing === "1") return;
+  chipEl.dataset.editing = "1";
+  const bindKey = chipEl.dataset.bind;
+  const rawVal = chipEl.dataset.raw;
+  const stepVal = chipEl.dataset.step || "any";
+  const origHtml = chipEl.innerHTML;
+
+  const inp = document.createElement("input");
+  inp.type = "number";
+  inp.step = stepVal;
+  inp.value = rawVal;
+  inp.className = "chip-inline-in";
+  inp.style.width = Math.max(66, String(rawVal).length * 10 + 30) + "px";
+
+  let finished = false;
+  const commit = () => {
+    if (finished) return;
+    finished = true;
+    const ok = applyChipEdit(bindKey, inp.value);
+    if (!ok) {
+      chipEl.innerHTML = origHtml;
+      chipEl.dataset.editing = "0";
+    }
+  };
+  const cancel = () => {
+    if (finished) return;
+    finished = true;
+    chipEl.innerHTML = origHtml;
+    chipEl.dataset.editing = "0";
+  };
+
+  inp.addEventListener("keydown", e => {
+    if (e.key === "Enter") { e.preventDefault(); commit(); }
+    else if (e.key === "Escape") { e.preventDefault(); cancel(); }
+  });
+  inp.addEventListener("blur", () => commit());
+  inp.addEventListener("click", e => e.stopPropagation());
+
+  chipEl.innerHTML = "";
+  chipEl.appendChild(inp);
+  inp.focus();
+  inp.select();
 }
 function renderFormulaStrip(id, cards) {
   const box = document.getElementById(id);
@@ -1022,8 +1213,8 @@ function renderFormulaStrip(id, cards) {
     const isOn = !!fstripXrayState[k];
     const noteHtml = c.note ? `<div class="fstrip-note">${c.note}</div>` : "";
     return `
-      <div class="fstrip-card${isOn ? ' xray-on' : ''}" style="border-left-color:${c.col || '#1E3A8A'};" onclick="toggleXrayCard('${k}', this)" title="Haz clic para alternar entre Fórmula + Reemplazo y Modo Rayos X ampliado">
-        <div class="fstrip-head">
+      <div class="fstrip-card${isOn ? ' xray-on' : ''}" style="border-left-color:${c.col || '#1E3A8A'};">
+        <div class="fstrip-head" onclick="toggleXrayCard('${k}', this)" title="Clic aquí para alternar Modo Rayos X">
           <span class="fstrip-lbl" style="color:${c.col || '#1E3A8A'};">${c.lbl}</span>
           <span class="xray-pill">${isOn ? "Rayos X: ON ⇄" : "f(x) → 123"}</span>
         </div>
@@ -1346,19 +1537,19 @@ function drawThunen() {
     {
       lbl: "Renta Locacional LR(d)", col: "#DC2626",
       eq: `LR<sub>1</sub>(d) = <span class="sym-r">M<sub>1</sub></span> − <span class="sym-o">t<sub>1</sub></span>·d`,
-      sub: `LR<sub>1</sub>(d) = ${vChip(fmtDec(s.m1,0),"vc-r","Margen M1","vt_m1")} − ${vChip(fmtDec(s.t1,1),"vc-o","Flete t1","vt_t1")}·d`,
-      note: `Anillo 2: LR<sub>2</sub> = ${fmtDec(s.m2,0)} − ${fmtDec(s.t2,1)}·d`
+      sub: `LR<sub>1</sub>(d) = ${eChip(fmtDec(s.m1,0),s.m1,"vt_m1","2","vc-r","Margen M1")} − ${eChip(fmtDec(s.t1,1),s.t1,"vt_t1","0.1","vc-o","Flete t1")}·d`,
+      note: `Anillo 2: LR<sub>2</sub> = ${fmtDec(s.m2,0)} − ${fmtDec(s.t2,1)}·d · Haz clic en cualquier cápsula con borde punteado para editar`
     },
     {
       lbl: "Corte Anillo 1 → 2 (LR1 = LR2)", col: "#1D4ED8",
       eq: `d<sub>12</sub> = ${mFrac('<span class="sym-r">M<sub>1</sub></span> − <span class="sym-b">M<sub>2</sub></span>', '<span class="sym-o">t<sub>1</sub></span> − <span class="sym-t">t<sub>2</sub></span>')}`,
-      sub: `d<sub>12</sub> = ${mFrac(vChip(fmtDec(s.m1,0),"vc-r","M1") + " − " + vChip(fmtDec(s.m2,0),"vc-b","M2"), vChip(fmtDec(s.t1,1),"vc-o","t1") + " − " + vChip(fmtDec(s.t2,1),"vc-t","t2"))} = ${rChip(fmtDec(Math.max(0,d12),1) + " km")}`,
+      sub: `d<sub>12</sub> = ${mFrac(eChip(fmtDec(s.m1,0),s.m1,"vt_m1","2","vc-r","M1") + " − " + eChip(fmtDec(s.m2,0),s.m2,"vt_m2","2","vc-b","M2"), eChip(fmtDec(s.t1,1),s.t1,"vt_t1","0.1","vc-o","t1") + " − " + eChip(fmtDec(s.t2,1),s.t2,"vt_t2","0.1","vc-t","t2"))} = ${rChip(fmtDec(Math.max(0,d12),1) + " km")}`,
       note: `Numerador: ${fmtDec(s.m1-s.m2,0)} | Dif. flete: ${fmtDec(s.t1-s.t2,1)}`
     },
     {
       lbl: "Frontera Agrícola (LR3 = 0)", col: "#059669",
       eq: `d<sub>máx</sub> = ${mFrac('<span class="sym-t">M<sub>3</sub></span>', '<span class="sym-p">t<sub>3</sub></span>')}`,
-      sub: `d<sub>máx</sub> = ${mFrac(vChip(fmtDec(s.m3,0),"vc-t","Margen M3"), vChip(fmtDec(s.t3,2),"vc-p","Flete t3","vt_t3"))} = ${rChip(fmtDec(d30,1) + " km")}`,
+      sub: `d<sub>máx</sub> = ${mFrac(eChip(fmtDec(s.m3,0),s.m3,"vt_m3","2","vc-t","Margen M3"), eChip(fmtDec(s.t3,2),s.t3,"vt_t3","0.05","vc-p","Flete t3"))} = ${rChip(fmtDec(d30,1) + " km")}`,
       note: `Más allá de ${fmtDec(d30,1)} km la renta es negativa`
     }
   ]);
@@ -1505,19 +1696,19 @@ function drawWeber() {
     {
       lbl: "Índice de Materiales (IM)", col: "#1D4ED8",
       eq: `IM = ${mFrac('<span class="sym-b">W<sub>1</sub></span> + <span class="sym-t">W<sub>2</sub></span>', '<span class="sym-p">W<sub>M</sub></span>')}`,
-      sub: `IM = ${mFrac(vChip(w1+"t","vc-b","Peso MP1","wb_w1") + " + " + vChip(w2+"t","vc-t","Peso MP2","wb_w2"), vChip(wm+"t","vc-p","Peso Producto Final","wb_wm"))} = ${mFrac(w1+w2, wm)} = ${rChip(fmtDec(im,2))}`,
+      sub: `IM = ${mFrac(eChip(w1+"t",w1,"wb_w1","1","vc-b","Peso MP1") + " + " + eChip(w2+"t",w2,"wb_w2","1","vc-t","Peso MP2"), eChip(wm+"t",wm,"wb_wm","1","vc-p","Peso Producto Final"))} = ${mFrac(w1+w2, wm)} = ${rChip(fmtDec(im,2))}`,
       note: im > 1.05 ? "IM &gt; 1 → Pierde peso (atracción a insumos)" : (im < 0.95 ? "IM &lt; 1 → Gana peso (atracción a mercado)" : "IM ≈ 1 → Equilibrio")
     },
     {
       lbl: "Prueba Isodápana Crítica", col: "#EA580C",
       eq: `<span class="sym-t">Ahorro<sub>L</sub></span> &gt; <span class="sym-o">ΔFlete(P*→L)</span>`,
-      sub: `${vChip("$"+ah,"vc-t","Ahorro salarial en L","wb_ah")} ${convieneL ? "&gt;" : "≤"} ${vChip("$"+fmtDec(extraCostL,1),"vc-o","Sobrecosto flete hacia L")} ⇒ ${rChip(convieneL ? "Saltar a L" : "Quedar en P*", !convieneL)}`,
+      sub: `${eChip("$"+ah,ah,"wb_ah","5","vc-t","Ahorro salarial en L")} ${convieneL ? "&gt;" : "≤"} ${vChip("$"+fmtDec(extraCostL,1),"vc-o","Sobrecosto flete hacia L")} ⇒ ${rChip(convieneL ? "Saltar a L" : "Quedar en P*", !convieneL)}`,
       note: convieneL ? "L cae dentro de la curva isodápana" : "L queda fuera de la curva isodápana"
     },
     {
       lbl: "Balance Neto por Unidad", col: "#15803D",
       eq: `Δ<sub>neto</sub> = <span class="sym-t">Ahorro<sub>L</sub></span> − <span class="sym-o">ΔFlete</span>`,
-      sub: `Δ<sub>neto</sub> = ${vChip("$"+ah,"vc-t","Ahorro L")} − ${vChip("$"+fmtDec(extraCostL,1),"vc-o","ΔFlete")} = ${rChip((ah-extraCostL>=0?"+":"-")+"$"+fmtDec(Math.abs(ah-extraCostL),1), ah < extraCostL)}`,
+      sub: `Δ<sub>neto</sub> = ${eChip("$"+ah,ah,"wb_ah","5","vc-t","Ahorro L")} − ${vChip("$"+fmtDec(extraCostL,1),"vc-o","ΔFlete")} = ${rChip((ah-extraCostL>=0?"+":"-")+"$"+fmtDec(Math.abs(ah-extraCostL),1), ah < extraCostL)}`,
       note: `Costo mínimo de flete en P*: $${fmtDec(opt.costMin,1)}`
     }
   ]);
@@ -1644,13 +1835,13 @@ function drawKrugman() {
     {
       lbl: "Umbral Crítico de Bifurcación (τ*)", col: "#D97706",
       eq: `τ* = 0,45·<span class="sym-b">Esc</span> + 0,35·<span class="sym-p">Mov</span>`,
-      sub: `τ* = 0,45·${vChip(fmtDec(esc,1),"vc-b","Economías de escala","kr_e")} + 0,35·${vChip(fmtDec(mov,1),"vc-p","Movilidad laboral","kr_m")} = ${rChip(fmtDec(cur.ust,2))}`,
+      sub: `τ* = 0,45·${eChip(fmtDec(esc,1),esc,"kr_e","0.2","vc-b","Economías de escala (1–10)")} + 0,35·${eChip(fmtDec(mov,1),mov,"kr_m","0.2","vc-p","Movilidad laboral (1–10)")} = ${rChip(fmtDec(cur.ust,2))}`,
       note: `Fijación monopolística: p*(x) = a·W(x) / ρ`
     },
     {
       lbl: "Condición de Régimen Espacial", col: "#1D4ED8",
       eq: `<span class="sym-r">τ</span> ≤ <span class="sym-o">τ*</span> ⇒ Aglomeración`,
-      sub: `${vChip("τ="+fmtDec(tau,1),"vc-r","Costo transporte actual","kr_t")} ${aglom ? "≤" : "&gt;"} ${vChip("τ*="+fmtDec(cur.ust,2),"vc-o","Umbral crítico")} ⇒ ${rChip(aglom ? "Centro-Periferia" : "Dispersión", aglom)}`,
+      sub: `${eChip("τ="+fmtDec(tau,1),tau,"kr_t","0.1","vc-r","Costo transporte τ (1–10)")} ${aglom ? "≤" : "&gt;"} ${vChip("τ*="+fmtDec(cur.ust,2),"vc-o","Umbral crítico")} ⇒ ${rChip(aglom ? "Centro-Periferia" : "Dispersión", aglom)}`,
       note: aglom ? "Fuerzas centrípetas dominan" : "Fuerzas centrífugas protegen la periferia"
     },
     {
@@ -1781,20 +1972,20 @@ function drawPerroux() {
     {
       lbl: "Multiplicador de Hirschman (M_H)", col: "#1D4ED8",
       eq: `M<sub>H</sub> = ${mFrac("1", '1 − (<span class="sym-b">b</span> + <span class="sym-p">f</span>)')}`,
-      sub: `M<sub>H</sub> = ${mFrac("1", "1 − (" + vChip(fmtDec(b,2),"vc-b","Atrás b","px_b") + " + " + vChip(fmtDec(f,2),"vc-p","Adelante f","px_f") + ")")} = ${mFrac("1", fmtDec(1-prop,2))} = ${rChip(fmtDec(mh,2)+"x")}`,
-      note: `Retención local (b + f) = ${fmtDec(prop*100,0)}%`
+      sub: `M<sub>H</sub> = ${mFrac("1", "1 − (" + eChip(fmtDec(b,2),b,"px_b","0.01","vc-b","Encadenamiento atrás b") + " + " + eChip(fmtDec(f,2),f,"px_f","0.01","vc-p","Encadenamiento adelante f") + ")")} = ${mFrac("1", fmtDec(1-prop,2))} = ${rChip(fmtDec(mh,2)+"x")}`,
+      note: `Retención local (b + f) = ${fmtDec(prop*100,0)}% · Clic en b o f para escribir directo`
     },
     {
       lbl: "Producción Total Inducida (Perroux)", col: "#0F172A",
       eq: `Y<sub>tot</sub> = <span class="sym-t">I<sub>0</sub></span> · <span class="sym-b">M<sub>H</sub></span>`,
-      sub: `Y<sub>tot</sub> = ${vChip("$"+fmtInt(i0)+"M","vc-t","Inversión motriz I0","px_i0")} × ${vChip(fmtDec(mh,2),"vc-b","Multiplicador M_H")} = ${rChip("$"+fmtInt(tot)+"M")}`,
+      sub: `Y<sub>tot</sub> = ${eChip("$"+fmtInt(i0)+"M",i0,"px_i0","100","vc-t","Inversión motriz I0 (MM$)")} × ${vChip(fmtDec(mh,2),"vc-b","Multiplicador M_H")} = ${rChip("$"+fmtInt(tot)+"M")}`,
       note: `Efecto indirecto puro: +$${fmtInt(ind)} MM`
     },
     {
       lbl: "Balanza Periferia (Myrdal)", col: saldo >= 0 ? "#15803D" : "#DC2626",
       eq: `Saldo = <span class="sym-t">Spread</span> − <span class="sym-r">Backwash</span>`,
-      sub: `Saldo = ${vChip("$"+fmtInt(spread)+"M","vc-t","Difusión Spread","px_sp")} − ${vChip("$"+fmtInt(backwash)+"M","vc-r","Absorción Backwash")} = ${rChip((saldo>=0?"+":"-")+"$"+fmtInt(Math.abs(saldo))+"M", saldo < 0)}`,
-      note: saldo >= 0 ? "Difusión supera absorción (Polo Integrador)" : "Absorción domina (Enclave Extractivo)"
+      sub: `Saldo = ${vChip("$"+fmtInt(spread)+"M","vc-t","Difusión Spread")} − ${vChip("$"+fmtInt(backwash)+"M","vc-r","Absorción Backwash")} = ${rChip((saldo>=0?"+":"-")+"$"+fmtInt(Math.abs(saldo))+"M", saldo < 0)}`,
+      note: `Proporción Spread: ${eChip(spPct+"%",spPct,"px_sp","5","vc-g","% Difusión Spread (5–95)")} · ${saldo >= 0 ? "Polo Integrador" : "Enclave Extractivo"}`
     }
   ]);
   renderPedBox("ped-perroux",
@@ -1896,13 +2087,13 @@ function drawChrisGran() {
     {
       lbl: "Cobertura de Umbral (Christaller)", col: "#1D4ED8",
       eq: `Cob = ${mFrac('<span class="sym-b">Pob</span>', '<span class="sym-p">Umbral</span>')} × 100%`,
-      sub: `Cob = ${mFrac(vChip(fmtInt(pob),"vc-b","Población","ch_pob"), vChip(fmtInt(umb),"vc-p","Umbral mínimo","ch_umb"))} = ${rChip(fmtDec(cob,1)+"%", !okU)}`,
-      note: `Alcance ${vChip(alc+"km","vc-t","Alcance máximo")} ${okA ? "≥" : "&lt;"} Dist ${vChip(dst+"km","vc-o","Distancia vial")}`
+      sub: `Cob = ${mFrac(eChip(fmtInt(pob),pob,"ch_pob","1000","vc-b","Población área influencia"), eChip(fmtInt(umb),umb,"ch_umb","1000","vc-p","Umbral mínimo"))} = ${rChip(fmtDec(cob,1)+"%", !okU)}`,
+      note: `Alcance ${eChip(alc+" km",alc,"ch_alc","1","vc-t","Alcance máximo")} ${okA ? "≥" : "&lt;"} Dist ${eChip(dst+" km",dst,"ch_dst","1","vc-o","Distancia vial")}`
     },
     {
       lbl: "Riesgo de Lock-in (Granovetter)", col: "#DC2626",
       eq: `Lock = máx(0, 10·<span class="sym-b">F</span> − 12·<span class="sym-r">D</span>)`,
-      sub: `Lock = máx(0, 10·${vChip(f,"vc-b","Vínculos fuertes F","gr_f")} − 12·${vChip(d,"vc-r","Vínculos débiles D","gr_d")}) = ${rChip(fmtInt(lck)+"%", lck > 40)}`,
+      sub: `Lock = máx(0, 10·${eChip(f,f,"gr_f","1","vc-b","Vínculos fuertes F (1–10)")} − 12·${eChip(d,d,"gr_d","1","vc-r","Vínculos débiles D (0–10)")}) = ${rChip(fmtInt(lck)+"%", lck > 40)}`,
       note: lck > 40 ? "Peligro de información redundante" : "Puentes externos evitan el bloqueo"
     },
     {
@@ -2023,6 +2214,7 @@ function drawLorenz() {
   document.getElementById("lz-k-hhi").textContent = fmtDec(cur.hhi, 3);
   document.getElementById("lz-k-hk").textContent = `HK(${fmtDec(alpha,1)}) = ${fmtDec(cur.hk, 2)} ciud. equiv.`;
 
+  const pairedDesc = arr.map((v, idx) => ({ v, origIdx: idx + 1 })).sort((a, b) => b.v - a.v);
   const sDesc = desc.map(v => v / cur.tot);
   const sChipsSq = sDesc.map((sv, i) => `${vChip(fmtDec(sv,2), ["vc-b","vc-t","vc-p","vc-o"][i], `Cuota ciudad #${i+1}: ${fmtDec(sv*100,1)}%`)}<sup>2</sup>`).join(" + ");
   const tTerm1 = sDesc[0] * Math.log(4 * sDesc[0]);
@@ -2032,8 +2224,8 @@ function drawLorenz() {
     {
       lbl: "Primacía Urbana (IP4)", col: "#1D4ED8",
       eq: `IP<sub>4</sub> = ${mFrac('<span class="sym-b">P<sub>1</sub></span>', '<span class="sym-t">P<sub>2</sub></span> + <span class="sym-p">P<sub>3</sub></span> + <span class="sym-o">P<sub>4</sub></span>')}`,
-      sub: `IP<sub>4</sub> = ${mFrac(vChip(fmtInt(desc[0]),"vc-b","P1 (Mayor ciudad)","lz_p1"), vChip(fmtInt(desc[1]),"vc-t","P2","lz_p2") + " + " + vChip(fmtInt(desc[2]),"vc-p","P3","lz_p3") + " + " + vChip(fmtInt(desc[3]),"vc-o","P4","lz_p4"))} = ${mFrac(fmtInt(desc[0]), fmtInt(sum234))} = ${rChip(fmtDec(ip4,3), ip4 >= 1.5)}`,
-      note: `Clasificación OT: ${catTxt}`
+      sub: `IP<sub>4</sub> = ${mFrac(eChip(fmtInt(desc[0]),desc[0],"lz_p"+pairedDesc[0].origIdx,"1000","vc-b","P1 (Mayor ciudad)"), eChip(fmtInt(desc[1]),desc[1],"lz_p"+pairedDesc[1].origIdx,"500","vc-t","P2") + " + " + eChip(fmtInt(desc[2]),desc[2],"lz_p"+pairedDesc[2].origIdx,"500","vc-p","P3") + " + " + eChip(fmtInt(desc[3]),desc[3],"lz_p"+pairedDesc[3].origIdx,"500","vc-o","P4"))} = ${mFrac(fmtInt(desc[0]), fmtInt(sum234))} = ${rChip(fmtDec(ip4,3), ip4 >= 1.5)}`,
+      note: `Clasificación OT: ${catTxt} · Clic en P1–P4 para escribir población`
     },
     {
       lbl: "Gini por Trapecios (G)", col: "#DC2626",
@@ -2050,8 +2242,8 @@ function drawLorenz() {
     {
       lbl: `HHI y Hannah-Kay (α = ${fmtDec(alpha,1)})`, col: "#0F766E",
       eq: `HHI = ∑ s<sub>i</sub><sup>2</sup> &nbsp;|&nbsp; HK<sub><span class="sym-p">α</span></sub> = (∑ s<sub>i</sub><sup><span class="sym-p">α</span></sup>)<sup>1/(1−<span class="sym-p">α</span>)</sup>`,
-      sub: `HHI = ${sChipsSq} = ${rChip(fmtDec(cur.hhi,3))}<br/>HK<sub>${vChip(fmtDec(alpha,1),"vc-p","Parámetro α","lz_al")}</sub> = (${fmtDec(sDesc.reduce((a,s)=>a+Math.pow(s,alpha),0),3)})<sup>${fmtDec(1/(1-alpha),2)}</sup> = ${rChip(fmtDec(cur.hk,2)+" ciud.")}`,
-      note: `Con 4 ciudades iguales: HHI = 0,250 y HK = 4,00`
+      sub: `HHI = ${sChipsSq} = ${rChip(fmtDec(cur.hhi,3))}<br/>HK<sub>${eChip(fmtDec(alpha,1),alpha,"lz_al","0.5","vc-p","Parámetro α (1,5–4,0)")}</sub> = (${fmtDec(sDesc.reduce((a,s)=>a+Math.pow(s,alpha),0),3)})<sup>${fmtDec(1/(1-alpha),2)}</sup> = ${rChip(fmtDec(cur.hk,2)+" ciud.")}`,
+      note: `Con 4 ciudades iguales: HHI = 0,250 y HK = 4,00 · Clic en α para cambiar`
     }
   ]);
 
@@ -2494,22 +2686,22 @@ function drawDini() {
       lbl: "Vínculos Máximos (Diagonal A_ii = 0)", col: "#0F172A",
       eq: diniDirected ? `L<sub>máx</sub> = <span class="sym-b">n</span>(<span class="sym-b">n</span> − 1)` : `L<sub>máx</sub> = ${mFrac('<span class="sym-b">n</span>(<span class="sym-b">n</span> − 1)', "2")}`,
       sub: diniDirected
-        ? `L<sub>máx</sub> = ${vChip(n,"vc-b","Actores n","dn_n")}·(${n}−1) = ${rChip(lMax)}`
-        : `L<sub>máx</sub> = ${mFrac(vChip(n,"vc-b","Actores n","dn_n") + "·(" + n + "−1)", "2")} = ${mFrac(n*(n-1), "2")} = ${rChip(lMax)}`,
-      note: `Pares posibles sin auto-enlaces (A_ii = 0)`
+        ? `L<sub>máx</sub> = ${eChip(n,n,"dn_n","1","vc-b","Actores n (4–15)")}·(${n}−1) = ${rChip(lMax)}`
+        : `L<sub>máx</sub> = ${mFrac(eChip(n,n,"dn_n","1","vc-b","Actores n (4–15)") + "·(" + n + "−1)", "2")} = ${mFrac(n*(n-1), "2")} = ${rChip(lMax)}`,
+      note: `Clic en n para cambiar la cantidad de empresas`
     },
     {
       lbl: "Densidad de la Red (D)", col: "#1D4ED8",
       eq: diniDirected ? `D = ${mFrac('<span class="sym-t">L</span>', '<span class="sym-b">n</span>(<span class="sym-b">n</span> − 1)')}` : `D = ${mFrac('2·<span class="sym-t">L</span>', '<span class="sym-b">n</span>(<span class="sym-b">n</span> − 1)')}`,
       sub: diniDirected
-        ? `D = ${mFrac(vChip(L,"vc-t","Vínculos L","dn_L"), vChip(n,"vc-b","n") + "·" + (n-1))} = ${mFrac(L, n*(n-1))} = ${rChip(fmtDec(den,1)+"%")}`
-        : `D = ${mFrac("2·" + vChip(L,"vc-t","Vínculos L","dn_L"), vChip(n,"vc-b","n") + "·" + (n-1))} = ${mFrac(2*L, n*(n-1))} = ${rChip(fmtDec(den,1)+"%")}`,
-      note: diniDirected ? "Matriz dirigida (flechas asimétricas)" : "Matriz simétrica (vínculos bilaterales)"
+        ? `D = ${mFrac(eChip(L,L,"dn_L","1","vc-t","Vínculos activos L"), eChip(n,n,"dn_n","1","vc-b","Actores n") + "·" + (n-1))} = ${mFrac(L, n*(n-1))} = ${rChip(fmtDec(den,1)+"%")}`
+        : `D = ${mFrac("2·" + eChip(L,L,"dn_L","1","vc-t","Vínculos activos L"), eChip(n,n,"dn_n","1","vc-b","Actores n") + "·" + (n-1))} = ${mFrac(2*L, n*(n-1))} = ${rChip(fmtDec(den,1)+"%")}`,
+      note: diniDirected ? "Matriz dirigida · Clic en L o n para editar" : "Matriz simétrica · Clic en L o n para editar"
     },
     {
       lbl: "Centralidad del Nodo Líder (C_máx)", col: "#15803D",
       eq: `C<sub>máx</sub> = ${mFrac('<span class="sym-r">k<sub>máx</sub></span>', '<span class="sym-b">n</span> − 1')}`,
-      sub: `C<sub>máx</sub> = ${mFrac(vChip(kMax,"vc-r","Grado máximo k_máx","dn_km"), vChip(n,"vc-b","n") + " − 1")} = ${mFrac(kMax, n-1)} = ${rChip(fmtDec(cMaxPct,1)+"%")}`,
+      sub: `C<sub>máx</sub> = ${mFrac(vChip(kMax,"vc-r","Grado máximo k_máx","dn_km"), eChip(n,n,"dn_n","1","vc-b","Actores n") + " − 1")} = ${mFrac(kMax, n-1)} = ${rChip(fmtDec(cMaxPct,1)+"%")}`,
       note: `Grado promedio k̄ = ${fmtDec(kAvg,1)} | Aislados = ${aislados}`
     },
     {
@@ -3475,23 +3667,23 @@ function drawIndicadoresU6() {
       lbl: `Normalización v1 — ${selNm} (${u6Dir1 === 1 ? "+" : "−"})`, col: "#1D4ED8",
       eq: u6Dir1 === 1 ? `u<sub>1</sub> = ${mFrac('<span class="sym-b">x<sub>i</sub></span> − <span class="sym-o">mín</span>', '<span class="sym-t">máx</span> − <span class="sym-o">mín</span>')}` : `u<sub>1</sub> = ${mFrac('<span class="sym-t">máx</span> − <span class="sym-b">x<sub>i</sub></span>', '<span class="sym-t">máx</span> − <span class="sym-o">mín</span>')}`,
       sub: u6Dir1 === 1
-        ? `u<sub>1</sub> = ${mFrac(vChip(fmtDec(selRow.v1,2),"vc-b","v1 de "+selNm,"u6_v1") + " − " + vChip(fmtDec(cur.min1,2),"vc-o","Mínimo v1"), vChip(fmtDec(cur.max1,2),"vc-t","Máximo v1") + " − " + vChip(fmtDec(cur.min1,2),"vc-o","Mínimo v1"))} = ${mFrac(fmtDec(num1Val,2), fmtDec(cur.max1-cur.min1,2))} = ${rChip(fmtDec(selRow.u1,3))}`
-        : `u<sub>1</sub> = ${mFrac(vChip(fmtDec(cur.max1,2),"vc-t","Máximo v1") + " − " + vChip(fmtDec(selRow.v1,2),"vc-b","v1 de "+selNm,"u6_v1"), vChip(fmtDec(cur.max1,2),"vc-t","Máximo v1") + " − " + vChip(fmtDec(cur.min1,2),"vc-o","Mínimo v1"))} = ${mFrac(fmtDec(num1Val,2), fmtDec(cur.max1-cur.min1,2))} = ${rChip(fmtDec(selRow.u1,3))}`,
-      note: `Sentido ${u6Dir1 === 1 ? "Favorable (+): mayor valor → 1" : "Desfavorable (−): menor valor → 1"}`
+        ? `u<sub>1</sub> = ${mFrac(eChip(fmtDec(selRow.v1,2),Number(selRow.v1.toFixed(4)),"u6_v1","0.05","vc-b","v1 de "+selNm) + " − " + vChip(fmtDec(cur.min1,2),"vc-o","Mínimo v1"), vChip(fmtDec(cur.max1,2),"vc-t","Máximo v1") + " − " + vChip(fmtDec(cur.min1,2),"vc-o","Mínimo v1"))} = ${mFrac(fmtDec(num1Val,2), fmtDec(cur.max1-cur.min1,2))} = ${rChip(fmtDec(selRow.u1,3))}`
+        : `u<sub>1</sub> = ${mFrac(vChip(fmtDec(cur.max1,2),"vc-t","Máximo v1") + " − " + eChip(fmtDec(selRow.v1,2),Number(selRow.v1.toFixed(4)),"u6_v1","0.05","vc-b","v1 de "+selNm), vChip(fmtDec(cur.max1,2),"vc-t","Máximo v1") + " − " + vChip(fmtDec(cur.min1,2),"vc-o","Mínimo v1"))} = ${mFrac(fmtDec(num1Val,2), fmtDec(cur.max1-cur.min1,2))} = ${rChip(fmtDec(selRow.u1,3))}`,
+      note: `Sentido ${u6Dir1 === 1 ? "Favorable (+)" : "Desfavorable (−)"} · Clic en x_i para escribir (ej. 3000)`
     },
     {
       lbl: `Normalización v2 — ${selNm} (${u6Dir2 === 1 ? "+" : "−"})`, col: "#059669",
       eq: u6Dir2 === 1 ? `u<sub>2</sub> = ${mFrac('<span class="sym-b">x<sub>i</sub></span> − <span class="sym-o">mín</span>', '<span class="sym-t">máx</span> − <span class="sym-o">mín</span>')}` : `u<sub>2</sub> = ${mFrac('<span class="sym-t">máx</span> − <span class="sym-b">x<sub>i</sub></span>', '<span class="sym-t">máx</span> − <span class="sym-o">mín</span>')}`,
       sub: u6Dir2 === 1
-        ? `u<sub>2</sub> = ${mFrac(vChip(fmtDec(selRow.v2,2),"vc-b","v2 de "+selNm,"u6_v2") + " − " + vChip(fmtDec(cur.min2,2),"vc-o","Mínimo v2"), vChip(fmtDec(cur.max2,2),"vc-t","Máximo v2") + " − " + vChip(fmtDec(cur.min2,2),"vc-o","Mínimo v2"))} = ${mFrac(fmtDec(num2Val,2), fmtDec(cur.max2-cur.min2,2))} = ${rChip(fmtDec(selRow.u2,3))}`
-        : `u<sub>2</sub> = ${mFrac(vChip(fmtDec(cur.max2,2),"vc-t","Máximo v2") + " − " + vChip(fmtDec(selRow.v2,2),"vc-b","v2 de "+selNm,"u6_v2"), vChip(fmtDec(cur.max2,2),"vc-t","Máximo v2") + " − " + vChip(fmtDec(cur.min2,2),"vc-o","Mínimo v2"))} = ${mFrac(fmtDec(num2Val,2), fmtDec(cur.max2-cur.min2,2))} = ${rChip(fmtDec(selRow.u2,3))}`,
-      note: `Sentido ${u6Dir2 === 1 ? "Favorable (+): mayor valor → 1" : "Desfavorable (−): menor valor → 1"}`
+        ? `u<sub>2</sub> = ${mFrac(eChip(fmtDec(selRow.v2,2),Number(selRow.v2.toFixed(4)),"u6_v2","0.05","vc-b","v2 de "+selNm) + " − " + vChip(fmtDec(cur.min2,2),"vc-o","Mínimo v2"), vChip(fmtDec(cur.max2,2),"vc-t","Máximo v2") + " − " + vChip(fmtDec(cur.min2,2),"vc-o","Mínimo v2"))} = ${mFrac(fmtDec(num2Val,2), fmtDec(cur.max2-cur.min2,2))} = ${rChip(fmtDec(selRow.u2,3))}`
+        : `u<sub>2</sub> = ${mFrac(vChip(fmtDec(cur.max2,2),"vc-t","Máximo v2") + " − " + eChip(fmtDec(selRow.v2,2),Number(selRow.v2.toFixed(4)),"u6_v2","0.05","vc-b","v2 de "+selNm), vChip(fmtDec(cur.max2,2),"vc-t","Máximo v2") + " − " + vChip(fmtDec(cur.min2,2),"vc-o","Mínimo v2"))} = ${mFrac(fmtDec(num2Val,2), fmtDec(cur.max2-cur.min2,2))} = ${rChip(fmtDec(selRow.u2,3))}`,
+      note: `Sentido ${u6Dir2 === 1 ? "Favorable (+)" : "Desfavorable (−)"} · Clic en x_i para escribir`
     },
     {
       lbl: `Índice Compuesto (${w1Pct}/${100 - w1Pct}) — ${selNm}`, col: "#7C3AED",
       eq: `I<sub>i</sub> = <span class="sym-p">w<sub>1</sub></span>·<span class="sym-b">u<sub>1</sub></span> + <span class="sym-o">w<sub>2</sub></span>·<span class="sym-t">u<sub>2</sub></span>`,
-      sub: `I = ${vChip(fmtDec(w1Pct/100,2),"vc-p","Peso w1","u6_w1")}·${vChip(fmtDec(selRow.u1,3),"vc-b","u1")} + ${vChip(fmtDec((100-w1Pct)/100,2),"vc-o","Peso w2")}·${vChip(fmtDec(selRow.u2,3),"vc-t","u2")} = ${rChip(fmtDec(selRow.idx,3)+" (#"+selRow.rank+")")}`,
-      note: `Cambia la provincia en el selector de arriba para auditar otra`
+      sub: `I = ${eChip(fmtDec(w1Pct/100,2),Number((w1Pct/100).toFixed(2)),"u6_w1","0.05","vc-p","Peso w1 (ej. 0.7 o 70)")}·${vChip(fmtDec(selRow.u1,3),"vc-b","u1")} + ${eChip(fmtDec((100-w1Pct)/100,2),Number(((100-w1Pct)/100).toFixed(2)),"u6_w2","0.05","vc-o","Peso w2 (ej. 0.3 o 30)")}·${vChip(fmtDec(selRow.u2,3),"vc-t","u2")} = ${rChip(fmtDec(selRow.idx,3)+" (#"+selRow.rank+")")}`,
+      note: `Clic en w1 o w2 para cambiar la ponderación directo aquí`
     }
   ]);
 
