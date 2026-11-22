@@ -432,6 +432,33 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
     background: #FEF2F2; border: 1px solid #FCA5A5; border-left: 4px solid #DC2626;
     color: #991B1B; border-radius: 5px; padding: 7px 11px; font-size: 11.6px; font-weight: 600; margin: 8px 0;
   }
+    .ot-dim-bar {
+    display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; align-items: center;
+    background: #F8FAFC; border: 1px solid #CBD5E1; border-radius: 6px; padding: 7px 9px;
+  }
+  .ot-dim-lbl { font-size: 11px; font-weight: 800; color: #334155; text-transform: uppercase; letter-spacing: 0.25px; margin-right: 4px; }
+  .ot-dim-btn {
+    border: 1px solid #CBD5E1; background: #FFFFFF; color: #334155;
+    padding: 4px 9px; border-radius: 5px; font-size: 11.2px; font-weight: 700; cursor: pointer;
+    transition: all 0.14s ease;
+  }
+  .ot-dim-btn:hover { border-color: #1D4ED8; color: #1D4ED8; background: #EFF6FF; }
+  .ot-dim-btn.active { background: #1E3A8A; color: #FFFFFF; border-color: #1E3A8A; }
+  .ot-dim-btn.reg-active { background: #0F172A; color: #FFFFFF; border-color: #0F172A; }
+  .ot-th-in {
+    width: 78px; background: #0F172A; color: #FFFFFF; border: 1px dashed #64748B;
+    border-radius: 4px; padding: 2px 4px; font-size: 10.3px; font-weight: 700;
+    text-align: center; font-family: inherit;
+  }
+  .ot-th-in:focus { outline: 2px solid #60A5FA; background: #1E293B; border-style: solid; }
+  .ot-th-del {
+    background: transparent; border: none; color: #FCA5A5; font-size: 10px;
+    font-weight: 800; cursor: pointer; padding: 0 2px; margin-left: 2px;
+  }
+  .ot-th-del:hover { color: #FFFFFF; }
+  .ot-rd-comp-box {
+    margin-top: 10px; background: #FFFFFF; border: 1px solid #CBD5E1; border-radius: 6px; padding: 10px 12px;
+  }
   .ot-banner-ok {
     background: #F0FDF4; border: 1px solid #86EFAC; border-left: 4px solid #15803D;
     color: #166534; border-radius: 5px; padding: 7px 11px; font-size: 11.6px; font-weight: 600; margin: 8px 0;
@@ -986,20 +1013,38 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
     <!-- SUB-PANEL B: ESCALA DE GUTTMAN Y MATRIZ DE RONDINELLI -->
     <div id="ot-sub-rd" class="ot-subpanel">
       <div class="sec-title">
-        <span>3. Escala de Guttman y Matriz de Rondinelli (1/0 Clicable + Gráfico Complejidad vs. Población)</span>
+        <span>3. Escala de Guttman y Matriz de Rondinelli (4 Dimensiones Oficiales Control 5 + Escalograma)</span>
         <div class="btn-bar">
-          <button class="act-btn primary" onclick="presetOtRond('ejemplo')">Ejemplo Excel (Flores–Benque)</button>
-          <button class="act-btn" onclick="presetOtRond('lagos')">Los Lagos (Top 10)</button>
-          <button class="act-btn" onclick="presetOtRond('biobio')">Biobío (Top 10)</button>
+          <button id="ot-rd-btn-sort" class="act-btn primary" onclick="ordenarEscalogramaOtRond()">Ordenar Escalograma (Guttman)</button>
           <button id="ot-rd-btn-mode" class="act-btn" onclick="toggleOtRondMode()">Ver Matriz Ponderada (Wk)</button>
-          <button class="act-btn" onclick="testOtRondError()">Probar Error: Todo en 1</button>
+          <button class="act-btn" onclick="agregarColOtRond()">+ Variable</button>
+          <button id="ot-rd-btn-raw" class="act-btn" onclick="cargarPautaBrutaOtRond()">Ver Error: Pauta con Puros 1</button>
+          <button id="ot-rd-btn-fix" class="act-btn" onclick="autoFixOtRond()">Auto-Ajustar Discriminación</button>
+          <button id="ot-rd-btn-comp" class="act-btn" onclick="toggleComp4DimOtRond()">Comparar 4 Dimensiones</button>
         </div>
+      </div>
+
+      <div class="ot-dim-bar">
+        <span class="ot-dim-lbl">1. Territorio:</span>
+        <button id="ot-rd-reg-ejemplo" class="ot-dim-btn reg-active" onclick="setOtRondRegion('ejemplo')">Ejemplo Cátedra (Flores–Benque)</button>
+        <button id="ot-rd-reg-lagos" class="ot-dim-btn" onclick="setOtRondRegion('lagos')">Los Lagos (Top 10)</button>
+        <button id="ot-rd-reg-biobio" class="ot-dim-btn" onclick="setOtRondRegion('biobio')">Biobío (Top 10)</button>
+        <button id="ot-rd-reg-araucania" class="ot-dim-btn" onclick="setOtRondRegion('araucania')">La Araucanía (Top 10)</button>
+        <button id="ot-rd-reg-rios" class="ot-dim-btn" onclick="setOtRondRegion('rios')">Los Ríos (Top 10)</button>
+      </div>
+
+      <div id="ot-rd-dim-bar" class="ot-dim-bar">
+        <span class="ot-dim-lbl">2. Dimensión Pauta Control 5:</span>
+        <button id="ot-rd-dim-prod" class="ot-dim-btn active" onclick="setOtRondDim('prod')">1. Servicios a la Producción</button>
+        <button id="ot-rd-dim-infra" class="ot-dim-btn" onclick="setOtRondDim('infra')">2. Infraestructura, Transporte y Telecom.</button>
+        <button id="ot-rd-dim-salud" class="ot-dim-btn" onclick="setOtRondDim('salud')">3. Salud y Educación</button>
+        <button id="ot-rd-dim-rec" class="ot-dim-btn" onclick="setOtRondDim('rec')">4. Recreación, Deporte y Comercio (Mall)</button>
       </div>
 
       <details class="enun-box" open>
         <summary>
-          <span>Complejidad Funcional de Asentamientos Humanos (Guttman / Rondinelli — láminas 12–15)</span>
-          <span class="enun-badge">Haz clic en cualquier celda 1 / 0 para modificar la matriz en tiempo real</span>
+          <span>Complejidad Funcional de Asentamientos Humanos (Guttman / Rondinelli — Pauta Control 5 y Láms. 12–15)</span>
+          <span class="enun-badge">Clic en 1/0 edita presencia · Clic en el encabezado renombra cualquier variable</span>
         </summary>
         <div class="enun-body" id="ot-rd-enun"></div>
       </details>
@@ -1007,34 +1052,34 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
       <div class="kpis">
         <div class="kpi" style="border-left-color:#15803D;"><div class="kpi-lbl">Líder Funcional (IC máx)</div><div id="ot-rd-k-top" class="kpi-val">Flores (GT)</div><div id="ot-rd-k-topv" class="kpi-sub">225,00 pts (7/7)</div></div>
         <div class="kpi" style="border-left-color:#1D4ED8;"><div class="kpi-lbl">Servicio Más Escaso (Mayor Wk)</div><div id="ot-rd-k-rar" class="kpi-val">Guarderías</div><div id="ot-rd-k-rarv" class="kpi-sub">fk=2 → Wk=50,00</div></div>
-        <div class="kpi" style="border-left-color:#D97706;"><div class="kpi-lbl">Validación Discriminación</div><div id="ot-rd-k-val" class="kpi-val">4 / 7 discriminan</div><div id="ot-rd-k-val2" class="kpi-sub">Regla: evitar puros 1 o 0</div></div>
+        <div class="kpi" style="border-left-color:#D97706;"><div class="kpi-lbl">Validación Control 5 (≥7 var.)</div><div id="ot-rd-k-val" class="kpi-val">4 / 7 discriminan</div><div id="ot-rd-k-val2" class="kpi-sub">Regla: evitar puros 1 o 0</div></div>
         <div class="kpi" style="border-left-color:#0F172A;"><div class="kpi-lbl">Verificación Suma Ponderada</div><div id="ot-rd-k-sum" class="kpi-val">700,00 pts</div><div id="ot-rd-k-sum2" class="kpi-sub">100 × 7 servicios activos</div></div>
       </div>
 
       <div id="ot-rd-fstrip" class="fstrip-grid"></div>
       <div id="ot-rd-alert"></div>
       <div id="ot-rd-tbl-box" class="ot-mat-wrap" style="margin-bottom:10px;"></div>
+      <div id="ot-rd-comp-box" class="ot-rd-comp-box" style="display:none;margin-bottom:10px;"></div>
       <div class="svg-box"><svg id="svg-ot-rond" viewBox="0 0 980 345"></svg></div>
-            <div id="ped-ot-rd" class="ped-grid"></div>
+      <div id="ped-ot-rd" class="ped-grid"></div>
       <details class="teo-box" open>
         <summary>
           <span>Base Teórica en Simple — Escala de Guttman y Matriz de Rondinelli (Control 5 · Láms. 12–15)</span>
-          <span class="enun-badge">3 propiedades clave que entran en pruebas</span>
+          <span class="enun-badge">3 propiedades clave + las 4 dimensiones de la pauta</span>
         </summary>
         <div class="teo-body">
           <ul>
             <li><b>¿Qué mide? (Lám. 12):</b> la <b>complejidad funcional</b> de los asentamientos humanos registrando presencia (<code>1</code>) o ausencia (<code>0</code>) de servicios, infraestructura, organizaciones o actividades económicas.</li>
             <li><b>Las 3 propiedades obligatorias de la Escala de Guttman (Lám. 12):</b>
-              <br/>1) <b>Unidimensional:</b> todos los ítems miden alrededor de un solo objetivo o dimensión (ej. solo apoyo productivo, o solo salud/educación).
+              <br/>1) <b>Unidimensional:</b> todos los ítems pertenecen a una misma dimensión (por eso la pauta separa 4 tablas distintas: Producción, Transporte/Telecom, Salud/Educación y Recreación/Comercio; no se mezclan al azar).
               <br/>2) <b>Ordinal:</b> los ítems se clasifican en presente–ausente (sí–no; <code>1</code> o <code>0</code>).
-              <br/>3) <b>Acumulativa:</b> los ítems se ordenan por grado de complejidad, de modo que una ciudad con ítems complejos (ej. hospital tipo 1 o universidad) normalmente ya posee los ítems básicos de orden menor (ej. posta o escuela).</li>
-            <li><b>Procedimiento de Rondinelli en 4 pasos (Láms. 13–15):</b> (1) inspección preliminar de servicios por dimensión (públicos, transporte, comercio, salud, recreación, educación, profesionales); (2) ordenar localidades de <b>mayor a menor población</b>; (3) llenar matriz <code>1/0</code> y ponderar cada servicio con <b>W<sub>k</sub> = 100 / f<sub>k</sub></b> (lo más escaso vale más); (4) graficar <b>Complejidad vs. Población</b> (en una red ordenada la jerarquía funcional debiera ser decreciente con la población).</li>
-            <li><b>Regla del Control 5 (Pauta Unidad 5):</b> aplicar a las <b>10 comunas con más población</b> con <b>mínimo 7 variables</b>. Las variables deben marcar <b>diferencias</b> entre comunas: si todas tienen <code>1</code> en una columna, debes reemplazar esa variable.</li>
+              <br/>3) <b>Acumulativa:</b> al pulsar <b>Ordenar Escalograma (Guttman)</b>, los ítems quedan ordenados de menor a mayor complejidad (de izquierda a derecha), formando un triángulo escalonado: una ciudad con equipamiento complejo (ej. Hospital Tipo 1, Aeropuerto o Mall) normalmente ya cuenta con los equipamientos más básicos.</li>
+            <li><b>Procedimiento de Rondinelli en 4 pasos (Láms. 13–15):</b> (1) inspección preliminar de servicios por dimensión; (2) ordenar localidades de <b>mayor a menor población</b>; (3) llenar matriz <code>1/0</code> y ponderar cada servicio con <b>W<sub>k</sub> = 100 / f<sub>k</sub></b> (lo más escaso vale más); (4) graficar <b>Complejidad vs. Población</b> (en una red ordenada la jerarquía funcional debiera ser decreciente con la población).</li>
+            <li><b>Regla clave del Control 5 (Pauta Unidad 5):</b> aplicar a las <b>10 comunas más pobladas</b> eligiendo <b>mínimo 7 variables</b>. Se pueden <i>agregar o cambiar</i> variables según el territorio: si todas las comunas tienen <code>1</code> en una columna (ej. <i>Cajeros automáticos</i>, <i>CESFAM</i> o <i>Farmacia</i>), esa variable <b>no discrimina</b> y debes reemplazarla por un servicio de mayor jerarquía.</li>
           </ul>
         </div>
       </details>
     </div>
-
     <!-- SUB-PANEL C: ÍNDICE DE AISLAMIENTO COMUNAL -->
     <div id="ot-sub-ai" class="ot-subpanel">
       <div class="sec-title">
@@ -4554,66 +4599,292 @@ function drawOtRanking() {
   );
 }
 
-// --- B. ESCALA DE GUTTMAN Y MATRIZ DE RONDINELLI (1/0 CLICABLE + GRÁFICO) ---
-const OT_RD_PRESETS = {
-  ejemplo: {
-    titulo: "Ejemplo Excel de Cátedra (Flores, Melchor de Mencos, San Ignacio y Benque Viejo)",
-    cols: ["Educ. Divers.", "Universid.", "C. Médica", "Seg. Social", "Guarderías", "Vivienda", "At. Mujer"],
-    rows: [
-      { nm: "Flores (GT)",               pob: 51535, v: [1, 1, 1, 1, 1, 1, 1] },
-      { nm: "Melchor de Mencos (GT)",    pob: 19847, v: [1, 1, 1, 1, 1, 0, 1] },
-      { nm: "San Ignacio/Sta. Elena",    pob: 16977, v: [1, 1, 1, 1, 0, 1, 1] },
-      { nm: "Benque Viejo (BZE)",        pob: 5824,  v: [0, 0, 1, 1, 0, 1, 1] }
-    ]
-  },
+// --- B. ESCALA DE GUTTMAN Y MATRIZ DE RONDINELLI (4 DIMENSIONES CONTROL 5 + ESCALOGRAMA) ---
+const OT_RD_REGIONES = {
   lagos: {
-    titulo: "Región de Los Lagos (Top 10 — Servicios a la Producción)",
-    cols: ["OTEC", "+1 Banco", "Of. Fomento", "Asist. Téc.", "Reclutam.", "C. Negocios", "Lab. Cert.", "Gremio Reg."],
-    rows: [
-      { nm: "Puerto Montt", pob: 275473, v: [1, 1, 1, 1, 1, 1, 1, 1] },
-      { nm: "Osorno",       pob: 174998, v: [1, 1, 1, 1, 1, 1, 1, 1] },
-      { nm: "Puerto Varas", pob: 50010,  v: [1, 1, 1, 1, 1, 1, 1, 0] },
-      { nm: "Castro",       pob: 48632,  v: [1, 1, 1, 1, 0, 1, 1, 0] },
-      { nm: "Ancud",        pob: 42158,  v: [1, 1, 1, 1, 0, 0, 0, 0] },
-      { nm: "Calbuco",      pob: 37620,  v: [1, 0, 1, 0, 0, 0, 1, 0] },
-      { nm: "Quellón",      pob: 30910,  v: [1, 1, 1, 0, 0, 0, 1, 0] },
-      { nm: "Purranque",    pob: 21475,  v: [1, 0, 1, 1, 0, 0, 0, 0] },
-      { nm: "Frutillar",    pob: 21220,  v: [1, 1, 1, 0, 0, 0, 0, 0] },
-      { nm: "Llanquihue",   pob: 19380,  v: [0, 0, 0, 0, 0, 0, 1, 0] }
+    titulo: "Región de Los Lagos (Top 10 Censo 2024)",
+    comunas: [
+      { nm: "Puerto Montt", pob: 275473 },
+      { nm: "Osorno",       pob: 174998 },
+      { nm: "Puerto Varas", pob: 50010  },
+      { nm: "Castro",       pob: 48632  },
+      { nm: "Ancud",        pob: 42158  },
+      { nm: "Calbuco",      pob: 37620  },
+      { nm: "Quellón",      pob: 30910  },
+      { nm: "Purranque",    pob: 21475  },
+      { nm: "Frutillar",    pob: 21220  },
+      { nm: "Llanquihue",   pob: 19380  }
     ]
   },
   biobio: {
-    titulo: "Región del Biobío (Top 10 — Servicios a la Producción)",
-    cols: ["OTEC", "+1 Banco", "Of. Fomento", "Asist. Téc.", "Reclutam.", "C. Negocios", "Lab. Cert.", "Gremio Reg."],
-    rows: [
-      { nm: "Concepción",          pob: 230375, v: [1, 1, 1, 1, 1, 1, 1, 1] },
-      { nm: "Los Ángeles",         pob: 219441, v: [1, 1, 1, 1, 1, 1, 1, 1] },
-      { nm: "San Pedro de la Paz", pob: 150992, v: [1, 1, 1, 1, 1, 1, 1, 0] },
-      { nm: "Talcahuano",          pob: 147322, v: [1, 1, 1, 1, 0, 1, 1, 0] },
-      { nm: "Coronel",             pob: 123648, v: [1, 1, 1, 1, 0, 0, 0, 0] },
-      { nm: "Hualpén",             pob: 87731,  v: [1, 0, 1, 0, 0, 0, 1, 0] },
-      { nm: "Chiguayante",         pob: 85822,  v: [1, 1, 1, 0, 0, 0, 1, 0] },
-      { nm: "Tomé",                pob: 56907,  v: [1, 0, 1, 1, 0, 0, 0, 0] },
-      { nm: "Penco",               pob: 48971,  v: [1, 1, 1, 0, 0, 0, 0, 0] },
-      { nm: "Lota",                pob: 39980,  v: [0, 0, 0, 0, 0, 0, 1, 0] }
+    titulo: "Región del Biobío (Top 10 Censo 2024)",
+    comunas: [
+      { nm: "Concepción",          pob: 230375 },
+      { nm: "Los Ángeles",         pob: 219441 },
+      { nm: "San Pedro de la Paz", pob: 150992 },
+      { nm: "Talcahuano",          pob: 147322 },
+      { nm: "Coronel",             pob: 123648 },
+      { nm: "Hualpén",             pob: 87731  },
+      { nm: "Chiguayante",         pob: 85822  },
+      { nm: "Tomé",                pob: 56907  },
+      { nm: "Penco",               pob: 48971  },
+      { nm: "Lota",                pob: 39980  }
+    ]
+  },
+  araucania: {
+    titulo: "Región de La Araucanía (Top 10 Censo 2024)",
+    comunas: [
+      { nm: "Temuco",          pob: 304820 },
+      { nm: "Padre Las Casas", pob: 83540  },
+      { nm: "Villarrica",      pob: 63910  },
+      { nm: "Angol",           pob: 56840  },
+      { nm: "Lautaro",         pob: 40890  },
+      { nm: "Victoria",        pob: 36120  },
+      { nm: "Pucón",           pob: 34950  },
+      { nm: "Nueva Imperial",  pob: 34620  },
+      { nm: "Vilcún",          pob: 30480  },
+      { nm: "Pitrufquén",      pob: 26410  }
+    ]
+  },
+  rios: {
+    titulo: "Región de Los Ríos (Top 10 Censo 2024)",
+    comunas: [
+      { nm: "Valdivia",    pob: 176870 },
+      { nm: "La Unión",    pob: 39820  },
+      { nm: "Panguipulli", pob: 36450  },
+      { nm: "Río Bueno",   pob: 32910  },
+      { nm: "Mariquina",   pob: 22840  },
+      { nm: "Paillaco",    pob: 21150  },
+      { nm: "Los Lagos",   pob: 20480  },
+      { nm: "Lanco",       pob: 17620  },
+      { nm: "Futrono",     pob: 15890  },
+      { nm: "Lago Ranco",  pob: 10540  }
     ]
   }
 };
 
-let otRdKey = "ejemplo";
-let otRdCols = [...OT_RD_PRESETS.ejemplo.cols];
-let otRdRows = OT_RD_PRESETS.ejemplo.rows.map(r => ({ nm: r.nm, pob: r.pob, v: [...r.v] }));
+const OT_RD_DIMS = {
+  prod: {
+    nombre: "1. Servicios a la Producción",
+    pautaRef: "Asist. Técnica (Sercotec), Centro de Negocios, Reclutamiento laboral, OTEC, +1 Banco, Agencia Des. Local (reemplazando Cajeros si dan puros 1)",
+    cols: ["OTEC / Cap.", "+1 Banco", "Ag. Des. Local", "Asist. Sercotec", "Reclutamiento", "C. Negocios", "Lab. Certif.", "Gremio Reg."],
+    mat: [
+      [1, 1, 1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1, 1, 0],
+      [1, 1, 1, 1, 0, 1, 1, 0],
+      [1, 1, 1, 1, 0, 0, 0, 0],
+      [1, 0, 1, 0, 0, 0, 1, 0],
+      [1, 1, 1, 0, 0, 0, 1, 0],
+      [1, 0, 1, 1, 0, 0, 0, 0],
+      [1, 1, 1, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 1, 0]
+    ],
+    rawCols: ["Cajeros Aut.", "Ag. Des. Local", "OTEC / Cap.", "+1 Banco", "Asist. Sercotec", "Reclutamiento", "C. Negocios"],
+    rawMat: [
+      [1, 1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 0, 1],
+      [1, 1, 1, 1, 1, 0, 0],
+      [1, 1, 1, 0, 0, 0, 0],
+      [1, 1, 1, 1, 0, 0, 0],
+      [1, 1, 1, 0, 1, 0, 0],
+      [1, 1, 1, 1, 0, 0, 0],
+      [1, 1, 0, 0, 0, 0, 0]
+    ]
+  },
+  infra: {
+    nombre: "2. Infraestructura, Transporte y Telecomunicaciones",
+    pautaRef: "Aeropuerto, Puerto, Estación Tren, Terminal de Buses, Periódico local, Señal Radio Local, Señal TV Local, Puerto Seco / Área Industrial",
+    cols: ["Terminal Buses", "Periódico Local", "Área Industrial", "Puerto Com.", "Señal TV Local", "Estación Tren", "Aeropuerto", "Puerto Seco"],
+    mat: [
+      [1, 1, 1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 0, 1, 0, 1, 1],
+      [1, 1, 1, 1, 1, 1, 0, 1],
+      [1, 1, 1, 1, 1, 0, 1, 0],
+      [1, 1, 1, 1, 1, 1, 0, 0],
+      [1, 0, 1, 1, 0, 1, 0, 0],
+      [1, 1, 1, 0, 0, 1, 0, 0],
+      [1, 1, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 1, 0, 0, 0, 0],
+      [0, 0, 1, 0, 0, 1, 0, 0]
+    ],
+    rawCols: ["Radio Local", "Terminal Buses", "Periódico Local", "Área Ind.", "Puerto", "TV Local", "Est. Tren", "Aeropuerto"],
+    rawMat: [
+      [1, 1, 1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 0, 1, 0, 1],
+      [1, 1, 1, 1, 1, 1, 1, 0],
+      [1, 1, 1, 1, 1, 1, 0, 1],
+      [1, 1, 1, 1, 1, 1, 1, 0],
+      [1, 1, 0, 1, 1, 0, 1, 0],
+      [1, 1, 1, 1, 0, 0, 1, 0],
+      [1, 1, 1, 0, 0, 0, 0, 0],
+      [1, 0, 0, 0, 1, 0, 0, 0],
+      [1, 0, 0, 1, 0, 0, 1, 0]
+    ]
+  },
+  salud: {
+    nombre: "3. Infraestructura de Salud y Educacional",
+    pautaRef: "Universidad, IP, CFT, Ed. Media CH, Ed. Media Técnica, Hospital Tipo 1 y Tipo 2, CESFAM, Centro Dental, Farmacia (reemplazando las básicas con puros 1)",
+    cols: ["Ed. Media TP", "Centro Dental", "Hospital Tipo 2", "Clínica Priv.", "CFT", "Inst. Prof. (IP)", "Universidad", "Hospital Tipo 1"],
+    mat: [
+      [1, 1, 1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1, 1, 0],
+      [1, 1, 1, 1, 1, 1, 1, 0],
+      [1, 1, 1, 0, 1, 1, 0, 0],
+      [1, 1, 1, 0, 1, 0, 0, 0],
+      [1, 1, 1, 0, 0, 0, 0, 0],
+      [1, 1, 0, 0, 0, 0, 0, 0],
+      [1, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0]
+    ],
+    rawCols: ["Farmacia", "CESFAM", "Ed. Media CH", "Ed. Media TP", "Hosp. Tipo 2", "CFT", "IP", "Universidad", "Hosp. Tipo 1"],
+    rawMat: [
+      [1, 1, 1, 1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1, 1, 1, 0],
+      [1, 1, 1, 1, 1, 1, 1, 1, 0],
+      [1, 1, 1, 1, 1, 1, 1, 0, 0],
+      [1, 1, 1, 1, 1, 1, 0, 0, 0],
+      [1, 1, 1, 1, 1, 0, 0, 0, 0],
+      [1, 1, 1, 1, 1, 0, 0, 0, 0],
+      [1, 1, 1, 1, 1, 0, 0, 0, 0],
+      [1, 1, 1, 1, 1, 0, 0, 0, 0]
+    ]
+  },
+  rec: {
+    nombre: "4. Recreación, Deporte y Grandes Centros Comerciales",
+    pautaRef: "Estadios, Gimnasios gran capacidad, Cines, Multitiendas, Centros comerciales (tipo mall), Parques/áreas verdes, Piscinas públicas, Pistas de atletismo",
+    cols: ["Estadio Reg.", "Gimnasio Cap.", "Pista Atletismo", "Piscina Púb.", "Multitiendas", "Mall / C. Com.", "Cines", "Teatro / C. Cult."],
+    mat: [
+      [1, 1, 1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1, 1, 0],
+      [1, 1, 0, 1, 1, 1, 1, 1],
+      [1, 1, 0, 0, 1, 1, 0, 0],
+      [1, 0, 0, 0, 0, 0, 0, 0],
+      [1, 1, 0, 0, 1, 0, 0, 0],
+      [1, 0, 0, 0, 0, 0, 0, 0],
+      [1, 1, 0, 0, 0, 0, 0, 1],
+      [0, 0, 0, 0, 0, 0, 0, 0]
+    ],
+    rawCols: ["Parques/Á.V.", "Estadios", "Gimn. Cap.", "Pista Atlet.", "Piscina Púb.", "Multitiendas", "Mall", "Cines"],
+    rawMat: [
+      [1, 1, 1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 0, 1, 1, 1, 1],
+      [1, 1, 1, 0, 0, 1, 1, 0],
+      [1, 1, 1, 0, 0, 0, 0, 0],
+      [1, 1, 1, 0, 0, 1, 0, 0],
+      [1, 1, 1, 0, 0, 0, 0, 0],
+      [1, 1, 1, 0, 0, 0, 0, 0],
+      [1, 1, 1, 0, 0, 0, 0, 0]
+    ]
+  }
+};
+
+const OT_RD_EJEMPLO = {
+  titulo: "Ejemplo Excel de Cátedra (Flores, Melchor de Mencos, San Ignacio y Benque Viejo)",
+  pautaRef: "Ejemplo clásico de clase con 4 asentamientos y 7 funciones sociales",
+  cols: ["Educ. Divers.", "Universid.", "C. Médica", "Seg. Social", "Guarderías", "Vivienda", "At. Mujer"],
+  rows: [
+    { nm: "Flores (GT)",            pob: 51535, v: [1, 1, 1, 1, 1, 1, 1] },
+    { nm: "Melchor de Mencos (GT)", pob: 19847, v: [1, 1, 1, 1, 1, 0, 1] },
+    { nm: "San Ignacio/Sta. Elena", pob: 16977, v: [1, 1, 1, 1, 0, 1, 1] },
+    { nm: "Benque Viejo (BZE)",     pob: 5824,  v: [0, 0, 1, 1, 0, 1, 1] }
+  ]
+};
+
+let otRdRegionKey = "ejemplo";
+let otRdDimKey = "prod";
+let otRdCols = [...OT_RD_EJEMPLO.cols];
+let otRdRows = OT_RD_EJEMPLO.rows.map(r => ({ nm: r.nm, pob: r.pob, v: [...r.v] }));
 let otRdShowWeights = false;
+let otRdShowComp4 = false;
+let otRdRawMode = false;
+
+function _syncOtRdButtons() {
+  ["ejemplo", "lagos", "biobio", "araucania", "rios"].forEach(rk => {
+    const b = document.getElementById("ot-rd-reg-" + rk);
+    if (b) b.classList.toggle("reg-active", rk === otRdRegionKey);
+  });
+  ["prod", "infra", "salud", "rec"].forEach(dk => {
+    const b = document.getElementById("ot-rd-dim-" + dk);
+    if (b) b.classList.toggle("active", dk === otRdDimKey);
+  });
+  const dimBar = document.getElementById("ot-rd-dim-bar");
+  if (dimBar) dimBar.style.opacity = otRdRegionKey === "ejemplo" ? "0.55" : "1";
+  const btnRaw = document.getElementById("ot-rd-btn-raw");
+  if (btnRaw) btnRaw.classList.toggle("primary", otRdRawMode);
+  const btnComp = document.getElementById("ot-rd-btn-comp");
+  if (btnComp) btnComp.classList.toggle("primary", otRdShowComp4);
+}
+
+function loadOtRondCurrent(useRaw = false) {
+  otRdRawMode = useRaw;
+  if (otRdRegionKey === "ejemplo") {
+    otRdCols = [...OT_RD_EJEMPLO.cols];
+    otRdRows = OT_RD_EJEMPLO.rows.map(r => ({ nm: r.nm, pob: r.pob, v: [...r.v] }));
+    if (useRaw) otRdRows.forEach(r => { r.v[0] = 1; });
+  } else {
+    const reg = OT_RD_REGIONES[otRdRegionKey] || OT_RD_REGIONES.lagos;
+    const dim = OT_RD_DIMS[otRdDimKey] || OT_RD_DIMS.prod;
+    otRdCols = useRaw ? [...dim.rawCols] : [...dim.cols];
+    const srcMat = useRaw ? dim.rawMat : dim.mat;
+    otRdRows = reg.comunas.map((c, idx) => ({ nm: c.nm, pob: c.pob, v: [...srcMat[idx]] }));
+  }
+  _syncOtRdButtons();
+  drawOtRond();
+}
 
 function presetOtRond(key) {
-  const pr = OT_RD_PRESETS[key] || OT_RD_PRESETS.ejemplo;
-  otRdKey = key;
-  otRdCols = [...pr.cols];
-  otRdRows = pr.rows.map(r => ({ nm: r.nm, pob: r.pob, v: [...r.v] }));
-  drawOtRond();
+  otRdRegionKey = key === "ejemplo" ? "ejemplo" : (OT_RD_REGIONES[key] ? key : "lagos");
+  loadOtRondCurrent(false);
+}
+function setOtRondRegion(rk) {
+  otRdRegionKey = rk;
+  loadOtRondCurrent(false);
+}
+function setOtRondDim(dk) {
+  otRdDimKey = dk;
+  if (otRdRegionKey === "ejemplo") otRdRegionKey = "lagos";
+  loadOtRondCurrent(false);
 }
 function toggleOtRondCell(ri, ci) {
   otRdRows[ri].v[ci] = otRdRows[ri].v[ci] === 1 ? 0 : 1;
+  drawOtRond();
+}
+function renameOtRondCol(ci, newName) {
+  const clean = String(newName || "").trim();
+  if (clean) otRdCols[ci] = clean;
+  drawOtRond(true);
+}
+function agregarColOtRond() {
+  if (otRdCols.length >= 12) return;
+  otRdCols.push(`Variable ${otRdCols.length + 1}`);
+  const mid = Math.max(1, Math.floor(otRdRows.length / 2));
+  otRdRows.forEach((r, idx) => { r.v.push(idx < mid ? 1 : 0); });
+  drawOtRond();
+}
+function quitarColOtRond(ci) {
+  if (otRdCols.length <= 2) return;
+  otRdCols.splice(ci, 1);
+  otRdRows.forEach(r => { r.v.splice(ci, 1); });
+  drawOtRond();
+}
+function ordenarEscalogramaOtRond() {
+  // Ordena filas de mayor a menor población y columnas de mayor frecuencia (más básica) a menor frecuencia (más compleja)
+  otRdRows.sort((a, b) => b.pob - a.pob);
+  const m = otRdCols.length;
+  const order = Array.from({ length: m }, (_, j) => {
+    const f = otRdRows.reduce((s, r) => s + r.v[j], 0);
+    return { j, f };
+  }).sort((a, b) => b.f - a.f);
+  otRdCols = order.map(o => otRdCols[o.j]);
+  otRdRows = otRdRows.map(r => ({ nm: r.nm, pob: r.pob, v: order.map(o => r.v[o.j]) }));
   drawOtRond();
 }
 function toggleOtRondMode() {
@@ -4625,11 +4896,81 @@ function toggleOtRondMode() {
   }
   drawOtRond();
 }
-function testOtRondError() {
-  otRdRows.forEach(r => { r.v[0] = 1; });
+function cargarPautaBrutaOtRond() {
+  if (otRdRegionKey === "ejemplo") otRdRegionKey = "lagos";
+  loadOtRondCurrent(true);
+}
+function autoFixOtRond() {
+  if (otRdRegionKey !== "ejemplo" && otRdRawMode) {
+    loadOtRondCurrent(false);
+    return;
+  }
+  const n = otRdRows.length;
+  for (let j = 0; j < otRdCols.length; j++) {
+    const f = otRdRows.reduce((s, r) => s + r.v[j], 0);
+    if (f === n && n > 1) otRdRows[n - 1].v[j] = 0;
+    else if (f === 0 && n > 0) otRdRows[0].v[j] = 1;
+  }
+  otRdRawMode = false;
+  _syncOtRdButtons();
   drawOtRond();
 }
-function drawOtRond() {
+function toggleComp4DimOtRond() {
+  otRdShowComp4 = !otRdShowComp4;
+  if (otRdShowComp4 && otRdRegionKey === "ejemplo") {
+    otRdRegionKey = "lagos";
+    loadOtRondCurrent(false);
+    return;
+  }
+  _syncOtRdButtons();
+  drawOtRond();
+}
+
+function _calcIcFromMat(mat) {
+  const n = mat.length, m = mat[0].length;
+  const fk = new Array(m).fill(0);
+  mat.forEach(row => row.forEach((x, j) => { fk[j] += x; }));
+  const wk = fk.map(f => f > 0 ? 100 / f : 0);
+  return mat.map(row => row.reduce((s, x, j) => s + x * wk[j], 0));
+}
+
+function renderComp4DimBox() {
+  const box = document.getElementById("ot-rd-comp-box");
+  if (!box) return;
+  if (!otRdShowComp4 || otRdRegionKey === "ejemplo") {
+    box.style.display = "none";
+    return;
+  }
+  const reg = OT_RD_REGIONES[otRdRegionKey];
+  const icProd  = _calcIcFromMat(OT_RD_DIMS.prod.mat);
+  const icInfra = _calcIcFromMat(OT_RD_DIMS.infra.mat);
+  const icSalud = _calcIcFromMat(OT_RD_DIMS.salud.mat);
+  const icRec   = _calcIcFromMat(OT_RD_DIMS.rec.mat);
+
+  let h = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;flex-wrap:wrap;gap:6px;">
+    <b style="font-size:12px;color:#1E3A8A;">Comparador Multi-Dimensión (Propiedad de Unidimensionalidad de Guttman — ${reg.titulo})</b>
+    <span style="font-size:11px;color:#475569;">Cada tabla evalúa una sola dimensión (800 pts repartidos en cada una)</span>
+  </div>
+  <table class="ot-mat-tbl"><thead><tr>
+    <th>Comuna (Top 10)</th><th>Pob. 2024</th>
+    <th>1. Producción</th><th>2. Transp./Telecom</th><th>3. Salud/Educ.</th><th>4. Recreación/Mall</th><th>Promedio 4 Dim.</th>
+  </tr></thead><tbody>`;
+  reg.comunas.forEach((c, i) => {
+    const avg = (icProd[i] + icInfra[i] + icSalud[i] + icRec[i]) / 4;
+    h += `<tr><td>${c.nm}</td><td style="text-align:right;">${fmtInt(c.pob)}</td>
+      <td style="text-align:right;${otRdDimKey==='prod'?'background:#EFF6FF;font-weight:800;':''}">${fmtDec(icProd[i], 1)}</td>
+      <td style="text-align:right;${otRdDimKey==='infra'?'background:#EFF6FF;font-weight:800;':''}">${fmtDec(icInfra[i], 1)}</td>
+      <td style="text-align:right;${otRdDimKey==='salud'?'background:#EFF6FF;font-weight:800;':''}">${fmtDec(icSalud[i], 1)}</td>
+      <td style="text-align:right;${otRdDimKey==='rec'?'background:#EFF6FF;font-weight:800;':''}">${fmtDec(icRec[i], 1)}</td>
+      <td style="text-align:right;font-weight:800;color:#1E3A8A;">${fmtDec(avg, 1)}</td></tr>`;
+  });
+  h += `</tbody></table>`;
+  box.innerHTML = h;
+  box.style.display = "block";
+}
+
+function drawOtRond(skipTableRebuild = false) {
+  _syncOtRdButtons();
   const n = otRdRows.length, m = otRdCols.length;
   const totPob = otRdRows.reduce((s, r) => s + r.pob, 0) || 1;
   const fk = new Array(m).fill(0);
@@ -4651,36 +4992,48 @@ function drawOtRond() {
   let rarIdx = 0, maxW = -1;
   wk.forEach((w, j) => { if (w > maxW) { maxW = w; rarIdx = j; } });
 
-  // Detectar anomalías jerárquicas (ciudad menos poblada con mayor IC que una más poblada)
   const anomalies = [];
   for (let i = 1; i < n; i++) {
     if (scores[i].ic > scores[i - 1].ic + 0.01) anomalies.push(scores[i].nm);
   }
 
+  const tituloAct = otRdRegionKey === "ejemplo"
+    ? OT_RD_EJEMPLO.titulo
+    : `${OT_RD_REGIONES[otRdRegionKey].titulo} — ${OT_RD_DIMS[otRdDimKey].nombre}`;
+  const refPauta = otRdRegionKey === "ejemplo" ? OT_RD_EJEMPLO.pautaRef : OT_RD_DIMS[otRdDimKey].pautaRef;
+
   document.getElementById("ot-rd-enun").innerHTML =
-    `<b>${OT_RD_PRESETS[otRdKey].titulo}:</b> las localidades están ordenadas de mayor a menor población. ` +
-    `Cada servicio presente suma un peso inverso <b>W<sub>k</sub> = 100 / f<sub>k</sub></b>: mientras menos comunas tienen el servicio, mayor puntaje aporta. ` +
+    `<b>${tituloAct}:</b> localidades ordenadas de mayor a menor población. ` +
+    `<b>Variables sugeridas en pauta Control 5:</b> ${refPauta}. ` +
+    `Cada servicio presente suma <b>W<sub>k</sub> = 100 / f<sub>k</sub></b> (más escaso = mayor puntaje). ` +
     `Modo actual: <b>${otRdShowWeights ? "Matriz Ponderada (Wk)" : "Matriz Binaria (1 / 0)"}</b>.`;
 
   document.getElementById("ot-rd-k-top").textContent = best.nm;
   document.getElementById("ot-rd-k-topv").textContent = `${fmtDec(best.ic, 2)} pts (${best.sumF}/${m} servicios)`;
-  document.getElementById("ot-rd-k-rar").textContent = otRdCols[rarIdx];
+  document.getElementById("ot-rd-k-rar").textContent = otRdCols[rarIdx] || "—";
   document.getElementById("ot-rd-k-rarv").textContent = `fk = ${fk[rarIdx]} → Wk = ${fmtDec(wk[rarIdx], 2)}`;
-  document.getElementById("ot-rd-k-val").textContent = badCols.length === 0 ? `${m} / ${m} discriminan` : `${badCols.length} sin discriminar`;
-  document.getElementById("ot-rd-k-val2").textContent = badCols.length === 0 ? "Cumple regla de cátedra" : "Tienen puros 1 o puros 0";
+  const okMin7 = m >= 7;
+  document.getElementById("ot-rd-k-val").textContent = (badCols.length === 0 && okMin7)
+    ? `${m} / ${m} discriminan`
+    : (!okMin7 ? `Solo ${m} var. (<7)` : `${badCols.length} sin discriminar`);
+  document.getElementById("ot-rd-k-val2").textContent = (badCols.length === 0 && okMin7)
+    ? "Cumple pauta (≥7 y diferencian)"
+    : (!okMin7 ? "Pauta exige mínimo 7 variables" : "Tienen puros 1 o puros 0");
   document.getElementById("ot-rd-k-sum").textContent = `${fmtDec(totIC, 2)} pts`;
   document.getElementById("ot-rd-k-sum2").textContent = `100 × ${activeCols} servicios activos`;
 
   const alertBox = document.getElementById("ot-rd-alert");
-  if (badCols.length > 0) {
-    alertBox.innerHTML = `<div class="ot-banner-warn">Regla de cátedra (Unidad 5 OT): las columnas <b>${badCols.join(", ")}</b> tienen puros 1 o puros 0 y no diferencian entre comunas. Haz clic en alguna celda para discriminar o reemplaza esa variable.</div>`;
+  if (!okMin7) {
+    alertBox.innerHTML = `<div class="ot-banner-warn">Regla de pauta (Control 5): debes incluir <b>como mínimo 7 variables</b> (actualmente tienes ${m}). Pulsa <b>+ Variable</b> para agregar una nueva columna.</div>`;
+  } else if (badCols.length > 0) {
+    alertBox.innerHTML = `<div class="ot-banner-warn">Regla de cátedra (Control 5): las variables <b>${badCols.join(", ")}</b> tienen puros 1 o puros 0 en las ${n} comunas y <b>no discriminan</b>. Tal como advierte la pauta, debes cambiarlas por servicios de mayor jerarquía (prueba <b>Auto-Ajustar Discriminación</b> o edita celdas 1/0).</div>`;
   } else {
-    alertBox.innerHTML = `<div class="ot-banner-ok">Validación OK: las ${m} variables discriminan efectivamente entre las ${n} localidades.${anomalies.length ? " Anomalía jerárquica detectada en: <b>" + anomalies.join(", ") + "</b> (supera en servicios a una ciudad más poblada)." : ""}</div>`;
+    alertBox.innerHTML = `<div class="ot-banner-ok">Validación Control 5 OK: tienes ${m} variables (≥ 7) y todas discriminan entre las ${n} localidades.${anomalies.length ? " Anomalía jerárquica detectada en: <b>" + anomalies.join(", ") + "</b> (supera en equipamiento a una comuna más poblada)." : " Jerarquía funcional consistente con el tamaño poblacional."}</div>`;
   }
 
   renderFormulaStrip("ot-rd-fstrip", [
     {
-      lbl: `Peso Inverso — ${otRdCols[rarIdx]}`, col: "#1D4ED8",
+      lbl: `Peso Inverso — ${otRdCols[rarIdx] || "Var."}`, col: "#1D4ED8",
       eq: `W<sub>k</sub> = ${mFrac("100", '<span class="sym-r">f<sub>k</sub></span>')}`,
       sub: `W<sub>${rarIdx + 1}</sub> = ${mFrac("100", vChip(fk[rarIdx], "vc-r", "Localidades con el servicio"))} = ${rChip(fmtDec(wk[rarIdx], 2) + " pts")}`,
       note: "Servicio más escaso = mayor peso en el índice"
@@ -4699,37 +5052,44 @@ function drawOtRond() {
     }
   ]);
 
-  // Tabla interactiva clicable
-  let tbl = `<table class="ot-mat-tbl"><thead><tr><th>Localidad</th><th>Pob.</th><th>% Pob</th>`;
-  otRdCols.forEach(c => { tbl += `<th>${c}</th>`; });
-  tbl += `<th>Suma</th><th>Índice IC</th></tr></thead><tbody>`;
-
-  otRdRows.forEach((r, ri) => {
-    tbl += `<tr><td>${r.nm}</td><td style="text-align:right;">${fmtInt(r.pob)}</td><td style="text-align:right;">${fmtDec((r.pob / totPob) * 100, 1)}%</td>`;
-    r.v.forEach((x, ci) => {
-      const lbl = otRdShowWeights ? (x === 1 ? fmtDec(wk[ci], 1) : "0") : String(x);
-      const cls = x === 1 ? "ot-c1" : "ot-c0";
-      const wStyle = otRdShowWeights ? "width:42px;font-size:10px;" : "";
-      tbl += `<td><button class="ot-cell-btn ${cls}" style="${wStyle}" onclick="toggleOtRondCell(${ri},${ci})" title="Clic para alternar 1 / 0">${lbl}</button></td>`;
+  if (!skipTableRebuild) {
+    let tbl = `<table class="ot-mat-tbl"><thead><tr><th>Localidad</th><th>Pob.</th><th>% Pob</th>`;
+    otRdCols.forEach((c, ci) => {
+      const safeC = c.replace(/"/g, "&quot;");
+      const delBtn = otRdCols.length > 2 ? `<button class="ot-th-del" onclick="quitarColOtRond(${ci})" title="Quitar variable">×</button>` : "";
+      tbl += `<th><input class="ot-th-in" type="text" value="${safeC}" onchange="renameOtRondCol(${ci}, this.value)" title="Clic para renombrar variable"/>${delBtn}</th>`;
     });
-    tbl += `<td style="font-weight:800;">${scores[ri].sumF}</td><td style="font-weight:800;color:#1E3A8A;text-align:right;">${fmtDec(scores[ri].ic, 2)}</td></tr>`;
-  });
+    tbl += `<th>Suma</th><th>Índice IC</th></tr></thead><tbody>`;
 
-  tbl += `<tr class="ot-sum-row"><td>Frecuencia (fk)</td><td style="text-align:right;">${fmtInt(totPob)}</td><td style="text-align:right;">100%</td>`;
-  fk.forEach(f => { tbl += `<td>${f}</td>`; });
-  tbl += `<td>${scores.reduce((s, o) => s + o.sumF, 0)}</td><td style="text-align:right;">${fmtDec(totIC, 2)}</td></tr>`;
+    otRdRows.forEach((r, ri) => {
+      tbl += `<tr><td>${r.nm}</td><td style="text-align:right;">${fmtInt(r.pob)}</td><td style="text-align:right;">${fmtDec((r.pob / totPob) * 100, 1)}%</td>`;
+      r.v.forEach((x, ci) => {
+        const lbl = otRdShowWeights ? (x === 1 ? fmtDec(wk[ci], 1) : "0") : String(x);
+        const cls = x === 1 ? "ot-c1" : "ot-c0";
+        const wStyle = otRdShowWeights ? "width:42px;font-size:10px;" : "";
+        tbl += `<td><button class="ot-cell-btn ${cls}" style="${wStyle}" onclick="toggleOtRondCell(${ri},${ci})" title="Clic para alternar 1 / 0">${lbl}</button></td>`;
+      });
+      tbl += `<td style="font-weight:800;">${scores[ri].sumF}</td><td style="font-weight:800;color:#1E3A8A;text-align:right;">${fmtDec(scores[ri].ic, 2)}</td></tr>`;
+    });
 
-  tbl += `<tr class="ot-wt-row"><td>Ponderación (100/fk)</td><td>—</td><td>—</td>`;
-  wk.forEach(w => { tbl += `<td>${fmtDec(w, 2)}</td>`; });
-  tbl += `<td>—</td><td>—</td></tr>`;
+    tbl += `<tr class="ot-sum-row"><td>Frecuencia (fk)</td><td style="text-align:right;">${fmtInt(totPob)}</td><td style="text-align:right;">100%</td>`;
+    fk.forEach(f => { tbl += `<td>${f}</td>`; });
+    tbl += `<td>${scores.reduce((s, o) => s + o.sumF, 0)}</td><td style="text-align:right;">${fmtDec(totIC, 2)}</td></tr>`;
 
-  tbl += `<tr class="ot-val-row"><td>Discriminación</td><td>—</td><td>—</td>`;
-  fk.forEach(f => {
-    const ok = f > 0 && f < n;
-    tbl += `<td class="${ok ? "ot-badge-ok" : "ot-badge-bad"}">${ok ? "OK" : "Cambiar"}</td>`;
-  });
-  tbl += `<td>—</td><td>—</td></tr></tbody></table>`;
-  document.getElementById("ot-rd-tbl-box").innerHTML = tbl;
+    tbl += `<tr class="ot-wt-row"><td>Ponderación (100/fk)</td><td>—</td><td>—</td>`;
+    wk.forEach(w => { tbl += `<td>${fmtDec(w, 2)}</td>`; });
+    tbl += `<td>—</td><td>—</td></tr>`;
+
+    tbl += `<tr class="ot-val-row"><td>Discriminación</td><td>—</td><td>—</td>`;
+    fk.forEach(f => {
+      const ok = f > 0 && f < n;
+      tbl += `<td class="${ok ? "ot-badge-ok" : "ot-badge-bad"}">${ok ? "OK" : "Cambiar"}</td>`;
+    });
+    tbl += `<td>—</td><td>—</td></tr></tbody></table>`;
+    document.getElementById("ot-rd-tbl-box").innerHTML = tbl;
+  }
+
+  renderComp4DimBox();
 
   // SVG Gráfico Complejidad Funcional vs. Población (lámina 15)
   const svg = document.getElementById("svg-ot-rond");
@@ -4769,9 +5129,9 @@ function drawOtRond() {
   });
 
   renderPedBox("ped-ot-rd",
-    `<b>${best.nm}</b> encabeza la complejidad funcional con <b>${fmtDec(best.ic,2)} puntos</b>. El servicio más escaso es <b>${otRdCols[rarIdx]}</b> (presente en solo ${fk[rarIdx]} localidad(es)), entregando <b>${fmtDec(wk[rarIdx],2)} pts</b> a quien lo posee.`,
-    `<b>Por qué dos ciudades con igual cantidad de servicios pueden tener puntajes distintos:</b> en el ejemplo de cátedra, <i>Melchor de Mencos</i> y <i>San Ignacio</i> tienen <b>6 servicios cada una</b>, pero Melchor saca <b>191,67</b> y San Ignacio <b>175,00</b> porque Melchor posee <b>Guarderías</b> (el más escaso: 50 pts) mientras a San Ignacio le falta.`,
-    `En el Control 5 (Unidad 5 OT): el Escalograma de Guttman / Rondinelli se aplica a las <b>10 comunas más pobladas</b> con mínimo <b>7 variables</b>. Si una columna queda con puros <code>1</code> no aporta diferenciación y debes cambiarla; además siempre se acompaña del gráfico de <b>Complejidad vs. Población</b>.`
+    `En <b>${tituloAct}</b>, <b>${best.nm}</b> encabeza la complejidad funcional con <b>${fmtDec(best.ic,2)} puntos</b>. El servicio más escaso es <b>${otRdCols[rarIdx]}</b> (presente en solo ${fk[rarIdx]} comuna/s), aportando <b>${fmtDec(wk[rarIdx],2)} pts</b> a quien lo posee.`,
+    `<b>Por qué el profesor advierte que puedes cambiar variables de la pauta:</b> presiona <b>Ver Error: Pauta con Puros 1</b> arriba y verás que equipamientos muy básicos (como <i>Cajeros automáticos</i>, <i>CESFAM</i>, <i>Farmacia</i> o <i>Parques</i>) existen en las 10 comunas mayores, dando peso plano y cero poder discriminante. Luego presiona <b>Ordenar Escalograma (Guttman)</b> para ver el triángulo acumulativo.`,
+    `Para el Control 5: trabaja las <b>10 comunas más pobladas</b> con <b>mínimo 7 variables</b> de una <b>sola dimensión</b> a la vez (Producción, Transporte/Telecom, Salud/Educación o Recreación/Comercio). Usa <b>Comparar 4 Dimensiones</b> arriba para comprobar cómo una comuna puede ser fuerte en infraestructura/comercio pero más débil en salud o servicios productivos.`
   );
 }
 
