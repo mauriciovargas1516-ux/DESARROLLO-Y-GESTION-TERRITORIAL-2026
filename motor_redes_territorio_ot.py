@@ -418,7 +418,7 @@ def obtener_matriz_guttman_control5(
     """
     Construye la matriz de presencia/ausencia (1/0) para las 10 comunas con más población
     de la región seleccionada según las 4 dimensiones de 'Unidad 5. Ordenamiento Territorial.pdf',
-    garantizando 8 variables con diferenciación efectiva entre comunas.
+    garantizando 8 variables con diferenciación efectiva entre comunas (sin columnas con puros 1 o 0).
     """
     if "Biobío" in region_sel:
         comunas_top10 = [
@@ -443,76 +443,79 @@ def obtener_matriz_guttman_control5(
 
     if "1. Servicios a la producción" in dimension:
         cols = [
-            "Cajeros automáticos", "OTEC / Capacitación", "Más de 1 Banco comercial",
-            "Agencia Desarrollo Local / Fomento", "Asistencia Técnica (Oficina Sercotec/INDAP)",
-            "Empresa reclutamiento laboral", "Centro de Negocios Sercotec", "Laboratorio Certificación Industrial",
+            "OTEC / Capacitación", "Más de 1 Banco comercial",
+            "Agencia Desarrollo Local / Fomento", "Asistencia Técnica (Sercotec/INDAP)",
+            "Empresa reclutamiento laboral", "Centro de Negocios Sercotec",
+            "Laboratorio Certificación Industrial", "Gremio / Cámara Regional",
         ]
         mat = [
             [1, 1, 1, 1, 1, 1, 1, 1],
             [1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 0, 1, 1, 1],
-            [1, 1, 1, 1, 1, 0, 1, 1],
-            [1, 1, 1, 1, 1, 0, 0, 0],
-            [1, 1, 0, 1, 0, 0, 0, 1],
-            [1, 1, 1, 1, 0, 0, 0, 1],
-            [1, 1, 0, 1, 1, 0, 0, 0],
+            [1, 1, 1, 1, 1, 1, 1, 0],
+            [1, 1, 1, 1, 0, 1, 1, 0],
             [1, 1, 1, 1, 0, 0, 0, 0],
-            [1, 0, 0, 1, 0, 0, 0, 1],
+            [1, 0, 1, 0, 0, 0, 1, 0],
+            [1, 1, 1, 0, 0, 0, 1, 0],
+            [1, 0, 1, 1, 0, 0, 0, 0],
+            [1, 1, 1, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 1, 0],
         ]
     elif "2. Infraestructura, transporte" in dimension:
         cols = [
-            "Señal Estación Radio Local", "Terminal de Buses Interurbano",
-            "Periódico / Medio Digital Local", "Parque o Área Industrial",
-            "Puerto Marítimo / Fluvial Comercial", "Señal de TV Local",
-            "Estación Operativa de Tren", "Aeropuerto / Aeródromo Comercial (DGAC)",
+            "Terminal de Buses Interurbano", "Periódico / Medio Digital Local",
+            "Parque o Área Industrial", "Puerto Marítimo / Fluvial Comercial",
+            "Señal de TV Local", "Estación Operativa de Tren",
+            "Aeropuerto / Aeródromo Comercial (DGAC)", "Puerto Seco / Centro Logístico",
         ]
         mat = [
             [1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 0, 1, 0, 1],
-            [1, 1, 1, 1, 1, 1, 1, 0],
+            [1, 1, 1, 0, 1, 0, 1, 1],
             [1, 1, 1, 1, 1, 1, 0, 1],
-            [1, 1, 1, 1, 1, 1, 1, 0],
-            [1, 1, 0, 1, 1, 0, 1, 0],
-            [1, 1, 1, 1, 0, 0, 1, 0],
-            [1, 1, 1, 0, 0, 0, 0, 0],
-            [1, 0, 0, 0, 1, 0, 0, 0],
-            [1, 0, 0, 1, 0, 0, 1, 0],
+            [1, 1, 1, 1, 1, 0, 1, 0],
+            [1, 1, 1, 1, 1, 1, 0, 0],
+            [1, 0, 1, 1, 0, 1, 0, 0],
+            [1, 1, 1, 0, 0, 1, 0, 0],
+            [1, 1, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 1, 0, 0, 0, 0],
+            [0, 0, 1, 0, 0, 1, 0, 0],
         ]
     elif "3. Infraestructura de salud" in dimension:
         cols = [
-            "Farmacia y Centro Dental", "CESFAM", "Educación Media Científico-Humanista",
-            "Educación Media Técnico-Profesional", "Hospital Baja/Media Complejidad",
-            "CFT / Instituto Profesional", "Universidad con Sede Presencial", "Hospital Alta Complejidad (Tipo 1)",
+            "Educación Media Técnico-Profesional", "Centro Dental / Especialidades",
+            "Hospital Baja/Media Complejidad (Tipo 2)", "Clínica Privada / Centro Médico",
+            "CFT", "Instituto Profesional (IP)",
+            "Universidad con Sede Presencial", "Hospital Alta Complejidad (Tipo 1)",
         ]
         mat = [
-            [1, 1, 1, 1, 1, 1, 1, 1],
             [1, 1, 1, 1, 1, 1, 1, 1],
             [1, 1, 1, 1, 1, 1, 1, 1],
             [1, 1, 1, 1, 1, 1, 1, 0],
-            [1, 1, 1, 1, 1, 1, 0, 0],
-            [1, 1, 1, 1, 1, 0, 0, 0],
-            [1, 1, 1, 1, 1, 0, 0, 0],
-            [1, 1, 1, 1, 1, 0, 0, 0],
-            [1, 1, 1, 1, 1, 0, 0, 0],
-            [1, 1, 1, 1, 1, 0, 0, 0],
+            [1, 1, 1, 1, 1, 1, 1, 0],
+            [1, 1, 1, 0, 1, 1, 0, 0],
+            [1, 1, 1, 0, 1, 0, 0, 0],
+            [1, 1, 1, 0, 0, 0, 0, 0],
+            [1, 1, 0, 0, 0, 0, 0, 0],
+            [1, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
         ]
     else:
         cols = [
-            "Parques y Áreas Verdes Urbanas", "Estadio Municipal", "Gimnasio de Gran Capacidad",
-            "Pista de Atletismo", "Piscina Pública / Temperada", "Multitiendas Comerciales",
-            "Centro Comercial (Tipo Mall)", "Salas de Cine Comercial",
+            "Estadio Regional / Profesional", "Gimnasio de Gran Capacidad",
+            "Pista de Atletismo", "Piscina Pública / Temperada",
+            "Multitiendas Comerciales", "Centro Comercial (Tipo Mall)",
+            "Salas de Cine Comercial", "Teatro / Centro Cultural",
         ]
         mat = [
             [1, 1, 1, 1, 1, 1, 1, 1],
             [1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 0, 1, 1, 1, 1],
-            [1, 1, 1, 0, 0, 1, 1, 0],
-            [1, 1, 1, 0, 0, 0, 0, 0],
-            [1, 1, 1, 0, 0, 1, 0, 0],
-            [1, 1, 1, 0, 0, 0, 0, 0],
-            [1, 1, 1, 0, 0, 0, 0, 0],
-            [1, 1, 1, 0, 0, 0, 0, 0],
+            [1, 1, 1, 1, 1, 1, 1, 0],
+            [1, 1, 0, 1, 1, 1, 1, 1],
+            [1, 1, 0, 0, 1, 1, 0, 0],
+            [1, 0, 0, 0, 0, 0, 0, 0],
+            [1, 1, 0, 0, 1, 0, 0, 0],
+            [1, 0, 0, 0, 0, 0, 0, 0],
+            [1, 1, 0, 0, 0, 0, 0, 1],
+            [0, 0, 0, 0, 0, 0, 0, 0],
         ]
 
     return pd.DataFrame(mat, index=comunas_top10, columns=cols)
@@ -1235,6 +1238,14 @@ def renderizar_redes_territorio_ot():
         df_gutt_edit = st.data_editor(df_gutt_base, use_container_width=True, key=f"gutt_c5_ed_{reg_c5}_{dim_sel[:2]}")
 
         frec_f = df_gutt_edit.sum(axis=0)
+        cols_sin_disc = [c for c in df_gutt_edit.columns if int(frec_f[c]) in (0, len(df_gutt_edit))]
+        if cols_sin_disc:
+            st.warning(
+                f"Regla Control 5: las columnas {', '.join(cols_sin_disc)} tienen puros 1 o puros 0 y no discriminan entre comunas. "
+                "Edita sus celdas o reemplaza esas variables por equipamientos diferenciadores."
+            )
+        else:
+            st.success(f"Validación Control 5 OK: las {len(df_gutt_edit.columns)} variables (≥ 7) discriminan efectivamente entre las {len(df_gutt_edit)} comunas.")
         pesos_r = np.where(frec_f > 0, 100.0 / frec_f, 0.0)
         centralidad_com = df_gutt_edit.values @ pesos_r
         df_res_gutt = pd.DataFrame({
