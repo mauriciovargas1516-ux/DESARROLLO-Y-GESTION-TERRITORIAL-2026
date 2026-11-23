@@ -24,6 +24,7 @@ from openpyxl.utils import get_column_letter
 
 
 ARCHIVO_DEFAULT_REPO = "ILPES GRUPO 10 29-10-2026.xlsx"
+ARCHIVO_CENSO_2017_REPO = "1_1_poblacion.xls"
 
 
 def _normalizar_texto(texto: str) -> str:
@@ -656,6 +657,54 @@ def _obtener_poblacion_comunas(comunas: list):
         pobs.append(int(val))
     return pobs
 
+@st.cache_data(show_spinner=False)
+def cargar_poblacion_censo_2017_xls(ruta_xls: str = ARCHIVO_CENSO_2017_REPO) -> dict:
+    """
+    Lee directamente la pestaña 'Comuna' del archivo oficial INE '1_1_poblacion.xls'
+    (Censo 2017, actualizado con Región de Ñuble) sin requerir filtros manuales en Excel.
+    Filtra automáticamente 'EDAD == Total Comuna' y retorna un diccionario normalizado
+    con las 346 comunas del país. Si el archivo o xlrd no están disponibles, retorna {}.
+    """
+    if not ruta_xls or not os.path.exists(ruta_xls):
+        return {}
+    try:
+        df_17 = pd.read_excel(ruta_xls, sheet_name="Comuna", header=2)
+    except Exception:
+        return {}
+
+    col_com = _buscar_columna(df_17.columns, ["NOMBRE COMUNA", "Comuna"])
+    col_prov = _buscar_columna(df_17.columns, ["NOMBRE PROVINCIA", "Provincia"])
+    col_reg = _buscar_columna(df_17.columns, ["NOMBRE REGIÓN", "NOMBRE REGION", "Región", "Region"])
+    col_edad = _buscar_columna(df_17.columns, ["EDAD", "Edad"])
+    col_tot = _buscar_columna(
+        df_17.columns,
+        ["TOTAL POBLACIÓN EFECTIVAMENTE CENSADA", "TOTAL POBLACION EFECTIVAMENTE CENSADA", "Total"],
+    )
+    if not col_com or not col_edad or not col_tot:
+        return {}
+
+    mask_tot = df_17[col_edad].astype(str).apply(_normalizar_texto) == "total comuna"
+    df_tot = df_17[mask_tot].copy()
+    mapa = {}
+    for _, row in df_tot.iterrows():
+        com_raw = str(row[col_com]).strip()
+        com_key = _normalizar_texto(com_raw)
+        if not com_key or com_key == "pais":
+            continue
+        val_num = pd.to_numeric(row[col_tot], errors="coerce")
+        if pd.isna(val_num) or val_num <= 0:
+            continue
+        prov_nom = str(row[col_prov]).strip().title() if col_prov and pd.notna(row[col_prov]) else ""
+        reg_nom = str(row[col_reg]).strip().title() if col_reg and pd.notna(row[col_reg]) else ""
+        mapa[com_key] = {
+            "comuna": com_raw.title(),
+            "provincia": prov_nom,
+            "region": reg_nom,
+            "pob_2017": int(round(float(val_num))),
+        }
+    return mapa
+
+
 
 def _etiquetas_variable_sii(variable_sel: str, anio_0: int, anio_t: int):
     """Genera etiquetas limpias para encabezados de la hoja Cuadrantes Silva."""
@@ -1022,6 +1071,8 @@ def construir_datos_ot_region(
     df_censo = None
     df_aislamiento = None
     es_base_censo_oficial = False
+    mapa_censo_17 = cargar_poblacion_censo_2017_xls()
+    usa_archivo_censo_2017 = False
 
     if reg_ot_key is not None:
         try:
@@ -1032,6 +1083,15 @@ def construir_datos_ot_region(
             df_censo = obtener_poblacion_censos_control5(reg_ot_key).copy()
             df_aislamiento = obtener_matriz_aislamiento_control5(reg_ot_key).copy()
             es_base_censo_oficial = True
+            if mapa_censo_17 and not df_censo.empty:
+                matches_17 = 0
+                for idx_c, row_c in df_censo.iterrows():
+                    info_17 = mapa_censo_17.get(_normalizar_texto(row_c["Comuna"]))
+                    if info_17 is not None:
+                        df_censo.at[idx_c, "Censo_2017"] = int(info_17["pob_2017"])
+                        matches_17 += 1
+                if matches_17 == len(df_censo):
+                    usa_archivo_censo_2017 = True
         except Exception:
             df_censo = None
             df_aislamiento = None
@@ -1042,16 +1102,37 @@ def construir_datos_ot_region(
         tot_0 = V0.sum(axis=0)
         tot_t = Vt.sum(axis=0)
         filas = []
+        n_match_17 = 0
+        n_match_24 = 0
         for com in Vt.columns:
-            p24 = POBLACION_CENSO_2024.get(_normalizar_texto(com))
-            if p24 is None:
+            com_key = _normalizar_texto(com)
+            info_17 = mapa_censo_17.get(com_key) if mapa_censo_17 else None
+            p24 = POBLACION_CENSO_2024.get(com_key)
+            prov_nom = str(region_sel)
+            if info_17 is not None:
+                p17 = int(info_17["pob_2017"])
+                if info_17.get("provincia"):
+                    prov_nom = info_17["provincia"]
+                n_match_17 += 1
+            else:
+                p17 = None
+            if p24 is not None:
+                p24 = int(p24)
+                n_match_24 += 1
+            if p24 is None and p17 is not None:
+                p24 = max(500, int(round(p17 * 1.04)))
+            elif p17 is None and p24 is not None:
+                p17 = max(500, int(round(p24 * 0.94)))
+            elif p17 is None and p24 is None:
                 p24 = max(1000, int(round(float(tot_t.get(com, 1.0)))))
                 p17 = max(1000, int(round(float(tot_0.get(com, 1.0)))))
-            else:
-                p17 = max(500, int(round(p24 * 0.94)))
-            filas.append((str(com), str(region_sel), int(p17), int(p24)))
+            filas.append((str(com), prov_nom, int(p17), int(p24)))
         df_censo = pd.DataFrame(filas, columns=["Comuna", "Provincia", "Censo_2017", "Censo_2024"])
         df_censo = df_censo.sort_values("Censo_2024", ascending=False).reset_index(drop=True)
+        if len(filas) > 0 and n_match_17 == len(filas):
+            usa_archivo_censo_2017 = True
+            if n_match_24 == len(filas):
+                es_base_censo_oficial = True
 
     df_censo = df_censo.sort_values("Censo_2024", ascending=False).reset_index(drop=True)
     top10_comunas = df_censo["Comuna"].astype(str).tolist()[:10]
@@ -1086,12 +1167,18 @@ def construir_datos_ot_region(
     else:
         cat_ip4, cod_ip4 = "Muy Dispersa", 0
 
+    pob_reg_17 = int(df_censo["Censo_2017"].sum())
+    pob_reg_24 = int(df_censo["Censo_2024"].sum())
+
     return {
         "df_censo": df_censo,
         "df_guttman": df_guttman,
         "df_aislamiento": df_aislamiento,
         "dimension_ot": dimension_ot,
         "es_base_censo_oficial": es_base_censo_oficial,
+        "usa_archivo_censo_2017": usa_archivo_censo_2017,
+        "pob_reg_17": pob_reg_17,
+        "pob_reg_24": pob_reg_24,
         "ip4_24": ip4_24,
         "ip2_24": ip2_24,
         "ip4_17": ip4_17,
@@ -1197,7 +1284,14 @@ def _agregar_hojas_ot_y_u6(
     df_aislamiento = datos_ot["df_aislamiento"].copy()
     dim_ot = datos_ot.get("dimension_ot", DIMENSIONES_GUTTMAN_OT[0])
     dim_nombre = dim_ot.split(".", 1)[1].strip() if "." in dim_ot else dim_ot
-    fuente_censo = "Fuente: INE (Censos de Población 2017 y 2024)" if datos_ot.get("es_base_censo_oficial") else "Fuente: Estimación comunal referencial (2017 y 2024)"
+    if datos_ot.get("es_base_censo_oficial") and datos_ot.get("usa_archivo_censo_2017"):
+        fuente_censo = "Fuente: INE — Censo 2017 (1_1_poblacion.xls) y Censo 2024 (poblacion 2024.pdf)"
+    elif datos_ot.get("es_base_censo_oficial"):
+        fuente_censo = "Fuente: INE (Censos de Población 2017 y 2024)"
+    elif datos_ot.get("usa_archivo_censo_2017"):
+        fuente_censo = "Fuente: INE Censo 2017 (1_1_poblacion.xls) y estimación comunal referencial 2024"
+    else:
+        fuente_censo = "Fuente: Estimación comunal referencial (2017 y 2024)"
 
     def _banner_sheet(ws, n_cols: int, titulo: str, subtitulo: str):
         ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=max(n_cols, 2))
@@ -1233,7 +1327,7 @@ def _agregar_hojas_ot_y_u6(
         # ======================================================================
         ws11 = wb.create_sheet("Primacía y Ranking")
         headers_11 = [
-            "Comuna", "Provincia", "Censo 2017", "Censo 2024",
+            "Comuna", "Provincia", "Población Censo 2017", "Población Censo 2024",
             "Ranking 2017", "Ranking 2024", "Cambio", "Tendencia",
             "Variación (%)", "Cuota Regional (%)", "Zipf Teórico (P1/Rango)",
         ]
@@ -1451,7 +1545,7 @@ def _agregar_hojas_ot_y_u6(
         # ======================================================================
         ws12 = wb.create_sheet("Rondinelli")
         headers_12 = (
-            ["Comuna", "Población 2024", "% Población"]
+            ["Comuna", "Población (Censo 2024)", "% Población"]
             + funcs_cols
             + ["Total Servicios", "Índice Rondinelli", "Ranking Funcional"]
         )
@@ -1581,7 +1675,7 @@ def _agregar_hojas_ot_y_u6(
         ws12.row_dimensions[f_b2_tit].height = 20
 
         f_b2_hd = f_b2_tit + 1
-        headers_b2 = ["Comuna", "Población 2024", "% Población"] + funcs_cols + ["Índice Funcional"]
+        headers_b2 = ["Comuna", "Población (Censo 2024)", "% Población"] + funcs_cols + ["Índice Funcional"]
         for c_i, h in enumerate(headers_b2, start=1):
             ch = ws12.cell(row=f_b2_hd, column=c_i, value=h)
             ch.fill = fill_header
@@ -1656,7 +1750,7 @@ def _agregar_hojas_ot_y_u6(
 
         chart_rond = ScatterChart()
         chart_rond.visible_cells_only = False
-        chart_rond.title = f"Complejidad Funcional vs. Población — {region_sel}"
+        chart_rond.title = f"Complejidad Funcional vs. Población (Censo 2024) — {region_sel}"
         chart_rond.style = 2
         chart_rond.legend = None
         chart_rond.x_axis.title = "Población Comunal (Censo 2024)"
@@ -2049,7 +2143,7 @@ def compilar_excel_10_hojas(
     df_portada = pd.DataFrame([
         {"Indicador": "Región analizada", "Valor": str(region_sel)},
         {"Indicador": "Variable económica (SII)", "Valor": str(variable_sel)},
-        {"Indicador": "Periodo de análisis", "Valor": f"{anio_0} – {anio_t} ({mb['T_anios']} años)"},
+        {"Indicador": "Periodo económico (SII)", "Valor": f"{anio_0} – {anio_t} ({mb['T_anios']} años)"},
         {"Indicador": "Comunas activas", "Valor": tot["n_comunas"]},
         {"Indicador": "Rubros económicos SII", "Valor": tot["n_rubros"]},
         {"Indicador": f"Total regional {anio_0}", "Valor": tot["total_reg_0"]},
@@ -2077,9 +2171,15 @@ def compilar_excel_10_hojas(
         score_rond = float(df_rond_res["Indice_Rondinelli"].max()) if not df_rond_res.empty else 0.0
         mejor_con = str(df_aisl_res.iloc[0]["Comuna_Localidad"]) if not df_aisl_res.empty else "-"
         pct_aisl_min = float(df_aisl_res.iloc[0]["Indice_Aislamiento_%"]) if not df_aisl_res.empty else 0.0
+        pob_17_tot = int(datos_ot_act.get("pob_reg_17", datos_ot_act["df_censo"]["Censo_2017"].sum()))
+        pob_24_tot = int(datos_ot_act.get("pob_reg_24", datos_ot_act["df_censo"]["Censo_2024"].sum()))
         filas_ot_portada = pd.DataFrame([
+            {"Indicador": "Periodo censal población (OT)", "Valor": "Censos 2017 y 2024 (INE)"},
+            {"Indicador": "Población regional (Censo 2017)", "Valor": pob_17_tot},
+            {"Indicador": "Población regional (Censo 2024)", "Valor": pob_24_tot},
+            {"Indicador": "Índice de primacía 4 ciudades (Censo 2017)", "Valor": round(datos_ot_act["ip4_17"], 4)},
             {"Indicador": "Índice de primacía 4 ciudades (Censo 2024)", "Valor": round(datos_ot_act["ip4_24"], 4)},
-            {"Indicador": "Clasificación de primacía", "Valor": f"{datos_ot_act['cat_ip4']} ({datos_ot_act['cod_ip4']})"},
+            {"Indicador": "Clasificación de primacía (Censo 2024)", "Valor": f"{datos_ot_act['cat_ip4']} ({datos_ot_act['cod_ip4']})"},
             {"Indicador": "Mayor centralidad funcional (Rondinelli)", "Valor": f"{lider_rond} ({score_rond:.2f})"},
             {"Indicador": "Menor índice de aislamiento", "Valor": f"{mejor_con} ({pct_aisl_min:.1f}%)"},
         ])
@@ -2511,7 +2611,7 @@ def compilar_excel_10_hojas(
             "Comuna",
             lbl_v0,
             lbl_vt,
-            "Población",
+            "Población (Censo 2024)",
             "Tasa prom. de crecimiento",
             lbl_pc,
             "Cuadrante Silva Lira",
@@ -3402,7 +3502,7 @@ def renderizar_exportador_sii(ruta_excel_default: str = ARCHIVO_DEFAULT_REPO):
                 "Comuna": df_ss["Comuna"].values,
                 lbl_v0: v0_arr,
                 lbl_vt: vt_arr,
-                "Población": pob_st,
+                "Población (Censo 2024)": pob_st,
                 "Tasa prom. de crecimiento (%)": tpa_pct,
                 lbl_pc: pc_arr,
                 "Cuadrante Silva Lira": cuads_st,
@@ -3633,7 +3733,7 @@ def renderizar_exportador_sii(ruta_excel_default: str = ARCHIVO_DEFAULT_REPO):
                     y="Indice_Rondinelli",
                     text="Comuna",
                     size="Total_Funciones",
-                    title=f"Complejidad Funcional vs. Población — {region_sel}",
+                    title=f"Complejidad Funcional vs. Población (Censo 2024) — {region_sel}",
                     labels={
                         "Poblacion_2024": "Población Comunal (Censo 2024)",
                         "Indice_Rondinelli": "Índice de Centralidad Funcional (Rondinelli)",
