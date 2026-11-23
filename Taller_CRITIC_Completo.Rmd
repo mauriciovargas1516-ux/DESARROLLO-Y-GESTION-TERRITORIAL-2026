@@ -1,0 +1,170 @@
+---
+title: "Taller CRITIC — Índice de Desarrollo Territorial"
+author: "Desarrollo y Gestión Territorial (Prof. Claudio Mancilla)"
+output: html_notebook
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+# 1. Librerías
+```{r}
+library(readxl)
+library(ggplot2)
+library(ggcorrplot)
+```
+
+# 2. Importar datos (hoja `para_r` del Excel)
+```{r}
+# Ajusta la ruta a donde guardaste el archivo Excel en tu PC
+ruta_excel <- "01_Caso_CRITIC_Completo_2017_2024.xlsx"
+
+# Leemos solo las 16 regiones (filas 1 a 17 de la hoja para_r)
+datos <- read_excel(ruta_excel, sheet = "para_r", range = "A1:H17")
+head(datos)
+```
+
+# 3. Vector de dimensiones, regiones y matriz X
+```{r}
+dimensiones <- c("Vivienda", "Población", "Salud", "Ingresos", "Educación", "Trabajo", "Pobreza")
+regiones <- trimws(datos$regiones)
+
+X <- as.matrix(datos[, dimensiones])
+rownames(X) <- regiones
+dim(X)
+```
+
+# 4. Paso 1 CRITIC: Desviación estándar por dimensión ($\sigma_j$)
+```{r}
+desviaciones <- apply(X, 2, sd)
+
+df_desviaciones <- data.frame(
+  dimension = factor(names(desviaciones), levels = names(desviaciones)),
+  sd = as.numeric(desviaciones)
+)
+
+ggplot(df_desviaciones, aes(x = dimension, y = sd)) +
+  geom_col(fill = "steelblue", width = 0.6) +
+  geom_text(aes(label = round(sd, 3)), vjust = -0.5, size = 3.5) +
+  ylim(0, max(df_desviaciones$sd) * 1.15) +
+  labs(
+    title = "Desviación Estándar por Dimensión (Variabilidad)",
+    x = "Dimensión",
+    y = "Desviación Estándar (SD)"
+  ) +
+  theme_minimal()
+```
+
+# 5. Paso 2 CRITIC: Matriz de correlación de Pearson ($r_{jk}$)
+```{r}
+correlacion <- cor(X, method = "pearson")
+round(correlacion, 3)
+
+# Correlograma con ggcorrplot (corrección del ggplot(correlacion) que daba error)
+ggcorrplot(
+  correlacion,
+  hc.order = FALSE,
+  type = "lower",
+  lab = TRUE,
+  lab_size = 3.2,
+  colors = c("#DC2626", "#FFFFFF", "#1D4ED8"),
+  title = "Matriz de Correlaciones de Pearson entre Dimensiones (2017)"
+)
+```
+
+# 6. Paso 3 CRITIC: Contenido informativo ($C_j$) y pesos objetivos ($w_j$)
+```{r}
+sumatorias_correlaciones <- rowSums(1 - correlacion)
+C <- desviaciones * sumatorias_correlaciones
+ponderador <- C / sum(C)
+
+tabla_critic <- data.frame(
+  Dimension = names(ponderador),
+  SD = round(desviaciones, 4),
+  Suma_1_menos_r = round(sumatorias_correlaciones, 4),
+  C_info = round(C, 4),
+  Peso_w = round(ponderador, 6),
+  Peso_pct = paste0(round(ponderador * 100, 2), "%")
+)
+print(tabla_critic, row.names = FALSE)
+
+ggplot(tabla_critic, aes(x = reorder(Dimension, Peso_w), y = Peso_w * 100)) +
+  geom_col(fill = "#1D4ED8", width = 0.6) +
+  geom_text(aes(label = Peso_pct), hjust = -0.15, size = 3.4) +
+  coord_flip() +
+  ylim(0, max(tabla_critic$Peso_w * 100) * 1.18) +
+  labs(
+    title = "Ponderaciones Objetivas CRITIC por Dimensión (2017)",
+    x = "Dimensión",
+    y = "Peso (%)"
+  ) +
+  theme_minimal()
+```
+
+# 7. Paso 4: Índice de Desarrollo Territorial 2017 y Ranking
+```{r}
+indice_2017 <- drop(X %*% ponderador)
+
+df_ranking_2017 <- data.frame(
+  Region = regiones,
+  ID_2017 = round(indice_2017, 4),
+  Ranking_2017 = rank(-indice_2017, ties.method = "min")
+)
+df_ranking_2017 <- df_ranking_2017[order(df_ranking_2017$Ranking_2017), ]
+print(df_ranking_2017, row.names = FALSE)
+
+ggplot(df_ranking_2017, aes(x = reorder(Region, ID_2017), y = ID_2017)) +
+  geom_col(fill = "#0F766E", width = 0.65) +
+  geom_text(aes(label = round(ID_2017, 3)), hjust = -0.15, size = 3.2) +
+  coord_flip() +
+  ylim(0, max(df_ranking_2017$ID_2017) * 1.15) +
+  labs(
+    title = "Índice de Desarrollo Territorial 2017 (Ponderación CRITIC)",
+    x = "Región",
+    y = "Índice [0, 1]"
+  ) +
+  theme_minimal()
+```
+
+# 8. Comparación 2017 vs. 2024 y Convergencia Beta y Sigma (pesos fijos 2017)
+```{r}
+datos_2024 <- read_excel(ruta_excel, sheet = "para_r_2024", range = "A1:H17")
+X_2024 <- as.matrix(datos_2024[, dimensiones])
+
+# Para comparar en el tiempo se mantienen los pesos CRITIC base 2017
+indice_2024 <- drop(X_2024 %*% ponderador)
+
+df_conv <- data.frame(
+  Region = regiones,
+  ID_2017 = round(indice_2017, 4),
+  Rk_2017 = rank(-indice_2017, ties.method = "min"),
+  ID_2024 = round(indice_2024, 4),
+  Rk_2024 = rank(-indice_2024, ties.method = "min"),
+  Cambio_Puesto = rank(-indice_2017, ties.method = "min") - rank(-indice_2024, ties.method = "min"),
+  ln_2017 = log(indice_2017),
+  g_anual = (log(indice_2024) - log(indice_2017)) / 7
+)
+print(df_conv[order(df_conv$Rk_2024), c("Region", "ID_2017", "Rk_2017", "ID_2024", "Rk_2024", "Cambio_Puesto")], row.names = FALSE)
+
+# Convergencia Sigma (desviación estándar de los logaritmos)
+sigma_2017 <- sd(log(indice_2017))
+sigma_2024 <- sd(log(indice_2024))
+cat("Convergencia Sigma -> SD(ln ID 2017):", round(sigma_2017, 4),
+    "| SD(ln ID 2024):", round(sigma_2024, 4), "\n")
+
+# Convergencia Beta (OLS: tasa anual vs logaritmo inicial)
+modelo_beta <- lm(g_anual ~ ln_2017, data = df_conv)
+summary(modelo_beta)
+
+ggplot(df_conv, aes(x = ln_2017, y = g_anual, label = Region)) +
+  geom_point(color = "#1D4ED8", size = 3) +
+  geom_smooth(method = "lm", se = FALSE, color = "#DC2626", linetype = "dashed") +
+  geom_text(vjust = -0.7, size = 3) +
+  labs(
+    title = "Convergencia Beta del Índice de Desarrollo CRITIC (2017–2024)",
+    x = "ln(ID 2017)",
+    y = "Tasa de Crecimiento Anual Media (T = 7 años)"
+  ) +
+  theme_minimal()
+```
