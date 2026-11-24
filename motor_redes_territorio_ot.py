@@ -1503,41 +1503,21 @@ def renderizar_redes_territorio_ot():
             df_aisl_edit,
         )
         slug_reg = reg_c5.split("(")[0].strip().replace(" ", "_")
-        bytes_pdf_tab4 = None
-        bytes_html_tab4 = None
         reg_limpia_t4 = reg_c5.split("(")[0].strip()
+        bytes_pdf_tab4 = None
         try:
-            from generador_imprimible_ot import (
-                generar_pdf_imprimible_control5,
-                generar_html_imprimible_control5,
+            from generador_imprimible_ot import generar_pdf_imprimible_control5
+            bytes_pdf_tab4 = generar_pdf_imprimible_control5(
+                region_sel=reg_limpia_t4,
+                df_censo=df_c5_pob,
+                df_guttman=df_gutt_edit,
+                df_aislamiento=df_aisl_edit,
+                dimension_ot=dim_sel,
             )
-            try:
-                bytes_pdf_tab4 = generar_pdf_imprimible_control5(
-                    region_sel=reg_limpia_t4,
-                    df_censo=df_c5_pob,
-                    df_guttman=df_gutt_edit,
-                    df_aislamiento=df_aisl_edit,
-                    dimension_ot=dim_sel,
-                    fuente_censo="INE, Censos 2017 y 2024",
-                )
-            except Exception:
-                bytes_pdf_tab4 = None
-            if bytes_pdf_tab4 is None:
-                html_tab4_str = generar_html_imprimible_control5(
-                    region_sel=reg_limpia_t4,
-                    df_censo=df_c5_pob,
-                    df_guttman=df_gutt_edit,
-                    df_aislamiento=df_aisl_edit,
-                    dimension_ot=dim_sel,
-                    incluir_teoria=False,
-                    fuente_censo="INE, Censos 2017 y 2024",
-                )
-                bytes_html_tab4 = html_tab4_str.encode("utf-8")
         except Exception:
             bytes_pdf_tab4 = None
-            bytes_html_tab4 = None
 
-        if bytes_pdf_tab4 is not None or bytes_html_tab4 is not None:
+        if bytes_pdf_tab4 is not None:
             cd_ot1, cd_ot2 = st.columns(2)
             with cd_ot1:
                 st.download_button(
@@ -1549,27 +1529,17 @@ def renderizar_redes_territorio_ot():
                     key="btn_dl_tab4_region",
                 )
             with cd_ot2:
-                if bytes_pdf_tab4 is not None:
-                    st.download_button(
-                        label=f"Descargar PDF Listo para Imprimir (.pdf — {reg_limpia_t4})",
-                        data=bytes_pdf_tab4,
-                        file_name=f"Control5_OT_{slug_reg}.pdf",
-                        mime="application/pdf",
-                        use_container_width=True,
-                        key="btn_dl_tab4_imprimible_pdf",
-                    )
-                else:
-                    st.download_button(
-                        label=f"Descargar Imprimible Control 5 (Carta .html — {reg_limpia_t4})",
-                        data=bytes_html_tab4,
-                        file_name=f"Imprimible_Control5_{slug_reg}.html",
-                        mime="text/html",
-                        use_container_width=True,
-                        key="btn_dl_tab4_imprimible_html",
-                    )
+                st.download_button(
+                    label=f"Descargar PDF — {reg_limpia_t4}",
+                    data=bytes_pdf_tab4,
+                    file_name=f"Control5_OT_{slug_reg}.pdf",
+                    mime="application/pdf",
+                    use_container_width=True,
+                    key="btn_dl_tab4_imprimible_pdf",
+                )
         else:
             st.download_button(
-                label=f"Descargar Reporte Excel — {reg_c5.split('(')[0].strip()}",
+                label=f"Descargar Reporte Excel — {reg_limpia_t4}",
                 data=bytes_reg_activa,
                 file_name=f"Control5_Primacia_Guttman_Aislamiento_{slug_reg}.xlsx",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
