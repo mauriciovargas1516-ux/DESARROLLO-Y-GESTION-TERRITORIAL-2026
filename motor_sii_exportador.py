@@ -3927,45 +3927,20 @@ def renderizar_exportador_sii(ruta_excel_default: str = ARCHIVO_DEFAULT_REPO):
         f"Reporte_Territorial_{reg_slug}_{anio_0}_{anio_t}{suf_nom}.xlsx"
     )
     bytes_pdf_c5 = None
-    bytes_html_c5 = None
-    fuente_censo_imp = (
-        "INE, Censo 2017 y Censo 2024"
-        if datos_ot_export.get("es_base_censo_oficial")
-        else "Referencia comunal SII / INE (2017-2024)"
-    )
     try:
-        from generador_imprimible_ot import (
-            generar_pdf_imprimible_control5,
-            generar_html_imprimible_control5,
+        from generador_imprimible_ot import generar_pdf_imprimible_control5
+        bytes_pdf_c5 = generar_pdf_imprimible_control5(
+            region_sel=region_sel,
+            df_censo=datos_ot_export["df_censo"],
+            df_guttman=datos_ot_export["df_guttman"],
+            df_aislamiento=datos_ot_export["df_aislamiento"],
+            dimension_ot=dim_ot_sel,
         )
-        try:
-            bytes_pdf_c5 = generar_pdf_imprimible_control5(
-                region_sel=region_sel,
-                df_censo=datos_ot_export["df_censo"],
-                df_guttman=datos_ot_export["df_guttman"],
-                df_aislamiento=datos_ot_export["df_aislamiento"],
-                dimension_ot=dim_ot_sel,
-                fuente_censo=fuente_censo_imp,
-            )
-        except Exception:
-            bytes_pdf_c5 = None
-        if bytes_pdf_c5 is None:
-            html_c5_str = generar_html_imprimible_control5(
-                region_sel=region_sel,
-                df_censo=datos_ot_export["df_censo"],
-                df_guttman=datos_ot_export["df_guttman"],
-                df_aislamiento=datos_ot_export["df_aislamiento"],
-                dimension_ot=dim_ot_sel,
-                incluir_teoria=False,
-                fuente_censo=fuente_censo_imp,
-            )
-            bytes_html_c5 = html_c5_str.encode("utf-8")
     except Exception:
         bytes_pdf_c5 = None
-        bytes_html_c5 = None
 
     with slot_descarga_superior.container():
-        if bytes_pdf_c5 is not None or bytes_html_c5 is not None:
+        if bytes_pdf_c5 is not None:
             cdl1, cdl2 = st.columns([1.15, 1.0])
             with cdl1:
                 st.download_button(
@@ -3977,24 +3952,14 @@ def renderizar_exportador_sii(ruta_excel_default: str = ARCHIVO_DEFAULT_REPO):
                     key="dl_reporte_sii_ot_top",
                 )
             with cdl2:
-                if bytes_pdf_c5 is not None:
-                    st.download_button(
-                        label=f"Descargar PDF Listo para Imprimir (Carta .pdf · {len(datos_ot_export['df_aislamiento'])} comunas)",
-                        data=bytes_pdf_c5,
-                        file_name=f"Control5_OT_{reg_slug}.pdf",
-                        mime="application/pdf",
-                        use_container_width=True,
-                        key="dl_imprimible_c5_sii_pdf",
-                    )
-                else:
-                    st.download_button(
-                        label=f"Descargar Imprimible Control 5 (Carta .html · {len(datos_ot_export['df_aislamiento'])} comunas)",
-                        data=bytes_html_c5,
-                        file_name=f"Imprimible_Control5_{reg_slug}.html",
-                        mime="text/html",
-                        use_container_width=True,
-                        key="dl_imprimible_c5_sii_top",
-                    )
+                st.download_button(
+                    label=f"Descargar PDF ({len(datos_ot_export['df_aislamiento'])} comunas)",
+                    data=bytes_pdf_c5,
+                    file_name=f"Control5_OT_{reg_slug}.pdf",
+                    mime="application/pdf",
+                    use_container_width=True,
+                    key="dl_imprimible_c5_sii_pdf",
+                )
         else:
             st.download_button(
                 label=f"Descargar Excel ({total_hojas} hojas: {', '.join(partes_desc)})",
