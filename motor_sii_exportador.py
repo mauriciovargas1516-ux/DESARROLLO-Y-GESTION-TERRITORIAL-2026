@@ -1135,17 +1135,40 @@ def construir_datos_ot_region(
     top10_comunas = df_censo["Comuna"].astype(str).tolist()[:10]
     df_guttman = _matriz_guttman_discriminante_default(dimension_ot, top10_comunas)
 
-    if df_aislamiento is None or df_aislamiento.empty:
-        n_l = len(top10_comunas)
+    todas_comunas = df_censo["Comuna"].astype(str).tolist()
+    if df_aislamiento is None or df_aislamiento.empty or len(df_aislamiento) < len(todas_comunas):
+        n_l = len(todas_comunas)
         mat_a = np.ones((n_l, n_l), dtype=int)
         np.fill_diagonal(mat_a, 0)
+        # Conecta la capital regional (0) con los polos provinciales y enlaza corredor base editable
+        prov_vistos = {}
+        provs_list = df_censo["Provincia"].astype(str).tolist() if "Provincia" in df_censo.columns else ["Reg"] * n_l
+        for i, pr_n in enumerate(provs_list):
+            if pr_n not in prov_vistos:
+                prov_vistos[pr_n] = i
+                if i > 0:
+                    mat_a[0, i] = 0
+                    mat_a[i, 0] = 0
+            else:
+                hub_p = prov_vistos[pr_n]
+                mat_a[hub_p, i] = 0
+                mat_a[i, hub_p] = 0
         for i in range(1, min(n_l, 5)):
             mat_a[0, i] = 0
             mat_a[i, 0] = 0
-        for i in range(n_l - 1):
-            mat_a[i, i + 1] = 0
-            mat_a[i + 1, i] = 0
-        df_aislamiento = pd.DataFrame(mat_a, index=top10_comunas, columns=top10_comunas)
+        if df_aislamiento is not None and not df_aislamiento.empty:
+            idx_full = {_normalizar_texto(c): idx for idx, c in enumerate(todas_comunas)}
+            for r_nm in df_aislamiento.index:
+                ri = idx_full.get(_normalizar_texto(r_nm))
+                if ri is None:
+                    continue
+                for c_nm in df_aislamiento.columns:
+                    ci = idx_full.get(_normalizar_texto(c_nm))
+                    if ci is not None and ri != ci:
+                        val_ex = int(pd.to_numeric(df_aislamiento.loc[r_nm, c_nm], errors="coerce") or 0)
+                        mat_a[ri, ci] = 0 if val_ex == 0 else 1
+                        mat_a[ci, ri] = mat_a[ri, ci]
+        df_aislamiento = pd.DataFrame(mat_a, index=todas_comunas, columns=todas_comunas)
 
     p_24 = df_censo["Censo_2024"].astype(float).values
     p_17 = np.sort(df_censo["Censo_2017"].astype(float).values)[::-1]
@@ -1533,6 +1556,12 @@ def _agregar_hojas_ot_y_u6(
             ws11.add_chart(chart_rk, "M4")
 
         _autoajustar_columnas_hoja(ws11, max_width=22, min_width=11, col_a_max=34)
+        ws11.page_setup.orientation = ws11.ORIENTATION_LANDSCAPE
+        ws11.page_setup.paperSize = ws11.PAPERSIZE_LETTER
+        ws11.sheet_properties.pageSetUpPr.fitToPage = True
+        ws11.page_setup.fitToWidth = 1
+        ws11.page_setup.fitToHeight = 1
+        ws11.print_area = f"A1:K{f_ip_cls}"
 
         # HOJA: RONDINELLI (ESCALOGRAMA DE GUTTMAN + MATRIZ PONDERADA + GRÁFICO)
         ws12 = wb.create_sheet("Rondinelli")
@@ -1774,6 +1803,12 @@ def _agregar_hojas_ot_y_u6(
 
         ws12.add_chart(chart_rond, f"A{f_b2_tot + 3}")
         _autoajustar_columnas_hoja(ws12, max_width=22, min_width=12, col_a_max=34)
+        ws12.page_setup.orientation = ws12.ORIENTATION_LANDSCAPE
+        ws12.page_setup.paperSize = ws12.PAPERSIZE_LETTER
+        ws12.sheet_properties.pageSetUpPr.fitToPage = True
+        ws12.page_setup.fitToWidth = 1
+        ws12.page_setup.fitToHeight = 1
+        ws12.print_area = f"A1:{get_column_letter(n_cols_12)}{f_b2_tot}"
 
         # HOJA: AISLAMIENTO (MATRIZ 0/1 Y RANKING DE CONECTIVIDAD)
         ws13 = wb.create_sheet("Aislamiento")
@@ -1856,7 +1891,35 @@ def _agregar_hojas_ot_y_u6(
             if c_i >= col_sum1:
                 cp.alignment = Alignment(horizontal="right", vertical="center")
 
-        _autoajustar_columnas_hoja(ws13, max_width=18, min_width=11, col_a_max=30)
+        fill_con0_13 = PatternFill("solid", fgColor="DCFCE7")
+        font_con0_13 = Font(name="Calibri", size=9, bold=True, color="166534")
+        for r_chk in range(f_ini_13, f_fin_13 + 1):
+            for c_chk in range(2, 2 + n_l):
+                cel_v = ws13.cell(row=r_chk, column=c_chk)
+                if cel_v.value == 0:
+                    cel_v.fill = fill_con0_13
+                    cel_v.font = font_con0_13
+
+        ws13.freeze_panes = "B5"
+        if n_l > 12:
+            ws13.row_dimensions[4].height = 96
+            for c_i in range(2, 2 + n_l):
+                ws13.cell(row=4, column=c_i).alignment = Alignment(
+                    horizontal="center", vertical="bottom", textRotation=90, wrap_text=False
+                )
+                ws13.column_dimensions[get_column_letter(c_i)].width = 4.2
+            ws13.column_dimensions["A"].width = 24
+            for c_i in range(col_sum1, len(headers_13) + 1):
+                ws13.column_dimensions[get_column_letter(c_i)].width = 14
+        else:
+            _autoajustar_columnas_hoja(ws13, max_width=18, min_width=11, col_a_max=30)
+
+        ws13.page_setup.orientation = ws13.ORIENTATION_LANDSCAPE
+        ws13.page_setup.paperSize = ws13.PAPERSIZE_LETTER
+        ws13.sheet_properties.pageSetUpPr.fitToPage = True
+        ws13.page_setup.fitToWidth = 1
+        ws13.page_setup.fitToHeight = 1
+        ws13.print_area = f"A1:{get_column_letter(len(headers_13))}{f_prom_13}"
 
     if incluir_u6:
         # HOJA OPCIONAL: ÍNDICE DESARROLLO (NORMALIZACIÓN Min-Max Y PESOS)
@@ -3406,7 +3469,7 @@ def renderizar_exportador_sii(ruta_excel_default: str = ARCHIVO_DEFAULT_REPO):
     reg_slug = _normalizar_texto(region_sel).replace(" ", "_")
     dim_slug = str(DIMENSIONES_GUTTMAN_OT.index(dim_ot_sel) + 1)
     key_gutt_ss = f"ot_gutt_edit_{reg_slug}_{dim_slug}"
-    key_aisl_ss = f"ot_aisl_edit_{reg_slug}"
+    key_aisl_ss = f"ot_aisl_edit_all_{reg_slug}"
 
     datos_ot_export = dict(datos_ot_base)
     if key_gutt_ss in st.session_state:
@@ -3738,11 +3801,19 @@ def renderizar_exportador_sii(ruta_excel_default: str = ARCHIVO_DEFAULT_REPO):
                 st.plotly_chart(fig_rond_st, use_container_width=True)
 
         with sub_ot3:
-            st.markdown("**Matriz de Aislamiento Comunal (0 = conexión directa asfaltada; 1 = sin conexión directa)**")
+            n_aisl_com = len(datos_ot_export["df_aislamiento"])
+            st.markdown(
+                f"**Matriz de Aislamiento Comunal Completa — {n_aisl_com} comunas de {region_sel}** "
+                "(0 = conexión directa asfaltada; 1 = sin conexión directa)"
+            )
+            st.caption(
+                "Cumple el punto 3 de la pauta Control 5 (todas las comunas de la región). "
+                "Puedes editar cualquier celda 0/1 y el Excel se exporta listo para imprimir en 1 hoja horizontal."
+            )
             df_aisl_edit = st.data_editor(
                 datos_ot_export["df_aislamiento"],
                 use_container_width=True,
-                key=f"editor_aisl_sii_{reg_slug}",
+                key=f"editor_aisl_all_sii_{reg_slug}",
             )
             st.session_state[key_aisl_ss] = df_aisl_edit
             datos_ot_export["df_aislamiento"] = df_aisl_edit
