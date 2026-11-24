@@ -523,32 +523,78 @@ def obtener_matriz_guttman_control5(
 
 def obtener_matriz_aislamiento_control5(region_sel: str = "Región de Los Lagos (30 comunas)") -> pd.DataFrame:
     """
-    Construye la Matriz de Aislamiento del punto 3 de 'Unidad 5. Ordenamiento Territorial.pdf':
-    0 = Conectada directamente (por ruta asfaltada directa sin pasar por otra cabecera comunal intermedia)
-    1 = No está conectada directamente (requiere transbordo o paso por otra comuna)
+    Construye la Matriz de Aislamiento del punto 3 de 'Unidad 5. Ordenamiento Territorial.pdf'
+    para TODAS las comunas de la región seleccionada:
+    0 = Conectada directamente por ruta asfaltada (sin cruzar otra cabecera comunal intermedia)
+    1 = No está conectada directamente
     """
+    df_pob_reg = obtener_poblacion_censos_control5(region_sel)
+    localidades = df_pob_reg["Comuna"].astype(str).tolist()
+
     if "Biobío" in region_sel:
-        localidades = [
-            "Concepción", "Talcahuano", "Hualpén", "San Pedro de la Paz",
-            "Chiguayante", "Coronel", "Lota", "Penco", "Tomé", "Los Ángeles",
-        ]
+        # 33 comunas Región del Biobío — red vial pavimentada directa
         conexiones_directas_0 = [
+            # Gran Concepción y ejes costero / interior
             ("Concepción", "Talcahuano"),
             ("Concepción", "Hualpén"),
             ("Concepción", "San Pedro de la Paz"),
             ("Concepción", "Chiguayante"),
             ("Concepción", "Penco"),
-            ("Concepción", "Los Ángeles"),
+            ("Concepción", "Florida"),
+            ("Concepción", "Cabrero"),
             ("Talcahuano", "Hualpén"),
-            ("San Pedro de la Paz", "Coronel"),
-            ("Coronel", "Lota"),
+            ("Hualpén", "San Pedro de la Paz"),
             ("Penco", "Tomé"),
+            ("Penco", "Florida"),
+            ("Chiguayante", "Hualqui"),
+            ("Hualqui", "San Rosendo"),
+            ("San Pedro de la Paz", "Coronel"),
+            ("San Pedro de la Paz", "Santa Juana"),
+            ("Coronel", "Lota"),
+            ("Coronel", "Santa Juana"),
+            ("Florida", "Cabrero"),
+            ("Florida", "Yumbel"),
+            # Provincia de Arauco (Ruta 160, P-40, P-60, P-70)
+            ("Lota", "Arauco"),
+            ("Lota", "Curanilahue"),
+            ("Arauco", "Curanilahue"),
+            ("Arauco", "Lebu"),
+            ("Curanilahue", "Los Álamos"),
+            ("Los Álamos", "Lebu"),
+            ("Los Álamos", "Cañete"),
+            ("Cañete", "Contulmo"),
+            ("Cañete", "Tirúa"),
+            ("Contulmo", "Tirúa"),
+            # Provincia del Biobío (Ruta 5 Sur, Ruta 156, Ruta 180, ejes cordilleranos)
+            ("Santa Juana", "Nacimiento"),
+            ("Cabrero", "Yumbel"),
+            ("Cabrero", "Los Ángeles"),
+            ("Cabrero", "Tucapel"),
+            ("Yumbel", "Laja"),
+            ("Yumbel", "San Rosendo"),
+            ("Yumbel", "Los Ángeles"),
+            ("Laja", "San Rosendo"),
+            ("Laja", "Los Ángeles"),
+            ("Laja", "Nacimiento"),
+            ("Los Ángeles", "Nacimiento"),
+            ("Los Ángeles", "Negrete"),
+            ("Los Ángeles", "Mulchén"),
+            ("Los Ángeles", "Santa Bárbara"),
+            ("Los Ángeles", "Quilleco"),
+            ("Los Ángeles", "Antuco"),
+            ("Los Ángeles", "Tucapel"),
+            ("Nacimiento", "Negrete"),
+            ("Mulchén", "Negrete"),
+            ("Mulchén", "Quilaco"),
+            ("Santa Bárbara", "Quilaco"),
+            ("Santa Bárbara", "Quilleco"),
+            ("Santa Bárbara", "Alto Biobío"),
+            ("Quilleco", "Antuco"),
+            ("Quilleco", "Tucapel"),
+            ("Antuco", "Tucapel"),
         ]
     elif "Los Ríos" in region_sel:
-        localidades = [
-            "Valdivia", "Corral", "Mariquina", "Lanco", "Máfil",
-            "Los Lagos", "Paillaco", "Panguipulli", "Futrono", "La Unión",
-        ]
+        # 12 comunas Región de Los Ríos
         conexiones_directas_0 = [
             ("Valdivia", "Corral"),
             ("Valdivia", "Mariquina"),
@@ -557,45 +603,117 @@ def obtener_matriz_aislamiento_control5(region_sel: str = "Región de Los Lagos 
             ("Valdivia", "Paillaco"),
             ("Mariquina", "Lanco"),
             ("Mariquina", "Máfil"),
+            ("Máfil", "Lanco"),
+            ("Máfil", "Los Lagos"),
             ("Lanco", "Panguipulli"),
             ("Los Lagos", "Panguipulli"),
             ("Los Lagos", "Futrono"),
+            ("Los Lagos", "Paillaco"),
+            ("Paillaco", "Futrono"),
             ("Paillaco", "La Unión"),
+            ("La Unión", "Río Bueno"),
+            ("Río Bueno", "Lago Ranco"),
+            ("Futrono", "Lago Ranco"),
         ]
     elif "Araucanía" in region_sel:
-        localidades = [
-            "Temuco", "Padre Las Casas", "Lautaro", "Victoria", "Angol",
-            "Nueva Imperial", "Carahue", "Freire", "Villarrica", "Pucón",
-        ]
+        # 32 comunas Región de La Araucanía
         conexiones_directas_0 = [
             ("Temuco", "Padre Las Casas"),
             ("Temuco", "Lautaro"),
+            ("Temuco", "Vilcún"),
             ("Temuco", "Nueva Imperial"),
-            ("Lautaro", "Victoria"),
-            ("Victoria", "Angol"),
-            ("Nueva Imperial", "Carahue"),
+            ("Temuco", "Cholchol"),
+            ("Temuco", "Galvarino"),
             ("Padre Las Casas", "Freire"),
+            ("Padre Las Casas", "Cunco"),
+            ("Padre Las Casas", "Vilcún"),
+            ("Lautaro", "Perquenco"),
+            ("Lautaro", "Vilcún"),
+            ("Lautaro", "Curacautín"),
+            ("Lautaro", "Galvarino"),
+            ("Perquenco", "Victoria"),
+            ("Perquenco", "Galvarino"),
+            ("Victoria", "Ercilla"),
+            ("Victoria", "Traiguén"),
+            ("Victoria", "Curacautín"),
+            ("Ercilla", "Collipulli"),
+            ("Collipulli", "Angol"),
+            ("Collipulli", "Renaico"),
+            ("Angol", "Renaico"),
+            ("Angol", "Los Sauces"),
+            ("Los Sauces", "Purén"),
+            ("Los Sauces", "Traiguén"),
+            ("Purén", "Lumaco"),
+            ("Traiguén", "Lumaco"),
+            ("Traiguén", "Galvarino"),
+            ("Galvarino", "Cholchol"),
+            ("Cholchol", "Nueva Imperial"),
+            ("Nueva Imperial", "Carahue"),
+            ("Nueva Imperial", "Teodoro Schmidt"),
+            ("Carahue", "Saavedra"),
+            ("Carahue", "Teodoro Schmidt"),
+            ("Teodoro Schmidt", "Toltén"),
+            ("Teodoro Schmidt", "Freire"),
+            ("Freire", "Pitrufquén"),
             ("Freire", "Villarrica"),
+            ("Freire", "Cunco"),
+            ("Pitrufquén", "Gorbea"),
+            ("Pitrufquén", "Toltén"),
+            ("Gorbea", "Loncoche"),
+            ("Loncoche", "Villarrica"),
             ("Villarrica", "Pucón"),
+            ("Pucón", "Curarrehue"),
+            ("Cunco", "Melipeuco"),
+            ("Cunco", "Villarrica"),
+            ("Vilcún", "Melipeuco"),
+            ("Curacautín", "Lonquimay"),
+            ("Lonquimay", "Melipeuco"),
         ]
     else:
-        localidades = [
-            "Osorno", "Puaucho (S.J. Costa)", "Entre Lagos (Puyehue)",
-            "San Pablo", "Río Negro", "Purranque", "Puerto Octay",
-            "Frutillar", "Puerto Varas", "Puerto Montt",
-        ]
+        # 30 comunas Región de Los Lagos
         conexiones_directas_0 = [
-            ("Osorno", "Puaucho (S.J. Costa)"),
-            ("Osorno", "Entre Lagos (Puyehue)"),
             ("Osorno", "San Pablo"),
+            ("Osorno", "Puyehue (Entre Lagos)"),
+            ("Osorno", "San Juan de la Costa (Puaucho)"),
             ("Osorno", "Río Negro"),
             ("Osorno", "Puerto Octay"),
-            ("Entre Lagos (Puyehue)", "Puerto Octay"),
+            ("Puyehue (Entre Lagos)", "Puerto Octay"),
             ("Río Negro", "Purranque"),
+            ("Purranque", "Puerto Octay"),
             ("Purranque", "Frutillar"),
+            ("Purranque", "Fresia"),
             ("Puerto Octay", "Frutillar"),
-            ("Frutillar", "Puerto Varas"),
+            ("Frutillar", "Llanquihue"),
+            ("Frutillar", "Fresia"),
+            ("Llanquihue", "Puerto Varas"),
+            ("Llanquihue", "Fresia"),
+            ("Fresia", "Los Muermos"),
             ("Puerto Varas", "Puerto Montt"),
+            ("Puerto Varas", "Cochamó"),
+            ("Puerto Montt", "Los Muermos"),
+            ("Puerto Montt", "Maullín"),
+            ("Puerto Montt", "Calbuco"),
+            ("Puerto Montt", "Cochamó"),
+            ("Puerto Montt", "Hualaihué"),
+            ("Los Muermos", "Maullín"),
+            ("Maullín", "Calbuco"),
+            ("Cochamó", "Hualaihué"),
+            ("Maullín", "Ancud"),
+            ("Ancud", "Quemchi"),
+            ("Ancud", "Dalcahue"),
+            ("Quemchi", "Dalcahue"),
+            ("Dalcahue", "Castro"),
+            ("Dalcahue", "Curaco de Vélez"),
+            ("Curaco de Vélez", "Quinchao"),
+            ("Castro", "Chonchi"),
+            ("Chonchi", "Puqueldón"),
+            ("Chonchi", "Queilén"),
+            ("Chonchi", "Quellón"),
+            ("Queilén", "Quellón"),
+            ("Hualaihué", "Chaitén"),
+            ("Chaitén", "Futaleufú"),
+            ("Chaitén", "Palena"),
+            ("Futaleufú", "Palena"),
         ]
 
     n = len(localidades)
@@ -610,7 +728,6 @@ def obtener_matriz_aislamiento_control5(region_sel: str = "Región de Los Lagos 
             mat[ib, ia] = 0
 
     return pd.DataFrame(mat, index=localidades, columns=localidades)
-
 
 # 4. EXPORTADOR EXCEL PARA CONTROL 2 Y CONTROL 5
 def _autoajustar_columnas_ot(ws, fila_ini: int = 3, max_width: int = 34, min_width: int = 13, col_a_max: int = 36):
@@ -933,8 +1050,35 @@ def exportar_excel_controles_2_y_5(
             cf.alignment = Alignment(horizontal="right", vertical="center")
             cf.border = borde
 
+    fill_con0 = PatternFill("solid", fgColor="DCFCE7")
+    font_con0 = Font(name="Calibri", size=9, bold=True, color="166534")
+    for r_chk in range(fila_ini_4, fila_ini_4 + n_l):
+        for c_chk in range(2, 2 + n_l):
+            cel_v = ws4.cell(row=r_chk, column=c_chk)
+            if cel_v.value == 0:
+                cel_v.fill = fill_con0
+                cel_v.font = font_con0
+
     ws4.freeze_panes = "B5"
-    _autoajustar_columnas_ot(ws4, fila_ini=4, max_width=22, min_width=13, col_a_max=28)
+    if n_l > 12:
+        ws4.row_dimensions[4].height = 96
+        for c_i in range(2, 2 + n_l):
+            ws4.cell(row=4, column=c_i).alignment = Alignment(
+                horizontal="center", vertical="bottom", textRotation=90, wrap_text=False
+            )
+            ws4.column_dimensions[get_column_letter(c_i)].width = 4.2
+        ws4.column_dimensions["A"].width = 24
+        for c_i in range(2 + n_l, len(headers_a) + 1):
+            ws4.column_dimensions[get_column_letter(c_i)].width = 14
+    else:
+        _autoajustar_columnas_ot(ws4, fila_ini=4, max_width=22, min_width=13, col_a_max=28)
+
+    ws4.page_setup.orientation = ws4.ORIENTATION_LANDSCAPE
+    ws4.page_setup.paperSize = ws4.PAPERSIZE_LETTER
+    ws4.sheet_properties.pageSetUpPr.fitToPage = True
+    ws4.page_setup.fitToWidth = 1
+    ws4.page_setup.fitToHeight = 1
+    ws4.print_area = f"A1:{get_column_letter(len(headers_a))}{fila_ini_4 + n_l - 1}"
 
     buf = io.BytesIO()
     wb.save(buf)
