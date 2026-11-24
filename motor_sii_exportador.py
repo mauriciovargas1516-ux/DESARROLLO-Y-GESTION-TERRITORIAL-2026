@@ -1561,7 +1561,7 @@ def _agregar_hojas_ot_y_u6(
         ws11.sheet_properties.pageSetUpPr.fitToPage = True
         ws11.page_setup.fitToWidth = 1
         ws11.page_setup.fitToHeight = 1
-        ws11.print_area = f"A1:K{f_ip_cls}"
+        ws11.print_area = f"A1:K{r_cat}"
 
         # HOJA: RONDINELLI (ESCALOGRAMA DE GUTTMAN + MATRIZ PONDERADA + GRÁFICO)
         ws12 = wb.create_sheet("Rondinelli")
