@@ -420,7 +420,8 @@ def obtener_matriz_guttman_control5(
     de la región seleccionada según las 4 dimensiones de 'Unidad 5. Ordenamiento Territorial.pdf',
     garantizando 8 variables con diferenciación efectiva entre comunas (sin columnas con puros 1 o 0).
     """
-    if "Biobío" in region_sel:
+    es_biobio = "Biobío" in region_sel
+    if es_biobio:
         comunas_top10 = [
             "Concepción", "Los Ángeles", "San Pedro de la Paz", "Talcahuano", "Coronel",
             "Hualpén", "Chiguayante", "Tomé", "Penco", "Lota",
@@ -443,83 +444,138 @@ def obtener_matriz_guttman_control5(
 
     if "1. Servicios a la producción" in dimension:
         cols = [
-            "OTEC / Capacitación", "Más de 1 Banco comercial",
-            "Agencia Desarrollo Local / Fomento", "Asistencia Técnica (Sercotec/INDAP)",
-            "Empresa reclutamiento laboral", "Centro de Negocios Sercotec",
-            "Laboratorio Certificación Industrial", "Gremio / Cámara Regional",
+            "OTEC / Capacitación", "Cámara de Comercio local",
+            "Banco (más de 1 banco)", "Asistencia Técnica (Sercotec / INDAP)",
+            "Empresa de reclutamiento laboral", "Centro de Negocios Sercotec",
+            "Oficina SII (atención empresas)", "Oficina Regional CORFO / Gremio Regional",
         ]
-        mat = [
-            [1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 1, 1, 0],
-            [1, 1, 1, 1, 0, 1, 1, 0],
-            [1, 1, 1, 1, 0, 0, 0, 0],
-            [1, 0, 1, 0, 0, 0, 1, 0],
-            [1, 1, 1, 0, 0, 0, 1, 0],
-            [1, 0, 1, 1, 0, 0, 0, 0],
-            [1, 1, 1, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 1, 0],
-        ]
+        if es_biobio:
+            mat = [
+                [1, 1, 1, 1, 1, 1, 1, 1],
+                [1, 1, 1, 1, 1, 1, 1, 1],
+                [1, 1, 1, 1, 1, 0, 0, 0],
+                [1, 1, 1, 1, 1, 1, 1, 0],
+                [1, 1, 1, 1, 1, 1, 1, 0],
+                [1, 0, 0, 0, 0, 0, 0, 0],
+                [1, 1, 1, 0, 0, 0, 0, 0],
+                [1, 1, 0, 1, 0, 0, 0, 0],
+                [1, 0, 0, 0, 0, 0, 0, 0],
+                [0, 1, 0, 0, 0, 0, 0, 0],
+            ]
+        else:
+            mat = [
+                [1, 1, 1, 1, 1, 1, 1, 1],
+                [1, 1, 1, 1, 1, 1, 1, 1],
+                [1, 1, 1, 1, 1, 1, 0, 0],
+                [1, 1, 1, 1, 0, 1, 1, 0],
+                [1, 1, 1, 1, 0, 0, 0, 0],
+                [1, 1, 0, 1, 0, 0, 0, 0],
+                [1, 1, 1, 0, 0, 0, 0, 0],
+                [1, 0, 0, 1, 0, 0, 0, 0],
+                [1, 0, 0, 0, 0, 0, 0, 0],
+                [0, 1, 0, 0, 0, 0, 0, 0],
+            ]
     elif "2. Infraestructura, transporte" in dimension:
         cols = [
-            "Terminal de Buses Interurbano", "Periódico / Medio Digital Local",
-            "Parque o Área Industrial", "Puerto Marítimo / Fluvial Comercial",
-            "Señal de TV Local", "Estación Operativa de Tren",
-            "Aeropuerto / Aeródromo Comercial (DGAC)", "Puerto Seco / Centro Logístico",
+            "Terminal de Buses", "Periódico / Medio local",
+            "Área industrial", "Estación de tren / Biotren",
+            "Puerto comercial", "Señal de TV local",
+            "Aeropuerto / Aeródromo comercial", "Puerto seco / Centro logístico",
         ]
-        mat = [
-            [1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 0, 1, 0, 1, 1],
-            [1, 1, 1, 1, 1, 1, 0, 1],
-            [1, 1, 1, 1, 1, 0, 1, 0],
-            [1, 1, 1, 1, 1, 1, 0, 0],
-            [1, 0, 1, 1, 0, 1, 0, 0],
-            [1, 1, 1, 0, 0, 1, 0, 0],
-            [1, 1, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 1, 0, 0, 0, 0],
-            [0, 0, 1, 0, 0, 1, 0, 0],
-        ]
+        if es_biobio:
+            mat = [
+                [1, 1, 1, 1, 0, 1, 0, 1],
+                [1, 1, 1, 0, 0, 1, 1, 1],
+                [0, 1, 1, 1, 0, 0, 0, 0],
+                [1, 1, 1, 1, 1, 1, 1, 1],
+                [1, 1, 1, 1, 1, 1, 0, 1],
+                [0, 0, 1, 1, 0, 0, 0, 0],
+                [0, 0, 0, 1, 0, 0, 0, 0],
+                [1, 1, 0, 0, 0, 1, 0, 0],
+                [0, 0, 1, 0, 1, 0, 0, 0],
+                [1, 1, 0, 0, 0, 0, 0, 0],
+            ]
+        else:
+            mat = [
+                [1, 1, 1, 1, 1, 1, 1, 1],
+                [1, 1, 1, 0, 0, 1, 1, 1],
+                [1, 1, 1, 1, 1, 0, 0, 1],
+                [1, 1, 1, 0, 1, 1, 1, 0],
+                [1, 1, 1, 1, 1, 0, 0, 0],
+                [1, 0, 1, 0, 1, 0, 0, 0],
+                [1, 1, 0, 0, 0, 0, 0, 0],
+                [1, 0, 0, 0, 0, 0, 0, 0],
+                [0, 1, 0, 0, 1, 0, 0, 0],
+                [0, 0, 1, 0, 0, 0, 0, 0],
+            ]
     elif "3. Infraestructura de salud" in dimension:
         cols = [
-            "Educación Media Técnico-Profesional", "Centro Dental / Especialidades",
-            "Hospital Baja/Media Complejidad (Tipo 2)", "Clínica Privada / Centro Médico",
+            "Educación media técnica", "Centro dental",
+            "Hospital tipo 2 (mediana / baja comp.)", "Clínica privada",
             "CFT", "Instituto Profesional (IP)",
-            "Universidad con Sede Presencial", "Hospital Alta Complejidad (Tipo 1)",
+            "Universidad", "Hospital tipo 1 (alta complejidad)",
         ]
-        mat = [
-            [1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 1, 1, 0],
-            [1, 1, 1, 1, 1, 1, 1, 0],
-            [1, 1, 1, 0, 1, 1, 0, 0],
-            [1, 1, 1, 0, 1, 0, 0, 0],
-            [1, 1, 1, 0, 0, 0, 0, 0],
-            [1, 1, 0, 0, 0, 0, 0, 0],
-            [1, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-        ]
+        if es_biobio:
+            mat = [
+                [1, 1, 0, 1, 1, 1, 1, 1],
+                [1, 1, 0, 1, 1, 1, 1, 1],
+                [1, 1, 0, 1, 0, 0, 1, 0],
+                [1, 1, 0, 1, 1, 1, 1, 1],
+                [1, 1, 1, 0, 1, 0, 0, 0],
+                [1, 1, 0, 0, 0, 0, 1, 0],
+                [1, 1, 0, 0, 0, 0, 0, 0],
+                [1, 1, 1, 0, 0, 0, 0, 0],
+                [1, 0, 1, 0, 0, 0, 0, 0],
+                [0, 0, 1, 0, 1, 0, 0, 0],
+            ]
+        else:
+            mat = [
+                [1, 1, 1, 1, 1, 1, 1, 1],
+                [1, 1, 1, 1, 1, 1, 1, 1],
+                [1, 1, 1, 1, 1, 1, 1, 0],
+                [1, 1, 1, 1, 1, 1, 0, 0],
+                [1, 1, 1, 0, 1, 0, 0, 0],
+                [1, 1, 1, 0, 0, 0, 0, 0],
+                [1, 1, 0, 0, 0, 0, 0, 0],
+                [1, 1, 0, 0, 0, 0, 0, 0],
+                [1, 0, 0, 0, 0, 0, 0, 0],
+                [0, 1, 0, 0, 0, 0, 0, 0],
+            ]
     else:
         cols = [
-            "Estadio Regional / Profesional", "Gimnasio de Gran Capacidad",
-            "Pista de Atletismo", "Piscina Pública / Temperada",
-            "Multitiendas Comerciales", "Centro Comercial (Tipo Mall)",
-            "Salas de Cine Comercial", "Teatro / Centro Cultural",
+            "Estadios", "Gimnasios de gran capacidad",
+            "Pistas de atletismo", "Piscinas públicas",
+            "Multitiendas", "Centros comerciales (tipo mall)",
+            "Cines", "Teatro / Centro cultural regional",
         ]
-        mat = [
-            [1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 1, 1, 0],
-            [1, 1, 0, 1, 1, 1, 1, 1],
-            [1, 1, 0, 0, 1, 1, 0, 0],
-            [1, 0, 0, 0, 0, 0, 0, 0],
-            [1, 1, 0, 0, 1, 0, 0, 0],
-            [1, 0, 0, 0, 0, 0, 0, 0],
-            [1, 1, 0, 0, 0, 0, 0, 1],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-        ]
+        if es_biobio:
+            mat = [
+                [1, 1, 1, 1, 1, 1, 1, 1],
+                [1, 1, 1, 1, 1, 1, 1, 1],
+                [1, 1, 1, 1, 1, 0, 0, 1],
+                [1, 1, 1, 1, 1, 1, 1, 0],
+                [1, 1, 0, 0, 1, 1, 1, 0],
+                [1, 1, 0, 0, 1, 0, 0, 0],
+                [1, 1, 0, 1, 0, 0, 0, 0],
+                [1, 1, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0],
+                [1, 0, 0, 0, 0, 0, 0, 1],
+            ]
+        else:
+            mat = [
+                [1, 1, 1, 1, 1, 1, 1, 1],
+                [1, 1, 1, 1, 1, 1, 1, 1],
+                [1, 1, 1, 1, 1, 1, 1, 0],
+                [1, 1, 0, 1, 1, 1, 1, 0],
+                [1, 1, 0, 0, 1, 1, 0, 0],
+                [1, 1, 0, 0, 0, 0, 0, 0],
+                [1, 0, 0, 0, 1, 0, 0, 0],
+                [1, 0, 0, 0, 0, 0, 0, 0],
+                [1, 0, 0, 0, 0, 0, 0, 0],
+                [0, 1, 0, 0, 0, 0, 0, 0],
+            ]
 
     return pd.DataFrame(mat, index=comunas_top10, columns=cols)
-
 
 def obtener_matriz_aislamiento_control5(region_sel: str = "Región de Los Lagos (30 comunas)") -> pd.DataFrame:
     """
@@ -759,6 +815,11 @@ def exportar_excel_controles_2_y_5(
     """
     wb = Workbook()
     wb.remove(wb.active)
+    wb.properties.creator = ""
+    wb.properties.lastModifiedBy = ""
+    wb.properties.title = ""
+    wb.properties.subject = ""
+    wb.properties.description = ""
 
     fill_titulo = PatternFill("solid", fgColor="262626")
     fill_header = PatternFill("solid", fgColor="404040")
@@ -1050,8 +1111,8 @@ def exportar_excel_controles_2_y_5(
             cf.alignment = Alignment(horizontal="right", vertical="center")
             cf.border = borde
 
-    fill_con0 = PatternFill("solid", fgColor="DCFCE7")
-    font_con0 = Font(name="Calibri", size=9, bold=True, color="166534")
+    fill_con0 = PatternFill("solid", fgColor="EDEDED")
+    font_con0 = Font(name="Calibri", size=9, bold=True, color="000000")
     for r_chk in range(fila_ini_4, fila_ini_4 + n_l):
         for c_chk in range(2, 2 + n_l):
             cel_v = ws4.cell(row=r_chk, column=c_chk)
@@ -1442,14 +1503,79 @@ def renderizar_redes_territorio_ot():
             df_aisl_edit,
         )
         slug_reg = reg_c5.split("(")[0].strip().replace(" ", "_")
-        st.download_button(
-            label=f"Descargar Reporte Excel — {reg_c5.split('(')[0].strip()}",
-            data=bytes_reg_activa,
-            file_name=f"Control5_Primacia_Guttman_Aislamiento_{slug_reg}.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            use_container_width=True,
-            key="btn_dl_tab4_region",
-        )
+        bytes_pdf_tab4 = None
+        bytes_html_tab4 = None
+        reg_limpia_t4 = reg_c5.split("(")[0].strip()
+        try:
+            from generador_imprimible_ot import (
+                generar_pdf_imprimible_control5,
+                generar_html_imprimible_control5,
+            )
+            try:
+                bytes_pdf_tab4 = generar_pdf_imprimible_control5(
+                    region_sel=reg_limpia_t4,
+                    df_censo=df_c5_pob,
+                    df_guttman=df_gutt_edit,
+                    df_aislamiento=df_aisl_edit,
+                    dimension_ot=dim_sel,
+                    fuente_censo="INE, Censos 2017 y 2024",
+                )
+            except Exception:
+                bytes_pdf_tab4 = None
+            if bytes_pdf_tab4 is None:
+                html_tab4_str = generar_html_imprimible_control5(
+                    region_sel=reg_limpia_t4,
+                    df_censo=df_c5_pob,
+                    df_guttman=df_gutt_edit,
+                    df_aislamiento=df_aisl_edit,
+                    dimension_ot=dim_sel,
+                    incluir_teoria=False,
+                    fuente_censo="INE, Censos 2017 y 2024",
+                )
+                bytes_html_tab4 = html_tab4_str.encode("utf-8")
+        except Exception:
+            bytes_pdf_tab4 = None
+            bytes_html_tab4 = None
+
+        if bytes_pdf_tab4 is not None or bytes_html_tab4 is not None:
+            cd_ot1, cd_ot2 = st.columns(2)
+            with cd_ot1:
+                st.download_button(
+                    label=f"Descargar Reporte Excel — {reg_limpia_t4}",
+                    data=bytes_reg_activa,
+                    file_name=f"Control5_Primacia_Guttman_Aislamiento_{slug_reg}.xlsx",
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    use_container_width=True,
+                    key="btn_dl_tab4_region",
+                )
+            with cd_ot2:
+                if bytes_pdf_tab4 is not None:
+                    st.download_button(
+                        label=f"Descargar PDF Listo para Imprimir (.pdf — {reg_limpia_t4})",
+                        data=bytes_pdf_tab4,
+                        file_name=f"Control5_OT_{slug_reg}.pdf",
+                        mime="application/pdf",
+                        use_container_width=True,
+                        key="btn_dl_tab4_imprimible_pdf",
+                    )
+                else:
+                    st.download_button(
+                        label=f"Descargar Imprimible Control 5 (Carta .html — {reg_limpia_t4})",
+                        data=bytes_html_tab4,
+                        file_name=f"Imprimible_Control5_{slug_reg}.html",
+                        mime="text/html",
+                        use_container_width=True,
+                        key="btn_dl_tab4_imprimible_html",
+                    )
+        else:
+            st.download_button(
+                label=f"Descargar Reporte Excel — {reg_c5.split('(')[0].strip()}",
+                data=bytes_reg_activa,
+                file_name=f"Control5_Primacia_Guttman_Aislamiento_{slug_reg}.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                use_container_width=True,
+                key="btn_dl_tab4_region",
+            )
 
     # TAB 5: GUÍA PROT SUBDERE-CEPAL (2011) Y BUSCADOR ANEXO 2
     with tabs[4]:
