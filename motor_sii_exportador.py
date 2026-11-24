@@ -938,104 +938,169 @@ def _mapear_region_a_control5(region_sel: str):
     return None
 
 
-def _matriz_guttman_discriminante_default(dimension: str, comunas_top10: list) -> pd.DataFrame:
+def _matriz_guttman_discriminante_default(dimension: str, comunas_top10: list, region_sel: str = "") -> pd.DataFrame:
     """
-    Genera una matriz binaria (1/0) de 8 variables para el Top 10 comunal asegurando
-    que cada variable presente diferenciación entre comunas (ni todos 1 ni todos 0).
+    Genera una matriz binaria (1/0) de 8 variables para el Top 10 comunal según las
+    4 dimensiones de 'Unidad 5. Ordenamiento Territorial.pdf', asegurando que cada
+    variable discrimine entre las comunas (ni puros 1 ni puros 0).
+    Para Región del Biobío utiliza un levantamiento verificable por comuna.
     """
     n_c = len(comunas_top10)
+    es_biobio = "biob" in _normalizar_texto(region_sel) or (
+        len(comunas_top10) >= 2
+        and "concepcion" in _normalizar_texto(comunas_top10[0])
+        and "angeles" in _normalizar_texto(comunas_top10[1])
+    )
+
     if "1. Servicios a la producción" in dimension:
         cols = [
             "OTEC / Capacitación",
-            "Más de 1 Banco comercial",
-            "Oficina Fomento Productivo Municipal",
+            "Cámara de Comercio local",
+            "Banco (más de 1 banco)",
             "Asistencia Técnica (Sercotec / INDAP)",
-            "Empresa reclutamiento laboral",
+            "Empresa de reclutamiento laboral",
             "Centro de Negocios Sercotec",
-            "Laboratorio Certificación Industrial",
-            "Cámara de Comercio / Gremio Regional",
+            "Oficina SII (atención empresas)",
+            "Oficina Regional CORFO / Gremio Regional",
         ]
-        mat_10 = [
-            [1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 1, 1, 0],
-            [1, 1, 1, 1, 0, 1, 1, 0],
-            [1, 1, 1, 1, 0, 0, 0, 0],
-            [1, 0, 1, 0, 0, 0, 1, 0],
-            [1, 1, 1, 0, 0, 0, 1, 0],
-            [1, 0, 1, 1, 0, 0, 0, 0],
-            [1, 1, 1, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 1, 0],
-        ]
+        if es_biobio:
+            # Concepción, Los Ángeles, San Pedro, Talcahuano, Coronel, Hualpén, Chiguayante, Tomé, Penco, Lota
+            mat_10 = [
+                [1, 1, 1, 1, 1, 1, 1, 1],  # Concepción (8)
+                [1, 1, 1, 1, 1, 1, 1, 1],  # Los Ángeles (8)
+                [1, 1, 1, 1, 1, 0, 0, 0],  # San Pedro de la Paz (5)
+                [1, 1, 1, 1, 1, 1, 1, 0],  # Talcahuano (7)
+                [1, 1, 1, 1, 1, 1, 1, 0],  # Coronel (7)
+                [1, 0, 0, 0, 0, 0, 0, 0],  # Hualpén (1)
+                [1, 1, 1, 0, 0, 0, 0, 0],  # Chiguayante (3)
+                [1, 1, 0, 1, 0, 0, 0, 0],  # Tomé (3)
+                [1, 0, 0, 0, 0, 0, 0, 0],  # Penco (1)
+                [0, 1, 0, 0, 0, 0, 0, 0],  # Lota (1)
+            ]
+        else:
+            mat_10 = [
+                [1, 1, 1, 1, 1, 1, 1, 1],
+                [1, 1, 1, 1, 1, 1, 1, 1],
+                [1, 1, 1, 1, 1, 1, 0, 0],
+                [1, 1, 1, 1, 0, 1, 1, 0],
+                [1, 1, 1, 1, 0, 0, 0, 0],
+                [1, 1, 0, 1, 0, 0, 0, 0],
+                [1, 1, 1, 0, 0, 0, 0, 0],
+                [1, 0, 0, 1, 0, 0, 0, 0],
+                [1, 0, 0, 0, 0, 0, 0, 0],
+                [0, 1, 0, 0, 0, 0, 0, 0],
+            ]
     elif "2. Infraestructura, transporte" in dimension:
         cols = [
-            "Terminal de Buses Interurbano",
-            "Periódico / Medio Digital Local",
-            "Parque o Área Industrial",
-            "Puerto Marítimo / Fluvial Comercial",
-            "Señal de TV Local",
-            "Estación Operativa de Tren",
-            "Aeropuerto / Aeródromo Comercial",
-            "Centro Logístico / Puerto Seco",
+            "Terminal de Buses",
+            "Periódico / Medio local",
+            "Área industrial",
+            "Estación de tren / Biotren",
+            "Puerto comercial",
+            "Señal de TV local",
+            "Aeropuerto / Aeródromo comercial",
+            "Puerto seco / Centro logístico",
         ]
-        mat_10 = [
-            [1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 0, 1, 0, 1, 1],
-            [1, 1, 1, 1, 1, 1, 0, 1],
-            [1, 1, 1, 1, 1, 0, 1, 0],
-            [1, 1, 1, 1, 1, 1, 0, 0],
-            [1, 0, 1, 1, 0, 1, 0, 0],
-            [1, 1, 1, 0, 0, 1, 0, 0],
-            [1, 1, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 1, 0, 0, 0, 0],
-            [0, 0, 1, 0, 0, 1, 0, 0],
-        ]
+        if es_biobio:
+            mat_10 = [
+                [1, 1, 1, 1, 0, 1, 0, 1],  # Concepción (6)
+                [1, 1, 1, 0, 0, 1, 1, 1],  # Los Ángeles (6)
+                [0, 1, 1, 1, 0, 0, 0, 0],  # San Pedro de la Paz (3)
+                [1, 1, 1, 1, 1, 1, 1, 1],  # Talcahuano (8 - Carriel Sur + San Vicente)
+                [1, 1, 1, 1, 1, 1, 0, 1],  # Coronel (7)
+                [0, 0, 1, 1, 0, 0, 0, 0],  # Hualpén (2)
+                [0, 0, 0, 1, 0, 0, 0, 0],  # Chiguayante (1)
+                [1, 1, 0, 0, 0, 1, 0, 0],  # Tomé (3)
+                [0, 0, 1, 0, 1, 0, 0, 0],  # Penco (2 - Puerto Lirquén)
+                [1, 1, 0, 0, 0, 0, 0, 0],  # Lota (2)
+            ]
+        else:
+            mat_10 = [
+                [1, 1, 1, 1, 1, 1, 1, 1],
+                [1, 1, 1, 0, 0, 1, 1, 1],
+                [1, 1, 1, 1, 1, 0, 0, 1],
+                [1, 1, 1, 0, 1, 1, 1, 0],
+                [1, 1, 1, 1, 1, 0, 0, 0],
+                [1, 0, 1, 0, 1, 0, 0, 0],
+                [1, 1, 0, 0, 0, 0, 0, 0],
+                [1, 0, 0, 0, 0, 0, 0, 0],
+                [0, 1, 0, 0, 1, 0, 0, 0],
+                [0, 0, 1, 0, 0, 0, 0, 0],
+            ]
     elif "3. Infraestructura de salud" in dimension:
         cols = [
-            "Educación Media Técnico-Profesional",
-            "Centro Dental / Óptica",
-            "Hospital Baja/Media Complejidad",
-            "Clínica Privada / Centro Médico",
-            "CFT / Instituto Profesional",
-            "Universidad con Sede Presencial",
-            "Hospital Alta Complejidad (Tipo 1)",
-            "Postgrado / Centro de Investigación",
+            "Educación media técnica",
+            "Centro dental",
+            "Hospital tipo 2 (mediana / baja comp.)",
+            "Clínica privada",
+            "CFT",
+            "Instituto Profesional (IP)",
+            "Universidad",
+            "Hospital tipo 1 (alta complejidad)",
         ]
-        mat_10 = [
-            [1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 1, 1, 0],
-            [1, 1, 1, 1, 1, 1, 0, 0],
-            [1, 1, 1, 0, 1, 0, 0, 0],
-            [1, 1, 1, 0, 0, 0, 0, 0],
-            [1, 1, 1, 0, 0, 0, 0, 0],
-            [1, 1, 0, 0, 0, 0, 0, 0],
-            [1, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-        ]
+        if es_biobio:
+            mat_10 = [
+                [1, 1, 0, 1, 1, 1, 1, 1],  # Concepción (7)
+                [1, 1, 0, 1, 1, 1, 1, 1],  # Los Ángeles (7)
+                [1, 1, 0, 1, 0, 0, 1, 0],  # San Pedro de la Paz (4)
+                [1, 1, 0, 1, 1, 1, 1, 1],  # Talcahuano (7 - Las Higueras)
+                [1, 1, 1, 0, 1, 0, 0, 0],  # Coronel (4)
+                [1, 1, 0, 0, 0, 0, 1, 0],  # Hualpén (3 - U. Federico Santa María)
+                [1, 1, 0, 0, 0, 0, 0, 0],  # Chiguayante (2)
+                [1, 1, 1, 0, 0, 0, 0, 0],  # Tomé (3)
+                [1, 0, 1, 0, 0, 0, 0, 0],  # Penco (2 - Hosp. Penco-Lirquén)
+                [1, 0, 1, 0, 1, 0, 0, 0],  # Lota (3 - CFT Lota-Arauco + Hosp. Lota)
+            ]
+        else:
+            mat_10 = [
+                [1, 1, 1, 1, 1, 1, 1, 1],
+                [1, 1, 1, 1, 1, 1, 1, 1],
+                [1, 1, 1, 1, 1, 1, 1, 0],
+                [1, 1, 1, 1, 1, 1, 0, 0],
+                [1, 1, 1, 0, 1, 0, 0, 0],
+                [1, 1, 1, 0, 0, 0, 0, 0],
+                [1, 1, 0, 0, 0, 0, 0, 0],
+                [1, 1, 0, 0, 0, 0, 0, 0],
+                [1, 0, 0, 0, 0, 0, 0, 0],
+                [0, 1, 0, 0, 0, 0, 0, 0],
+            ]
     else:
         cols = [
-            "Gimnasio de Gran Capacidad",
-            "Teatro / Centro Cultural",
-            "Pista de Atletismo",
-            "Piscina Pública / Temperada",
-            "Multitiendas Comerciales",
-            "Centro Comercial (Tipo Mall)",
-            "Salas de Cine",
-            "Hotel 4-5 Estrellas",
+            "Estadios",
+            "Gimnasios de gran capacidad",
+            "Pistas de atletismo",
+            "Piscinas públicas",
+            "Multitiendas",
+            "Centros comerciales (tipo mall)",
+            "Cines",
+            "Teatro / Centro cultural regional",
         ]
-        mat_10 = [
-            [1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 0, 1, 1, 1, 1, 0],
-            [1, 1, 0, 0, 1, 1, 0, 0],
-            [1, 1, 0, 0, 0, 0, 0, 0],
-            [1, 0, 0, 0, 1, 0, 0, 0],
-            [1, 0, 0, 0, 0, 0, 0, 0],
-            [1, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-        ]
+        if es_biobio:
+            mat_10 = [
+                [1, 1, 1, 1, 1, 1, 1, 1],  # Concepción (8)
+                [1, 1, 1, 1, 1, 1, 1, 1],  # Los Ángeles (8)
+                [1, 1, 1, 1, 1, 0, 0, 1],  # San Pedro de la Paz (6)
+                [1, 1, 1, 1, 1, 1, 1, 0],  # Talcahuano (7 - Mall Plaza Trébol)
+                [1, 1, 0, 0, 1, 1, 1, 0],  # Coronel (5 - Mall Arauco Coronel)
+                [1, 1, 0, 0, 1, 0, 0, 0],  # Hualpén (3)
+                [1, 1, 0, 1, 0, 0, 0, 0],  # Chiguayante (3)
+                [1, 1, 0, 0, 0, 0, 0, 0],  # Tomé (2)
+                [1, 0, 0, 0, 0, 0, 0, 0],  # Penco (1)
+                [1, 0, 0, 0, 0, 0, 0, 1],  # Lota (2 - Teatro Lota)
+            ]
+        else:
+            mat_10 = [
+                [1, 1, 1, 1, 1, 1, 1, 1],
+                [1, 1, 1, 1, 1, 1, 1, 1],
+                [1, 1, 1, 1, 1, 1, 1, 0],
+                [1, 1, 0, 1, 1, 1, 1, 0],
+                [1, 1, 0, 0, 1, 1, 0, 0],
+                [1, 1, 0, 0, 0, 0, 0, 0],
+                [1, 0, 0, 0, 1, 0, 0, 0],
+                [1, 0, 0, 0, 0, 0, 0, 0],
+                [1, 0, 0, 0, 0, 0, 0, 0],
+                [0, 1, 0, 0, 0, 0, 0, 0],
+            ]
 
     if n_c <= len(mat_10):
         mat = [row[:] for row in mat_10[:n_c]]
@@ -1051,7 +1116,6 @@ def _matriz_guttman_discriminante_default(dimension: str, comunas_top10: list) -
                 mat[0][j] = 1
 
     return pd.DataFrame(mat, index=comunas_top10, columns=cols)
-
 
 def construir_datos_ot_region(
     region_sel: str,
@@ -1133,7 +1197,7 @@ def construir_datos_ot_region(
 
     df_censo = df_censo.sort_values("Censo_2024", ascending=False).reset_index(drop=True)
     top10_comunas = df_censo["Comuna"].astype(str).tolist()[:10]
-    df_guttman = _matriz_guttman_discriminante_default(dimension_ot, top10_comunas)
+    df_guttman = _matriz_guttman_discriminante_default(dimension_ot, top10_comunas, region_sel=region_sel)
 
     todas_comunas = df_censo["Comuna"].astype(str).tolist()
     if df_aislamiento is None or df_aislamiento.empty or len(df_aislamiento) < len(todas_comunas):
@@ -1891,8 +1955,8 @@ def _agregar_hojas_ot_y_u6(
             if c_i >= col_sum1:
                 cp.alignment = Alignment(horizontal="right", vertical="center")
 
-        fill_con0_13 = PatternFill("solid", fgColor="DCFCE7")
-        font_con0_13 = Font(name="Calibri", size=9, bold=True, color="166534")
+        fill_con0_13 = PatternFill("solid", fgColor="EDEDED")
+        font_con0_13 = Font(name="Calibri", size=9, bold=True, color="000000")
         for r_chk in range(f_ini_13, f_fin_13 + 1):
             for c_chk in range(2, 2 + n_l):
                 cel_v = ws13.cell(row=r_chk, column=c_chk)
@@ -3862,15 +3926,84 @@ def renderizar_exportador_sii(ruta_excel_default: str = ARCHIVO_DEFAULT_REPO):
     nombre_archivo_salida = (
         f"Reporte_Territorial_{reg_slug}_{anio_0}_{anio_t}{suf_nom}.xlsx"
     )
-    with slot_descarga_superior.container():
-        st.download_button(
-            label=f"Descargar Excel ({total_hojas} hojas: {', '.join(partes_desc)})",
-            data=bytes_excel,
-            file_name=nombre_archivo_salida,
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            use_container_width=True,
-            key="dl_reporte_sii_ot_top",
+    bytes_pdf_c5 = None
+    bytes_html_c5 = None
+    fuente_censo_imp = (
+        "INE, Censo 2017 y Censo 2024"
+        if datos_ot_export.get("es_base_censo_oficial")
+        else "Referencia comunal SII / INE (2017-2024)"
+    )
+    try:
+        from generador_imprimible_ot import (
+            generar_pdf_imprimible_control5,
+            generar_html_imprimible_control5,
         )
+        try:
+            bytes_pdf_c5 = generar_pdf_imprimible_control5(
+                region_sel=region_sel,
+                df_censo=datos_ot_export["df_censo"],
+                df_guttman=datos_ot_export["df_guttman"],
+                df_aislamiento=datos_ot_export["df_aislamiento"],
+                dimension_ot=dim_ot_sel,
+                fuente_censo=fuente_censo_imp,
+            )
+        except Exception:
+            bytes_pdf_c5 = None
+        if bytes_pdf_c5 is None:
+            html_c5_str = generar_html_imprimible_control5(
+                region_sel=region_sel,
+                df_censo=datos_ot_export["df_censo"],
+                df_guttman=datos_ot_export["df_guttman"],
+                df_aislamiento=datos_ot_export["df_aislamiento"],
+                dimension_ot=dim_ot_sel,
+                incluir_teoria=False,
+                fuente_censo=fuente_censo_imp,
+            )
+            bytes_html_c5 = html_c5_str.encode("utf-8")
+    except Exception:
+        bytes_pdf_c5 = None
+        bytes_html_c5 = None
+
+    with slot_descarga_superior.container():
+        if bytes_pdf_c5 is not None or bytes_html_c5 is not None:
+            cdl1, cdl2 = st.columns([1.15, 1.0])
+            with cdl1:
+                st.download_button(
+                    label=f"Descargar Excel ({total_hojas} hojas: {', '.join(partes_desc)})",
+                    data=bytes_excel,
+                    file_name=nombre_archivo_salida,
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    use_container_width=True,
+                    key="dl_reporte_sii_ot_top",
+                )
+            with cdl2:
+                if bytes_pdf_c5 is not None:
+                    st.download_button(
+                        label=f"Descargar PDF Listo para Imprimir (Carta .pdf · {len(datos_ot_export['df_aislamiento'])} comunas)",
+                        data=bytes_pdf_c5,
+                        file_name=f"Control5_OT_{reg_slug}.pdf",
+                        mime="application/pdf",
+                        use_container_width=True,
+                        key="dl_imprimible_c5_sii_pdf",
+                    )
+                else:
+                    st.download_button(
+                        label=f"Descargar Imprimible Control 5 (Carta .html · {len(datos_ot_export['df_aislamiento'])} comunas)",
+                        data=bytes_html_c5,
+                        file_name=f"Imprimible_Control5_{reg_slug}.html",
+                        mime="text/html",
+                        use_container_width=True,
+                        key="dl_imprimible_c5_sii_top",
+                    )
+        else:
+            st.download_button(
+                label=f"Descargar Excel ({total_hojas} hojas: {', '.join(partes_desc)})",
+                data=bytes_excel,
+                file_name=nombre_archivo_salida,
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                use_container_width=True,
+                key="dl_reporte_sii_ot_top",
+            )
 
 
 # Alias de compatibilidad para importación desde app.py
