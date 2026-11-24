@@ -513,9 +513,194 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
   .ot-sem-cell b { color: #0F172A; display: block; margin-bottom: 2px; font-size: 10.6px; text-transform: uppercase; letter-spacing: 0.2px; }
   .sem-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
 
+
+  /* === ESTUDIO GUIADO EN 4 MODOS (APRENDER · PRACTICAR · FORMULARIO · LAB) === */
+  .studio-bar {
+    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
+    background: #FFFFFF; border: 1px solid #CBD5E1; border-radius: 10px; padding: 9px 12px;
+    margin-bottom: 10px; box-shadow: 0 1px 4px rgba(15, 23, 42, 0.05);
+  }
+  .mode-pills { display: flex; gap: 6px; flex-wrap: wrap; }
+  .mode-btn {
+    border: 1.5px solid #CBD5E1; background: #F8FAFC; color: #334155;
+    padding: 7px 13px; border-radius: 7px; font-weight: 800; font-size: 12.2px;
+    cursor: pointer; transition: all 0.14s ease;
+  }
+  .mode-btn:hover { border-color: #1D4ED8; color: #1D4ED8; background: #EFF6FF; }
+  .mode-btn.active { background: #0F172A; color: #FFFFFF; border-color: #0F172A; }
+  .prog-chip {
+    background: #ECFDF5; color: #065F46; border: 1px solid #6EE7B7;
+    padding: 5px 11px; border-radius: 16px; font-size: 11.5px; font-weight: 800;
+    font-family: Consolas, monospace; white-space: nowrap;
+  }
+
+  .learn-shell {
+    display: none; background: #FFFFFF; border: 1px solid #CBD5E1; border-radius: 10px;
+    padding: 12px 14px; margin-bottom: 10px;
+  }
+  .wrap.mode-aprender .learn-shell { display: block; }
+  .prac-shell {
+    display: none; background: #FFFFFF; border: 1px solid #CBD5E1; border-radius: 10px;
+    padding: 10px 14px; margin-bottom: 10px;
+  }
+  .wrap.mode-practicar .prac-shell { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+  .wrap:not(.mode-lab) .top-tabs { display: none !important; }
+
+  .learn-topic-row {
+    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;
+    margin-bottom: 10px; padding-bottom: 9px; border-bottom: 1px solid #E2E8F0;
+  }
+  .learn-select {
+    flex: 1; min-width: 260px; max-width: 580px; padding: 7px 10px;
+    border: 1.5px solid #1D4ED8; border-radius: 7px; background: #F8FAFC;
+    color: #0F172A; font-size: 12.8px; font-weight: 800; cursor: pointer;
+  }
+  .learn-select:focus { outline: 2px solid #93C5FD; background: #FFFFFF; }
+  .step-bar {
+    display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; margin-bottom: 10px;
+  }
+  @media (max-width: 680px) { .step-bar { grid-template-columns: 1fr; } }
+  .step-pill {
+    border: 1.5px solid #CBD5E1; background: #F8FAFC; color: #475569;
+    padding: 8px 10px; border-radius: 7px; font-size: 12px; font-weight: 700;
+    cursor: pointer; text-align: left; display: flex; align-items: center; gap: 8px;
+    transition: all 0.14s ease;
+  }
+  .step-pill:hover { border-color: #60A5FA; background: #EFF6FF; }
+  .step-pill.active { background: #1D4ED8; color: #FFFFFF; border-color: #1D4ED8; }
+  .step-num {
+    width: 22px; height: 22px; border-radius: 50%; background: #E2E8F0; color: #0F172A;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 800; flex-shrink: 0;
+  }
+  .step-pill.active .step-num { background: #FFFFFF; color: #1D4ED8; }
+
+  .guide-card {
+    background: linear-gradient(135deg, #EFF6FF 0%, #F8FAFC 100%);
+    border: 1px solid #BFDBFE; border-left: 4.5px solid #1D4ED8; border-radius: 8px;
+    padding: 11px 14px; font-size: 12.5px; line-height: 1.5; color: #0F172A;
+  }
+  .guide-head {
+    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;
+    margin-bottom: 5px;
+  }
+  .guide-tag {
+    font-size: 10.5px; font-weight: 800; color: #1E3A8A; background: #DBEAFE;
+    padding: 2px 8px; border-radius: 10px; text-transform: uppercase;
+  }
+  .guide-foot {
+    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;
+    margin-top: 10px; padding-top: 9px; border-top: 1px dashed #CBD5E1;
+  }
+  .done-btn {
+    border: 1.5px solid #15803D; background: #FFFFFF; color: #15803D;
+    padding: 5px 10px; border-radius: 6px; font-size: 11.5px; font-weight: 800; cursor: pointer;
+  }
+  .done-btn.is-done { background: #15803D; color: #FFFFFF; }
+
+  /* Recorte limpio por Paso en Modo Aprender */
+  .wrap.mode-aprender .panel .enun-box,
+  .wrap.mode-aprender .panel .eq-editor-bar,
+  .wrap.mode-aprender .panel .u6-edit-bar,
+  .wrap.mode-aprender .panel .sliders-grid,
+  .wrap.mode-aprender .panel .kpis,
+  .wrap.mode-aprender .panel .fstrip-grid,
+  .wrap.mode-aprender .panel .sol-box,
+  .wrap.mode-aprender .panel .ped-grid,
+  .wrap.mode-aprender .panel .teo-box { display: none; }
+
+  /* Paso 1: Gráfico / Diagrama limpio */
+  .wrap.mode-aprender.step-1 .panel .svg-box,
+  .wrap.mode-aprender.step-1 .panel .ot-grid-2,
+  .wrap.mode-aprender.step-1 .panel .u6-grid,
+  .wrap.mode-aprender.step-1 .panel .cr-vis-grid { display: block; }
+  .wrap.mode-aprender.step-1 .panel .ot-grid-2,
+  .wrap.mode-aprender.step-1 .panel .u6-grid { display: grid; }
+  .wrap.mode-aprender.step-1 #ch-diag { display: block; }
+
+  /* Paso 2: Fórmulas grandes editables + KPIs + Tablas + Solucionario */
+  .wrap.mode-aprender.step-2 .panel .svg-box { display: none; }
+  .wrap.mode-aprender.step-2 .panel .kpis { display: grid; }
+  .wrap.mode-aprender.step-2 .panel .fstrip-grid { display: grid; }
+  .wrap.mode-aprender.step-2 .panel .sol-box { display: block; }
+  .wrap.mode-aprender.step-2 .panel .cr-tbl-grid { display: grid; }
+
+  /* Paso 3: Trampas de prueba + 3 Cápsulas Pedagógicas + Marco Teórico */
+  .wrap.mode-aprender.step-3 .panel .svg-box,
+  .wrap.mode-aprender.step-3 .panel .ot-grid-2,
+  .wrap.mode-aprender.step-3 .panel .u6-grid,
+  .wrap.mode-aprender.step-3 .panel .cr-tbl-grid { display: none; }
+  .wrap.mode-aprender.step-3 .panel .ped-grid { display: grid; }
+  .wrap.mode-aprender.step-3 .panel .teo-box,
+  .wrap.mode-aprender.step-3 .panel .enun-box { display: block; }
+
+  /* Botón opcional "Ajustar variables (sliders)" */
+  .wrap.mode-aprender.show-vars .panel .sliders-grid { display: grid !important; }
+  .wrap.mode-aprender.show-vars .panel .eq-editor-bar { display: grid !important; }
+  .wrap.mode-aprender.show-vars .panel .u6-edit-bar { display: grid !important; }
+
+  /* === PANEL MODO PRACTICAR (RETOS ACTIVOS) === */
+  .pr-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 11px; }
+  .pr-chip {
+    border: 1.5px solid #CBD5E1; background: #F8FAFC; color: #334155;
+    padding: 5px 10px; border-radius: 16px; font-size: 11.5px; font-weight: 700; cursor: pointer;
+  }
+  .pr-chip:hover { border-color: #1D4ED8; color: #1D4ED8; }
+  .pr-chip.active { background: #1D4ED8; color: #FFFFFF; border-color: #1D4ED8; }
+  .pr-chip.solved { background: #DCFCE7; color: #166534; border-color: #15803D; }
+  .pr-chip.solved.active { background: #15803D; color: #FFFFFF; border-color: #15803D; }
+  .pr-card {
+    background: #FFFFFF; border: 1px solid #CBD5E1; border-top: 4px solid #1D4ED8;
+    border-radius: 8px; padding: 13px 16px;
+  }
+  .pr-enun {
+    background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px;
+    padding: 10px 13px; font-size: 12.6px; line-height: 1.52; color: #0F172A; margin-bottom: 12px;
+  }
+  .pr-qgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 10px; margin-bottom: 12px; }
+  .pr-qbox {
+    background: #F8FAFC; border: 1.5px solid #CBD5E1; border-radius: 7px; padding: 9px 11px;
+  }
+  .pr-qbox.ok { border-color: #15803D; background: #F0FDF4; }
+  .pr-qbox.bad { border-color: #DC2626; background: #FEF2F2; }
+  .pr-qlbl { font-size: 11.8px; font-weight: 800; color: #0F172A; margin-bottom: 5px; display: block; }
+  .pr-in {
+    width: 100%; padding: 7px 9px; border: 1.5px solid #94A3B8; border-radius: 5px;
+    font-family: Consolas, monospace; font-size: 13px; font-weight: 700; background: #FFFFFF; color: #0F172A;
+  }
+  .pr-in:focus { outline: 2px solid #93C5FD; border-color: #1D4ED8; }
+  .pr-qfb { font-size: 11.2px; margin-top: 5px; font-weight: 700; line-height: 1.35; }
+  .pr-hint {
+    display: none; margin-top: 10px; padding: 9px 12px; border-radius: 6px;
+    background: #FFFBEB; border: 1px solid #FCD34D; border-left: 4px solid #D97706;
+    font-size: 12px; line-height: 1.48; color: #78350F;
+  }
+  .pr-sol {
+    display: none; margin-top: 10px; padding: 10px 13px; border-radius: 6px;
+    background: #F0FDF4; border: 1px solid #86EFAC; border-left: 4px solid #15803D;
+    font-size: 12px; line-height: 1.5; color: #14532D; font-family: Consolas, monospace;
+  }
+
+  /* === UNIDAD VI SUB-B: SIMULADOR CRITIC (2017 vs 2024) === */
+  .u6-subpanel { display: none; }
+  .u6-subpanel.active { display: block; }
+  .cr-dim-toggles { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 10px; background: #F8FAFC; border: 1px solid #CBD5E1; border-radius: 6px; padding: 7px 10px; }
+  .cr-dim-chip {
+    border: 1.5px solid #1D4ED8; background: #DBEAFE; color: #1E3A8A;
+    padding: 4px 10px; border-radius: 14px; font-size: 11.3px; font-weight: 800; cursor: pointer;
+  }
+  .cr-dim-chip.off { border-color: #CBD5E1; background: #FFFFFF; color: #94A3B8; text-decoration: line-through; }
+  .cr-tbl-grid { display: grid; grid-template-columns: 1fr 1.15fr; gap: 12px; margin-top: 10px; align-items: start; }
+  @media (max-width: 880px) { .cr-tbl-grid { grid-template-columns: 1fr; } }
+  .mec-print-msg {
+    display: none; margin-bottom: 9px; padding: 7px 11px; border-radius: 6px;
+    background: #EFF6FF; border: 1px solid #93C5FD; border-left: 4px solid #1D4ED8;
+    font-size: 11.8px; color: #1E3A8A; font-weight: 600;
+  }
+
   @media print {
     body { background: #FFFFFF !important; }
-    .top-tabs, .mec-toolbar, .mec-filters, .btn-bar, .chk-btn { display: none !important; }
+    .studio-bar, .learn-shell, .prac-shell, .top-tabs, .mec-toolbar, .mec-filters, .btn-bar, .chk-btn { display: none !important; }
     .panel { display: none !important; border: none !important; padding: 0 !important; }
     #panel-mecanica { display: block !important; }
     .sec-title { background: #F1F5F9 !important; color: #000000 !important; border-left: 3px solid #000 !important; padding: 4px 8px !important; font-size: 11px !important; }
@@ -530,7 +715,68 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
 </style>
 </head>
 <body>
-<div class="wrap">
+<div id="app-wrap" class="wrap mode-aprender step-1">
+  <!-- BARRA MAESTRA DE 4 MODOS DE ESTUDIO -->
+  <div class="studio-bar">
+    <div class="mode-pills">
+      <button id="mbtn-aprender" class="mode-btn active" onclick="setStudioMode('aprender')">1. Aprender (Paso a Paso)</button>
+      <button id="mbtn-practicar" class="mode-btn" onclick="setStudioMode('practicar')">2. Practicar (Modo Prueba)</button>
+      <button id="mbtn-formulario" class="mode-btn" onclick="setStudioMode('formulario')">3. Formulario e Impresión</button>
+      <button id="mbtn-lab" class="mode-btn" onclick="setStudioMode('lab')">4. Laboratorio Completo</button>
+    </div>
+    <span id="studio-prog-chip" class="prog-chip">Progreso: 0 / 10 temas · 0 / 8 retos</span>
+  </div>
+
+  <!-- GUÍA PASO A PASO (SOLO EN MODO APRENDER) -->
+  <div class="learn-shell">
+    <div class="learn-topic-row">
+      <select id="learn-topic-sel" class="learn-select" onchange="selectLearnTopic(+this.value)"></select>
+      <div class="btn-bar">
+        <button class="act-btn" onclick="stepLearnTopic(-1)">← Tema anterior</button>
+        <button class="act-btn" onclick="stepLearnTopic(1)">Tema siguiente →</button>
+        <button id="learn-done-btn" class="done-btn" onclick="toggleTopicDone()">Marcar aprendido ✓</button>
+      </div>
+    </div>
+
+    <div class="step-bar">
+      <button id="stp-btn-1" class="step-pill active" onclick="setLearnStep(1)">
+        <span class="step-num">1</span><span><b>Ver el Gráfico</b> · Qué ocurre</span>
+      </button>
+      <button id="stp-btn-2" class="step-pill" onclick="setLearnStep(2)">
+        <span class="step-num">2</span><span><b>Fórmulas Clave</b> · Cálculo paso a paso</span>
+      </button>
+      <button id="stp-btn-3" class="step-pill" onclick="setLearnStep(3)">
+        <span class="step-num">3</span><span><b>Trampa de Prueba</b> · Teoría y defensa</span>
+      </button>
+    </div>
+
+    <div class="guide-card">
+      <div class="guide-head">
+        <span id="guide-step-tag" class="guide-tag">Paso 1 de 3 — Intuición Visual</span>
+        <div class="btn-bar">
+          <button id="btn-toggle-vars" class="act-btn" onclick="toggleVarsGuided()">Ajustar variables (sliders)</button>
+          <button class="act-btn primary" onclick="irAPracticaTemaActual()">Practicar este tema →</button>
+        </div>
+      </div>
+      <div id="guide-step-body"></div>
+      <div class="guide-foot">
+        <button id="btn-prev-step" class="act-btn" onclick="moveLearnStep(-1)">← Paso anterior</button>
+        <span id="guide-step-hint" style="font-size:11.5px;color:#475569;font-weight:700;">Tema 1 de 10 · Paso 1 de 3</span>
+        <button id="btn-next-step" class="act-btn primary" onclick="moveLearnStep(1)">Siguiente paso →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUB-NAVEGACIÓN MODO PRACTICAR (SIEMPRE VISIBLE EN MODO PRACTICAR) -->
+  <div class="prac-shell">
+    <span style="font-size:12.5px;font-weight:800;color:#1E3A8A;">Modo Prueba Activa — Elige cómo quieres entrenarte:</span>
+    <div class="btn-bar">
+      <button id="pr-sub-retos" class="act-btn primary" onclick="setPracSub('retos')">Retos Numéricos (8)</button>
+      <button id="pr-sub-lec" class="act-btn" onclick="setPracSub('lec')">Control de Lectura U.I–U.VI (14)</button>
+      <button id="pr-sub-ot" class="act-btn" onclick="setPracSub('ot')">Control de Lectura 5: OT y PROT (10)</button>
+    </div>
+  </div>
+
   <div class="top-tabs">
     <button class="tab-btn active" onclick="openTab('perroux', this)">1. Crecimiento y Polos de Desarrollo (Unidad 1)</button>
     <button class="tab-btn" onclick="openTab('thunen', this)">2. Localización Rural: Von Thünen (Unidad 2)</button>
@@ -540,7 +786,7 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
     <button class="tab-btn" onclick="openTab('lorenz', this)">6. Disparidades y Primacía: Lorenz, Gini, Theil e IP4 (Unidades 3 y 5)</button>
     <button class="tab-btn" onclick="openTab('dini', this)">7. Redes Empresariales y UCINET: Dini 2010 (Unidad 4)</button>
     <button class="tab-btn" onclick="openTab('ot', this)">8. Ordenamiento Territorial — Control 5 (Unidad 5)</button>
-    <button class="tab-btn" onclick="openTab('indicadores', this)">9. Indicadores de Desarrollo Mín–Máx (Unidad 6)</button>
+    <button class="tab-btn" onclick="openTab('indicadores', this)">9. Indicadores: Mín–Máx y Método CRITIC (Unidad 6)</button>
     <button class="tab-btn" onclick="openTab('mecanica', this)">10. Formulario de Fórmulas y Gráficos (Modo Ciego)</button>
     <button class="tab-btn" onclick="openTab('lectura', this)">11. Mapa Teórico Integrado y Control de Lectura</button>
   </div>
@@ -1376,8 +1622,14 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
   <!-- PANEL U.VI: INDICADORES DE DESARROLLO (MÍNIMO-MÁXIMO Y PONDERACIONES)  -->
   <!-- ====================================================================== -->
   <div id="panel-indicadores" class="panel">
+    <div class="ot-subtabs">
+      <button id="u6-subbtn-minmax" class="ot-sub-btn active" onclick="openU6Sub('minmax', this)">A. Normalización Mín–Máx [0, 1] y Pesos Manuales (15 Provincias)</button>
+      <button id="u6-subbtn-critic" class="ot-sub-btn" onclick="openU6Sub('critic', this)">B. Método CRITIC Objetivo (16 Regiones · 7 Dimensiones · 2017 vs. 2024)</button>
+    </div>
+
+    <div id="u6-sub-minmax" class="u6-subpanel active">
     <div class="sec-title">
-      <span>Unidad VI — Indicadores de Desarrollo: Normalización Mínimo-Máximo [0, 1], Sentido y Ponderaciones</span>
+      <span>Unidad VI (A) — Normalización Mínimo-Máximo [0, 1], Sentido y Ponderaciones</span>
       <div class="btn-bar">
         <button class="act-btn primary" onclick="presetU6('base50')">Caso Clase 50 / 50</button>
         <button class="act-btn" onclick="presetU6('base70')">Caso Clase 70 / 30</button>
@@ -1464,6 +1716,71 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
         </ul>
       </div>
     </details>
+    </div><!-- /u6-sub-minmax -->
+
+    <!-- SUB-PANEL B: MÉTODO CRITIC (DIAKOULAKI ET AL., 1995) — 16 REGIONES × 7 DIMENSIONES -->
+    <div id="u6-sub-critic" class="u6-subpanel">
+      <div class="sec-title">
+        <span>Unidad VI (B) — Método CRITIC Objetivo (16 Regiones · 7 Dimensiones · 2017 vs. 2024 + Convergencia)</span>
+        <div class="btn-bar">
+          <button id="cr-m-2017" class="act-btn primary" onclick="setCriticMode('2017')">Base 2017 (Oficial)</button>
+          <button id="cr-m-2024f" class="act-btn" onclick="setCriticMode('2024_fijo')">2024 (Pesos Fijos 2017)</button>
+          <button id="cr-m-2024r" class="act-btn" onclick="setCriticMode('2024_recalc')">2024 (CRITIC Recalculado)</button>
+          <button id="cr-m-redun" class="act-btn" onclick="toggleCriticRedundancia()">Simular Redundancia (Salud ≈ Vivienda)</button>
+        </div>
+      </div>
+
+      <details class="enun-box" open>
+        <summary>
+          <span>Taller CRITIC Oficial (Prof. Claudio Mancilla · Diakoulaki et al., 1995 · OECD Handbook)</span>
+          <span class="enun-badge">C_j = σ_j · ∑(1 − r_jk) · w_j = C_j / ∑C_j</span>
+        </summary>
+        <div class="enun-body" id="cr-enun"></div>
+      </details>
+
+      <div class="cr-dim-toggles">
+        <span class="ot-dim-lbl">Activar / Desactivar Dimensiones (mín. 2):</span>
+        <div id="cr-dim-chips" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+      </div>
+
+      <div class="kpis">
+        <div class="kpi" style="border-left-color:#1D4ED8;"><div class="kpi-lbl">Dimensión Mayor Peso (w_máx)</div><div id="cr-k-topd" class="kpi-val">Pobreza (24,72%)</div><div id="cr-k-topd2" class="kpi-sub">Mayor σ y menor redundancia</div></div>
+        <div class="kpi" style="border-left-color:#DC2626;"><div class="kpi-lbl">Dimensión Menor Peso (w_mín)</div><div id="cr-k-botd" class="kpi-val">Salud (9,14%)</div><div id="cr-k-botd2" class="kpi-sub">Más correlacionada con el resto</div></div>
+        <div class="kpi" style="border-left-color:#15803D;"><div class="kpi-lbl">Región #1 del Ranking</div><div id="cr-k-reg1" class="kpi-val">Antofagasta</div><div id="cr-k-reg1v" class="kpi-sub">ID = 0,7675</div></div>
+        <div class="kpi" style="border-left-color:#7C3AED;"><div class="kpi-lbl">Convergencia 2017 → 2024 (T=7)</div><div id="cr-k-conv" class="kpi-val">β = −0,0721 (Sí)</div><div id="cr-k-conv2" class="kpi-sub">σ: 0,555 → 0,376 (R² 54,4%)</div></div>
+      </div>
+
+      <div id="cr-fstrip" class="fstrip-grid"></div>
+      <div class="svg-box"><svg id="svg-u6-critic" viewBox="0 0 980 395"></svg></div>
+      <div id="cr-sol" class="sol-box"></div>
+
+      <div class="cr-tbl-grid">
+        <div class="ot-mat-wrap">
+          <div style="padding:7px 10px;background:#F8FAFC;border-bottom:1px solid #CBD5E1;font-size:11.8px;font-weight:800;color:#1E3A8A;">Tabla 1 — Cálculo Paso a Paso de Pesos CRITIC (σ_j, Conflicto, C_j y w_j)</div>
+          <div id="cr-tbl-dims"></div>
+        </div>
+        <div class="ot-mat-wrap" style="max-height:385px;overflow-y:auto;">
+          <div style="padding:7px 10px;background:#F8FAFC;border-bottom:1px solid #CBD5E1;font-size:11.8px;font-weight:800;color:#1E3A8A;">Tabla 2 — Ranking Regional 2017 vs. 2024 (16 Regiones)</div>
+          <div id="cr-tbl-regs"></div>
+        </div>
+      </div>
+
+      <div id="ped-u6-critic" class="ped-grid"></div>
+      <details class="teo-box">
+        <summary>
+          <span>Marco Teórico: Método CRITIC (Diakoulaki, Mavrotas &amp; Papayannakis, 1995) y Código Clave en R</span>
+          <span class="enun-badge">Desplegar teoría y guía RStudio</span>
+        </summary>
+        <div class="teo-body">
+          <ul>
+            <li><b>¿Por qué CRITIC es objetivo?</b> Porque los pesos <b>w<sub>j</sub></b> nacen 100% de la matriz de datos normalizada en [0, 1] (donde mayor valor = mejor condición; en el taller Pobreza ya viene recodificada como favorable), sin preferencias subjetivas del evaluador.</li>
+            <li><b>Los 2 criterios que multiplica CRITIC:</b> (1) <b>Intensidad de contraste / Variabilidad (σ<sub>j</sub>):</b> una dimensión con diferencias amplias entre regiones discrimina mejor; (2) <b>Conflicto / No redundancia ∑(1 − r<sub>jk</sub>):</b> si una dimensión está muy correlacionada con otras (r<sub>jk</sub> → 1), aporta información repetida y recibe menor peso.</li>
+            <li><b>Regla clave para comparar 2017 vs. 2024 (Convergencia):</b> para medir si las regiones convergieron en el tiempo debes aplicar los <b>pesos fijos del año base (2017)</b> sobre la matriz normalizada de 2024 (<code>X_2024 %*% ponderador_2017</code>). Si cambias los pesos cada año, cambias la regla de medición.</li>
+            <li><b>4 líneas exactas en R (Taller CRITIC):</b> <code>desv &lt;- apply(X, 2, sd)</code> · <code>R &lt;- cor(X, method="pearson")</code> · <code>C &lt;- desv * rowSums(1 - R)</code> · <code>w &lt;- C / sum(C)</code> · <code>indice &lt;- drop(X %*% w)</code>.</li>
+          </ul>
+        </div>
+      </details>
+    </div><!-- /u6-sub-critic -->
   </div>
 
   <!-- ====================================================================== -->
@@ -1476,7 +1793,9 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
         <button id="btn-modo-copia" class="act-btn primary" onclick="setModoMec(false)">Modo Copia (Todo Visible)</button>
         <button id="btn-modo-ciego" class="act-btn" onclick="setModoMec(true)">Modo Ciego (Autoevaluación)</button>
         <button class="act-btn" onclick="resetDominadas()">Reiniciar ✓</button>
-        <button class="act-btn" onclick="window.print()">Imprimir / Guardar PDF (Carta)</button>
+        <button class="act-btn" onclick="imprimirHojaMecanica(false)" title="Abre vista Carta limpia con todas las fórmulas y etiquetas">Imprimir Completo (Carta)</button>
+        <button class="act-btn" onclick="imprimirHojaMecanica(true)" title="Abre hoja Carta en blanco con líneas para escribir de memoria con lápiz">Imprimir En Blanco (Lápiz)</button>
+        <button class="act-btn" onclick="descargarHojaMecanica()" title="Descarga archivo HTML listo para imprimir según el modo activo">Descargar (.html)</button>
       </div>
     </div>
 
@@ -1484,18 +1803,19 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
       <div style="font-size:12px;color:#334155;">
         <b>Método de cuaderno:</b> copia cada fórmula y esqueleto varias veces; luego activa <b>Modo Ciego</b>, escríbelos sin mirar y haz clic en cada recuadro para comprobar y marcar <b>✓</b>.
       </div>
-      <span id="mec-score" class="pill-score">Dominadas: 0 / 18</span>
+      <span id="mec-score" class="pill-score">Dominadas: 0 / 20</span>
     </div>
 
     <div class="mec-filters">
-      <button class="flt-btn active" onclick="filtrarMec('all', this)">Todas (18)</button>
+      <button class="flt-btn active" onclick="filtrarMec('all', this)">Todas (20)</button>
       <button class="flt-btn" onclick="filtrarMec('ilpes', this)">U.I · Crecimiento ILPES/MADE (5)</button>
       <button class="flt-btn" onclick="filtrarMec('loc', this)">U.II · Localización y Polos (4)</button>
       <button class="flt-btn" onclick="filtrarMec('reat', this)">U.III · Disparidades REAT (4)</button>
       <button class="flt-btn" onclick="filtrarMec('ot', this)">U.IV–V · Redes Dini y OT (3)</button>
-      <button class="flt-btn" onclick="filtrarMec('ind', this)">U.VI · Indicadores Mín-Máx (2)</button>
+      <button class="flt-btn" onclick="filtrarMec('ind', this)">U.VI · Mín-Máx y CRITIC (4)</button>
     </div>
 
+    <div id="mec-print-msg" class="mec-print-msg"></div>
     <div id="mec-container">
       <div class="mec-grid" id="mec-formulas-grid"></div>
       <div class="sec-title" style="margin-top:6px;">
@@ -1546,14 +1866,54 @@ HTML_TERRITORIAL_60FPS = r"""<!DOCTYPE html>
     <div class="lec-grid" id="lec-cards-grid"></div>
 
     <div class="sec-title" style="margin-top:14px;">
-      <span>Control de Lectura y Aplicación Cruzada (12 preguntas integradas)</span>
+      <span>Control de Lectura y Aplicación Cruzada (14 preguntas integradas — incluye CRITIC)</span>
       <div class="btn-bar">
-        <span id="qz-score" class="pill-score">Aciertos: 0 / 12</span>
+        <span id="qz-score" class="pill-score">Aciertos: 0 / 14</span>
         <button class="act-btn" onclick="toggleSoloErradasQz(this)">Ver Solo Pendientes / Erradas</button>
         <button class="act-btn" onclick="resetQuizLectura()">Reiniciar Control</button>
       </div>
     </div>
     <div id="qz-list"></div>
+  </div>
+
+  <!-- ====================================================================== -->
+  <!-- PANEL MODO PRACTICAR: 8 RETOS NUMÉRICOS + QUIZ OT SYNC                 -->
+  <!-- ====================================================================== -->
+  <div id="panel-practicar" class="panel">
+    <div id="pr-view-retos">
+      <div id="pr-chips-bar" class="pr-chips"></div>
+      <div class="pr-card">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
+          <div>
+            <span id="pr-badge" class="enun-badge">Reto 1 de 8</span>
+            <span id="pr-title" style="font-size:14px;font-weight:800;color:#0F172A;margin-left:6px;"></span>
+          </div>
+          <button class="act-btn" onclick="abrirTemaDesdeReto()">Repasar este tema en Aprender →</button>
+        </div>
+        <div id="pr-enun" class="pr-enun"></div>
+        <div id="pr-qgrid" class="pr-qgrid"></div>
+        <div class="btn-bar">
+          <button class="act-btn primary" onclick="comprobarReto()">Comprobar Respuestas</button>
+          <button class="act-btn" onclick="toggleHintReto()">Ver Pista (Fórmula)</button>
+          <button class="act-btn" onclick="toggleSolReto()">Ver Desarrollo Completo</button>
+          <button class="act-btn" onclick="limpiarReto()">Limpiar</button>
+          <button class="act-btn" onclick="navReto(1)">Siguiente Reto →</button>
+        </div>
+        <div id="pr-hint" class="pr-hint"></div>
+        <div id="pr-sol" class="pr-sol"></div>
+      </div>
+    </div>
+
+    <div id="pr-view-ot" style="display:none;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:8px;">
+        <span style="font-size:12.5px;font-weight:700;color:#1E3A8A;">Control de Lectura 5 — Ordenamiento Territorial y Manual PROT (10 Preguntas)</span>
+        <div class="btn-bar">
+          <span id="pr-ot-score" class="pill-score">Control 5: 0 / 10</span>
+          <button class="act-btn" onclick="resetOtQuiz()">Reiniciar Control 5</button>
+        </div>
+      </div>
+      <div id="pr-ot-list"></div>
+    </div>
   </div>
 </div>
 
@@ -1868,6 +2228,16 @@ function openTab(name, btn) {
   if (name === "lectura") { drawMapaTeoria(); renderLecturaCards(); renderQuizLectura(); }
 }
 function jumpToTab(name) {
+  if (name === "mecanica") { setStudioMode("formulario"); window.scrollTo({ top: 0, behavior: "smooth" }); return; }
+  const tIdx = LEARN_TOPICS.findIndex(t => t.tab === name);
+  if (tIdx >= 0 && studioMode !== "lab") {
+    learnTopicIdx = tIdx;
+    learnStep = 1;
+    setStudioMode("aprender");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    return;
+  }
+  setStudioMode("lab");
   const btns = Array.from(document.querySelectorAll(".top-tabs .tab-btn"));
   const target = btns.find(b => (b.getAttribute("onclick") || "").includes("'" + name + "'"));
   if (target) {
@@ -3482,7 +3852,13 @@ const FORMULAS_TERR = [
     rule: "Lleva cualquier escala (ej. 200–3.000 o %) al intervalo [0, 1]. Favorable (+): el valor más alto da 1; Desfavorable (−): el valor más bajo da 1." },
   { id: 18, cat: "ind", tag: "Unidad VI", title: "18. Índice Compuesto Ponderado y Ranking Territorial",
     eq: `I<sub>i</sub> = ∑<sub>k</sub> w<sub>k</sub> · u<sub>k</sub>(x<sub>ik</sub>) &nbsp;&nbsp;(∑ w<sub>k</sub> = 1)`,
-    rule: "Un territorio solo alcanza I = 1,00 si es líder simultáneo en todas las variables. Cambiar pesos (ej. 50/50 → 70/30) altera el ranking." }
+    rule: "Un territorio solo alcanza I = 1,00 si es líder simultáneo en todas las variables. Cambiar pesos (ej. 50/50 → 70/30) altera el ranking." },
+  { id: 19, cat: "ind", tag: "CRITIC", title: "19. Método CRITIC: Contenido Informativo (Cj)",
+    eq: `C<sub>j</sub> = σ<sub>j</sub> · ∑<sub>k=1..m</sub> (1 − r<sub>jk</sub>)`,
+    rule: "Multiplica variabilidad (σ_j) por no-redundancia ∑(1−r_jk). Dimensiones muy correlacionadas (r→1) pierden peso; las más distintas ganan." },
+  { id: 20, cat: "ind", tag: "CRITIC", title: "20. Pesos Objetivos CRITIC y Comparación Temporal",
+    eq: `w<sub>j</sub> = <span class="frac"><span class="num">C<sub>j</sub></span><span class="den">∑ C<sub>k</sub></span></span> &nbsp;|&nbsp; ID = X · w`,
+    rule: "Objetividad total (Diakoulaki et al., 1995). Requiere variables normalizadas [0,1] y misma orientación (+). Para convergencia 2017→2024 fija w_2017." }
 ];
 
 const ESQUELETOS_TERR = [
@@ -3992,6 +4368,28 @@ const QUIZ_LECTURA_DATA = [
     opts: ["La líder sigue obteniendo 1,00 y la mínima 0,00, pero todas las provincias intermedias se comprimen (caen) hacia 0", "Todas las provincias mantienen exactamente el mismo valor normalizado entre 0 y 1", "La líder pasa a obtener 3,00 porque superó la escala original"],
     ans: 0,
     why: "La normalización Mín–Máx siempre acota los extremos a 0 y 1 sin importar la unidad, pero es muy sensible a valores atípicos (outliers): al agrandar el denominador (máx − mín), comprime hacia cero a todos los territorios intermedios."
+  },
+  {
+    tag: "U.VI CRITIC",
+    q: "En el método objetivo CRITIC (Diakoulaki et al., 1995), ¿por qué la dimensión 'Pobreza' obtuvo el mayor peso (24,72%) y 'Salud' el menor (9,14%) en la matriz 2017 de 16 regiones?",
+    opts: [
+      "Porque el evaluador asignó manualmente mayor prioridad política a Pobreza",
+      "Porque Pobreza combinó la mayor desviación estándar (variabilidad) con la menor correlación respecto a las demás dimensiones (mayor conflicto ∑(1−r_jk))",
+      "Porque Salud tenía solo 1 variable y Pobreza tenía 4 variables en el Excel"
+    ],
+    ans: 1,
+    why: "CRITIC es 100% objetivo: C_j = σ_j · ∑(1−r_jk). Pobreza presentó σ=0,303 y conflicto=4,221 (C=1,279 → w=24,72%), mientras Salud presentó alta correlación con las demás dimensiones (conflicto=2,029 → w=9,14%)."
+  },
+  {
+    tag: "U.VI CRITIC ↔ U.III",
+    q: "Si deseas evaluar Convergencia Beta y Sigma del Índice de Desarrollo CRITIC entre 2017 y 2024, ¿qué pesos debes aplicar sobre la matriz normalizada de 2024?",
+    opts: [
+      "Mantener fijos los pesos CRITIC calculados en el año base (2017) para garantizar comparabilidad temporal",
+      "Asignar pesos iguales 1/7 en 2024 aunque en 2017 se haya usado CRITIC",
+      "Eliminar las correlaciones negativas y sumar solo las desviaciones estándar"
+    ],
+    ans: 0,
+    why: "Al comparar el mismo índice en el tiempo (2017 → 2024), fijar las ponderaciones del año base (w_2017) asegura que los cambios reflejen mejoras reales en las dimensiones y no un cambio de la regla de ponderación."
   }
 ];
 
@@ -5629,6 +6027,10 @@ function renderOtQuiz() {
   });
   const sc = document.getElementById("ot-qz-score");
   if (sc) sc.textContent = `Control 5: ${okCount} / ${OT_QUIZ_DATA.length}`;
+  const prOt = document.getElementById("pr-ot-list");
+  if (prOt) prOt.innerHTML = wrap.innerHTML;
+  const prOtSc = document.getElementById("pr-ot-score");
+  if (prOtSc) prOtSc.textContent = `Control 5: ${okCount} / ${OT_QUIZ_DATA.length}`;
 }
 
 presetOtAisl('pauta');
@@ -5725,6 +6127,877 @@ renderMecanica();
 drawMapaTeoria();
 renderLecturaCards();
 renderQuizLectura();
+
+// ============================================================================
+// 10. UNIDAD VI (B): MOTOR INTERACTIVO MÉTODO CRITIC (16 REGIONES · 2017/2024)
+// ============================================================================
+const CRITIC_DIMS = ["Vivienda", "Población", "Salud", "Ingresos", "Educación", "Trabajo", "Pobreza"];
+const CRITIC_REGS = ["Arica", "Tarapaca", "Antofagasta", "Copiapó", "Coquimbo", "Valparaiso", "Metropoliana", "Ohiggins", "Maule", "Ñuble", "Biobio", "Araucanía", "Los Ríos", "Los Lagos", "Aysen", "Magallanes"];
+const CRITIC_X17  = [[0.335492, 0.109599, 0.482422, 0.466155, 0.452487, 0.402597, 0.30453], [0.663193, 0.353135, 0.599508, 0.661866, 0.543522, 0.359597, 1.0], [0.851513, 0.424538, 0.760182, 0.70789, 0.633452, 0.829828, 0.993797], [0.508733, 0.283005, 0.642856, 0.678624, 0.498013, 0.666186, 0.737627], [0.409977, 0.011083, 0.270821, 0.531303, 0.0279, 0.693802, 0.781308], [0.522471, 0.203273, 0.401607, 0.571943, 0.63631, 0.53935, 0.382387], [0.28594, 0.016302, 0.196463, 0.226882, 0.104389, 0.2987, 0.323431], [0.300219, 0.018602, 0.221266, 0.252884, 0.166442, 0.624787, 0.450303], [0.827178, 1.0, 0.984468, 0.516845, 0.962934, 0.617419, 0.322776], [0.16984, 0.087589, 0.376218, 0.589678, 0.26206, 0.321721, 0.815963], [0.0, 0.098796, 0.306614, 0.201462, 0.200445, 0.388825, 0.806299], [0.134888, 0.104845, 0.446243, 0.362568, 0.508879, 0.42562, 0.22293], [0.157404, 0.160238, 0.33022, 0.493471, 0.168275, 0.240554, 0.208015], [0.066979, 0.06222, 0.34533, 0.80523, 0.299602, 0.159477, 0.716447], [0.569941, 0.016917, 0.471579, 0.456327, 0.661678, 0.351616, 0.531127], [0.166588, 0.054361, 0.029416, 0.147601, 0.110256, 0.081511, 0.0]];
+const CRITIC_X24  = [[0.108004, 0.174457, 0.224175, 0.384606, 0.808006, 0.372505, 0.024106], [0.614018, 0.206369, 0.279005, 0.420144, 0.707729, 0.320724, 0.583223], [0.830547, 0.196739, 0.349534, 0.672756, 0.557274, 0.61479, 0.29969], [0.32479, 0.265558, 0.351287, 0.308885, 0.577496, 0.777973, 0.191248], [0.352591, 0.528757, 0.164305, 0.180043, 0.288505, 0.258561, 0.441338], [0.558469, 0.40322, 0.338003, 0.411951, 0.687781, 0.44176, 0.642998], [0.429567, 0.065041, 0.046537, 0.157363, 0.220905, 0.73099, 0.280125], [0.315403, 0.019796, 0.034573, 0.164668, 0.112828, 0.450026, 0.448653], [0.224835, 0.805783, 0.680553, 0.22229, 0.33851, 0.155391, 0.0], [0.203045, 0.104833, 0.378531, 0.330111, 0.37164, 0.357748, 0.410015], [0.0, 0.147678, 0.190976, 0.070556, 0.520731, 0.253546, 1.0], [0.121404, 0.078797, 0.212163, 0.185622, 0.254957, 0.243026, 0.029153], [0.062718, 0.280882, 0.416515, 0.327043, 0.352813, 0.068081, 0.184527], [0.149754, 0.012959, 0.2691, 0.584729, 0.481472, 0.110593, 0.74193], [0.328328, 0.0, 0.505269, 0.258409, 0.409054, 0.672111, 0.030861], [0.375888, 0.017244, 0.045493, 0.126996, 0.246101, 0.220519, 0.052796]];
+
+let u6SubActive = "minmax";
+let criticMode = "2017";
+let criticRedun = false;
+let criticActiveDims = [true, true, true, true, true, true, true];
+
+function openU6Sub(subKey, btn) {
+  u6SubActive = subKey;
+  document.querySelectorAll("#panel-indicadores .u6-subpanel").forEach(p => p.classList.remove("active"));
+  document.querySelectorAll("#panel-indicadores .ot-sub-btn").forEach(b => b.classList.remove("active"));
+  const target = document.getElementById("u6-sub-" + subKey);
+  if (target) target.classList.add("active");
+  if (btn) btn.classList.add("active");
+  else {
+    const b = document.getElementById("u6-subbtn-" + subKey);
+    if (b) b.classList.add("active");
+  }
+  if (subKey === "minmax") drawIndicadoresU6();
+  else drawCriticU6();
+}
+
+function setCriticMode(m) {
+  criticMode = m;
+  ["2017", "2024_fijo", "2024_recalc"].forEach(k => {
+    const idMap = { "2017": "cr-m-2017", "2024_fijo": "cr-m-2024f", "2024_recalc": "cr-m-2024r" };
+    const b = document.getElementById(idMap[k]);
+    if (b) b.classList.toggle("primary", k === m);
+  });
+  drawCriticU6();
+}
+
+function toggleCriticRedundancia() {
+  criticRedun = !criticRedun;
+  const b = document.getElementById("cr-m-redun");
+  if (b) b.classList.toggle("primary", criticRedun);
+  drawCriticU6();
+}
+
+function toggleCriticDim(idx) {
+  const actCount = criticActiveDims.filter(Boolean).length;
+  if (criticActiveDims[idx] && actCount <= 2) return;
+  criticActiveDims[idx] = !criticActiveDims[idx];
+  drawCriticU6();
+}
+
+function computeCriticMatrix(rawMat, activeIndices, simRedun) {
+  const n = rawMat.length;
+  const m = activeIndices.length;
+  const X = rawMat.map(row => activeIndices.map(j => {
+    if (simRedun && j === 2) return Math.min(1, Math.max(0, row[0] * 0.96 + row[2] * 0.04));
+    return row[j];
+  }));
+
+  // Mean & sample SD (ddof=1, matches R's sd() and Excel STDEV.S)
+  const means = new Array(m).fill(0);
+  for (let j = 0; j < m; j++) {
+    let s = 0;
+    for (let i = 0; i < n; i++) s += X[i][j];
+    means[j] = s / n;
+  }
+  const sds = new Array(m).fill(0);
+  for (let j = 0; j < m; j++) {
+    let ss = 0;
+    for (let i = 0; i < n; i++) ss += Math.pow(X[i][j] - means[j], 2);
+    sds[j] = Math.sqrt(ss / (n - 1));
+  }
+
+  // Pearson correlation matrix R (m x m)
+  const R = Array.from({ length: m }, () => new Array(m).fill(0));
+  for (let a = 0; a < m; a++) {
+    for (let b = 0; b < m; b++) {
+      if (a === b) { R[a][b] = 1.0; continue; }
+      let cov = 0;
+      for (let i = 0; i < n; i++) cov += (X[i][a] - means[a]) * (X[i][b] - means[b]);
+      const den = (n - 1) * sds[a] * sds[b];
+      R[a][b] = den > 1e-12 ? cov / den : 0;
+    }
+  }
+
+  const sum1r = new Array(m).fill(0);
+  const C = new Array(m).fill(0);
+  for (let a = 0; a < m; a++) {
+    let s1 = 0;
+    for (let b = 0; b < m; b++) s1 += (1 - R[a][b]);
+    sum1r[a] = s1;
+    C[a] = sds[a] * s1;
+  }
+  const sumC = C.reduce((acc, v) => acc + v, 0) || 1;
+  const w = C.map(v => v / sumC);
+  const idx = X.map(row => row.reduce((acc, v, j) => acc + v * w[j], 0));
+  return { X, sds, R, sum1r, C, sumC, w, idx };
+}
+
+function drawCriticU6() {
+  const chipsWrap = document.getElementById("cr-dim-chips");
+  if (chipsWrap) {
+    chipsWrap.innerHTML = CRITIC_DIMS.map((nm, i) =>
+      `<button class="cr-dim-chip${criticActiveDims[i] ? '' : ' off'}" onclick="toggleCriticDim(${i})">${criticActiveDims[i] ? '✓ ' : ''}${nm}</button>`
+    ).join("");
+  }
+
+  const actIdx = CRITIC_DIMS.map((_, i) => i).filter(i => criticActiveDims[i]);
+  const actNames = actIdx.map(i => CRITIC_DIMS[i]);
+  const m = actIdx.length;
+
+  const res17 = computeCriticMatrix(CRITIC_X17, actIdx, criticRedun);
+  const res24 = computeCriticMatrix(CRITIC_X24, actIdx, criticRedun);
+
+  // Active weights and index depending on selected mode
+  const use24Weights = (criticMode === "2024_recalc");
+  const wAct = use24Weights ? res24.w : res17.w;
+  const statsAct = use24Weights ? res24 : res17;
+  const id17 = res17.idx;
+  const id24 = use24Weights ? res24.idx : res24.X.map(row => row.reduce((s, v, j) => s + v * res17.w[j], 0));
+  const idShow = (criticMode === "2017") ? id17 : id24;
+
+  // Rankings & Convergence (T = 7 years: 2017 -> 2024)
+  const ord17 = id17.map((v, i) => ({ i, v })).sort((a, b) => b.v - a.v);
+  const ord24 = id24.map((v, i) => ({ i, v })).sort((a, b) => b.v - a.v);
+  const rk17 = new Array(16), rk24 = new Array(16);
+  ord17.forEach((o, p) => { rk17[o.i] = p + 1; });
+  ord24.forEach((o, p) => { rk24[o.i] = p + 1; });
+
+  const ln17 = id17.map(v => Math.log(Math.max(1e-4, v)));
+  const ln24 = id24.map(v => Math.log(Math.max(1e-4, v)));
+  const gAnn = ln17.map((x, i) => (ln24[i] - x) / 7.0);
+  const meanX = ln17.reduce((s, v) => s + v, 0) / 16;
+  const meanY = gAnn.reduce((s, v) => s + v, 0) / 16;
+  let numB = 0, denB = 0, ssY = 0;
+  for (let i = 0; i < 16; i++) {
+    numB += (ln17[i] - meanX) * (gAnn[i] - meanY);
+    denB += Math.pow(ln17[i] - meanX, 2);
+    ssY += Math.pow(gAnn[i] - meanY, 2);
+  }
+  const beta = denB > 1e-12 ? numB / denB : 0;
+  const alfa = meanY - beta * meanX;
+  const r2 = (denB > 1e-12 && ssY > 1e-12) ? Math.pow(numB, 2) / (denB * ssY) : 0;
+  const sig17 = Math.sqrt(denB / 15);
+  const meanLn24 = ln24.reduce((s, v) => s + v, 0) / 16;
+  const sig24 = Math.sqrt(ln24.reduce((s, v) => s + Math.pow(v - meanLn24, 2), 0) / 15);
+
+  // Max and min weight dimensions
+  let maxD = 0, minD = 0;
+  for (let j = 1; j < m; j++) {
+    if (wAct[j] > wAct[maxD]) maxD = j;
+    if (wAct[j] < wAct[minD]) minD = j;
+  }
+  const topReg = (criticMode === "2017") ? ord17[0] : ord24[0];
+
+  const modeLbl = criticMode === "2017" ? "Base 2017" : (criticMode === "2024_fijo" ? "2024 con Pesos Fijos 2017" : "2024 CRITIC Recalculado");
+  document.getElementById("cr-enun").innerHTML =
+    `<b>Escenario activo: ${modeLbl}${criticRedun ? " (SIMULANDO REDUNDANCIA: Salud ≈ Vivienda)" : ""}.</b> ` +
+    `Matriz de <b>16 regiones</b> × <b>${m} dimensiones normalizadas [0, 1]</b> (orientación favorable: mayor = mejor; Pobreza ya recodificada). ` +
+    `CRITIC asigna mayor peso a dimensiones con alta variabilidad (<b>σ<sub>j</sub></b>) y baja correlación con las demás (<b>∑(1 − r<sub>jk</sub>)</b>).`;
+
+  document.getElementById("cr-k-topd").textContent = `${actNames[maxD]} (${fmtDec(wAct[maxD]*100,2)}%)`;
+  document.getElementById("cr-k-topd2").textContent = `σ=${fmtDec(statsAct.sds[maxD],3)} · ∑(1−r)=${fmtDec(statsAct.sum1r[maxD],2)}`;
+  document.getElementById("cr-k-botd").textContent = `${actNames[minD]} (${fmtDec(wAct[minD]*100,2)}%)`;
+  document.getElementById("cr-k-botd2").textContent = `σ=${fmtDec(statsAct.sds[minD],3)} · ∑(1−r)=${fmtDec(statsAct.sum1r[minD],2)}`;
+  document.getElementById("cr-k-reg1").textContent = CRITIC_REGS[topReg.i];
+  document.getElementById("cr-k-reg1v").textContent = `ID = ${fmtDec(topReg.v, 4)} (#1 de 16)`;
+  document.getElementById("cr-k-conv").textContent = `β = ${fmtDec(beta, 4)} (${beta < 0 ? "Converge" : "Diverge"})`;
+  document.getElementById("cr-k-conv2").textContent = `σ: ${fmtDec(sig17,3)} → ${fmtDec(sig24,3)} (R² ${fmtDec(r2*100,1)}%)`;
+
+  renderFormulaStrip("cr-fstrip", [
+    {
+      lbl: `Contenido Informativo — ${actNames[maxD]}`, col: "#1D4ED8",
+      eq: `C<sub>j</sub> = <span class="sym-b">σ<sub>j</sub></span> · ∑(1 − <span class="sym-p">r<sub>jk</sub></span>)`,
+      sub: `C = ${vChip(fmtDec(statsAct.sds[maxD],4),"vc-b","Desv. estándar σ_j")} × ${vChip(fmtDec(statsAct.sum1r[maxD],4),"vc-p","Conflicto ∑(1−r_jk)")} = ${rChip(fmtDec(statsAct.C[maxD],4))}`,
+      note: `Dimensión con mayor poder discriminante y menor redundancia`
+    },
+    {
+      lbl: `Peso Objetivo CRITIC (w_j)`, col: "#15803D",
+      eq: `w<sub>j</sub> = ${mFrac('<span class="sym-b">C<sub>j</sub></span>', '∑ <span class="sym-t">C<sub>k</sub></span>')}`,
+      sub: `w = ${mFrac(vChip(fmtDec(statsAct.C[maxD],4),"vc-b"), vChip(fmtDec(statsAct.sumC,4),"vc-t","Suma total ∑C"))} = ${rChip(fmtDec(wAct[maxD]*100,2)+"%")}`,
+      note: `Menor peso: ${actNames[minD]} (${fmtDec(wAct[minD]*100,2)}%) · Suma pesos = 100%`
+    },
+    {
+      lbl: "Convergencia Beta y Sigma (2017 → 2024)", col: "#7C3AED",
+      eq: `g<sub>i</sub> = α + <span class="sym-r">β</span>·ln(ID<sub>2017</sub>)`,
+      sub: `β = ${rChip(fmtDec(beta,4), beta >= 0)} &nbsp;|&nbsp; σ<sub>17</sub>=${vChip(fmtDec(sig17,3),"vc-o")} → σ<sub>24</sub>=${vChip(fmtDec(sig24,3),"vc-g")}`,
+      note: `R² = ${fmtDec(r2*100,1)}% · ${sig24 < sig17 ? "Convergencia Sigma confirmada (cae dispersión)" : "Sin Convergencia Sigma"}`
+    }
+  ]);
+
+  document.getElementById("cr-sol").innerHTML =
+    `<b>Lectura RStudio / Excel (${modeLbl}):</b> ` +
+    actNames.map((nm, j) => `${nm}=<b>${fmtDec(wAct[j]*100,1)}%</b>`).join(" · ") +
+    ` | <b>Top 3:</b> #1 ${CRITIC_REGS[(criticMode==="2017"?ord17:ord24)[0].i]}, #2 ${CRITIC_REGS[(criticMode==="2017"?ord17:ord24)[1].i]}, #3 ${CRITIC_REGS[(criticMode==="2017"?ord17:ord24)[2].i]}`;
+
+  // Tabla 1: Dimensiones CRITIC
+  let tDim = `<table class="ot-mat-tbl"><thead><tr><th>Dimensión</th><th>σ_j (SD)</th><th>∑(1 − r_jk)</th><th>C_j</th><th>Peso w_j</th></tr></thead><tbody>`;
+  for (let j = 0; j < m; j++) {
+    const hi = j === maxD ? "background:#DCFCE7;font-weight:800;" : (j === minD ? "background:#FEF2F2;" : "");
+    tDim += `<tr><td>${actNames[j]}</td><td>${fmtDec(statsAct.sds[j],4)}</td><td>${fmtDec(statsAct.sum1r[j],4)}</td><td>${fmtDec(statsAct.C[j],4)}</td><td style="${hi}"><b>${fmtDec(wAct[j]*100,2)}%</b></td></tr>`;
+  }
+  tDim += `<tr class="ot-sum-row"><td>TOTAL (${m} dim.)</td><td>—</td><td>—</td><td>${fmtDec(statsAct.sumC,4)}</td><td>100,00%</td></tr></tbody></table>`;
+  document.getElementById("cr-tbl-dims").innerHTML = tDim;
+
+  // Tabla 2: 16 Regiones (2017 vs 2024)
+  const ordShow = (criticMode === "2017") ? ord17 : ord24;
+  let tReg = `<table class="ot-mat-tbl"><thead><tr><th>Región</th><th>ID 2017</th><th>#17</th><th>ID 2024</th><th>#24</th><th>Δ Puesto</th></tr></thead><tbody>`;
+  ordShow.forEach(o => {
+    const i = o.i;
+    const chg = rk17[i] - rk24[i];
+    const cCol = chg > 0 ? "#15803D" : (chg < 0 ? "#DC2626" : "#64748B");
+    const cTxt = chg > 0 ? `↑ +${chg}` : (chg < 0 ? `↓ ${chg}` : "—");
+    tReg += `<tr><td>${CRITIC_REGS[i]}</td><td>${fmtDec(id17[i],4)}</td><td>#${rk17[i]}</td><td>${fmtDec(id24[i],4)}</td><td><b>#${rk24[i]}</b></td><td style="color:${cCol};font-weight:800;">${cTxt}</td></tr>`;
+  });
+  tReg += `</tbody></table>`;
+  document.getElementById("cr-tbl-regs").innerHTML = tReg;
+
+  // SVG DUAL 60 FPS: Izquierda = Correlograma Heatmap + Pesos CRITIC; Derecha = Convergencia Beta
+  const svg = document.getElementById("svg-u6-critic");
+  if (svg) {
+    svg.innerHTML = "";
+    addDefs(svg);
+    const W = 980, H = 395;
+
+    // 1. Izquierda: Heatmap de Correlación de Pearson (x: 68..356, y: 46..334)
+    const hT = el("text", { x: 215, y: 20, fill: "#0F172A", "font-size": "11.5", "font-weight": "800", "text-anchor": "middle" }, svg);
+    hT.textContent = "Matriz de Correlaciones r_jk (Azul = redundante)";
+    const cellS = Math.min(38, Math.floor(270 / m));
+    const gx0 = 80, gy0 = 42;
+    for (let a = 0; a < m; a++) {
+      const ly = el("text", { x: gx0 - 6, y: gy0 + a * cellS + cellS * 0.65, fill: "#1E293B", "font-size": "9.8", "font-weight": "700", "text-anchor": "end" }, svg);
+      ly.textContent = actNames[a].slice(0, 8);
+      const lx = el("text", { x: gx0 + a * cellS + cellS / 2, y: gy0 - 6, fill: "#1E293B", "font-size": "9.2", "font-weight": "700", "text-anchor": "middle" }, svg);
+      lx.textContent = actNames[a].slice(0, 4);
+      for (let b = 0; b < m; b++) {
+        const rv = statsAct.R[a][b];
+        let bg = "#FFFFFF", fg = "#0F172A";
+        if (a === b) { bg = "#E2E8F0"; fg = "#475569"; }
+        else if (rv >= 0) {
+          const al = Math.min(0.85, rv * 0.82);
+          bg = `rgba(29,78,216,${al.toFixed(2)})`;
+          if (rv > 0.52) fg = "#FFFFFF";
+        } else {
+          const al = Math.min(0.85, Math.abs(rv) * 0.82);
+          bg = `rgba(220,38,38,${al.toFixed(2)})`;
+          if (Math.abs(rv) > 0.52) fg = "#FFFFFF";
+        }
+        el("rect", { x: gx0 + b * cellS, y: gy0 + a * cellS, width: cellS - 1, height: cellS - 1, fill: bg, stroke: "#CBD5E1", "stroke-width": "0.7" }, svg);
+        const tv = el("text", { x: gx0 + b * cellS + cellS / 2, y: gy0 + a * cellS + cellS * 0.64, fill: fg, "font-size": "9.0", "font-weight": "700", "text-anchor": "middle" }, svg);
+        tv.textContent = rv.toFixed(2).replace(".", ",");
+      }
+    }
+
+    // 2. Centro: Barras de Pesos CRITIC (x: 388..620, y: 42..330)
+    const pT = el("text", { x: 505, y: 20, fill: "#0F172A", "font-size": "11.5", "font-weight": "800", "text-anchor": "middle" }, svg);
+    pT.textContent = "Pesos Objetivos CRITIC (w_j %)";
+    const maxW = Math.max(...wAct, 0.28);
+    const barRowH = Math.min(38, Math.floor(285 / m));
+    for (let j = 0; j < m; j++) {
+      const y0 = 46 + j * barRowH;
+      const bw = Math.max(4, (wAct[j] / maxW) * 145);
+      const col = j === maxD ? "#15803D" : (j === minD ? "#DC2626" : "#1D4ED8");
+      const tl = el("text", { x: 446, y: y0 + barRowH * 0.55, fill: "#0F172A", "font-size": "10", "font-weight": "700", "text-anchor": "end" }, svg);
+      tl.textContent = actNames[j].slice(0, 9);
+      el("rect", { x: 452, y: y0 + 4, width: bw, height: Math.max(12, barRowH - 12), fill: col, rx: 3 }, svg);
+      const tv = el("text", { x: 456 + bw, y: y0 + barRowH * 0.55, fill: col, "font-size": "10", "font-weight": "800" }, svg);
+      tv.textContent = fmtDec(wAct[j] * 100, 1) + "%";
+    }
+
+    // 3. Derecha: Scatter de Convergencia Beta (2017 -> 2024) (x: 675..955, y: 44..340)
+    const cT = el("text", { x: 815, y: 20, fill: "#0F172A", "font-size": "11.5", "font-weight": "800", "text-anchor": "middle" }, svg);
+    cT.textContent = `Convergencia β (2017→2024): β=${fmtDec(beta,3)}`;
+    const cx0 = 675, cx1 = 955, cy0 = 44, cy1 = 335;
+    const minLx = Math.min(...ln17) - 0.25, maxLx = Math.max(...ln17) + 0.25;
+    const minGy = Math.min(...gAnn, -0.05) - 0.03, maxGy = Math.max(...gAnn, 0.05) + 0.03;
+    const sxC = v => cx0 + ((v - minLx) / Math.max(0.1, maxLx - minLx)) * (cx1 - cx0);
+    const syC = v => cy1 - ((v - minGy) / Math.max(0.05, maxGy - minGy)) * (cy1 - cy0);
+
+    drawAxesPizarra(svg, cx0, cy0, cx1, cy1, "g anual (T=7)", "ln(ID 2017)");
+    if (minGy < 0 && maxGy > 0) {
+      el("line", { x1: cx0, y1: syC(0), x2: cx1, y2: syC(0), stroke: "#94A3B8", "stroke-dasharray": "4,3" }, svg);
+    }
+    // Regression line
+    const yL1 = alfa + beta * minLx, yL2 = alfa + beta * maxLx;
+    el("line", { x1: sxC(minLx), y1: syC(Math.max(minGy, Math.min(maxGy, yL1))), x2: sxC(maxLx), y2: syC(Math.max(minGy, Math.min(maxGy, yL2))), stroke: "#DC2626", "stroke-width": "2.2", "stroke-dasharray": "6,3" }, svg);
+
+    for (let i = 0; i < 16; i++) {
+      const px = sxC(ln17[i]), py = syC(gAnn[i]);
+      const up = rk17[i] > rk24[i];
+      el("circle", { cx: px, cy: py, r: 4.5, fill: up ? "#15803D" : "#1D4ED8", stroke: "#FFFFFF", "stroke-width": "1.2" }, svg);
+      if (i === 2 || i === 5 || i === 8 || i === 10 || i === 13 || i === 15) {
+        const tn = el("text", { x: px, y: py - 7, fill: "#0F172A", "font-size": "8.8", "font-weight": "700", "text-anchor": "middle" }, svg);
+        tn.textContent = CRITIC_REGS[i].slice(0, 7);
+      }
+    }
+  }
+
+  renderPedBox("ped-u6-critic",
+    `<b>${actNames[maxD]} (${fmtDec(wAct[maxD]*100,2)}%)</b> obtiene el mayor peso CRITIC porque combina alta dispersión entre regiones (σ=${fmtDec(statsAct.sds[maxD],3)}) con baja redundancia (∑(1−r)=${fmtDec(statsAct.sum1r[maxD],2)}). Al contrario, <b>${actNames[minD]} (${fmtDec(wAct[minD]*100,2)}%)</b> pesa menos por su mayor correlación con las demás dimensiones.`,
+    `<b>Prueba la magia de CRITIC ahora mismo:</b> haz clic en <b>«Simular Redundancia (Salud ≈ Vivienda)»</b> arriba y mira qué pasa en el heatmap: la correlación Salud–Vivienda salta a ~0,99 y CRITIC castiga automáticamente el peso de ambas para no contar dos veces la misma información.`,
+    `<b>Clave de examen (Convergencia 2017→2024):</b> manteniendo fijos los pesos CRITIC 2017, la dispersión cae de <b>σ = ${fmtDec(sig17,3)}</b> a <b>${fmtDec(sig24,3)}</b> (Convergencia Sigma) y la pendiente OLS es <b>β = ${fmtDec(beta,4)}</b> (R² = ${fmtDec(r2*100,1)}%), confirmando que las regiones rezagadas crecieron más rápido.`
+  );
+}
+
+// ============================================================================
+// 11. MOTOR DE IMPRESIÓN CARTA LIMPIO (COMPLETO · EN BLANCO LÁPIZ · .HTML)
+// ============================================================================
+function buildHojaMecanicaPrintHtml(esBlanco) {
+  const cont = document.getElementById("mec-container");
+  if (!cont) return "";
+  const clone = cont.cloneNode(true);
+  clone.classList.remove("blind-mode");
+  clone.querySelectorAll(".chk-btn, .blind-cover").forEach(n => n.remove());
+  clone.querySelectorAll(".f-card, .s-card").forEach(n => n.classList.remove("mastered", "revealed"));
+
+  if (esBlanco) {
+    clone.querySelectorAll(".f-card").forEach(card => {
+      const body = card.querySelector(".f-body");
+      if (body) body.innerHTML = '<div class="blank-lines"><div class="bline"></div><div class="bline"></div></div>';
+    });
+    clone.querySelectorAll(".s-card").forEach(card => {
+      card.querySelectorAll(".sk-lbl").forEach(n => n.remove());
+      const sub = card.querySelector(".s-sub");
+      if (sub) sub.innerHTML = '<b>Interpretación:</b> ____________________________________';
+    });
+  }
+
+  const modoBadge = esBlanco ? "HOJA DE PRÁCTICA EN BLANCO (LÁPIZ)" : "FORMULARIO COMPLETO DE ESTUDIO";
+  const metaAlumno = esBlanco
+    ? '<div class="pr-student"><span><b>Nombre:</b> ______________________________________</span><span><b>Fecha:</b> ____/____/2026</span><span><b>Autoevaluación:</b> _____ / 20</span></div>'
+    : '';
+  const tituloDoc = `Hoja Mecánica — Desarrollo y Gestión Territorial (${esBlanco ? "En Blanco" : "Completa"})`;
+
+  return `<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8" /><title>${tituloDoc}</title>
+<style>
+  @page { size: letter portrait; margin: 10mm 11mm; }
+  * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; }
+  body { margin: 0; padding: 14px; background: #FFFFFF; color: #0F172A; }
+  .no-print { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; background:#0F172A; color:#FFF; padding:9px 14px; border-radius:7px; margin-bottom:12px; }
+  .no-print button { border:1px solid #93C5FD; background:#1D4ED8; color:#FFF; padding:6px 12px; border-radius:5px; font-size:12px; font-weight:700; cursor:pointer; }
+  .no-print button.sec { background:#334155; border-color:#64748B; }
+  .pr-header { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; border-bottom:2px solid #0F172A; padding-bottom:7px; margin-bottom:9px; }
+  .pr-title { font-size:14px; font-weight:800; } .pr-sub { font-size:10.5px; color:#334155; margin-top:2px; }
+  .pr-badge { font-size:9.8px; font-weight:800; color:#FFF; background:${esBlanco ? "#0F172A" : "#1E3A8A"}; padding:4px 9px; border-radius:4px; white-space:nowrap; }
+  .pr-student { display:flex; justify-content:space-between; gap:12px; font-size:10.5px; margin-bottom:9px; padding:5px 8px; background:#F8FAFC; border:1px solid #CBD5E1; border-radius:4px; }
+  .sec-title { font-size:11px; font-weight:800; background:#F1F5F9; border-left:3.5px solid #0F172A; padding:4px 8px; border-radius:3px; margin:9px 0 6px 0; }
+  .sec-title span:nth-child(2) { display:none; }
+  .mec-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:7px; margin-bottom:10px; }
+  .f-card { border:1px solid #94A3B8; border-left:3px solid #0F172A; border-radius:4px; padding:6px 8px; break-inside:avoid; }
+  .f-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; }
+  .f-title { font-size:10.5px; font-weight:800; } .f-cat { font-size:8.8px; font-weight:700; color:#334155; background:#E2E8F0; padding:1px 5px; border-radius:3px; margin-right:4px; }
+  .f-body { background:#F8FAFC; border:1px dashed #CBD5E1; border-radius:3px; padding:5px 7px; }
+  .f-eq { font-family:"Cambria Math","Times New Roman",Georgia,serif; font-size:12.2px; font-weight:700; display:block; line-height:1.55; }
+  .f-eq sup { font-size:0.72em; vertical-align:super; line-height:0; } .f-eq sub { font-size:0.72em; vertical-align:sub; line-height:0; }
+  .frac { display:inline-flex; flex-direction:column; align-items:center; vertical-align:middle; margin:0 2px; font-size:0.88em; line-height:1.1; }
+  .frac .num { border-bottom:1.2px solid #0F172A; padding:0 3px 1px 3px; text-align:center; } .frac .den { padding:1px 3px 0 3px; text-align:center; }
+  .f-rule { font-size:9.2px; color:#334155; margin-top:3px; line-height:1.3; }
+  .blank-lines { padding:2px 0; } .bline { height:21px; border-bottom:1px dashed #94A3B8; }
+  .skel-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:7px; }
+  .s-card { border:1px solid #94A3B8; border-radius:4px; padding:6px 7px; break-inside:avoid; }
+  .s-title { font-size:9.8px; font-weight:800; margin-bottom:3px; } .s-card svg { width:100%; height:auto; display:block; }
+  .s-sub { font-size:8.8px; color:#334155; margin-top:3px; line-height:1.28; }
+  @media print { body { padding:0; } .no-print { display:none !important; } * { -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; } }
+</style></head>
+<body>
+  <div class="no-print">
+    <div><b>Hoja Mecánica Lista para Impresión Carta</b> — Desarrollo y Gestión Territorial (${esBlanco ? "Modo En Blanco para Lápiz" : "Formulario Completo"})</div>
+    <div style="display:flex;gap:8px;"><button onclick="window.print()">Imprimir / Guardar PDF (Carta)</button><button class="sec" onclick="window.close()">Cerrar</button></div>
+  </div>
+  <div class="pr-header">
+    <div><div class="pr-title">HOJA MECÁNICA DE ESTUDIO — Desarrollo y Gestión Territorial</div><div class="pr-sub">Universidad de Los Lagos · Ingeniería Comercial 2026 · Prof. Claudio Mancilla</div></div>
+    <div class="pr-badge">${modoBadge}</div>
+  </div>
+  ${metaAlumno}
+  ${clone.innerHTML}
+</body></html>`;
+}
+
+function showMecPrintMsg(txt) {
+  const elMsg = document.getElementById("mec-print-msg");
+  if (!elMsg) return;
+  elMsg.innerHTML = txt;
+  elMsg.style.display = "block";
+}
+
+function descargarHojaMecanica(esBlancoOverride) {
+  const esBlanco = typeof esBlancoOverride === "boolean" ? esBlancoOverride : !!mecBlind;
+  const htmlDoc = buildHojaMecanicaPrintHtml(esBlanco);
+  const blob = new Blob([htmlDoc], { type: "text/html;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `Hoja_Mecanica_Territorial_${esBlanco ? "En_Blanco_Lapiz" : "Completa"}_Carta.html`;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 1200);
+  showMecPrintMsg(`Archivo descargado (<b>${a.download}</b>). Ábrelo en tu navegador y presiona <b>Ctrl + P → Guardar como PDF</b> (formato Carta limpio).`);
+}
+
+function imprimirHojaMecanica(esBlanco) {
+  const htmlDoc = buildHojaMecanicaPrintHtml(esBlanco);
+  try {
+    const win = window.open("", "_blank", "width=1020,height=780");
+    if (win && win.document) {
+      win.document.open(); win.document.write(htmlDoc); win.document.close(); win.focus();
+      setTimeout(() => { try { win.print(); } catch (e) {} }, 350);
+      showMecPrintMsg(`Se abrió la vista limpia tamaño Carta (${esBlanco ? "<b>En Blanco para Lápiz</b>" : "<b>Formulario Completo</b>"}).`);
+      return;
+    }
+  } catch (err) {}
+  descargarHojaMecanica(esBlanco);
+}
+
+// ============================================================================
+// 12. MOTOR DE ESTUDIO EN 4 MODOS (APRENDER · PRACTICAR · FORMULARIO · LAB)
+// ============================================================================
+const LEARN_TOPICS = [
+  {
+    id: "u1_perroux", tab: "perroux", sub: null, retoIdx: 0,
+    title: "1. Unidad I · Polos de Desarrollo (Perroux, Hirschman y Myrdal)",
+    s1: "<b>Qué ocurre aquí:</b> Una industria motriz inyecta I<sub>0</sub> = $1.000 MM y se multiplica en 5 rondas (izquierda). A la derecha, la balanza de <b>Myrdal</b> compara <b>Spread</b> (difusión hacia comunas vecinas) vs. <b>Backwash</b> (absorción hacia el centro).",
+    s2: "<b>Fórmula clave:</b> Multiplicador de Hirschman <b>M<sub>H</sub> = 1 / [1 − (b + f)]</b>, donde <b>b</b> son encadenamientos hacia atrás (proveedores) y <b>f</b> hacia adelante. Saldo neto periferia = Spread − Backwash.",
+    s3: "<b>Trampa clásica de control:</b> Un megaproyecto NO siempre es un polo integrador: si importa todo y tiene b+f bajo opera como <b>enclave extractivo</b> donde el Backwash drena talento y capital de la periferia."
+  },
+  {
+    id: "u2_thunen", tab: "thunen", sub: null, retoIdx: 1,
+    title: "2. Unidad II · Localización Rural: Von Thünen (Anillos Concéntricos)",
+    s1: "<b>Qué ocurre aquí:</b> A la izquierda cada recta es la renta locacional <b>LR(d)</b> que cae al alejarse de la ciudad; a la derecha se dibuja el mapa de <b>anillos concéntricos</b> según quién puja más alto por el suelo.",
+    s2: "<b>Fórmula clave:</b> <b>LR(d) = Y(m − c) − Y·t·d</b>. Los radios de transición se encuentran igualando las rectas: <b>LR<sub>1</sub> = LR<sub>2</sub></b> (d<sub>12</sub> = 14,0 km), <b>LR<sub>2</sub> = LR<sub>3</sub></b> (d<sub>23</sub> = 29,2 km) y la frontera donde <b>LR<sub>3</sub> = 0</b> (62,5 km).",
+    s3: "<b>Trampa clásica de control:</b> Las actividades con <b>mayor costo de transporte por km (pendiente más empinada)</b> se ubican en el anillo más cercano al mercado (ej. lechería fresca en Osorno), no necesariamente las que tienen mayor precio bruto."
+  },
+  {
+    id: "u2_weber", tab: "weber", sub: null, retoIdx: 2,
+    title: "3. Unidad II · Localización Industrial: Weber (IM e Isodápana Crítica)",
+    s1: "<b>Qué ocurre aquí:</b> El punto rojo <b>P*</b> busca el mínimo flete dentro del triángulo MP1–MP2–Mercado. La curva punteada es la <b>Isodápana Crítica</b>: solo conviene saltar al enclave laboral barato <b>L</b> si L cae <i>dentro</i> de esa curva.",
+    s2: "<b>Fórmula clave:</b> Índice de Materiales <b>IM = (W<sub>1</sub> + W<sub>2</sub>) / W<sub>M</sub></b>. Si <b>IM &gt; 1</b> (pierde peso, ej. aserradero/leche en polvo) atrae a insumos; si <b>IM &lt; 1</b> (gana peso con agua, ej. bebidas) atrae al mercado.",
+    s3: "<b>Trampa clásica de control:</b> Aunque L ofrezca mano de obra barata, si el sobrecosto adicional de flete supera el ahorro salarial (L fuera de la isodápana), la empresa <b>NO debe trasladarse a L</b>."
+  },
+  {
+    id: "u2_krugman", tab: "krugman", sub: null, retoIdx: 3,
+    title: "4. Unidad II · Nueva Economía Geográfica: Krugman (Umbral τ*)",
+    s1: "<b>Qué ocurre aquí:</b> Mueve el costo de transporte τ o pulsa «Reproducir Baja de Fletes»: al cruzar el <b>umbral crítico τ*</b> hacia la izquierda, el sistema salta abruptamente de equilibrio disperso (50/50) a <b>aglomeración Centro-Periferia</b>.",
+    s2: "<b>Fórmula clave:</b> <b>p*(x) = a·W(x)/ρ</b> y condición de bifurcación <b>τ ≤ τ* ⇒ Aglomeración</b>. A mayores economías de escala y movilidad laboral, más alto es τ* (más fácil concentrar).",
+    s3: "<b>Paradoja de la carretera:</b> Bajar costos de transporte NO siempre favorece a la periferia; si τ cae bajo τ*, las firmas producen todo en la capital regional con escala y despachan hacia afuera, vaciando a la periferia."
+  },
+  {
+    id: "u24_chrisgran", tab: "christaller", sub: null, retoIdx: 3,
+    title: "5. Unidades II y IV · Lugares Centrales (Christaller) y Redes (Granovetter)",
+    s1: "<b>Qué ocurre aquí:</b> Arriba verificas si un servicio cumple <b>Umbral</b> (masa crítica) y <b>Alcance</b> (km máximos); abajo ves cómo los <b>puentes débiles</b> (rojos punteados) conectan a las PyMEs locales con ULagos/INIA/CORFO.",
+    s2: "<b>Reglas clave:</b> Viabilidad en Christaller exige <b>Pob ≥ Umbral</b> y <b>Alcance ≥ Distancia</b>. En Granovetter, el riesgo de <b>Lock-in</b> (bloqueo por información redundante) sube cuando hay muchos lazos fuertes internos pero cero puentes externos.",
+    s3: "<b>Trampa clásica de control:</b> La innovación rara vez llega de los «amigos más cercanos» (vínculos fuertes); proviene de <b>vínculos débiles</b> (universidades, clientes externos) que unen redes distintas."
+  },
+  {
+    id: "u3_lorenz", tab: "lorenz", sub: null, retoIdx: 4,
+    title: "6. Unidades III y V · Disparidades REAT: Lorenz, Gini, Theil, HHI e IP4",
+    s1: "<b>Qué ocurre aquí:</b> A la izquierda, la <b>Curva de Lorenz</b> muestra cuánto se aleja la distribución de la diagonal de 45° (Gini); a la derecha, el termómetro ubica la <b>Primacía IP<sub>4</sub></b> (escala 0–3) y compara contra la <b>Ley de Zipf (P<sub>1</sub>/r)</b>.",
+    s2: "<b>Fórmulas clave:</b> <b>IP<sub>4</sub> = P<sub>1</sub> / (P<sub>2</sub>+P<sub>3</sub>+P<sub>4</sub>)</b>; <b>G = 1 − ∑(p<sub>i</sub>−p<sub>i−1</sub>)(q<sub>i</sub>+q<sub>i−1</sub>)</b>; <b>Theil T = ∑ s<sub>i</sub>·ln(n·s<sub>i</sub>)</b>; <b>HHI = ∑ s<sub>i</sub>²</b>.",
+    s3: "<b>Trampa clásica de control:</b> (1) Convergencia β es necesaria pero <b>NO suficiente</b> para Convergencia σ; (2) Para descomponer desigualdad «entre» y «dentro» de regiones se usa <b>Theil</b>, jamás Gini."
+  },
+  {
+    id: "u4_dini", tab: "dini", sub: null, retoIdx: 5,
+    title: "7. Unidad IV · Redes Empresariales y UCINET (Dini, 2010 — Control 4)",
+    s1: "<b>Qué ocurre aquí:</b> Haz clic en 2 actores del grafo para crear/borrar vínculos o pulsa <b>«Simular Quiebra del Líder»</b> para ver la diferencia entre una Red Simétrica (resiliente) y una Estrella (colapsa a D=0%).",
+    s2: "<b>Fórmulas clave:</b> Diagonal siempre <b>A<sub>ii</sub> = 0</b>. Densidad no dirigida <b>D = 2L / [n(n−1)]</b> (dirigida: L/[n(n−1)]). Gradiente <b>GC = ∑(k<sub>máx</sub>−k<sub>i</sub>) / [(n−1)(n−2)]</b> (0% simétrica ↔ 100% estrella).",
+    s3: "<b>Regla de entrevista Control 4 (Prof. Mancilla):</b> Entrevista a 3 actores de organizaciones distintas (≥2 eslabones), <b>NO sugieras que debe existir un clúster</b> y <b>NO uses la palabra «debilidades»</b> (pregunta por desafíos)."
+  },
+  {
+    id: "u5_ot", tab: "ot", sub: null, retoIdx: 6,
+    title: "8. Unidad V · Ordenamiento Territorial: Flechas, Rondinelli, Aislamiento y PROT",
+    s1: "<b>Qué ocurre aquí:</b> Explora las 5 sub-pestañas del laboratorio OT: cruces censales con flechas, Escalograma de Guttman/Rondinelli (1/0), Matriz de Aislamiento vial (0/1) y el Mapa Semáforo del Manual PROT.",
+    s2: "<b>Fórmulas clave:</b> Rondinelli <b>W<sub>k</sub> = 100 / f<sub>k</sub></b> (lo más escaso vale más) y <b>IC<sub>i</sub> = ∑ X<sub>ik</sub>·W<sub>k</sub></b>. Aislamiento <b>IA<sub>i</sub> = (∑ unos / (n−1)) × 100%</b>.",
+    s3: "<b>Trampa clásica de Control 5:</b> (1) En Rondinelli, si una variable tiene <b>puros 1</b> en las 10 comunas, NO discrimina y <b>debes reemplazarla</b>; (2) En Aislamiento el <b>0 es bueno</b> (conectada) y el <b>1 es malo</b> (aislada), exactamente al revés que Rondinelli."
+  },
+  {
+    id: "u6_minmax", tab: "indicadores", sub: "minmax", retoIdx: 7,
+    title: "9. Unidad VI (A) · Indicadores de Desarrollo: Normalización Mín–Máx (15 Provincias)",
+    s1: "<b>Qué ocurre aquí:</b> Normaliza 2 variables de 15 provincias a [0, 1] y compara el ranking al cambiar ponderaciones (50/50 vs. 70/30) o aplicar un <b>Shock Outlier</b> (verás cómo aplasta hacia 0 a las comunas intermedias).",
+    s2: "<b>Fórmulas clave:</b> Favorable (+): <b>u<sup>+</sup> = (x − mín)/(máx − mín)</b>. Desfavorable (−, ej. pobreza): <b>u<sup>−</sup> = (máx − x)/(máx − mín)</b>. Índice compuesto <b>I<sub>i</sub> = ∑ w<sub>k</sub>·u<sub>k</sub></b>.",
+    s3: "<b>Trampa clásica de Excel:</b> En <code>RANK(celda, rango, 0)</code> el tercer argumento <b>0</b> da lugar #1 al mayor valor (descendente). Y recuerda que un outlier sigue sacando 1,00 pero comprime a todos los demás."
+  },
+  {
+    id: "u6_critic", tab: "indicadores", sub: "critic", retoIdx: 7,
+    title: "10. Unidad VI (B) · Método CRITIC Objetivo (16 Regiones · 2017 vs. 2024)",
+    s1: "<b>Qué ocurre aquí:</b> A la izquierda ves el <b>Correlograma de Pearson (7×7)</b> y las barras de pesos CRITIC (<b>Pobreza 24,7%</b> lidera, <b>Salud 9,1%</b> queda última); a la derecha ves la <b>Convergencia Beta 2017→2024</b>.",
+    s2: "<b>Fórmulas clave:</b> <b>C<sub>j</sub> = σ<sub>j</sub> · ∑(1 − r<sub>jk</sub>)</b> y <b>w<sub>j</sub> = C<sub>j</sub> / ∑ C<sub>k</sub></b>. Combina variabilidad (σ) × no redundancia ∑(1−r). En R: <code>C &lt;- apply(X,2,sd) * rowSums(1 - cor(X))</code>.",
+    s3: "<b>Trampa clásica de Taller CRITIC:</b> (1) Todas las dimensiones deben estar ya en [0, 1] con <b>sentido favorable (+)</b> (Pobreza recodificada); (2) Para evaluar convergencia 2017→2024 usa <b>pesos fijos 2017</b> sobre 2024."
+  }
+];
+
+const PRAC_RETOS = [
+  {
+    id: "tr1", topicIdx: 0, short: "1. Perroux/Myrdal",
+    title: "Unidad I — Multiplicador de Hirschman y Balanza de Myrdal",
+    enun: "Una industria motriz inyecta <b>I<sub>0</sub> = $1.000 MM</b> con encadenamientos hacia atrás <b>b = 0,35</b> y hacia adelante <b>f = 0,25</b>. Del efecto indirecto total, un <b>65%</b> se difunde hacia comunas vecinas (Spread) y el Backwash equivale a 0,6 × (35% restante). Calcula:",
+    qs: [
+      { lbl: "Multiplicador de Hirschman M_H", type: "num", ans: 2.5, tol: 0.02, ph: "ej. 2,5" },
+      { lbl: "Producción Total Inducida ($ MM)", type: "num", ans: 2500, tol: 0.02, ph: "ej. 2500" },
+      { lbl: "Efecto Difusión Spread ($ MM)", type: "num", ans: 975, tol: 0.02, ph: "ej. 975" }
+    ],
+    hint: "<b>Pista:</b> M<sub>H</sub> = 1 / [1 − (b + f)] = 1 / (1 − 0,60). Producción Total = I<sub>0</sub> × M<sub>H</sub>. Efecto indirecto = Total − I<sub>0</sub> = $1.500 MM; Spread = 65% de $1.500 MM.",
+    sol: "M_H = 1 / 0,40 = <b>2,50x</b> | Total = 1.000 × 2,5 = <b>$2.500 MM</b> | Indirecto = $1.500 MM ⇒ Spread = 0,65 × 1.500 = <b>$975 MM</b>."
+  },
+  {
+    id: "tr2", topicIdx: 1, short: "2. Von Thünen",
+    title: "Unidad II — Anillos Concéntricos y Cortes de Renta Locacional",
+    enun: "Tres actividades compiten por suelo desde el mercado central: <b>LR<sub>1</sub> = 120 − 4,5·d</b> (Lechería), <b>LR<sub>2</sub> = 85 − 2,0·d</b> (Agroindustria) y <b>LR<sub>3</sub> = 50 − 0,8·d</b> (Forestal). Determina los radios exactos (km):",
+    qs: [
+      { lbl: "Corte Anillo 1 → Anillo 2 (d12 en km)", type: "num", ans: 14.0, tol: 0.02, ph: "ej. 14" },
+      { lbl: "Corte Anillo 2 → Anillo 3 (d23 en km)", type: "num", ans: 29.17, tol: 0.02, ph: "ej. 29,2" },
+      { lbl: "Frontera agrícola donde LR3 = 0 (km)", type: "num", ans: 62.5, tol: 0.02, ph: "ej. 62,5" }
+    ],
+    hint: "<b>Pista:</b> Iguala LR<sub>1</sub> = LR<sub>2</sub> ⇒ d<sub>12</sub> = (120 − 85)/(4,5 − 2,0). Luego d<sub>23</sub> = (85 − 50)/(2,0 − 0,8) y d<sub>máx</sub> = 50 / 0,8.",
+    sol: "d12 = 35 / 2,5 = <b>14,0 km</b> | d23 = 35 / 1,2 = <b>29,17 km</b> | Frontera LR3=0 ⇒ 50 / 0,8 = <b>62,5 km</b>."
+  },
+  {
+    id: "tr3", topicIdx: 2, short: "3. Weber (IM)",
+    title: "Unidad II — Índice de Materiales (IM) e Isodápana Crítica",
+    enun: "Una fábrica usa materias primas localizadas <b>W<sub>1</sub> = 40 t</b> y <b>W<sub>2</sub> = 30 t</b> para producir <b>W<sub>M</sub> = 40 t</b> de producto final. Un enclave laboral L ahorra <b>$55/unid</b> en salarios, pero agrega <b>+$98,4/unid</b> de flete respecto a P*.",
+    qs: [
+      { lbl: "Índice de Materiales IM", type: "num", ans: 1.75, tol: 0.02, ph: "ej. 1,75" },
+      { lbl: "Orientación de P* según IM", type: "sel", opts: ["Seleccionar...", "Hacia los insumos (pierde peso)", "Hacia el mercado (gana peso)"], ans: "Hacia los insumos (pierde peso)" },
+      { lbl: "Decisión respecto al enclave laboral L", type: "sel", opts: ["Seleccionar...", "Saltar a L (ahorro > flete extra)", "Permanecer en P* (L queda fuera de la isodápana)"], ans: "Permanecer en P* (L queda fuera de la isodápana)" }
+    ],
+    hint: "<b>Pista:</b> IM = (W<sub>1</sub> + W<sub>2</sub>) / W<sub>M</sub>. Si IM &gt; 1 se orienta a insumos. Compara Ahorro ($55) vs. Flete extra ($98,4).",
+    sol: "IM = (40 + 30)/40 = <b>1,75 &gt; 1</b> (insumos). Como ahorro $55 &lt; sobrecosto flete $98,4, L está fuera de la isodápana ⇒ <b>permanecer en P*</b>."
+  },
+  {
+    id: "tr4", topicIdx: 3, short: "4. Krugman τ*",
+    title: "Unidad II — Bifurcación Centro-Periferia (Krugman, 1991)",
+    enun: "Con economías de escala <b>Esc = 7,0</b> y movilidad laboral <b>Mov = 6,5</b> (donde τ* = 0,45·Esc + 0,35·Mov), una mejora vial baja el costo de transporte a <b>τ = 3,5</b>.",
+    qs: [
+      { lbl: "Umbral crítico de bifurcación τ*", type: "num", ans: 5.425, tol: 0.02, ph: "ej. 5,43" },
+      { lbl: "Régimen espacial resultante para τ = 3,5", type: "sel", opts: ["Seleccionar...", "Aglomeración Centro-Periferia (τ ≤ τ*)", "Equilibrio Disperso (τ > τ*)"], ans: "Aglomeración Centro-Periferia (τ ≤ τ*)" }
+    ],
+    hint: "<b>Pista:</b> Calcula τ* = 0,45(7,0) + 0,35(6,5). Si τ ≤ τ*, dominan las fuerzas centrípetas y se concentra en el centro.",
+    sol: "τ* = 3,15 + 2,275 = <b>5,43</b>. Como τ = 3,5 ≤ 5,43, dominan fuerzas centrípetas ⇒ <b>Aglomeración Centro-Periferia</b>."
+  },
+  {
+    id: "tr5", topicIdx: 5, short: "5. IP4 y Theil",
+    title: "Unidades III y V — Primacía Urbana IP4 (Los Lagos 2024) y Desigualdad",
+    enun: "En Los Lagos (Censo 2024), las 4 mayores comunas son Puerto Montt (<b>275.473</b>), Osorno (<b>174.998</b>), Puerto Varas (<b>50.010</b>) y Castro (<b>48.632</b>).",
+    qs: [
+      { lbl: "Índice de Primacía IP4 = P1/(P2+P3+P4)", type: "num", ans: 1.007, tol: 0.02, ph: "ej. 1,01" },
+      { lbl: "Clasificación OT (Escala 0–3 de Mancilla)", type: "sel", opts: ["Seleccionar...", "Valor 0: Muy Dispersa (<0,65)", "Valor 1: Dispersa (0,65–1,00)", "Valor 2: Concentrada (1,00–1,50)", "Valor 3: Macrocefalia (≥1,50)"], ans: "Valor 2: Concentrada (1,00–1,50)" },
+      { lbl: "Índice ideal para descomponer desigualdad Entre + Intra región", type: "sel", opts: ["Seleccionar...", "Índice de Gini", "Entropía de Theil (T)", "Índice de Primacía IP2"], ans: "Entropía de Theil (T)" }
+    ],
+    hint: "<b>Pista:</b> Suma P2+P3+P4 = 273.640 y divide 275.473 por esa suma. En escala 0–3, el tramo [1,00; 1,50) es Valor 2 (Concentrada).",
+    sol: "IP4 = 275.473 / 273.640 = <b>1,007</b> ⇒ <b>Valor 2: Concentrada</b>. Descomposición aditiva Entre/Intra ⇒ <b>Entropía de Theil</b>."
+  },
+  {
+    id: "tr6", topicIdx: 6, short: "6. Redes Dini",
+    title: "Unidad IV — Densidad (D) y Gradiente de Concentración (GC)",
+    enun: "Una red <b>no dirigida</b> (matriz simétrica, diagonal A<sub>ii</sub> = 0) tiene <b>n = 6 empresas</b> y <b>L = 5 vínculos</b> todos conectados a una única empresa ancla (topología estrella: k<sub>líder</sub> = 5, resto k<sub>i</sub> = 1).",
+    qs: [
+      { lbl: "Densidad de la red D (%)", type: "num", ans: 33.3, tol: 0.02, ph: "ej. 33,3" },
+      { lbl: "Gradiente de Concentración GC (%)", type: "num", ans: 100, tol: 0.01, ph: "ej. 100" },
+      { lbl: "Si quiebra la empresa líder, la densidad cae a (%)", type: "num", ans: 0, tol: 0.01, ph: "ej. 0" }
+    ],
+    hint: "<b>Pista:</b> D = 2L / [n(n−1)] × 100. GC = ∑(k<sub>máx</sub> − k<sub>i</sub>) / [(n−1)(n−2)] × 100. En una estrella pura, sin el líder no queda ningún vínculo.",
+    sol: "D = 10 / 30 = <b>33,3%</b> | ∑(5−k_i) = 5×4 = 20; (5×4)=20 ⇒ GC = <b>100%</b> | Si sale el líder, L=0 ⇒ D = <b>0%</b>."
+  },
+  {
+    id: "tr7", topicIdx: 7, short: "7. OT Control 5",
+    title: "Unidad V — Rondinelli (Wk) y Matriz de Aislamiento",
+    enun: "En un Escalograma de Rondinelli, el servicio «Guarderías» está presente en solo <b>f<sub>k</sub> = 2</b> localidades. En paralelo, en el ejemplo de Aislamiento (Osorno, Puaucho, Entre Lagos), Puaucho tiene conexión directa (0) con Osorno pero NO (1) con Entre Lagos.",
+    qs: [
+      { lbl: "Peso de centralidad Wk = 100 / fk de Guarderías", type: "num", ans: 50, tol: 0.01, ph: "ej. 50" },
+      { lbl: "Índice de Aislamiento IA de Puaucho (%)", type: "num", ans: 50, tol: 0.01, ph: "ej. 50" },
+      { lbl: "Si una variable de Rondinelli tiene 1 en las 10 comunas...", type: "sel", opts: ["Seleccionar...", "Se mantiene porque da máximo puntaje", "Se reemplaza porque no discrimina entre comunas"], ans: "Se reemplaza porque no discrimina entre comunas" }
+    ],
+    hint: "<b>Pista:</b> W<sub>k</sub> = 100 / 2. Para Puaucho hay n−1 = 2 pares posibles y 1 de ellos es 1 (sin conexión directa) ⇒ 1/2 = 50%.",
+    sol: "Wk = 100 / 2 = <b>50 pts</b> | IA Puaucho = (1 / 2) × 100% = <b>50%</b> | Columna de puros 1 ⇒ <b>se reemplaza porque no discrimina</b>."
+  },
+  {
+    id: "tr8", topicIdx: 9, short: "8. Mín-Máx y CRITIC",
+    title: "Unidad VI — Normalización Mín–Máx y Ponderación Objetiva CRITIC",
+    enun: "<b>Parte A:</b> Una variable va de <b>mín = 20</b> a <b>máx = 100</b> y una región marca <b>x = 80</b>. <b>Parte B (CRITIC):</b> Una dimensión tiene desviación estándar <b>σ = 0,30</b> y conflicto <b>∑(1 − r<sub>jk</sub>) = 4,0</b>, siendo la suma total de contenidos de todas las dimensiones <b>∑C = 4,80</b>.",
+    qs: [
+      { lbl: "Valor Mín–Máx si x=80 es FAVORABLE (+)", type: "num", ans: 0.75, tol: 0.02, ph: "ej. 0,75" },
+      { lbl: "Valor Mín–Máx si x=80 es DESFAVORABLE (−)", type: "num", ans: 0.25, tol: 0.02, ph: "ej. 0,25" },
+      { lbl: "Contenido Informativo CRITIC C_j = σ · ∑(1−r)", type: "num", ans: 1.20, tol: 0.02, ph: "ej. 1,20" },
+      { lbl: "Peso Objetivo CRITIC w_j (%)", type: "num", ans: 25.0, tol: 0.02, ph: "ej. 25" }
+    ],
+    hint: "<b>Pista:</b> u+ = (80−20)/(100−20); u− = (100−80)/(100−20). C_j = 0,30 × 4,0; w_j = (C_j / 4,80) × 100%.",
+    sol: "u+ = 60/80 = <b>0,75</b> | u− = 20/80 = <b>0,25</b> | C_j = 0,30 × 4,0 = <b>1,20</b> | w_j = 1,20 / 4,80 = <b>25,0%</b>."
+  }
+];
+
+let studioMode = "aprender";
+let learnTopicIdx = 0;
+let learnStep = 1;
+let learnShowVars = false;
+let pracSub = "retos";
+let pracRetoIdx = 0;
+let doneTopics = new Set();
+let solvedRetos = new Set();
+
+try {
+  const saved = JSON.parse(localStorage.getItem("ulagos_terr_2026_prog") || "{}");
+  if (Array.isArray(saved.t)) doneTopics = new Set(saved.t);
+  if (Array.isArray(saved.r)) solvedRetos = new Set(saved.r);
+} catch (e) {}
+
+function saveStudioProg() {
+  try {
+    localStorage.setItem("ulagos_terr_2026_prog", JSON.stringify({
+      t: Array.from(doneTopics),
+      r: Array.from(solvedRetos)
+    }));
+  } catch (e) {}
+  const chip = document.getElementById("studio-prog-chip");
+  if (chip) chip.textContent = `Progreso: ${doneTopics.size} / ${LEARN_TOPICS.length} temas · ${solvedRetos.size} / ${PRAC_RETOS.length} retos`;
+}
+
+function initLearnSelector() {
+  const sel = document.getElementById("learn-topic-sel");
+  if (!sel || sel.options.length > 0) return;
+  LEARN_TOPICS.forEach((t, idx) => {
+    const opt = document.createElement("option");
+    opt.value = idx;
+    opt.textContent = t.title;
+    sel.appendChild(opt);
+  });
+}
+
+function activatePanelClean(panelName) {
+  document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+  const pEl = document.getElementById("panel-" + panelName);
+  if (pEl) pEl.classList.add("active");
+  document.querySelectorAll(".top-tabs .tab-btn").forEach(b => {
+    const oc = b.getAttribute("onclick") || "";
+    b.classList.toggle("active", oc.includes("'" + panelName + "'"));
+  });
+  if (panelName === "thunen") drawThunen();
+  if (panelName === "weber") drawWeber();
+  if (panelName === "krugman") drawKrugman();
+  if (panelName === "perroux") drawPerroux();
+  if (panelName === "christaller") drawChrisGran();
+  if (panelName === "lorenz") drawLorenz();
+  if (panelName === "dini") drawDini();
+  if (panelName === "ot") drawOtActive();
+  if (panelName === "indicadores") {
+    if (u6SubActive === "critic") drawCriticU6(); else drawIndicadoresU6();
+  }
+  if (panelName === "mecanica") renderMecanica();
+  if (panelName === "lectura") { drawMapaTeoria(); renderLecturaCards(); renderQuizLectura(); }
+}
+
+function setStudioMode(mode) {
+  studioMode = mode;
+  const wrap = document.getElementById("app-wrap");
+  if (!wrap) return;
+  wrap.classList.remove("mode-aprender", "mode-practicar", "mode-formulario", "mode-lab", "step-1", "step-2", "step-3", "show-vars");
+  wrap.classList.add("mode-" + mode);
+
+  ["aprender", "practicar", "formulario", "lab"].forEach(m => {
+    const b = document.getElementById("mbtn-" + m);
+    if (b) b.classList.toggle("active", m === mode);
+  });
+
+  if (mode === "aprender") {
+    applyLearnView();
+  } else if (mode === "practicar") {
+    setPracSub(pracSub);
+  } else if (mode === "formulario") {
+    activatePanelClean("mecanica");
+  } else {
+    const t = LEARN_TOPICS[learnTopicIdx];
+    activatePanelClean(t ? t.tab : "perroux");
+  }
+}
+
+function applyLearnView() {
+  initLearnSelector();
+  const wrap = document.getElementById("app-wrap");
+  const topic = LEARN_TOPICS[learnTopicIdx];
+  const sel = document.getElementById("learn-topic-sel");
+  if (sel) sel.value = String(learnTopicIdx);
+
+  wrap.classList.remove("step-1", "step-2", "step-3", "show-vars");
+  wrap.classList.add("step-" + learnStep);
+  if (learnShowVars && learnStep !== 3) wrap.classList.add("show-vars");
+
+  if (topic.tab === "indicadores" && topic.sub) {
+    u6SubActive = topic.sub;
+    openU6Sub(topic.sub, null);
+  }
+  activatePanelClean(topic.tab);
+
+  for (let s = 1; s <= 3; s++) {
+    const sb = document.getElementById("stp-btn-" + s);
+    if (sb) sb.classList.toggle("active", s === learnStep);
+  }
+
+  const tags = ["", "Paso 1 de 3 — Intuición Visual y Gráfico", "Paso 2 de 3 — Fórmulas Clave y Cálculos", "Paso 3 de 3 — Trampa de Prueba y Teoría"];
+  document.getElementById("guide-step-tag").textContent = tags[learnStep];
+  document.getElementById("guide-step-body").innerHTML = learnStep === 1 ? topic.s1 : (learnStep === 2 ? topic.s2 : topic.s3);
+  document.getElementById("guide-step-hint").textContent = `Tema ${learnTopicIdx + 1} de ${LEARN_TOPICS.length} · Paso ${learnStep} de 3`;
+
+  const btnVars = document.getElementById("btn-toggle-vars");
+  if (btnVars) {
+    btnVars.style.display = learnStep === 3 ? "none" : "inline-block";
+    btnVars.textContent = learnShowVars ? "Ocultar sliders" : "Ajustar variables (sliders)";
+    btnVars.classList.toggle("primary", learnShowVars);
+  }
+
+  const bPrev = document.getElementById("btn-prev-step");
+  const bNext = document.getElementById("btn-next-step");
+  if (bPrev) bPrev.disabled = (learnStep === 1 && learnTopicIdx === 0);
+  if (bNext) bNext.textContent = learnStep < 3 ? "Siguiente paso →" : (learnTopicIdx < LEARN_TOPICS.length - 1 ? "Ir al siguiente tema →" : "Ir a Practicar →");
+
+  const dBtn = document.getElementById("learn-done-btn");
+  if (dBtn) {
+    const isD = doneTopics.has(topic.id);
+    dBtn.classList.toggle("is-done", isD);
+    dBtn.textContent = isD ? "Aprendido ✓" : "Marcar aprendido ✓";
+  }
+
+  if (learnStep === 3) {
+    const pEl = document.getElementById("panel-" + topic.tab);
+    if (pEl) pEl.querySelectorAll(".teo-box").forEach(d => d.setAttribute("open", "open"));
+  }
+}
+
+function selectLearnTopic(idx) {
+  learnTopicIdx = Math.max(0, Math.min(LEARN_TOPICS.length - 1, idx));
+  learnStep = 1;
+  learnShowVars = false;
+  applyLearnView();
+}
+function stepLearnTopic(delta) { selectLearnTopic(learnTopicIdx + delta); }
+function setLearnStep(st) { learnStep = st; if (st === 3) learnShowVars = false; applyLearnView(); }
+function moveLearnStep(delta) {
+  if (delta > 0) {
+    if (learnStep < 3) { learnStep++; applyLearnView(); }
+    else {
+      doneTopics.add(LEARN_TOPICS[learnTopicIdx].id);
+      saveStudioProg();
+      if (learnTopicIdx < LEARN_TOPICS.length - 1) selectLearnTopic(learnTopicIdx + 1);
+      else setStudioMode("practicar");
+    }
+  } else {
+    if (learnStep > 1) { learnStep--; applyLearnView(); }
+    else if (learnTopicIdx > 0) { learnTopicIdx--; learnStep = 3; applyLearnView(); }
+  }
+}
+function toggleVarsGuided() { learnShowVars = !learnShowVars; applyLearnView(); }
+function toggleTopicDone() {
+  const id = LEARN_TOPICS[learnTopicIdx].id;
+  if (doneTopics.has(id)) doneTopics.delete(id); else doneTopics.add(id);
+  saveStudioProg();
+  applyLearnView();
+}
+function irAPracticaTemaActual() {
+  const topic = LEARN_TOPICS[learnTopicIdx];
+  pracRetoIdx = topic.retoIdx || 0;
+  pracSub = "retos";
+  setStudioMode("practicar");
+}
+
+// --- MODO PRACTICAR ---
+function setPracSub(sub) {
+  pracSub = sub;
+  ["retos", "lec", "ot"].forEach(k => {
+    const b = document.getElementById("pr-sub-" + k);
+    if (b) b.classList.toggle("primary", k === sub);
+  });
+  if (sub === "lec") {
+    activatePanelClean("lectura");
+    return;
+  }
+  activatePanelClean("practicar");
+  document.getElementById("pr-view-retos").style.display = sub === "retos" ? "block" : "none";
+  document.getElementById("pr-view-ot").style.display = sub === "ot" ? "block" : "none";
+  if (sub === "retos") renderRetoActual();
+  if (sub === "ot") renderOtQuiz();
+}
+
+function renderRetoActual() {
+  const bar = document.getElementById("pr-chips-bar");
+  if (bar) {
+    bar.innerHTML = PRAC_RETOS.map((r, i) => {
+      const ok = solvedRetos.has(r.id);
+      return `<button class="pr-chip${i === pracRetoIdx ? ' active' : ''}${ok ? ' solved' : ''}" onclick="selectReto(${i})">${ok ? '✓ ' : ''}${r.short}</button>`;
+    }).join("");
+  }
+  const reto = PRAC_RETOS[pracRetoIdx];
+  document.getElementById("pr-badge").textContent = `Reto ${pracRetoIdx + 1} de ${PRAC_RETOS.length}`;
+  document.getElementById("pr-title").textContent = reto.title;
+  document.getElementById("pr-enun").innerHTML = reto.enun;
+
+  const qg = document.getElementById("pr-qgrid");
+  qg.innerHTML = reto.qs.map((q, qi) => {
+    if (q.type === "sel") {
+      const opts = q.opts.map(op => `<option value="${op.replace(/"/g, '&quot;')}">${op}</option>`).join("");
+      return `<div class="pr-qbox" id="pr-qb-${qi}"><label class="pr-qlbl">${q.lbl}</label><select class="pr-in" id="pr-in-${qi}">${opts}</select><div class="pr-qfb" id="pr-fb-${qi}"></div></div>`;
+    }
+    return `<div class="pr-qbox" id="pr-qb-${qi}"><label class="pr-qlbl">${q.lbl}</label><input class="pr-in" id="pr-in-${qi}" type="text" placeholder="${q.ph || ''}" onkeydown="if(event.key==='Enter') comprobarReto()" /><div class="pr-qfb" id="pr-fb-${qi}"></div></div>`;
+  }).join("");
+
+  const hBox = document.getElementById("pr-hint");
+  const sBox = document.getElementById("pr-sol");
+  hBox.style.display = "none"; hBox.innerHTML = reto.hint;
+  sBox.style.display = "none"; sBox.innerHTML = `<b>Desarrollo paso a paso:</b> ${reto.sol}`;
+}
+
+function selectReto(i) { pracRetoIdx = i; renderRetoActual(); }
+function navReto(delta) { pracRetoIdx = (pracRetoIdx + delta + PRAC_RETOS.length) % PRAC_RETOS.length; renderRetoActual(); }
+function toggleHintReto() { const b = document.getElementById("pr-hint"); b.style.display = b.style.display === "block" ? "none" : "block"; }
+function toggleSolReto() { const b = document.getElementById("pr-sol"); b.style.display = b.style.display === "block" ? "none" : "block"; }
+function limpiarReto() { renderRetoActual(); }
+function abrirTemaDesdeReto() {
+  const reto = PRAC_RETOS[pracRetoIdx];
+  learnTopicIdx = reto.topicIdx || 0;
+  learnStep = 1;
+  setStudioMode("aprender");
+}
+
+function parseUserNum(raw) {
+  let s = String(raw || "").trim().replace(/\$/g, "").replace(/%/g, "").replace(/\s+/g, "");
+  if (!s) return NaN;
+  if (s.includes(".") && s.includes(",")) s = s.replace(/\./g, "").replace(/,/g, ".");
+  else if (s.includes(",")) s = s.replace(/,/g, ".");
+  else if ((s.match(/\./g) || []).length > 1) s = s.replace(/\./g, "");
+  else if (/^\d{1,3}\.\d{3}$/.test(s)) s = s.replace(/\./g, "");
+  return parseFloat(s);
+}
+
+function comprobarReto() {
+  const reto = PRAC_RETOS[pracRetoIdx];
+  let allOk = true;
+  reto.qs.forEach((q, qi) => {
+    const box = document.getElementById("pr-qb-" + qi);
+    const inp = document.getElementById("pr-in-" + qi);
+    const fb = document.getElementById("pr-fb-" + qi);
+    box.classList.remove("ok", "bad");
+    if (q.type === "sel") {
+      const ok = inp.value === q.ans;
+      box.classList.add(ok ? "ok" : "bad");
+      fb.style.color = ok ? "#15803D" : "#DC2626";
+      fb.textContent = ok ? "✓ Correcto" : "✗ Revisa la pista e intenta de nuevo";
+      if (!ok) allOk = false;
+    } else {
+      const v = parseUserNum(inp.value);
+      const ok = Number.isFinite(v) && (q.ans === 0 ? Math.abs(v) < 0.01 : Math.abs(v - q.ans) <= Math.max(Math.abs(q.ans) * (q.tol || 0.02), 0.1));
+      box.classList.add(ok ? "ok" : "bad");
+      fb.style.color = ok ? "#15803D" : "#DC2626";
+      fb.textContent = ok ? "✓ Correcto" : (Number.isFinite(v) ? "✗ Aún no coincide (usa «Ver Pista»)" : "Ingresa un número");
+      if (!ok) allOk = false;
+    }
+  });
+  if (allOk) {
+    solvedRetos.add(reto.id);
+    saveStudioProg();
+    document.getElementById("pr-sol").style.display = "block";
+    const bar = document.getElementById("pr-chips-bar");
+    if (bar) {
+      bar.querySelectorAll(".pr-chip")[pracRetoIdx].classList.add("solved");
+      bar.querySelectorAll(".pr-chip")[pracRetoIdx].textContent = "✓ " + reto.short;
+    }
+  }
+}
+
+drawCriticU6();
+saveStudioProg();
+setStudioMode("aprender");
+
 </script>
 </body>
 </html>
