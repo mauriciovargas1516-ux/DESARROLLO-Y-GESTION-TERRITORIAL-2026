@@ -1,0 +1,119 @@
+---
+title: "Indicadores de análisis Disparidades y COnvergencia"
+author: "Claudio Mancilla"
+date: "05-10-2026"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Libreria
+```{r}
+library(readxl)
+#install.packages("REAT")
+#REAT: Regional Economic Analysis Toolbox 
+library(REAT)
+#install.packages("ggplot2")
+library(ggplot2)
+```
+
+
+
+#Importar datos - es necesario copiar-pegar la ruta
+```{r}
+ejemplo1<-read_excel('D:/Dropbox/Mis documentos/ULAGOS/Asignaturas/12 Economía Regional/2026/Clases/Unidad 3/trabajo autonomo/2026/Ejemplo 1 TE.xlsx')
+
+ejemplo1 ##con esto mostramos la base
+```
+
+#Análisis descriptivo de los datos (datos y gráfico)
+```{r}
+summary(ejemplo1)
+boxplot(ejemplo1$v2010, ejemplo1$v2020)
+```
+
+#Análisis de convergencia
+##COnvergencia Sigma
+```{r}
+sd2(ejemplo1$v2010)
+sd2(ejemplo1$v2020)
+```
+##Coeficiente de Variación 
+
+```{r}
+mean(ejemplo1$v2010)
+mean(ejemplo1$v2020)
+
+cv(ejemplo1$v2010)
+cv(ejemplo1$v2020)
+```
+
+##Coeficiente de Variación - logaritmo
+```{r}
+cv(log(ejemplo1$v2010))
+cv(log(ejemplo1$v2020))
+```
+### analizar si la convergencia sigma, desde el punto de vista estadístico, es distinta entre un año y otro. 
+```{r}
+cv=sigmaconv(ejemplo1$v2010, 2010, ejemplo1$v2020, 2020)
+cv
+cv=sigmaconv(log(ejemplo1$v2010), 2010, log(ejemplo1$v2020), 2020)
+cv
+```
+## ConvergenciaBeta
+```{r}
+ejemplo1$y=log(ejemplo1$v2020/ejemplo1$v2010)
+
+modelo1<-lm(y~log(v2010),ejemplo1)
+
+summary(modelo1)
+
+```
+
+```{r}
+betaconv.ols(ejemplo1$v2010,2010,ejemplo1$v2020,2020,conditions = NULL,print.results =TRUE)
+```
+
+
+#Curva de Lorenz
+
+```{r}
+lorenz(ejemplo1$v2010)
+lorenz(ejemplo1$v2020)
+```
+
+#Gini
+```{r}
+gini(ejemplo1$v2010)
+gini(ejemplo1$v2020)
+```
+#Medidas de concentración, desigualdad y dispersión
+```{r}
+disp(ejemplo1$v2010)
+```
+
+
+
+
+#CONCENTRACION
+
+
+```{r}
+herf(ejemplo1$v2010)
+herf(ejemplo1$v2020)
+```
+
+
+```{r}
+krugman.conc(ejemplo1$v2010,ejemplo1$v2020)
+#krugman.conc2(ejemplo1$v2010,ejemplo1$v2020)
+
+
+krugman.spec(ejemplo1$v2010,ejemplo1$v2020)
+#krugman.spec2(ejemplo1$v2010,ejemplo1$v2020)
+```
+
+
+
