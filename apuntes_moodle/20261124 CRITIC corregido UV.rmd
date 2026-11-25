@@ -1,0 +1,75 @@
+---
+title: "Taller CRITIC"
+output: html_notebook
+Autor: Claudio Mancilla
+Asignatura: Desarrollo y Gestión Territorial
+Carrera: Ingenieria Comercial - ULagos
+
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Libreria
+```{r}
+library(readxl)
+
+```
+
+
+Importamos datos
+```{r}
+datos <- read_excel('D:/Dropbox/Mis documentos/ULAGOS/Asignaturas/12 Economía Regional/2026/Clases 2 nuevas/UNIDAD 6 DESARROLLO/CRITIC metodo/01 Caso_CRITIC_ejemplo_UV.xlsx', sheet = 'para_r')
+
+```
+
+
+Creamos vector de dimensiones
+```{r}
+dimensiones <- c("Vivienda", "Población", "Salud", "Ingresos", "Educación", "Trabajo", "Pobreza")
+
+```
+
+
+Creamos vector de regiones
+```{r}
+regiones <- trimws(datos$regiones)
+```
+
+Creamos matriz de datos por separado
+```{r}
+X <- as.matrix(datos[dimensiones])
+dim(X) 
+
+```
+
+
+Calculamos desviación estándar
+```{r}
+desviaciones <- apply(X, 2, sd)
+print(desviaciones)
+```
+
+
+Calculamos correlación
+```{r}
+correlacion <- cor(X, method = "pearson")
+print(correlacion)
+```
+
+Hacemos los cálculos del peso de 
+```{r}
+
+sumatorias_correlaciones <- rowSums(1 - correlacion)
+C <- desviaciones * sumatorias_correlaciones
+ponderador <- C / sum(C)
+print(ponderador)
+
+```
+
+
+
+
+
