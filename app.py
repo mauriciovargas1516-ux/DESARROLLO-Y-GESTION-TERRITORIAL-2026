@@ -32,7 +32,10 @@ try:
 except Exception:
     _qp_modo_init = ""
 
-_es_url_catedra = _qp_modo_init in ("catedra", "docente", "presentacion", "1", "true")
+# Por defecto la URL base abre SIEMPRE en Modo Cátedra blindado (ideal para mostrar en clase).
+# Para abrir el entorno personal completo (Drive 5 TB, Excel SII, Controles 2/4/5 y Laboratorio), usar ?modo=admin
+_es_url_admin = _qp_modo_init in ("admin", "privado", "mauri", "proyecto", "dev")
+_es_url_catedra = not _es_url_admin
 
 st.set_page_config(
     page_title="Desarrollo y Gestión Territorial 2026 — ULagos",
@@ -178,56 +181,84 @@ def main():
     elif _es_url_catedra:
         st.session_state.modo_catedra_terr = True
 
-    with st.sidebar:
-        st.markdown("### Gestión Territorial 2026")
-        st.caption("Ingeniería Comercial — ULagos")
-        st.markdown("---")
-
-        opciones_nav = [
-            "1. Modelos Interactivos, Formulario y Teoría",
-            "2. Biblioteca y Visor PDF (Drive 5 TB)",
-        ]
-        if not st.session_state.modo_catedra_terr:
-            opciones_nav.extend([
-                "3. Motor SII / ILPES / REAT y OT (Excel)",
-                "4. Laboratorio Cátedra (PIB, TAREA, Markov)",
-                "5. Terreno, Redes y Controles 2, 4 y 5",
-            ])
-
-        vista_activa = st.radio(
-            "Vista de Trabajo:",
-            options=opciones_nav,
-            index=0,
-            key="nav_terr_limpio_v2",
+    # Blindaje visual en URL base (oculta sidebar, Drive, Excel SII, Controles y barra superior de Streamlit)
+    if _es_url_catedra:
+        st.markdown(
+            """
+            <style>
+            [data-testid="stSidebar"],
+            [data-testid="stSidebarCollapsedControl"],
+            [data-testid="collapsedControl"],
+            [data-testid="stToolbar"],
+            [data-testid="stDecoration"],
+            [data-testid="stStatusWidget"],
+            #MainMenu,
+            footer {
+                display: none !important;
+                visibility: hidden !important;
+            }
+            </style>
+            """,
+            unsafe_allow_html=True,
         )
+        vista_activa = "1. Modelos Interactivos, Formulario y Teoría"
+    else:
+        with st.sidebar:
+            st.markdown("### Gestión Territorial 2026")
+            st.caption("Ingeniería Comercial — ULagos")
+            st.markdown("---")
 
-        st.markdown("---")
-        _nuevo_modo = st.toggle(
-            "Modo Presentación Cátedra",
-            value=st.session_state.modo_catedra_terr,
-            key="toggle_modo_catedra_terr",
-            help="Muestra únicamente el módulo principal de cátedra y la biblioteca oficial.",
-        )
-        if _nuevo_modo != st.session_state.modo_catedra_terr:
-            st.session_state.modo_catedra_terr = _nuevo_modo
-            st.rerun()
+            opciones_nav = [
+                "1. Modelos Interactivos, Formulario y Teoría",
+            ]
+            if not st.session_state.modo_catedra_terr:
+                opciones_nav.extend([
+                    "2. Biblioteca y Visor PDF (Drive 5 TB)",
+                    "3. Motor SII / ILPES / REAT y OT (Excel)",
+                    "4. Laboratorio Cátedra (PIB, TAREA, Markov)",
+                    "5. Terreno, Redes y Controles 2, 4 y 5",
+                ])
 
-        if st.session_state.modo_catedra_terr:
-            st.caption("Link directo Modo Cátedra:")
-            st.code("https://desarrollo-y-gestion-territorial-2026-azi4k3liecm2g45r97lkff.streamlit.app/?modo=catedra", language=None)
+            vista_activa = st.radio(
+                "Vista de Trabajo:",
+                options=opciones_nav,
+                index=0,
+                key="nav_terr_limpio_v2",
+            )
+
+            st.markdown("---")
+            _nuevo_modo = st.toggle(
+                "Modo Presentación Cátedra",
+                value=st.session_state.modo_catedra_terr,
+                key="toggle_modo_catedra_terr",
+                help="Muestra únicamente la vista académica de simuladores interactivos.",
+            )
+            if _nuevo_modo != st.session_state.modo_catedra_terr:
+                st.session_state.modo_catedra_terr = _nuevo_modo
+                st.rerun()
+
+            st.caption("Enlace público docente (abre blindado por defecto):")
+            st.code("https://desarrollo-y-gestion-territorial-2026-azi4k3liecm2g45r97lkff.streamlit.app/", language=None)
+            st.caption("Tu acceso completo personal:")
+            st.code("https://desarrollo-y-gestion-territorial-2026-azi4k3liecm2g45r97lkff.streamlit.app/?modo=admin", language=None)
 
     if vista_activa.startswith("1."):
         st.markdown(
             """
             <div style="background-color:#0F172A;color:#FFFFFF;padding:14px 20px;border-radius:8px;margin-bottom:10px;border-left:4px solid #3B82F6;">
-                <div style="font-size:17px;font-weight:700;letter-spacing:0.2px;">Desarrollo y Gestión Territorial</div>
+                <div style="font-size:17px;font-weight:700;letter-spacing:0.2px;">Desarrollo y Gestión Territorial — Laboratorio Interactivo</div>
                 <div style="font-size:12.5px;color:#CBD5E1;margin-top:3px;">Ingeniería Comercial · Universidad de Los Lagos · 2026 &nbsp;|&nbsp; Unidades I a VI: Crecimiento, Localización, Disparidades, SPL, OT e Indicadores</div>
             </div>
             """,
             unsafe_allow_html=True,
         )
         if callable(renderizar_laboratorio_fluido_territorial):
-            renderizar_laboratorio_fluido_territorial()
+            try:
+                renderizar_laboratorio_fluido_territorial(
+                    modo_catedra=bool(st.session_state.modo_catedra_terr or _es_url_catedra)
+                )
+            except TypeError:
+                renderizar_laboratorio_fluido_territorial()
         else:
             st.warning("Verifica que 'motor_fluidez_territorial_60fps.py' esté en la raíz del repositorio.")
     elif vista_activa.startswith("2."):
