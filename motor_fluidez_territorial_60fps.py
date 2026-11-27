@@ -7004,6 +7004,17 @@ setStudioMode("aprender");
 """
 
 
-def renderizar_laboratorio_fluido_territorial():
-    """Renderiza el Estudio Territorial Integral a 60 FPS (11 pestañas, incluyendo Laboratorio OT Unidad V) sin recarga de servidor."""
-    components.html(HTML_TERRITORIAL_60FPS, height=1280, scrolling=True)
+def renderizar_laboratorio_fluido_territorial(modo_catedra: bool = False):
+    """Renderiza el Estudio Territorial Integral a 60 FPS con conectores vivos y expansión DGT RA2."""
+    html_final = HTML_TERRITORIAL_60FPS
+    try:
+        from motor_conectores_territorial import inyectar_conectores_territorial
+        html_final = inyectar_conectores_territorial(html_final)
+    except Exception:
+        pass
+    try:
+        from motor_expansion_dgt_ra2 import inyectar_expansion_dgt_ra2
+        html_final = inyectar_expansion_dgt_ra2(html_final, modo_catedra=modo_catedra)
+    except Exception:
+        pass
+    components.html(html_final, height=1420, scrolling=True)
